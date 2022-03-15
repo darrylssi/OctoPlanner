@@ -22,7 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/login")
+                    .antMatchers(HttpMethod.GET, "/login", "/static/**")    // TODO: For some reason I can't access static while not logged in
                     .permitAll()
                     .and()
                 .authorizeRequests()

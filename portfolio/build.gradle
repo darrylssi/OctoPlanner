@@ -22,6 +22,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     implementation 'net.devh:grpc-client-spring-boot-starter:2.13.1.RELEASE' // GRPC client dependencies
     implementation 'nz.ac.canterbury.seng302:shared:1.0' // Local package containing .proto files
@@ -32,9 +33,6 @@ dependencies {
     implementation 'com.h2database:h2:2.1.210'
     // Java Persistence API
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.4'
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
-//    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.6.4'
-
 
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

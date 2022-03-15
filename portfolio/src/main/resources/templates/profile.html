@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Profile</title>
+
+    <link rel="stylesheet" th:href=@{/styles/style.css}>
+
+</head>
+
+<body>
+    <header th:replace="~{fragments :: header}" />
+
+    <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
+        <th th:text="${errMsg}" />
+        <br>
+    </p>
+    <!--/* Only show the user page if the user exists */-->
+    <div class="profile" th:if="${userExists}" th:object="${profileInfo}">
+        <div class="profile-info">
+            <img width="250" height="250" src="/static/img/default-pfp.jpg">
+
+            <strong class="name" th:text="*{getUsername()}" />
+            <br>
+            <span th:text="*{getFullName()}" />
+            <br>
+            <i><a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}" /></i>
+            <br>
+            <span th:if="*{getPronouns()}" th:text="|🗨 *{getPronouns()}|" />
+
+
+            <p th:if="*{getBio()}" class="bio" th:utext="*{| &lt;hr&gt; ${#strings.replace(#strings.escapeXml(getBio()), '&#10', '&lt;br&gt;')} |}" />
+            <!--/*
+                Only render if the logged in user's ID is this page's ID 
+            */-->
+            <a>
+                <button>Edit</button>
+            </a>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

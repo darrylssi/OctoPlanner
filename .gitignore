@@ -5,3 +5,5 @@
 */.idea/
 */src/generated/
 */bin/
+.jpb/
+data/

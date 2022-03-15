@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <header th:fragment="header">
+        <h3 class="header-text">
+            Team-8's un-named project
+        </h3>
+        <div class="header-user">
+            Login? How!!!
+        </div>
+
+        <form th:action="@{/login}">
+            <button type="submit"> Logout </button>
+        </form>
+    </header>
+
+</body>
+
+</html>
