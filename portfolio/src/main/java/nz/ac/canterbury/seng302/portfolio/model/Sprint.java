@@ -12,11 +12,17 @@ public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @NotBlank(message = "Sprint parent project id cannot be empty")
     private int parentProjectId;
+    @NotBlank(message = "Sprint name cannot be empty")
     private String sprintName;
+    @NotBlank(message = "Sprint label cannot be empty")
     private String sprintLabel;
+    @NotNull // may be empty, but not null
     private String sprintDescription;
+    @NotBlank(message = "Sprint start date cannot be empty")
     private Date sprintStartDate;
+    @NotBlank(message = "Sprint end date cannot be empty")
     private Date sprintEndDate;
 
     protected Sprint() {}

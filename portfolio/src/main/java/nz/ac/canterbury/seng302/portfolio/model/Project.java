@@ -12,9 +12,13 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @NotBlank(message = "Project name cannot be empty")
     private String projectName;
+    @NotNull // may be empty, but not null
     private String projectDescription;
+    @NotBlank(message = "Project start date cannot be empty")
     private Date projectStartDate;
+    @NotBlank(message = "Project end date cannot be empty")
     private Date projectEndDate;
 
     protected Project() {}
