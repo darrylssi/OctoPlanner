@@ -7,8 +7,6 @@
 <body>
 <p th:text="${loginMessage}" />
 
-<p>Get to Registration page: <a th:href="@{/register}">register_here</a></p>
-
     <div id="loginform">
         <form th:action="@{/login}" method="post">
             <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="username">
@@ -17,9 +15,9 @@
             <br>
             <button type="submit" class="inputs">Log In</button>
         </form>
-        <form th:action="@{/register}">
+        <a th:href="@{/register}">
             <button type="submit" class="inputs"> Register </button>   <!-- replace with register page -->
-        </form>
+        </a>
         <p th:text="${loginMessage}" />
     </div>
     
