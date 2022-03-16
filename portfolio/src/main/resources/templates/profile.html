@@ -19,7 +19,7 @@
     <!--/* Only show the user page if the user exists */-->
     <div class="profile" th:if="${userExists}" th:object="${profileInfo}">
         <div class="profile-info">
-            <img width="250" height="250" src="/static/img/default-pfp.jpg">
+            <img width="250" height="250" th:src=@{/img/default-pfp.jpg}>
 
             <strong class="name" th:text="*{getUsername()}" />
             <br>
