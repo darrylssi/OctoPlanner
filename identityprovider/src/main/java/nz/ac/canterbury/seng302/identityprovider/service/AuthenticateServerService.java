@@ -31,9 +31,9 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
         User user = userService.getUserByUsername(request.getUsername());
 
-        if (user == null) {
+       if (user == null) {
             reply
-                    .setMessage("There are no users in the database")
+                    .setMessage("Log in attempt failed: No users found with that username")
                     .setSuccess(false)
                     .setToken("");
         } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {  // TODO replace getPassword() for when passwords are hashed

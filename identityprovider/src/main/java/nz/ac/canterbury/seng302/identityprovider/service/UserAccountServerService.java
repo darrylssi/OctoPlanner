@@ -25,6 +25,11 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     @Autowired
     private UserRepository repository;
 
+    /**
+     * Adds a user to the database and returns a UserRegisterResponse to the portfolio
+     * @param request An object containing all the details of the user to register
+     * @param responseObserver
+     */
     @Override
     public void register(UserRegisterRequest request, StreamObserver<UserRegisterResponse> responseObserver) {
         logger.info("register() has been called");
@@ -52,6 +57,11 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Gets a user from the database by its id and returns it as a UserResponse to the portfolio
+     * @param request An object containing the id of the user to retrieve
+     * @param responseObserver
+     */
     @Override
     public void getUserAccountById(GetUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         logger.info("getUserAccountById has been called");

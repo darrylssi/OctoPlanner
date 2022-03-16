@@ -42,10 +42,7 @@ public class UserService {
      */
     public User getUserByUsername(String username)
     {
-        if (userRepository.findByUsername(username).size() == 0) {
-            return null;
-        }
-        return userRepository.findByUsername(username).get(0);
+        return userRepository.findByUsername(username);
     }
 
     /**
