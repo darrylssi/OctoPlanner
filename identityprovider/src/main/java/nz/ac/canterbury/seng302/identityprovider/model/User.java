@@ -7,21 +7,27 @@ import java.util.Date;
 @Table (name = "Users")
 public class User {
     @Id
+    //@GeneratedValue(strategy = GenerationType.AUTO) //TODO should this go here?
     private int ID;
+    @NotBlank(message = "Username must not be empty and not already in use")
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
+    @NotEmpty(message = "Password must not be empty") // NotEmpty allows for leading/trailing spaces
     private String password;
-    @Column(nullable = false)
+    @NotBlank(message = "First name must not be empty")
     private String firstName;
     private String middleName;
-    @Column(nullable = false)
+    @NotBlank(message = "Last name must not be empty")
     private String lastName;
     private String nickName;
     private String bio;
     private String personalPronouns;
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "Email address must not be empty")
+    @Email(message = "Email address must be valid and not already in use")
     private String email;
+    @Column(nullable = false)
     private Date registerDate;
 
     public int getID() {
