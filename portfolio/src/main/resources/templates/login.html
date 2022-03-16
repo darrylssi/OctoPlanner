@@ -5,20 +5,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-<p th:text="${loginMessage}" />
-
-<p>Get to Registration page: <a th:href="@{/register}">register_here</a></p>
 
     <div id="loginform">
         <form th:action="@{/login}" method="post">
-            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="username">
+            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">
             <br>
-            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="password">
+            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
             <br>
             <button type="submit" class="inputs">Log In</button>
         </form>
-        <form th:action="@{/greeting}">
-            <button type="submit" class="inputs"> Register </button>   <!-- replace with register page -->
+        <form th:action="@{/register}">
+            <button type="submit" class="inputs">Register</button>   <!-- replace with register page -->
         </form>
         <p th:text="${loginMessage}" />
     </div>

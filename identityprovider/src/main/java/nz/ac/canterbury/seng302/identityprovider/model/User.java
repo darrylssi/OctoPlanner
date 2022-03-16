@@ -7,6 +7,7 @@ import java.util.Date;
 @Table (name = "Users")
 public class User {
     @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private int ID;
     @Column(nullable = false, unique = true)
     private String username;
@@ -23,6 +24,23 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
     private Date registerDate;
+
+    protected User() {
+    }
+
+    public User(String username, String password, String firstName,
+                String middleName, String lastName, String nickName,
+                String bio, String personalPronouns, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.nickName = nickName;
+        this.bio = bio;
+        this.personalPronouns = personalPronouns;
+        this.email = email;
+    }
 
     public int getID() {
         return this.ID;

@@ -23,20 +23,21 @@ public class UserServiceTests {
     @MockBean
     private UserRepository userRepository;
 
-    private User user1;
+    private User testUser;
 
     @BeforeEach
     public void setup() {
-        user1 = new User();
-        user1.setUsername("user1");
+        testUser = new User("testUser", "testPassword", "testFirstName",
+                "testMiddleName", "testLastName", "testNickname",
+                "testBio", "testPronouns", "testEmail@example.com");
     }
 
     @Test
     public void searchByUsername() {
-        when(userRepository.findByUsername("user1"))
-                .thenReturn(List.of(user1));
+        when(userRepository.findByUsername("testUser"))
+                .thenReturn(List.of(testUser));
 
-        assertThat(userService.getUserByUsername("user1")).isEqualTo(user1);
+        assertThat(userService.getUserByUsername("testUser")).isEqualTo(testUser);
     }
 
 }

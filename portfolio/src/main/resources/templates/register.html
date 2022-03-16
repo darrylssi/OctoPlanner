@@ -1,21 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title> Register </title>
+    <title>Register</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" th:href="@{/styles/css_register.css}" />
+<!--    <link rel="stylesheet" th:href="@{/styles/css_register.css}" /> -->
 </head>
 <body>
+
+    <div id="registerform">
+        <form th:action="@{/register}" method="post">
+            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">
+            <br>
+            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
+            <br>
+            <input class="inputs" type="text" th:name="firstName" th:value="*{firstName}" required placeholder="First Name">
+            <br>
+            <input class="inputs" type="text" th:name="middleName" th:value="*{middleName}" placeholder="Middle Name">
+            <br>
+            <input class="inputs" type="text" th:name="lastName" th:value="*{lastName}" required placeholder="Last Name">
+            <br>
+            <input class="inputs" type="text" th:name="nickname" th:value="*{nickname}" placeholder="Nickname">
+            <br>
+            <input class="inputs" type="text" th:name="bio" th:value="*{bio}" placeholder="Bio">
+            <br>
+            <input class="inputs" type="text" th:name="personalPronouns" th:value="*{personalPronouns}" placeholder="Personal Pronouns">
+            <br>
+            <input class="inputs" type="email" th:name="email" th:value="*{email}" required placeholder="Email">
+            <br>
+            <button type="submit" class="inputs">Register</button>
+        </form>
+        <p th:text="${registerMessage}" />
+    </div>
+
+<!--
     <div class="container">
         <h2 class="title"> Registration Form </h2>
 
-        <form th:action="@{/register}" th:object="${user}" method="post">
+        <form th:action="@{/register}" method="post">
             <div class="user-info">
                 <div class="input-box">
                     <label> Username* </label>
-                    <input type="text" placeholder="Enter your username" th:field="*{userName}" th:required="required" /><br>
-                    <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" th:errorclass="error" />
+                    <input type="text" placeholder="Enter your username" th:field="*{username}" th:required="required" /><br>
+                    <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
                     <label> First Name* </label>
@@ -32,13 +58,13 @@
                     <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
-                    <label> Nick Name </label>
-                    <input type="text" placeholder="Enter your last name" th:field="*{nickName}" maxlength="15" />
+                    <label> Nickname </label>
+                    <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" maxlength="15" />
                 </div>
                 <div class="input-box">
                     <label> Personal Pronouns </label>
 
-                    <select class="select-box" th:field="*{pronouns}">
+                    <select class="select-box" th:field="*{personalPronouns}">
                         <option value="" th:disabled="disabled" th:selected="selected"> Choose </option>
                         <option value="He"> He </option>
                         <option value="She"> She </option>
@@ -54,8 +80,6 @@
                 </div>
                 <div class="input-box">
                     <label> Confirm Password* </label>
-<!--                    <input type="password" placeholder="Confirm your password" th:field="*{confirmPassword}" th:required="required" /><br>-->
-<!--                    <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" th:errorclass="error" />-->
                     <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
                            placeholder="Password" th:field="*{confirmPassword}">
                     <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
@@ -73,11 +97,10 @@
                 </div>
 
             </div>
-            <div class="submit">
-                <input type="submit" value="Submit">
-            </div>
+            <button type="submit" class="inputs">Register</button>
         </form>
         <p th:text="${registerMessage}" />
     </div>
+-->
 </body>
 </html>
