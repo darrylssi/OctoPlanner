@@ -1,9 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
 import net.devh.boot.grpc.client.inject.GrpcClient;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterRequest;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,6 +27,13 @@ public class UserAccountClientService {
                 .setEmail(email)
                 .build();
         return userAccountStub.register(registerRequest);
+    }
+
+    private UserResponse getUserAccountById(final int id) {
+        GetUserByIdRequest userRequest = GetUserByIdRequest.newBuilder()
+                .setId(id)
+                .build();
+        return userAccountStub.getUserAccountById(userRequest);
     }
 
 }

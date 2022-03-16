@@ -1,7 +1,8 @@
 package nz.ac.canterbury.seng302.identityprovider.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @Table (name = "Users")
@@ -23,7 +24,8 @@ public class User {
     private String personalPronouns;
     @Column(nullable = false, unique = true)
     private String email;
-    private Date registerDate;
+    @CreationTimestamp
+    private Instant created;
 
     protected User() {
     }
@@ -122,13 +124,9 @@ public class User {
         this.email = email;
     }
 
-    public Date getRegisterDate() {
-        return this.registerDate;
-    }
+    public Instant getCreated() { return created; }
 
-    public void setRegisterDate(Date registerDate) {
-        this.registerDate = registerDate;
-    }
+    public void setCreated(Instant created) { this.created = created; }
 
     public String getFullName() {
         if (this.middleName == null){

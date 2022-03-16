@@ -22,10 +22,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
     private JwtTokenUtil jwtTokenService = JwtTokenUtil.getInstance();
 
-    private User getUserByUsername(String username) {
-        return userService.getUserByUsername(username);
-    }
-
     /**
      * Attempts to authenticate a user with a given username and password. 
      */
@@ -33,10 +29,14 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
     public void authenticate(AuthenticateRequest request, StreamObserver<AuthenticateResponse> responseObserver) {
         AuthenticateResponse.Builder reply = AuthenticateResponse.newBuilder();
 
-        User user = getUserByUsername(request.getUsername());
+        User user = userService.getUserByUsername(request.getUsername());
 
-        // TODO replace getPassword() for when passwords are hashed
-        if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {
+        if (user == null) {
+            reply
+                    .setMessage("There are no users in the database")
+                    .setSuccess(false)
+                    .setToken("");
+        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {  // TODO replace getPassword() for when passwords are hashed
 
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
             reply

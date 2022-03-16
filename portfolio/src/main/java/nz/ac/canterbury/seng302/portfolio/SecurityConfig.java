@@ -22,7 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/login", "/static/**")    // TODO: For some reason I can't access static while not logged in
+                    .antMatchers(HttpMethod.GET, "/login", "/register", "/")    // TODO: For some reason I can't access static while not logged in
                     .permitAll()
                     .and()
                 .authorizeRequests()
@@ -49,6 +49,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception
     {
-        web.ignoring().antMatchers("/login");
+        web.ignoring().antMatchers("/login", "/styles/**", "/img/**", "/register", "/");
     }
 }
