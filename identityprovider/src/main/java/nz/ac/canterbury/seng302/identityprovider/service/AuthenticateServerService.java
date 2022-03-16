@@ -35,9 +35,17 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
         User user = getUserByUsername(request.getUsername());
 
-        // TODO replace getPassword() for when passwords are hashed
-        if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {
-
+        if (user == null) {
+            reply
+            .setMessage("Username not registered.")
+            .setSuccess(false)
+            .setToken("");
+        } else if (!request.getPassword().equals(user.getPassword())) { // TODO replace getPassword() for when passwords are hashed
+            reply
+            .setMessage("Incorrect password!")
+            .setSuccess(false)
+            .setToken("");
+        } else {
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
             reply
                 .setEmail(user.getEmail())
@@ -48,11 +56,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
                 .setToken(token)
                 .setUserId(user.getID())
                 .setUsername(user.getUsername());
-        } else {
-            reply
-            .setMessage("Log in attempt failed: username or password incorrect")
-            .setSuccess(false)
-            .setToken("");
         }
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
