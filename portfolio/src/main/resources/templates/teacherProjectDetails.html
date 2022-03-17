@@ -28,7 +28,7 @@
             <div class="detail-block">
                 <div>
                     <div class="sprint-title" th:text="${sprint.getName}" />
-                    <div class="sprint-date" th:text="${sprint.getDates}" />
+                    <div class="sprint-date" th:text="${sprint.getStartDateString} + ' - ' + ${sprint.getEndDateString}" />
                     <div class="sprint-description" th:text="${sprint.getDescription}" />
                 </div>
                 <div>

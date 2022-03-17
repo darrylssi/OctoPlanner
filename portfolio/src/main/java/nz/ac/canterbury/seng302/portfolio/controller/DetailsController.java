@@ -18,7 +18,7 @@ import java.util.List;
  * Controller for the display project details page
  */
 @Controller
-public class DetailsController {
+public class DetailsController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -37,11 +37,7 @@ public class DetailsController {
 
 
         // Below code is just begging to be added as a method somewhere...
-        String role = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("role"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
+        String role = getUserRole(principal);
 
         /* Return the name of the Thymeleaf template */
         // detects the role of the current user and returns appropriate page

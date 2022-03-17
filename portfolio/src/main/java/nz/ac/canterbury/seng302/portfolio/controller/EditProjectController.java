@@ -5,7 +5,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -14,13 +16,21 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Controller for the edit project details page
  */
 @Controller
-public class EditProjectController {
+public class EditProjectController extends PageController {
     /* Create default project. TODO: use database to check for this*/
     Project project = new Project("Project 2022", "", "04/Mar/2022",
                                   "04/Nov/2022");
 
     @GetMapping("/edit-project")
-    public String projectForm(Model model) {
+    public String projectForm(
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) {
+        /* Ensure that the user is at least a teacher */
+        if (getUserRole(principal).equals("student")) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            return "error";
+        }
         /* Add project details to the model */
         model.addAttribute("projectName", project.getName());
         model.addAttribute("projectStartDate", project.getStartDateString());
@@ -41,6 +51,12 @@ public class EditProjectController {
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
     ) {
+        /* Ensure that the user is at least a teacher */
+        if (getUserRole(principal).equals("student")) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            return "error";
+        }
+        /* Set attributes */
         project.setName(projectName);
         project.setStartDateString(projectStartDate);
         project.setEndDateString(projectEndDate);

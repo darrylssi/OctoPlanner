@@ -7,13 +7,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 
 
 /**
  * Controller for the edit sprint details page
  */
 @Controller
-public class EditSprintController {
+public class EditSprintController extends PageController {
     private String sprintName = "Sprint 1";
     private String sprintStartDate = "04/Mar/2022";
     private String sprintEndDate = "25/Mar/2022";
@@ -33,7 +34,14 @@ public class EditSprintController {
     }
 
     @GetMapping("/edit-sprint")
-    public String sprintForm(Model model) {
+    public String sprintForm(
+            @AuthenticationPrincipal AuthState principal,
+            Model model) {
+        /* Check that the user has at least teacher role */
+        if (getUserRole(principal).equals("student")) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint");
+            return "error";
+        }
         /* Add sprint details to the model */
         model.addAttribute("sprintLabel", "Sprint 1");
         model.addAttribute("sprintName", this.sprintName);
@@ -55,11 +63,16 @@ public class EditSprintController {
             @RequestParam(value="sprintDescription") String sprintDescription,
             Model model
     ) {
+        /* Check that the user has at least teacher role */
+        if (getUserRole(principal).equals("student")) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint");
+            return "error";
+        }
         this.sprintName = sprintName;
         this.sprintStartDate = sprintStartDate;
         this.sprintEndDate = sprintEndDate;
         this.sprintDescription = sprintDescription;
-        return "redirect:/edit-sprint";
+        return "redirect:/details";
     }
 
 }
