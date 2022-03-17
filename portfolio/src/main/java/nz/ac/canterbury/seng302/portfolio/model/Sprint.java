@@ -13,9 +13,10 @@ public class Sprint {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private int parentProjectId;
+
     private String sprintName;
     private String sprintLabel = "Sprint ";
-    private int sprintNum = 1;
+    private int sprintNum = 0;
     private String sprintDescription;
     private Date sprintStartDate;
     private Date sprintEndDate;
@@ -88,7 +89,7 @@ public class Sprint {
     }
 
     public String getLabel() {
-        return sprintLabel + String.valueOf(sprintNum);
+        return sprintLabel + String.valueOf(sprintNum+1);
     }
 
     public int getSprintNum() { return sprintNum; }
