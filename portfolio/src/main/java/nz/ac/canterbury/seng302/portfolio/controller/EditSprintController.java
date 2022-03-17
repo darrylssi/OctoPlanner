@@ -15,23 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class EditSprintController {
-//    private String sprintName = "Sprint 1";
-//    private String sprintStartDate = "04/Mar/2022";
-//    private String sprintEndDate = "25/Mar/2022";
-//    private String sprintDescription = "This is the first sprint.";
-//
-//    private void setSprintName(String name) {
-//        this.sprintName = name;
-//    }
-//    private void setSprintStartDate(String date) {
-//        this.sprintStartDate = date;
-//    }
-//    private void setSprintEndDate(String date) {
-//        this.sprintEndDate = date;
-//    }
-//    private void setSprintDescription(String description) {
-//        this.sprintDescription = description;
-//    }
 
     /* Create default sprint page. */
     Sprint sprint = new Sprint(1, "First Sprint", "This is my first sprint.", "04/11/2021", "08/07/2022");
