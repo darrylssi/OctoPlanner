@@ -8,42 +8,35 @@ import javax.validation.constraints.*;
  */
 public class User {
 
-   // private Date registrationDate;
-
-//    @NotEmpty(message = "Username can't be empty")
-    @Size(min = 2, max = 15, message = "The length must be in range from 2 to 15")
+    @Size(min = 2, max = 15, message = "Username must be between 2 to 15 characters")
     private String userName;
 
-//    @NotEmpty(message = "First name can't be empty")
-    @Size(min = 2, max = 20, message = "The length must be in range from 2 to 20")
+    @Size(min = 2, max = 20, message = "First name must be between 2 to 20 characters")
     private String firstName;
 
+    @Size(max = 20, message = "Middle name must have less than 20 characters")
     private String middleName;
 
-//    @NotBlank(message = "Last name can't be empty")
-    @Size(min = 2, max = 20, message = "The length must be in range from 2 to 20")
+    @Size(min = 2, max = 20, message = "Last name must be between 2 to 20 characters")
     private String lastName;
 
+    @Size(max = 20, message = "Nickname must have less than 20 characters")
     private String nickName;
 
-//    @Size(min = 2, max = 20, message = "The length must be in range from 2 to 15")
     private String pronouns;
 
-//    @NotBlank(message = "Password can't be empty")
-    @Size(min = 7, message = "The length of password must be 7")
+    @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String password;
 
-//    @NotBlank(message = "Confirm Password can't be empty")
-    @Size(min = 7, message = "The length of password must be in range from 7 to 20")
+    @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String confirmPassword;
 
     private boolean passwordsEqual;
 
-//    @NotBlank(message = "Email can't be empty")
     @Email(message = "Email should be valid")
     private String email;
 
-//    @Size(min = 10, max = 200, message = "The length must be in range from 10 to 200")
+    @Size(max = 200, message = "Bio must have less than 200 characters")
     private String bio;
 
     public User() {}
@@ -146,7 +139,7 @@ public class User {
         this.passwordsEqual = passwordsEqual;
     }
 
-    @AssertTrue(message = "Password do not match")
+    @AssertTrue(message = "Passwords do not match")
     public boolean isPasswordsEqual() {
         return (password == null) ? false : password.equals(confirmPassword);
     }

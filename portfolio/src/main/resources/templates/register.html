@@ -13,27 +13,29 @@
         <form th:action="@{/register}" th:object="${user}" method="post">
             <div class="user-info">
                 <div class="input-box">
-                    <label> Username* </label>
-                    <input type="text" placeholder="Enter your username" th:field="*{userName}" th:required="required" /><br>
+                    <label class="required"> Username </label>
+                    <input type="text" placeholder="Enter your username" th:field="*{userName}" th:required="required" maxlength="15"/><br>
                     <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
-                    <label> First Name* </label>
-                    <input type="text" placeholder="Enter your first name" th:field="*{firstName}" th:required="required" /><br>
+                    <label class="required"> First Name </label>
+                    <input type="text" placeholder="Enter your first name" th:field="*{firstName}" th:required="required" maxlength="20"/><br>
                     <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
                     <label> Middle Name </label>
-                    <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" maxlength="15" />
+                    <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" maxlength="20" />
+                    <span th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
-                    <label> Last Name* </label>
-                    <input type="text" placeholder="Enter your last name" th:field="*{lastName}" th:required="required" /><br>
+                    <label class="required"> Last Name </label>
+                    <input type="text" placeholder="Enter your last name" th:field="*{lastName}" th:required="required" maxlength="20"/><br>
                     <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
                     <label> Nick Name </label>
-                    <input type="text" placeholder="Enter your last name" th:field="*{nickName}" maxlength="15" />
+                    <input type="text" placeholder="Enter your last name" th:field="*{nickName}" maxlength="20" />
+                    <span th:if="${#fields.hasErrors('nickName')}" th:errors="*{nickName}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
                     <label> Personal Pronouns </label>
@@ -47,15 +49,13 @@
                     </select>
                 </div>
                 <div class="input-box">
-                    <label> Password* </label>
+                    <label class="required"> Password </label>
                     <input type="password" placeholder="Enter your password" th:field="*{password}" th:required="required" /><br>
                     <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="error" />
 
                 </div>
                 <div class="input-box">
-                    <label> Confirm Password* </label>
-<!--                    <input type="password" placeholder="Confirm your password" th:field="*{confirmPassword}" th:required="required" /><br>-->
-<!--                    <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" th:errorclass="error" />-->
+                    <label class="required"> Confirm Password </label>
                     <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
                            placeholder="Password" th:field="*{confirmPassword}">
                     <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
@@ -63,13 +63,14 @@
                     <span th:errorclass="error" th:if="${#fields.hasErrors('passwordsEqual')}" th:errors="*{passwordsEqual}"></span>
                 </div>
                 <div class="input-box">
-                    <label> Email* </label>
+                    <label class="required"> Email </label>
                     <input th:type="email" placeholder="Enter your email" th:field="*{email}" th:required="required" /><br>
                     <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="error" />
                 </div>
                 <div class="input-box">
                     <label> Bio </label>
-                    <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" />
+                    <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" maxlength="200"/><br>
+                    <span th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}" th:errorclass="error" />
                 </div>
 
             </div>
