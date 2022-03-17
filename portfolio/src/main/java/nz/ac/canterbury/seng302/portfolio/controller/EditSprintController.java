@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,32 +15,35 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class EditSprintController {
-    private String sprintName = "Sprint 1";
-    private String sprintStartDate = "04/Mar/2022";
-    private String sprintEndDate = "25/Mar/2022";
-    private String sprintDescription = "This is the first sprint.";
+//    private String sprintName = "Sprint 1";
+//    private String sprintStartDate = "04/Mar/2022";
+//    private String sprintEndDate = "25/Mar/2022";
+//    private String sprintDescription = "This is the first sprint.";
+//
+//    private void setSprintName(String name) {
+//        this.sprintName = name;
+//    }
+//    private void setSprintStartDate(String date) {
+//        this.sprintStartDate = date;
+//    }
+//    private void setSprintEndDate(String date) {
+//        this.sprintEndDate = date;
+//    }
+//    private void setSprintDescription(String description) {
+//        this.sprintDescription = description;
+//    }
 
-    private void setSprintName(String name) {
-        this.sprintName = name;
-    }
-    private void setSprintStartDate(String date) {
-        this.sprintStartDate = date;
-    }
-    private void setSprintEndDate(String date) {
-        this.sprintEndDate = date;
-    }
-    private void setSprintDescription(String description) {
-        this.sprintDescription = description;
-    }
+    /* Create default sprint page. */
+    Sprint sprint = new Sprint(1, "First Sprint", "This is my first sprint.", "04/11/2021", "08/07/2022");
 
     @GetMapping("/edit-sprint")
     public String sprintForm(Model model) {
         /* Add sprint details to the model */
-        model.addAttribute("sprintLabel", "Sprint 1");
-        model.addAttribute("sprintName", this.sprintName);
-        model.addAttribute("sprintStartDate", this.sprintStartDate);
-        model.addAttribute("sprintEndDate", this.sprintEndDate);
-        model.addAttribute("sprintDescription", this.sprintDescription);
+        model.addAttribute("sprintLabel", sprint.getLabel());
+        model.addAttribute("sprintName", sprint.getName());
+        model.addAttribute("sprintStartDate", sprint.getStartDate());
+        model.addAttribute("sprintEndDate", sprint.getEndDate());
+        model.addAttribute("sprintDescription", sprint.getDescription());
 
 
         /* Return the name of the Thymeleaf template */
@@ -55,10 +59,10 @@ public class EditSprintController {
             @RequestParam(value="sprintDescription") String sprintDescription,
             Model model
     ) {
-        this.sprintName = sprintName;
-        this.sprintStartDate = sprintStartDate;
-        this.sprintEndDate = sprintEndDate;
-        this.sprintDescription = sprintDescription;
+        sprint.setSprintName(sprintName);
+        sprint.setStartDateString(sprintStartDate);
+        sprint.setEndDateString(sprintEndDate);
+        sprint.setSprintDescription(sprintDescription);
         return "redirect:/edit-sprint";
     }
 
