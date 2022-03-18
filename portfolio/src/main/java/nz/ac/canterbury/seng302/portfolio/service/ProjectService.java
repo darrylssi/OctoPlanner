@@ -29,14 +29,6 @@ public class ProjectService {
      * Get project by id
      */
     public Project getProjectById(Integer id) throws Exception {
-
-        Optional<Project> project = repository.findById(id);
-        if(project!=null) {
-            return project.get();
-        }
-        else
-        {
-            throw new Exception("Project not found");
-        }
+        return repository.findById(id).get();
     }
 }
