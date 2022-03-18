@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-//import nz.ac.canterbury.seng302.portfolio.service.SprintRepository;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -16,81 +18,47 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class AddSprintController {
 
-//    @Autowired
-//    private SprintRepository sprintRepository;
+    @Autowired
+    SprintService sprintService;
 
+    /**
+     * Gets the project name and creates a new sprint label
+     * @param model Used to display the project name in title
+     * @param project Used to get the project name
+     * @return The sprint add page
+     */
     @GetMapping("/add-sprint")
-    public String projectForm(
-            Model model, Sprint sprint) {
-        model.addAttribute("sprintLabel", sprint.getLabel());
+    public String getsSprint(Model model, Project project) {
+
+        Sprint sprint = new Sprint();
+        model.addAttribute("projectName", project.getName() + " - Add Sprint");
+        model.addAttribute("sprintLabel", "Add Sprint - " + sprint.getLabel());
+
         /* Return the name of the Thymeleaf template */
         return "addSprint";
     }
 
+    /**
+     * Adds a sprint to the project
+     * @param sprintName Gets the given name of the new sprint
+     * @param sprintStartDate Gets the given sprint start date
+     * @param sprintEndDate Gets the given sprint end date
+     * @param sprintDescription Gets the given sprint description
+     * @param project Gets the current project
+     * @return To the teacherProjectDetails page
+     */
     @PostMapping("/add-sprint")
     public String projectSave(
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
-            Sprint sprint,
+            Project project,
             Model model
     ) {
-        Sprint newSprint = new Sprint(2, sprintName, sprintDescription, sprintStartDate, sprintEndDate);
-
-//        sprintRepository.save(newSprint);
-
+        Sprint newSprint = new Sprint(project.getId(), sprintName, sprintDescription, sprintStartDate, sprintEndDate);
+        sprintService.saveOrUpdateSprint(newSprint);
         return "teacherProjectDetails";
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-//
-//    Project project = new Project("Project 2022", "", "04/Mar/2022",
-//            "04/Nov/2022");
-//
-////    /* Create default sprint page. */
-////    Sprint sprint = new Sprint(1, "First Sprint", "This is my first" +
-////            " sprint.", "04/11/2021", "08/07/2022");
-//
-//    @GetMapping("/add-sprint")
-//    public String sprintForm(Model model) {
-////        // Shows all project details
-////        model.addAttribute("projectName", project.getName());
-////        model.addAttribute("projectStartDate", project.getStartDateString());
-////        model.addAttribute("projectEndDate", project.getEndDateString());
-////        model.addAttribute("projectDescription", project.getDescription());
-//
-////        // Shows all sprint details
-////        model.addAttribute("sprintLabel", sprint.getLabel());
-////        model.addAttribute("sprintName", sprint.getName());
-////        model.addAttribute("sprintStartDate", sprint.getStartDateString());
-////        model.addAttribute("sprintEndDate", sprint.getEndDateString());
-////        model.addAttribute("sprintDescription", sprint.getDescription());
-//
-//        return "addSprint";
-//    }
-//
-//    @PostMapping("/add-sprint")
-//    public String sprintSave(
-//            @AuthenticationPrincipal AuthState principal,
-//            @RequestParam(name="sprintName") String sprintName,
-//            @RequestParam(name="sprintStartDate") String sprintStartDate,
-//            @RequestParam(name="sprintEndDate") String sprintEndDate,
-//            @RequestParam(name="sprintDescription") String sprintDescription,
-//            Model model
-//    ) {
-//        Sprint newSprint = new Sprint(2, sprintName, sprintDescription, sprintStartDate, sprintEndDate);
-//        return "addSprint";
-//    }
-//
-//}

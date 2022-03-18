@@ -38,4 +38,22 @@ public class SprintService {
             throw new Exception("Project not found");
         }
     }
+
+    /**
+     * Savdes a sprint to the repository
+     * @param sprint The sprint object to save to the repository
+     */
+    public void saveOrUpdateSprint(Sprint sprint) {
+        repository.save(sprint);
+    }
+
+    /**
+     * Deletes a specific user from the repository
+     * @param id The id of the sprint to delete
+     */
+    public void delete(int id) {
+        repository.deleteById(id);
+    }
+
+
 }

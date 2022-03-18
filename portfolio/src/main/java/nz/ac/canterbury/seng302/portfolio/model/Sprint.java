@@ -21,7 +21,7 @@ public class Sprint {
     private Date sprintStartDate;
     private Date sprintEndDate;
 
-    protected Sprint() {}
+    public Sprint() {}
 
     public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
         this.parentProjectId = parentProjectId;
