@@ -4,16 +4,15 @@
 <body>
 
     <header th:fragment="header">
-        <h3 class="header-text">
-            Team-8's un-named project
-        </h3>
-        <div class="header-user">
-            Login? How!!!
+        <div class="header">
+            <div class="title">
+                <div class="title-name" th:text="${title}" />
+                <div class="title-date" th:text="${subtitle}" />
+            </div>
+            <button style="background: url(/img/default-pfp.jpg)" class="profile-icon">
+                <a th:href="@{'/edit-project'}"></a>
+            </button>
         </div>
-
-        <form th:action="@{/login}">
-            <button type="submit"> Logout </button>
-        </form>
     </header>
 
 </body>

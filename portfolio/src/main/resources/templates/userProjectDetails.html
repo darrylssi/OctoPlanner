@@ -6,12 +6,7 @@
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
 </head>
 <body>
-<div class="header">
-    <div class="title">
-        <p class="title-name" th:text="${project.getName}" />
-        <p class="title-date" th:text="${project.getStartDateString} + ' - ' + ${project.getEndDateString}" />
-    </div>
-</div>
+<div th:replace="fragments :: header(title=${project.getName} subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
 <div class="content">
     <div class="detail-block" th:text="${project.getDescription}" />
     <hr/>
