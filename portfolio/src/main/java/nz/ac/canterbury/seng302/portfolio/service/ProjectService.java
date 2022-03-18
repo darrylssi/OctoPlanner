@@ -31,4 +31,8 @@ public class ProjectService {
     public Project getProjectById(Integer id) throws Exception {
         return repository.findById(id).get();
     }
+
+    public void saveProject(Project project) {
+        repository.save(project);
+    }
 }

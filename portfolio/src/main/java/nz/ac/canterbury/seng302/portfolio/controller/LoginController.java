@@ -77,7 +77,7 @@ public class LoginController {
                     5 * 60 * 60, // Expires in 5 hours
                     domain.startsWith("localhost") ? null : domain
             );
-            return "redirect:/greeting?name=" + username;   //TODO replace with user's profile page
+            return "redirect:/details";   //TODO replace with user's profile page
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
         return "login";
