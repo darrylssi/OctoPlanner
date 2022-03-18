@@ -38,4 +38,8 @@ public class SprintService {
             throw new Exception("Project not found");
         }
     }
+
+    public Sprint getSprintByLabel(String label) {
+        return repository.findBySprintLabel(label).get(0);
+    }
 }

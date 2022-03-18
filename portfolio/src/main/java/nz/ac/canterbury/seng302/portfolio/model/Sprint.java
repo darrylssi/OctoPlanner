@@ -1,9 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,11 +9,23 @@ public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @Column
     private int parentProjectId;
+
+    @Column
     private String sprintName;
+
+    @Column(nullable = false)
     private String sprintLabel;
+
+    @Column
     private String sprintDescription;
+
+    @Column
     private Date sprintStartDate;
+
+    @Column
     private Date sprintEndDate;
 
     protected Sprint() {}
@@ -84,5 +93,9 @@ public class Sprint {
 
     public void setEndDateString(String date) {
         this.sprintStartDate = Project.stringToDate(date);
+    }
+
+    public String getDates() {
+        return getStartDateString() + " - " + getEndDateString();
     }
 }

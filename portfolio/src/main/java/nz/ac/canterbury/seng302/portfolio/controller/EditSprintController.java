@@ -1,5 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,32 +17,23 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class EditSprintController {
-    private String sprintName = "Sprint 1";
-    private String sprintStartDate = "04/Mar/2022";
-    private String sprintEndDate = "25/Mar/2022";
-    private String sprintDescription = "This is the first sprint.";
 
-    private void setSprintName(String name) {
-        this.sprintName = name;
-    }
-    private void setSprintStartDate(String date) {
-        this.sprintStartDate = date;
-    }
-    private void setSprintEndDate(String date) {
-        this.sprintEndDate = date;
-    }
-    private void setSprintDescription(String description) {
-        this.sprintDescription = description;
+    @Autowired
+    SprintService sprintService;
+
+    private Sprint getSprintDetails(String label) {
+        return sprintService.getSprintByLabel(label);
     }
 
     @GetMapping("/edit-sprint")
-    public String sprintForm(Model model) {
+    public String sprintForm(@RequestParam("label") String label, Model model) {
         /* Add sprint details to the model */
-        model.addAttribute("sprintLabel", "Sprint 1");
-        model.addAttribute("sprintName", this.sprintName);
-        model.addAttribute("sprintStartDate", this.sprintStartDate);
-        model.addAttribute("sprintEndDate", this.sprintEndDate);
-        model.addAttribute("sprintDescription", this.sprintDescription);
+        Sprint sprint = getSprintDetails(label);
+        model.addAttribute("sprintLabel", label);
+        model.addAttribute("sprintName", sprint.getName());
+        model.addAttribute("sprintStartDate", sprint.getStartDateString());
+        model.addAttribute("sprintEndDate", sprint.getEndDateString());
+        model.addAttribute("sprintDescription", sprint.getDescription());
 
 
         /* Return the name of the Thymeleaf template */
@@ -55,10 +49,10 @@ public class EditSprintController {
             @RequestParam(value="sprintDescription") String sprintDescription,
             Model model
     ) {
-        this.sprintName = sprintName;
-        this.sprintStartDate = sprintStartDate;
-        this.sprintEndDate = sprintEndDate;
-        this.sprintDescription = sprintDescription;
+//        this.sprintName = sprintName;
+//        this.sprintStartDate = sprintStartDate;
+//        this.sprintEndDate = sprintEndDate;
+//        this.sprintDescription = sprintDescription;
         return "redirect:/edit-sprint";
     }
 
