@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.portfolio.controller;
+package nz.ac.canterbury.seng302.portfolio.model;
 
 
 import javax.validation.constraints.*;
