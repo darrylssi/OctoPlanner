@@ -4,21 +4,43 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Calendar;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity // this is an entity, assumed to be in a table called Sprint
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @Column(nullable = false)
     private int parentProjectId;
 
+    @NotBlank
+    @Column(nullable = false)
+    @Size(min = 2, message = "The length must be minimum 2.")
     private String sprintName;
+
     private String sprintLabel = "Sprint ";
     private int sprintNum = 0;
+
+    @Size(max = 200, message = "The maximum lenght can be 200.")
     private String sprintDescription;
+
+    @NotBlank
+    @Column(nullable = false)
+    @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintStartDate;
+
+    @NotBlank
+    @Column(nullable = false)
+    @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
 
     public Sprint() {}
@@ -100,6 +122,7 @@ public class Sprint {
         return sprintDescription;
     }
 
+
     public Date getStartDate() {
         return sprintStartDate;
     }
@@ -115,6 +138,7 @@ public class Sprint {
     public void setStartDateString(String date) {
         this.sprintStartDate = Project.stringToDate(date);
     }
+
 
     public Date getEndDate() {
         return sprintEndDate;

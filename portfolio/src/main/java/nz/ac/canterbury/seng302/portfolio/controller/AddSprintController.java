@@ -10,6 +10,8 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import java.util.Date;
 
 
 /**
@@ -50,12 +52,18 @@ public class AddSprintController {
     @PostMapping("/add-sprint")
     public String projectSave(
             @RequestParam(name="sprintName") String sprintName,
-            @RequestParam(name="sprintStartDate") String sprintStartDate,
-            @RequestParam(name="sprintEndDate") String sprintEndDate,
+            @RequestParam(name="sprintStartDate") Date sprintStartDate,
+            @RequestParam(name="sprintEndDate") Date sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
             Project project,
+            BindingResult result,
             Model model
     ) {
+        if (result.hasErrors()) {
+            return "addSprint";
+        }
+
+
         Sprint newSprint = new Sprint(project.getId(), sprintName, sprintDescription, sprintStartDate, sprintEndDate);
         sprintService.saveOrUpdateSprint(newSprint);
         return "teacherProjectDetails";

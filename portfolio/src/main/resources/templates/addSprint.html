@@ -9,28 +9,32 @@
 <body>
 <div class="header">
     <div class="title">
-<!--        <div class="title-name">Add Sprint - </div>-->
         <div class="title-name" th:text="${sprintLabel}" ></div>
     </div>
 </div>
 <div class="content">
     <form th:action="@{/teacherProjectDetails}" th:method="post">
-        <label for="sprintName">Sprint Name</label> <br/>
-        <input id="sprintName" th:type="text" th:name="sprintName" th:required="required" />
-        <br/>
+        <div>
+            <label for="sprintName">Sprint Name</label> <br/>
+            <input id="sprintName" th:type="text" th:field="*{sprintName}" th:required="required"/>
+            <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
+        </div><br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate">Sprint Start Date</label> <br/>
-                <input id="sprintStartDate" th:type="text" th:name="sprintStartDate" th:required="required" />
+                <input id="sprintStartDate" th:value="${#dates.format(sprintStartDate, 'dd/MMM/yyyy')}" />
+                <span th:if="${#fields.hasErrors('sprintStartDate')}" th:errors="*{sprintStartDate}" th:errorclass="error" />
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintEndDate">Sprint End Date</label> <br/>
-                <input id="sprintEndDate" th:type="text" th:name="sprintEndDate" th:required="required" />
+                <input id="sprintEndDate" th:name="sprintEndDate" />
+                <span th:if="${#fields.hasErrors('sprintEndDate')}" th:errors="*{sprintEndDate}" th:errorclass="error" />
             </div>
         </div>
         <div>
             <label for="sprintDescription">Sprint Description</label> <br/>
-            <textarea th:type="text" class="description-input" id="sprintDescription" th:name="sprintDescription" th:required="required"></textarea>
+            <textarea th:type="text" class="description-input" id="sprintDescription" th:name="sprintDescription"></textarea>
+            <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
         </div>
         <br/>
         <a th:href="@{'/teacherProjectDetails'}">
