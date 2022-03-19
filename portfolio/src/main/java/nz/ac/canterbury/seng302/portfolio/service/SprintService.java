@@ -1,13 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
-import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 // more info here https://codebun.com/spring-boot-crud-application-using-thymeleaf-and-spring-data-jpa/
 
@@ -27,19 +25,16 @@ public class SprintService {
     /**
      * Get sprint by id
      */
-    public Sprint getSprintById(Integer id) throws Exception {
-
-        Optional<Sprint> sprint = repository.findById(id);
-        if(sprint!=null) {
-            return sprint.get();
-        }
-        else
-        {
-            throw new Exception("Project not found");
-        }
+    public Sprint getSprintById(Integer id) {
+        return repository.findById(id).get();
     }
 
-    public Sprint getSprintByLabel(String label) {
-        return repository.findBySprintLabel(label).get(0);
+    /**
+     * Adds a new sprint into the database if the sprint with the given ID does not exist.
+     * Otherwise, updates the sprint with the given ID.
+     * @param sprint sprint to be added to the database
+     */
+    public void saveSprint(Sprint sprint) {
+        repository.save(sprint);
     }
 }

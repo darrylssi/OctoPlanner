@@ -50,17 +50,29 @@ public class Sprint {
     public int getId(){
         return  id;
     }
+
     public int getParentProjectId() {
         return parentProjectId;
     }
+
     public String getName() {
         return sprintName;
     }
+
+    public void setSprintName(String newName) {
+        this.sprintName = newName;
+    }
+
     public String getLabel() {
         return sprintLabel;
     }
+
     public String getDescription(){
         return sprintDescription;
+    }
+
+    public void setSprintDescription(String newDescription) {
+        this.sprintDescription = newDescription;
     }
 
     public Date getStartDate() {
@@ -92,7 +104,7 @@ public class Sprint {
     }
 
     public void setEndDateString(String date) {
-        this.sprintStartDate = Project.stringToDate(date);
+        this.sprintEndDate = Project.stringToDate(date);
     }
 
     public String getDates() {
