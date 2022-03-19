@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -26,7 +28,10 @@ public class DetailsController {
     private SprintService sprintService;
 
     @GetMapping("/details")
-    public String details(@AuthenticationPrincipal AuthState principal, Model model) throws Exception {
+    public String details(
+                            @AuthenticationPrincipal AuthState principal,
+                            @RequestParam(name="role", required=false) String debugRole,
+                            Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(0);
@@ -36,20 +41,23 @@ public class DetailsController {
         model.addAttribute("sprints", sprintList);
 
 
-        // Below code is just begging to be added as a method somewhere...
-        String role = principal.getClaimsList().stream()
+        // TODO: Link this with George's role helper class once that's merged
+        String role;
+        if (debugRole != null) {
+            role = debugRole;
+        } else {
+            role = principal.getClaimsList().stream()
                 .filter(claim -> claim.getType().equals("role"))
                 .findFirst()
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
-
+        }
         /* Return the name of the Thymeleaf template */
         // detects the role of the current user and returns appropriate page
-        if (role.equals("teacher")) {
-            return "teacherProjectDetails";
-        } else {
-            return "userProjectDetails";
-        }
+        boolean hasEditPermissions = role.contains("teacher");
+        model.addAttribute("canEdit", hasEditPermissions);
+        return "teacherProjectDetails";
+        // TODO: Andrew: I have marked "userProjectDetails.html" for deletion
     }
 
 }
