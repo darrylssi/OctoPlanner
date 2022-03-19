@@ -28,31 +28,36 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     /**
      * Adds a user to the database and returns a UserRegisterResponse to the portfolio
      * @param request An object containing all the details of the user to register
-     * @param responseObserver
      */
     @Override
     public void register(UserRegisterRequest request, StreamObserver<UserRegisterResponse> responseObserver) {
         logger.info("register() has been called");
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
 
-        // Creates a user object from the parameters in the request
-        User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
-                request.getMiddleName(), request.getLastName(), request.getNickname(),
-                request.getBio(), request.getPersonalPronouns(), request.getEmail());
+        if (repository.findByUsername(request.getUsername()) == null) {
 
-        // Sets the current time as the users register date
-        long millis = System.currentTimeMillis();
-        Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
-                .setNanos((int) ((millis % 1000) * 1000000)).build();
-        user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
+            // Creates a user object from the parameters in the request
+            User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
+                    request.getMiddleName(), request.getLastName(), request.getNickname(),
+                    request.getBio(), request.getPersonalPronouns(), request.getEmail());
 
-        repository.save(user);  // Saves the user object to the database
+            // Sets the current time as the users register date
+            long millis = System.currentTimeMillis();
+            Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+                    .setNanos((int) ((millis % 1000) * 1000000)).build();
+            user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
 
-        reply
-                .setIsSuccess(true)
-                .setNewUserId(user.getID())
-                .setMessage("User created successfully");
+            repository.save(user);  // Saves the user object to the database
 
+            reply
+                    .setIsSuccess(true)
+                    .setNewUserId(user.getID())
+                    .setMessage("User created successfully");
+        } else {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("That username is taken! Choose another");
+        }
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }
@@ -60,7 +65,6 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     /**
      * Gets a user from the database by its id and returns it as a UserResponse to the portfolio
      * @param request An object containing the id of the user to retrieve
-     * @param responseObserver
      */
     @Override
     public void getUserAccountById(GetUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
@@ -68,7 +72,10 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         UserResponse.Builder reply = UserResponse.newBuilder();
 
         Optional<User> userResponse = repository.findById(request.getId());
-        User user = userResponse.get();
+        User user = null;
+        if (userResponse.isPresent()) {
+            user = userResponse.get();
+        }
 
         reply
                 .setUsername(user.getUsername())

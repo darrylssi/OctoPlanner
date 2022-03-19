@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
+import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,13 @@ public class RegisterController {
      * @return Registration page
      */
     @GetMapping("/register")
-    public String register() {
+    public String register(User user) {
         return "register";
     }
 
     @PostMapping("/register")
     public String register(
+            User user,
             @RequestParam(name="username") String username,
             @RequestParam(name="password") String password,
             @RequestParam(name="firstName") String firstName,
