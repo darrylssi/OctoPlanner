@@ -1,10 +1,15 @@
+# IDE files
 .idea/
+*/.idea/
 .vscode/
+
+# Compiled files
 */.gradle/
 */build/
-*/.idea/
 */src/generated/
 */bin/
 .jpb/
 data/
-/portfolio/subdirectory/
+
+# Other
+*.db
