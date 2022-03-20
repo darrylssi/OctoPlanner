@@ -25,6 +25,14 @@ public class SprintService {
     }
 
     /**
+     * Get a list of all sprints for a certain project id
+     */
+    public List<Sprint> getSprintByParentProjectId(int parentProjectId) {
+        List<Sprint> list = repository.findByParentProjectId(parentProjectId);
+        return list;
+    }
+
+    /**
      * Get sprint by id
      */
     public Sprint getSprintById(Integer id) throws Exception {
@@ -35,7 +43,15 @@ public class SprintService {
         }
         else
         {
-            throw new Exception("Project not found");
+            throw new Exception("Sprint not found");
         }
+    }
+
+    /**
+     * Get sprint by name
+     */
+    public List<Sprint> getSprintBySprintName(String name) {
+        List<Sprint> list = repository.findBySprintName(name);
+        return list;
     }
 }
