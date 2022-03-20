@@ -26,6 +26,12 @@ public class EditSprintController {
     @Autowired
     private DateUtils utils;
 
+    /**
+     * Show the edit-sprint page.
+     * @param id ID of the sprint to be edited
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Edit-sprint page
+     */
     @GetMapping("/edit-sprint/{id}")
     public String sprintForm(@PathVariable("id") int id, Model model) {
         /* Add sprint details to the model */
@@ -41,6 +47,16 @@ public class EditSprintController {
         return "editSprint";
     }
 
+    /**
+     * Post request for editing a sprint with a given ID.
+     * @param id ID of the sprint to be edited
+     * @param name (New) name of the sprint
+     * @param startDate (New) start date of the sprint
+     * @param endDate (New) end date of the sprint
+     * @param description (New) description of the sprint
+     * @return Details page
+     * @throws ParseException If date is of a different format than expected
+     */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
             @PathVariable("id") int id,
@@ -49,12 +65,15 @@ public class EditSprintController {
             @RequestParam(value="sprintEndDate") String endDate,
             @RequestParam(value="sprintDescription") String description
     ) throws ParseException {
+
+        /* Set (new) sprint details to the corresponding sprint */
         Sprint sprint = sprintService.getSprintById(id);
         sprint.setSprintName(name);
         sprint.setStartDate(utils.toDate(startDate));
         sprint.setEndDate(utils.toDate(endDate));
         sprint.setSprintDescription(description);
         sprintService.saveSprint(sprint);
+
         return "redirect:/details";
     }
 
