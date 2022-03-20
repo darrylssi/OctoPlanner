@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
@@ -23,6 +25,9 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * Adds a user to the database and returns a UserRegisterResponse to the portfolio
@@ -74,20 +79,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         User user;
         if (userResponse.isPresent()) {
             user = userResponse.get();
-            reply
-                    .setUsername(user.getUsername())
-                    .setFirstName(user.getFirstName())
-                    .setMiddleName(user.getMiddleName())
-                    .setLastName(user.getLastName())
-                    .setNickname(user.getNickName())
-                    .setBio(user.getBio())
-                    .setPersonalPronouns(user.getPersonalPronouns())
-                    .setEmail(user.getEmail())
-                    .setProfileImagePath("/") // TODO Path to users profile image once implemented
-                    .addRoles(STUDENT)           // TODO Get role(s) from database once implemented
-                    .setCreated(com.google.protobuf.Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
-                            .setSeconds(user.getCreated().getEpochSecond())
-                            .setNanos(user.getCreated().getNano()));
+            setUserResponse(user, reply);
         }
 
         responseObserver.onNext(reply.build());
@@ -99,11 +91,44 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         logger.info("getPaginatedUsers has been called");
         PaginatedUsersResponse.Builder reply = PaginatedUsersResponse.newBuilder();
 
-        //Loop through id's in database and get each user by id and add each user response to the reply
-        // reply.addAllUsers() or reply.addUsers(UserResponse) for each one
-        // reply.setResultSetSize() is the number of users in the response
+        List<User> users;
+        users = userService.getAllUsers();
+
+        List<UserResponse> userResponses = new ArrayList<>();
+
+        for (User user : users) {
+            UserResponse.Builder userResponse = UserResponse.newBuilder();
+            setUserResponse(user, userResponse);
+            userResponses.add(userResponse.build());
+        }
+
+        reply
+                .addAllUsers(userResponses)
+                .setResultSetSize(users.size());
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Sets the field in a userResponse object using a user object
+     * @param user The user object to extract fields from
+     * @param userResponse The userResponse builder to set fields in
+     */
+    private void setUserResponse(User user, UserResponse.Builder userResponse) {
+        userResponse
+                .setUsername(user.getUsername())
+                .setFirstName(user.getFirstName())
+                .setMiddleName(user.getMiddleName())
+                .setLastName(user.getLastName())
+                .setNickname(user.getNickName())
+                .setBio(user.getBio())
+                .setPersonalPronouns(user.getPersonalPronouns())
+                .setEmail(user.getEmail())
+                .setProfileImagePath("/") // TODO Path to users profile image once implemented
+                .addRoles(STUDENT)           // TODO Get role(s) from database once implemented
+                .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
+                        .setSeconds(user.getCreated().getEpochSecond())
+                        .setNanos(user.getCreated().getNano()));
     }
 }
