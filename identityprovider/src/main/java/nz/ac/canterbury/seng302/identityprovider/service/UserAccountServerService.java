@@ -5,11 +5,8 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetUserByIdRequest;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc.UserAccountServiceImplBase;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterRequest;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,4 +94,16 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void getPaginatedUsers(GetPaginatedUsersRequest request, StreamObserver<PaginatedUsersResponse> responseObserver) {
+        logger.info("getPaginatedUsers has been called");
+        PaginatedUsersResponse.Builder reply = PaginatedUsersResponse.newBuilder();
+
+        //Loop through id's in database and get each user by id and add each user response to the reply
+        // reply.addAllUsers() or reply.addUsers(UserResponse) for each one
+        // reply.setResultSetSize() is the number of users in the response
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
 }

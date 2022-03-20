@@ -54,4 +54,20 @@ public class UserAccountClientService {
         return userAccountStub.getUserAccountById(userRequest);
     }
 
+    /**
+     * Gets a paginated list of users from the identity provider
+     * @param offset How many results to skip (offset of 0 means start at beginning, i.e page 1)
+     * @param limit Max results to get - "results per page"
+     * @param orderBy How to sort the results
+     * @return A PaginatedUserResponse with a list of users and the total number of users in the response
+     */
+    public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy) {
+        GetPaginatedUsersRequest paginatedUsersRequest = GetPaginatedUsersRequest.newBuilder()
+                .setOffset(offset)
+                .setLimit(limit)
+                .setOrderBy(orderBy)
+                .build();
+        return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
+    }
+
 }
