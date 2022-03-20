@@ -4,25 +4,41 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
+/**
+ * Represents a project object.
+ */
 @Entity // this is an entity, assumed to be in a table called Project
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @NotBlank(message = "Project name cannot be empty")
+    /** The name of the project. Just a string chosen by the user. */
     private String projectName;
-    @NotNull // may be empty, but not null
+    @NotNull
+    /** The description of the project. @NotNull means that it may be empty, but not null. */
     private String projectDescription;
-    @NotBlank(message = "Project start date cannot be empty")
+    @NotNull
+    /** The project start date. Must be before the end date. */
     private Date projectStartDate;
-    @NotBlank(message = "Project end date cannot be empty")
+    @NotNull
+    /** The project end date. Must be before the start date. */
     private Date projectEndDate;
 
     protected Project() {}
 
+    /**
+     * Constructor taking dates as Date objects.
+     * @param projectName
+     * @param projectDescription
+     * @param projectStartDate start date, as a Date object
+     * @param projectEndDate end date, as a Date object
+     */
     public Project(String projectName, String projectDescription, Date projectStartDate, Date projectEndDate) {
         this.projectName = projectName;
         this.projectDescription = projectDescription;
@@ -30,6 +46,16 @@ public class Project {
         this.projectEndDate = projectEndDate;
     }
 
+    /**
+     * Constructor taking dates as String objects. Date strings should be of the format dd/MON/yyyy, where MON is the
+     * first three letters of the name of the month, e.g. Jan, Feb, Mar, Apr, etc. Day and year are numbers.
+     * @param projectName
+     * @param projectDescription
+     * @param projectStartDate project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
+     *                         Must be before the end date.
+     * @param projectEndDate project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
+     *                       Must be after the start date.
+     */
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
         this.projectName = projectName;
         this.projectDescription = projectDescription;
@@ -38,6 +64,9 @@ public class Project {
     }
 
     @Override
+    /**
+     * Returns a string listing the attributes of the project in the form "Project[x, x, x, ...]".
+     */
     public String toString() {
         return String.format(
                 "Project[id=%d, projectName='%s', projectStartDate='%s', projectEndDate='%s', projectDescription='%s']",
@@ -94,35 +123,40 @@ public class Project {
 
     /* Dates have string get/set methods to interact with view */
 
+    /** Returns the start date as a date object. */
+    //date
     public Date getStartDate() {
         return projectStartDate;
     }
 
+    /** Returns the start date as a string in format dd/MON/yyyy. */
     public String getStartDateString() {
         return Project.dateToString(this.projectStartDate);
     }
 
+    /** Sets the start date with a date object. */
     public void setStartDate(Date newStartDate) {
         this.projectStartDate = newStartDate;
     }
 
-    public void setStartDateString(String date) {
-        this.projectStartDate = Project.stringToDate(date);
-    }
+    /** Sets the start date with a string in format dd/MON/yyyy. */
+    public void setStartDateString(String date) { this.setStartDate(Project.stringToDate(date)); }
 
+    /** Returns the end date as a date object. */
     public Date getEndDate() {
         return projectEndDate;
     }
 
+    /** Returns the end date as a string in format dd/MON/yyyy. */
     public String getEndDateString() {
         return Project.dateToString(this.projectEndDate);
     }
 
-    public void setEndDate(Date newEndDate) {
-        this.projectEndDate = newEndDate;
-    }
+    /** Sets the end date with a date object. */
+    public void setEndDate(Date newEndDate) { this.projectEndDate = newEndDate; }
 
+    /** Sets the end date with a string in format dd/MON/yyyy. */
     public void setEndDateString(String date) {
-        this.projectStartDate = Project.stringToDate(date);
+        this.setEndDate(Project.stringToDate(date));
     }
 }
