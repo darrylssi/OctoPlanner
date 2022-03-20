@@ -47,7 +47,7 @@ public class UserAccountClientService {
      * @param id The id of the user account to get
      * @return A UserResponse with the attributes of the requested user account
      */
-    private UserResponse getUserAccountById(final int id) {
+    public UserResponse getUserAccountById(final int id) {
         GetUserByIdRequest userRequest = GetUserByIdRequest.newBuilder()
                 .setId(id)
                 .build();

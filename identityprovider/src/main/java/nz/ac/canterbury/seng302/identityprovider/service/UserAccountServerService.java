@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.Optional;
 
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
+
 @GrpcService
 public class UserAccountServerService extends UserAccountServiceImplBase {
 
@@ -72,25 +74,24 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         UserResponse.Builder reply = UserResponse.newBuilder();
 
         Optional<User> userResponse = repository.findById(request.getId());
-        User user = null;
+        User user;
         if (userResponse.isPresent()) {
             user = userResponse.get();
+            reply
+                    .setUsername(user.getUsername())
+                    .setFirstName(user.getFirstName())
+                    .setMiddleName(user.getMiddleName())
+                    .setLastName(user.getLastName())
+                    .setNickname(user.getNickName())
+                    .setBio(user.getBio())
+                    .setPersonalPronouns(user.getPersonalPronouns())
+                    .setEmail(user.getEmail())
+                    .setProfileImagePath("/") // TODO Path to users profile image once implemented
+                    .addRoles(STUDENT)           // TODO Get role(s) from database once implemented
+                    .setCreated(com.google.protobuf.Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
+                            .setSeconds(user.getCreated().getEpochSecond())
+                            .setNanos(user.getCreated().getNano()));
         }
-
-        reply
-                .setUsername(user.getUsername())
-                .setFirstName(user.getFirstName())
-                .setMiddleName(user.getMiddleName())
-                .setLastName(user.getLastName())
-                .setNickname(user.getNickName())
-                .setBio(user.getBio())
-                .setPersonalPronouns(user.getPersonalPronouns())
-                .setEmail(user.getEmail())
-                .setCreated(com.google.protobuf.Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
-                        .setSeconds(user.getCreated().getEpochSecond())
-                        .setNanos(user.getCreated().getNano()));
-        //      .setProfileImagePath("...") Path to users profile image once implemented
-        //      .setRoles(...)              Users roles once implemented
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
