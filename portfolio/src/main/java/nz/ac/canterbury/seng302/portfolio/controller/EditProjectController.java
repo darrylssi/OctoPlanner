@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -22,6 +21,9 @@ public class EditProjectController {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private DateUtils utils;
+
     @GetMapping("/edit-project/{id}")
     public String projectForm(@PathVariable("id") int id, Model model) throws Exception {
 
@@ -29,8 +31,8 @@ public class EditProjectController {
         Project project = projectService.getProjectById(id);
         model.addAttribute("projectId", id);
         model.addAttribute("projectName", project.getName());
-        model.addAttribute("projectStartDate", project.getStartDateString());
-        model.addAttribute("projectEndDate", project.getEndDateString());
+        model.addAttribute("projectStartDate", utils.toString(project.getStartDate()));
+        model.addAttribute("projectEndDate", utils.toString(project.getEndDate()));
         model.addAttribute("projectDescription", project.getDescription());
 
         /* Return the name of the Thymeleaf template */
@@ -47,8 +49,8 @@ public class EditProjectController {
     ) throws Exception {
         Project project = projectService.getProjectById(id);
         project.setName(projectName);
-        project.setStartDateString(projectStartDate);
-        project.setEndDateString(projectEndDate);
+        project.setStartDate(utils.toDate(projectStartDate));
+        project.setEndDate(utils.toDate(projectEndDate));
         project.setDescription(projectDescription);
         projectService.saveProject(project);
         return "redirect:/details";
