@@ -26,7 +26,7 @@ public class SprintService {
      * Get sprint by id
      */
     public Sprint getSprintById(Integer id) {
-        return repository.findById(id).get();
+        return repository.findSprintById(id);
     }
 
     /**

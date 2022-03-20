@@ -23,7 +23,6 @@ public class EditProjectController {
     @Autowired
     private ProjectService projectService;
 
-    @Autowired
     private DateUtils utils;
 
     /**

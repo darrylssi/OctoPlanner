@@ -26,7 +26,8 @@ public class ProjectService {
      * Get project by id
      */
     public Project getProjectById(Integer id) {
-        return repository.findById(id).get();
+        return repository.findProjectById(id);
+
     }
 
     /**
