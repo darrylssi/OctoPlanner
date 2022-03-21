@@ -1,67 +1,19 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.service.AuthenticateClientService;
+import com.google.protobuf.Timestamp;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.thymeleaf.util.StringUtils;
 
+import java.time.*;
 import java.util.ArrayList;
 
-/**
- * InnerProfilePageController
- */
-class TestInfo {
-
-    static String username = "ConcreteDesk";
-    static String firstName = "Tony";
-    static String middleName = null;
-    static String lastName = "Asus";
-    static String email = "i-eat-cement@ucmail.gov";
-    static String pronouns = null;//"He/him";
-    static String bio = null;/* "The owner of a lonely heart!\n\n"
-                        + "Owner of a lonely heart!\n"
-                        + "(Much better than a-)\n"
-                        + "Owner of a broken heart!";*/
-
-    public static String getUsername() {
-        return username;
-    }
-
-    public static String getFirstName() {
-        return firstName;
-    }
-
-    public static String getMiddleName() {
-        return middleName;
-    }
-
-    public static String getLastName() {
-        return lastName;
-    }
-
-    public static String getEmail() {
-        return email;
-    }
-
-    public static String getPronouns() {
-        return pronouns;
-    }
-
-    public static String getBio() {
-        return bio;
-    }
-
-    public static String getFullName() {
-        if (middleName != null)
-            return String.format("%s %s %s", firstName, middleName, lastName);
-        else
-            return String.format("%s %s", firstName, lastName);
-    }
-
-
-}
+import static java.lang.String.valueOf;
 
 /**
  * Controller class for the profile page.
@@ -72,31 +24,88 @@ class TestInfo {
 public class ProfilePageController {
 
     @Autowired
-    private AuthenticateClientService authenticateClientService;
+    private UserAccountClientService userAccountClientService;
 
     /**
      * Generates the profile page for the requested user
      *
      * Example URL:
-     * <code>/profile?id=123</code>
+     * <code>/users/123</code>
      * @param id The ID associated with a given user
      * @author Andrew Hall <amh284@uclive.ac.nz>
      */
-    @GetMapping("/profile/{id}")
+    @GetMapping("/users/{id}")
     public String GetProfile(
             @PathVariable("id") int id,
             Model model
     ) {
+        UserResponse user = userAccountClientService.getUserAccountById(id);
+
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
-        var userInfo = new TestInfo();      // TODO: Link into the GetUser service layer once that's made
-        if (id > 5) {                       // A placeholder for 'invalid ID'
-            model.addAttribute("profileInfo", userInfo);
+
+        if(user.isInitialized()) {
+            model.addAttribute("profileInfo", user);
             model.addAttribute("userExists", true);
+            model.addAttribute("fullName", getFullName(
+                    user.getFirstName(), user.getMiddleName(),  user.getLastName()));
+            model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
         } else {
             errors.add("Invalid ID");
         }
         return "profile";
     }
 
+    /**
+     * Combines a user's names into one string
+     * @param firstName The user's first name
+     * @param middleName The user's middle name
+     * @param lastName The user's last name
+     * @return A formatted string containing the user's full name, only including the middle name if they have one
+     */
+    public static String getFullName(String firstName, String middleName, String lastName) {
+        if (middleName != null)
+            return String.format("%s %s %s", firstName, middleName, lastName);
+        else
+            return String.format("%s %s", firstName, lastName);
+    }
+
+    /**
+     * Gets the user's date created in a readable format from the timestamp it was created at
+     * @param timestamp The timestamp at which the user's account was created
+     * @return A formatted string containing the date the user was created
+     */
+    public static String getDateCreated(Timestamp timestamp){
+        LocalDateTime dateTime = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos())
+                .atOffset(ZoneOffset.UTC)
+                .toLocalDateTime();
+        LocalDate date = dateTime.toLocalDate();
+
+        // Calculate how long ago the user was created
+        Period period = Period.between(date, LocalDate.now());
+
+        String timeAgo;
+        if (period.getYears() == 0) {   // TODO Refactor away the pyramid of doom
+            if (period.getMonths() == 0) {
+                if (period.getDays() == 1){
+                    timeAgo = "(1 day ago)";
+                } else {
+                    timeAgo = "(" + period.getDays() + " days ago)";
+                }
+            } else if (period.getMonths() == 1) {
+                timeAgo = "(1 month ago)";
+            } else {
+                timeAgo = "(" + period.getMonths() + " months ago)";
+            }
+        } else if (period.getYears() == 1) {
+            timeAgo = "(1 year ago)";
+        } else {
+            timeAgo = "(" + period.getYears() + " years ago)";
+        }
+
+        // Convert month field to title case rather than uppercase (e.g. March rather than MARCH)
+        String month = StringUtils.capitalize(valueOf(date.getMonth()).toLowerCase());
+
+        return String.format("Member since: %s %s %s %s", date.getDayOfMonth(), month, date.getYear(), timeAgo);
+    }
 }
