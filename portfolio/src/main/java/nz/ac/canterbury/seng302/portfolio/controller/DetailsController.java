@@ -31,13 +31,14 @@ public class DetailsController {
     public String details(
                             @AuthenticationPrincipal AuthState principal,
                             @RequestParam(name="role", required=false) String debugRole,
+                            @RequestParam(name="id", required=true) int id,
                             Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
-        Project project = projectService.getProjectById(0);
+        Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
         
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         model.addAttribute("sprints", sprintList);
 
 
@@ -56,8 +57,8 @@ public class DetailsController {
         // detects the role of the current user and returns appropriate page
         boolean hasEditPermissions = role.contains("teacher");
         model.addAttribute("canEdit", hasEditPermissions);
-        return "teacherProjectDetails";
-        // TODO: Andrew: I have marked "userProjectDetails.html" for deletion
+        return "projectDetails";
+        // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion
     }
 
 }

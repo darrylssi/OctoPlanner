@@ -21,9 +21,7 @@
 </div>
 <div class="content">
     <div class="detail-block" th:text="${project.getDescription}" />
-    <p th:text="|debug -- ${project}|" />
     <hr/>
-    <p th:text="|debug -- # sprints: ${#arrays.length(sprints)}|" />
     <div th:each="sprint: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
             <div class="sprint-label" th:text="*{getLabel}" />
@@ -32,7 +30,6 @@
                     <div class="sprint-title" th:text="*{getName}" />
                     <div class="sprint-date" th:text="|*{getStartDateString} - *{getEndDateString}|" />
                     <div class="sprint-description" th:text="*{getDescription}" />
-                    <p th:text="|debug -- *{toString}|" ></p>
                 </div>
                 <div>
                     <button class="edit-button" th:if="${canEdit}">
