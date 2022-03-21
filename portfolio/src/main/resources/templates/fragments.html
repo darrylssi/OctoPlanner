@@ -4,17 +4,48 @@
 <body>
 
     <header th:fragment="header">
+        <script>
+            function toggleMenu() {
+                console.log('button clicked!');
+                if(document.getElementById("userMenu").className == "dropdown-content") {
+                    document.getElementById("userMenu").className = "dropdown-content show";
+                } else {
+                    document.getElementById("userMenu").className = "dropdown-content";
+                }
+            }
+
+            // Close the dropdown if the user clicks outside of it
+            window.onclick = function(event) {
+              if (!event.target.matches('.profile-icon')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                  var openDropdown = dropdowns[i];
+                  if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                  }
+                }
+              }
+            }
+        </script>
         <div class="header">
             <div class="title">
                 <div class="title-name" th:text="${title}" />
                 <div class="title-date" th:text="${subtitle}" />
             </div>
-            <button style="background: url(/img/default-pfp.jpg)" class="profile-icon">
-                <a th:href="@{'/edit-project'}"></a>
-            </button>
+            <div class="dropdown">
+                <button style="background: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
+                </button>
+                <div id="userMenu" class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
     </header>
 
 </body>
+
 
 </html>
