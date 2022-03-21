@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
@@ -27,11 +28,11 @@ public class DetailsController {
     @Autowired
     private SprintService sprintService;
 
-    @GetMapping("/details")
+    @GetMapping("/project/{id}")
     public String details(
                             @AuthenticationPrincipal AuthState principal,
+                            @PathVariable(name="id") int id,
                             @RequestParam(name="role", required=false) String debugRole,
-                            @RequestParam(name="id", required=true) int id,
                             Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
