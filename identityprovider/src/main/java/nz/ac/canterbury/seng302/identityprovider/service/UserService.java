@@ -15,7 +15,7 @@ public class UserService {
     private UserRepository userRepository;
 
     /**
-     *
+     * Gets all users from the repository
      * @return A list of all users in the repository
      */
     public List<User> getAllUsers()

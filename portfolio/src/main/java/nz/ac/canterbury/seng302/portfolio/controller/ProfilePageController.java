@@ -13,6 +13,8 @@ import org.thymeleaf.util.StringUtils;
 import java.time.*;
 import java.util.ArrayList;
 
+import static java.lang.String.valueOf;
+
 /**
  * Controller class for the profile page.
  *
@@ -110,7 +112,7 @@ public class ProfilePageController {
 
 
         // Convert month field to title case rather than uppercase (e.g. March rather than MARCH)
-        String month = StringUtils.capitalize(String.valueOf(date.getMonth()).toLowerCase());
+        String month = StringUtils.capitalize(date.getMonth().toString().toLowerCase());
 
         return String.format("Member since: %s %s %s %s", date.getDayOfMonth(), month, date.getYear(), timeAgo);
     }
