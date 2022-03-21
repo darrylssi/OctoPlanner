@@ -9,14 +9,14 @@
 
     <div id="loginform">
         <form th:action="@{/login}" method="post">
-            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="username">
+            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">
             <br>
-            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="password">
+            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
             <br>
             <button type="submit" class="inputs">Log In</button>
         </form>
         <a th:href="@{/register}">
-            <button type="submit" class="inputs"> Register </button>   <!-- replace with register page -->
+            <button type="submit" class="inputs"> Register </button>
         </a>
         <p id="error" th:text="${loginMessage}" />
     </div>

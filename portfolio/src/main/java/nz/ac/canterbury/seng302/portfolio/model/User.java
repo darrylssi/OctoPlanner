@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.portfolio.controller;
+package nz.ac.canterbury.seng302.portfolio.model;
 
 
 import javax.validation.constraints.*;
@@ -9,7 +9,7 @@ import javax.validation.constraints.*;
 public class User {
 
     @Size(min = 2, max = 15, message = "Username must be between 2 to 15 characters")
-    private String userName;
+    private String username;
 
     @Size(min = 2, max = 20, message = "First name must be between 2 to 20 characters")
     private String firstName;
@@ -21,9 +21,10 @@ public class User {
     private String lastName;
 
     @Size(max = 20, message = "Nickname must have less than 20 characters")
-    private String nickName;
+    private String nickname;
 
-    private String pronouns;
+    @Size(max = 20, message = "Personal pronouns must have less than 20 characters")
+    private String personalPronouns;
 
     @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String password;
@@ -41,26 +42,26 @@ public class User {
 
     public User() {}
 
-    public User(String userName, String firstName, String middleName, String lastName, String nickName, String pronouns,
+    public User(String username, String firstName, String middleName, String lastName, String nickname, String personalPronouns,
                 String password, String confirmPassword, String email, String bio) {
-        this.userName = userName;
+        this.username = username;
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
-        this.nickName = nickName;
-        this.pronouns = pronouns;
+        this.nickname = nickname;
+        this.personalPronouns = personalPronouns;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.email = email;
         this.bio = bio;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirstName() {
@@ -87,20 +88,20 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getNickName() {
-        return nickName;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
-    public String getPronouns() {
-        return pronouns;
+    public String getPersonalPronouns() {
+        return personalPronouns;
     }
 
-    public void setPronouns(String pronouns) {
-        this.pronouns = pronouns;
+    public void setPersonalPronouns(String personalPronouns) {
+        this.personalPronouns = personalPronouns;
     }
 
     public String getPassword() {

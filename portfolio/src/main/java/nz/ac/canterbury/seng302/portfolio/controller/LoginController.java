@@ -76,8 +76,7 @@ public class LoginController {
                     5 * 60 * 60, // Expires in 5 hours
                     domain.startsWith("localhost") ? null : domain
             );
-            long tempID = loginReply.getUserId() + 5;
-            return "redirect:/profile/" + Long.toString(tempID); //TODO replace with user's profile page
+            return "redirect:/users/" + loginReply.getUserId();   //TODO replace with user's profile page
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
         return "login";

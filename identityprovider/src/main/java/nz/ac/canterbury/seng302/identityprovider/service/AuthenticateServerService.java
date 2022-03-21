@@ -22,10 +22,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
     private JwtTokenUtil jwtTokenService = JwtTokenUtil.getInstance();
 
-    private User getUserByUsername(String username) {
-        return userService.getUserByUsername(username);
-    }
-
     /**
      * Attempts to authenticate a user with a given username and password. 
      */
@@ -33,7 +29,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
     public void authenticate(AuthenticateRequest request, StreamObserver<AuthenticateResponse> responseObserver) {
         AuthenticateResponse.Builder reply = AuthenticateResponse.newBuilder();
 
-        User user = getUserByUsername(request.getUsername());
+        User user = userService.getUserByUsername(request.getUsername());
 
         if (user == null) {
             reply
@@ -45,7 +41,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
             .setMessage("Incorrect password!")
             .setSuccess(false)
             .setToken("");
-        } else {
+        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) { 
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
             reply
                 .setEmail(user.getEmail())
@@ -56,6 +52,11 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
                 .setToken(token)
                 .setUserId(user.getID())
                 .setUsername(user.getUsername());
+        } else {
+            reply
+            .setMessage("Log in attempt failed: username or password incorrect")
+            .setSuccess(false)
+            .setToken("");
         }
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
