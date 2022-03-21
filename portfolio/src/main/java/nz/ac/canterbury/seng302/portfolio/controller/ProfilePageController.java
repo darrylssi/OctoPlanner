@@ -83,23 +83,31 @@ public class ProfilePageController {
         Period period = Period.between(date, LocalDate.now());
 
         String timeAgo;
-        if (period.getYears() == 0) {   // TODO Refactor away the pyramid of doom
-            if (period.getMonths() == 0) {
-                if (period.getDays() == 1){
-                    timeAgo = "(1 day ago)";
-                } else {
-                    timeAgo = "(" + period.getDays() + " days ago)";
-                }
-            } else if (period.getMonths() == 1) {
-                timeAgo = "(1 month ago)";
-            } else {
-                timeAgo = "(" + period.getMonths() + " months ago)";
-            }
-        } else if (period.getYears() == 1) {
-            timeAgo = "(1 year ago)";
-        } else {
-            timeAgo = "(" + period.getYears() + " years ago)";
+        Integer unit;
+        
+        // Format string has 2 parts: The number, and the plural 's'
+        if (period.getYears() > 0) {            // If over a year has passed
+            timeAgo = "(%d year%s ago)";
+            unit = period.getYears();
+
+        } else if (period.getMonths() > 0) {    // If over a month has passed
+            timeAgo = "(%d month%s ago)";
+            unit = period.getMonths();
+            
+        } else if (period.getDays() > 0) {      // If over a day has passed
+            timeAgo = "(%d day%s ago)";
+            unit = period.getDays();
+
+        } else {                                // Account was created today
+            timeAgo = "(Today)";
+            unit = null;
         }
+
+        if (unit != null) {
+            // Plural only applies on quantities other than 1 (0 days, 1 day, 2 days)
+            timeAgo = String.format(timeAgo, unit, (unit != 1) ? "s" : "");
+        }
+
 
         // Convert month field to title case rather than uppercase (e.g. March rather than MARCH)
         String month = StringUtils.capitalize(String.valueOf(date.getMonth()).toLowerCase());
