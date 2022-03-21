@@ -36,6 +36,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
                     .setMessage("Log in attempt failed: No users found with that username")
                     .setSuccess(false)
                     .setToken("");
+                    // TODO replace getPassword() for when passwords are hashed
         } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {  // TODO replace getPassword() for when passwords are hashed
 
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
