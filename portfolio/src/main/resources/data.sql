@@ -5,8 +5,8 @@ SELECT * FROM (SELECT
                       0 AS id,
                       'Cool Project 2022' AS name,
                       'Create the coolest app EVER' as description,
-                      '2022-01-01' as start_date,
-                      SELECT '2022-30-12' as end_date
+                      '2022-01-01 1:00:00.000000+13' as start_date,
+                      '2022-12-30 1:00:00.000000+13' as end_date
                 ) as temp
 WHERE NOT EXISTS (SELECT * FROM PROJECT where ID=0);
 
@@ -30,14 +30,14 @@ select * from (SELECT
                     'Freezing my world' as label,
                     'Create a prison area for people who like waffle cones' as description,
                     '2022-02-03' as start_date,
-                    '2022-02-31' as end_date
+                    '2022-02-28' as end_date
                 ) as temp
 WHERE NOT EXISTS (SELECT * FROM SPRINT where ID=2);
 
 -- Project #2
 INSERT INTO project (ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_START_DATE, PROJECT_END_DATE)
 SELECT * FROM (SELECT
-                    2 AS id,
+                    1 AS id,
                     'Icy Project 2023' AS name,
                     'Freeze the thymeleaf dev in time, until the end of time >:(' as description,
                     '2023-01-05' as start_date,
@@ -53,6 +53,6 @@ select * from (SELECT
                     'Ban-hammer' as label,
                     'Get his github account banned for his crimes' as description,
                     '2023-02-03' as start_date,
-                    '2023-02-31' as end_date
+                    '2023-02-28' as end_date
                 ) as temp
 WHERE NOT EXISTS (SELECT * FROM SPRINT where ID=3);
