@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc.UserAccountServiceImplBase;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,43 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                 .addAllUsers(userResponses)
                 .setResultSetSize(users.size());
 
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void editUser(EditUserRequest request, StreamObserver<EditUserResponse> responseObserver) {
+        logger.info("editUser has been called");
+        EditUserResponse.Builder reply = EditUserResponse.newBuilder();
+
+        Optional<User> userResponse = repository.findById(request.getUserId());
+        User user;
+
+        if (userResponse.isEmpty()) {    // Check that the user exists in the database
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("UserId")
+                    .setErrorText("ID does not exist")
+                    .build();
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("User does not exist and cannot be edited")
+                    .addValidationErrors(error);
+        } else {
+            user = userResponse.get();
+            // Set the users details to the details provided in the edit request
+            user.setFirstName(request.getFirstName());
+            user.setMiddleName(request.getMiddleName());
+            user.setLastName(request.getLastName());
+            user.setNickName(request.getNickname());
+            user.setBio(request.getBio());
+            user.setPersonalPronouns(request.getPersonalPronouns());
+            user.setEmail(request.getEmail());
+
+            repository.save(user);  // Saves the user object to the database
+            reply
+                    .setIsSuccess(true)
+                    .setMessage("User edited successfully");
+        }
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }

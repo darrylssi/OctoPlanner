@@ -70,4 +70,32 @@ public class UserAccountClientService {
         return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
     }
 
+    /**
+     * Sends an EditUserRequest to the identity provider.
+     * @param userId The id of the user to edit
+     * @param firstName The edited first name of the user
+     * @param middleName The edited middle name of the user
+     * @param lastName The edited last name of the user
+     * @param nickname The edited nickname of the user
+     * @param bio The edited bio of the user
+     * @param personalPronouns The edited personal pronouns of the user
+     * @param email The edited email of the user
+     * @return An EditUserResponse containing the success of the request
+     */
+    public EditUserResponse editUser(final int userId, final String firstName, final String middleName,
+                                     final String lastName, final String nickname, final String bio,
+                                     final String personalPronouns, final String email) {
+        EditUserRequest editUserRequest = EditUserRequest.newBuilder()
+                .setUserId(userId)
+                .setFirstName(firstName)
+                .setMiddleName(middleName)
+                .setLastName(lastName)
+                .setNickname(nickname)
+                .setBio(bio)
+                .setPersonalPronouns(personalPronouns)
+                .setEmail(email)
+                .build();
+        return userAccountStub.editUser(editUserRequest);
+    }
+
 }
