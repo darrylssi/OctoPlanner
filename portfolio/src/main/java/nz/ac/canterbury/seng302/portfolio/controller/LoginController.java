@@ -21,8 +21,6 @@ public class LoginController {
     @Autowired
     private AuthenticateClientService authenticateClientService;
 
-    private AuthState state;
-
     /**
      * Shows the login page.
      *
@@ -67,19 +65,27 @@ public class LoginController {
             return "login";
         }
         if (loginReply.getSuccess()) {
-            var domain = request.getHeader("host");
-            CookieUtil.create(
-                    response,
-                    "lens-session-token",
-                    loginReply.getToken(),
-                    true,
-                    5 * 60 * 60, // Expires in 5 hours
-                    domain.startsWith("localhost") ? null : domain
-            );
+            createCookie(request, response, loginReply);
             return "redirect:/users/" + loginReply.getUserId();   //TODO replace with user's profile page
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
         return "login";
+    }
+
+
+    public void createCookie(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticateResponse loginReply) {
+        var domain = request.getHeader("host");
+        CookieUtil.create(
+                response,
+                "lens-session-token",
+                loginReply.getToken(),
+                true,
+                5 * 60 * 60, // Expires in 5 hours
+                domain.startsWith("localhost") ? null : domain
+        );
     }
 
 }
