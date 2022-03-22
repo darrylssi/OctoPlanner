@@ -1,6 +1,9 @@
 package nz.ac.canterbury.seng302.identityprovider.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @Entity
