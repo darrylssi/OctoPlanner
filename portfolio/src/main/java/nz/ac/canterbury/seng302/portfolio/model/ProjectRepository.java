@@ -14,5 +14,5 @@ public interface ProjectRepository extends CrudRepository<Project, Integer> {
     // you can join multiple attributes with and, e.g. findByProjectNameAndId for attributes ProjectName, Id
     List<Project> findByProjectName(String projectName);
 
-    Project findById(int id);
+    Project findProjectById(Integer id);
 }
