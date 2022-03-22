@@ -26,6 +26,7 @@
     border: none;
     margin: 10px;
     background-position: center;
+    background-size: cover;
 }
 
 .title-date {
