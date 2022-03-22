@@ -3,6 +3,10 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +27,11 @@ public class UserService {
         List<User> users = new ArrayList<>();
         userRepository.findAll().forEach(user -> users.add(user));
         return users;
+    }
+
+    public List<User> getUsersPaginated(int page, int size, String orderBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
+        return userRepository.findAll(pageable);
     }
 
     /**
@@ -62,4 +71,5 @@ public class UserService {
     {
         userRepository.deleteById(id);
     }
+    
 }
