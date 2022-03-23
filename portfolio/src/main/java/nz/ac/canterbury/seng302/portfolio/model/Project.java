@@ -69,7 +69,7 @@ public class Project {
     /* Getters/Setters */
 
     public int getId(){
-        return  id;
+        return id;
     }
 
     public String getName() {
