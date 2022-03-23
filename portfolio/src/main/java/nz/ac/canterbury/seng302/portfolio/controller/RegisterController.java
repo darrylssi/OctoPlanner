@@ -19,7 +19,7 @@ public class RegisterController {
      * @return Registration page
      */
     @GetMapping("/register")
-    public String showRegistrationForm(User user) {
+    public String showRegistrationForm() {
         return "register";
     }
 
@@ -30,7 +30,7 @@ public class RegisterController {
      * @return
      */
     @PostMapping("/register")
-    public String submitRegistrationForm(@Valid User user, BindingResult result, Model model) {
+    public String submitRegistrationForm(BindingResult result, Model model) {
 
         if (result.hasErrors()) {
             return "register";

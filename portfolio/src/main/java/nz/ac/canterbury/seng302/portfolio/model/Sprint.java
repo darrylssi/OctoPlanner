@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity // this is an entity, assumed to be in a table called Sprint
+@Table (name = "Sprint")
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,16 +28,25 @@ public class Sprint {
     @Column
     private Date sprintEndDate;
 
-    protected Sprint() {}
+    public Sprint() {}
 
-    public Sprint(int parentProjectId, String sprintName, String sprintLabel, String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
-        this.sprintLabel = sprintLabel;
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = sprintStartDate;
         this.sprintEndDate = sprintEndDate;
     }
+
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate) {
+        this.parentProjectId = parentProjectId;
+        this.sprintName = sprintName;
+        this.sprintDescription = sprintDescription;
+        this.sprintStartDate = Project.stringToDate(sprintStartDate);
+        this.sprintEndDate = Project.stringToDate(sprintEndDate);
+    }
+
+
 
     @Override
     public String toString() {
@@ -48,6 +58,10 @@ public class Sprint {
 
     public int getId(){
         return  id;
+    }
+
+    public void setParentProjectId(int parentProjectId) {
+        this.parentProjectId = parentProjectId;
     }
 
     public int getParentProjectId() {
@@ -105,4 +119,24 @@ public class Sprint {
     public void setEndDateString(String date) {
         this.sprintEndDate = Project.stringToDate(date);
     }
+
+    public boolean validWithProject(Project project) {
+        try {
+            return  this.sprintStartDate.after(project.getStartDate()) &&
+                    this.sprintEndDate.before(project.getEndDate()) &&
+                    this.sprintStartDate.before(this.sprintEndDate);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+//    @AssertTrue(message = "Start date must be before end date")
+//    public boolean isPasswordsEqual() {
+//        if (this.sprintStartDate.before(this.sprintEndDate)) {
+//            return true;
+//        }
+//        return false;
+//
+//    }
+
 }
