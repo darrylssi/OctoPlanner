@@ -47,7 +47,8 @@ public class AddSprintController {
         sprint.setParentProjectId(id);
 
         model.addAttribute("projectName", project.getName() + " - Add Sprint");
-        model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
+        model.addAttribute("sprintLabel", "Add Sprint - Sprint 1");
+//        model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
         model.addAttribute("sprintName",  "");
         model.addAttribute("sprintStartDate", "");
         model.addAttribute("sprintStartDate", "");
