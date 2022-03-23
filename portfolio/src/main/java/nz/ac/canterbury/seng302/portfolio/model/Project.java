@@ -1,20 +1,25 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
 @Entity // this is an entity, assumed to be in a table called Project
+@Table (name = "Project")
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @Column (nullable = false)
     private String projectName;
+
     private String projectDescription;
+
+    @Column (nullable = false)
     private Date projectStartDate;
+
+    @Column (nullable = false)
     private Date projectEndDate;
 
     protected Project() {}
@@ -119,6 +124,6 @@ public class Project {
     }
 
     public void setEndDateString(String date) {
-        this.projectStartDate = Project.stringToDate(date);
+        this.projectEndDate = Project.stringToDate(date);
     }
 }
