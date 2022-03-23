@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <div th:replace="fragments :: header(title='Profile', subtitle=${userExists} ? ${profileInfo.getFullName()} : 'User not Found')"></div>
+    <div th:replace="fragments :: header(title='Profile', subtitle=${userExists} ? ${fullName} : 'User not Found')"></div>
 
     <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
         <th th:text="${errMsg}"></th>
