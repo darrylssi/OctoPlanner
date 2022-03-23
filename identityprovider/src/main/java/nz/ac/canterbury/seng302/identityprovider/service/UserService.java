@@ -15,7 +15,7 @@ public class UserService {
     private UserRepository userRepository;
 
     /**
-     *
+     * Gets all users from the repository
      * @return A list of all users in the repository
      */
     public List<User> getAllUsers()
@@ -42,10 +42,7 @@ public class UserService {
      */
     public User getUserByUsername(String username)
     {
-        if (userRepository.findByUsername(username).size() == 0) {
-            return new User();
-        }
-        return userRepository.findByUsername(username).get(0);
+        return userRepository.findByUsername(username);
     }
 
     /**

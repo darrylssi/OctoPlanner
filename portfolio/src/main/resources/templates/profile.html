@@ -14,24 +14,28 @@
     <div th:replace="fragments :: header(title='Profile', subtitle=${userExists} ? ${profileInfo.getFullName()} : 'User not Found')"></div>
 
     <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
-        <th th:text="${errMsg}" />
+        <th th:text="${errMsg}"></th>
         <br>
-    </p>
-    <!--/* Only show the user page if the user exists */-->
+
     <div class="profile" th:if="${userExists}" th:object="${profileInfo}">
         <div class="profile-info">
             <img width="250" height="250" th:src=@{/img/default-pfp.jpg}>
 
-            <strong class="name" th:text="*{getUsername()}" />
+            <strong class="name" th:text="*{getUsername()}"></strong>
             <br>
-            <span th:text="*{getFullName()}" />
+            <span th:text="${fullName}"></span>
             <br>
-            <i><a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}" /></i>
+            <i><a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}"></a></i>
             <br>
-            <span th:if="*{getPronouns()}" th:text="|🗨 *{getPronouns()}|" />
+            <span th:if="*{getPersonalPronouns()}" th:text="|🗨 *{getPersonalPronouns()}|"></span>
+            <br>
+            <span th:text="${dateCreated}"></span>
+            <br>
 
-
+            <!--
+            /* This broke when changing the way fields are added and I don't really know what it does so I'm not going to fix it just yet */
             <p th:if="*{getBio()}" class="bio" th:utext="*{| &lt;hr&gt; ${#strings.replace(#strings.escapeXml(getBio()), '&#10', '&lt;br&gt;')} |}" />
+            -->
             <!--/*
                 Only render if the logged in user's ID is this page's ID 
             */-->
