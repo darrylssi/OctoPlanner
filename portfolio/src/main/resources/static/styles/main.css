@@ -1,7 +1,8 @@
-body div .header {
+.header {
     background-color: #b70f0a;
     display: flex;
     justify-content: space-between;
+    height: 126px;
 }
 
 .title {
@@ -14,14 +15,13 @@ body div .header {
 .title-name {
     color: white;
     font-size: xx-large;
-    font-weight: bold;
-    padding-left: 5px;
-    padding-right: 5px;
+    font-weight: bolder;
+    padding-left: 45px;
+    padding-right: 40px;
 }
 
 .title-date {
-    color: white;
-    font-weight: bold;
+    color: #ffffff99;
     font-size: large;
 }
 
@@ -132,12 +132,6 @@ a {
     min-width: 50px;
     display: flex;
     align-items: center;
-
 }
-
-.error {
-    color: red;
-}
-
 
 
