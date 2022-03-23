@@ -21,9 +21,9 @@ input {
 }
 
 .description-input {
-    width: 1490px;
-    max-width: 1490px;
-    min-height: 100px;
+    width: 1480px;
+    max-width: 1480px;
+    height: 100px;
     max-height: 200px;
     padding: 5px;
     font-size: large;
