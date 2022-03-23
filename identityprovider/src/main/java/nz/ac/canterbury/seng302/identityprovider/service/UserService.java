@@ -1,12 +1,16 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException.NotImplemented;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
@@ -43,6 +47,32 @@ public class UserService {
     public User getUserByUsername(String username)
     {
         return userRepository.findByUsername(username);
+    }
+
+    /**
+     * Assigns a role to a user.
+     * 
+     * @param id The ID of the user getting a new role
+     * @param role The string representation of a role. (STUDENT, TEACHER, COURSEADMINISTRATOR)
+     * @throws NoSuchElementException The ID does not match any user
+     * @return <code>true</code> if the user didn't already have this role
+     */
+    public boolean addRoleToUser(int id, UserRole role) throws NoSuchElementException {
+        User user = getUser(id);            // Throws NoSuchElementException if the user ID is wrong
+        return user.getRoles().add(role);
+    }
+    
+    /**
+     * Removes a role from a user.
+     * 
+     * @param id The ID of the user getting a new role
+     * @param role The string representation of a role. (STUDENT, TEACHER, COURSEADMINISTRATOR)
+     * @throws NoSuchElementException The ID does not match any user
+     * @return <code>true</code> if the user had this role
+     */
+    public boolean removeRoleFromUser(int id, UserRole role) throws NoSuchElementException {
+        User user = getUser(id);            // Throws NoSuchElementException if the user ID is wrong
+        return user.getRoles().remove(role);
     }
 
     /**

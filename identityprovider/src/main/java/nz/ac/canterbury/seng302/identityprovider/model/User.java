@@ -3,6 +3,9 @@ package nz.ac.canterbury.seng302.identityprovider.model;
 import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 
 @Entity
 @Table (name = "Users")
@@ -26,6 +29,8 @@ public class User {
     private String email;
     @CreationTimestamp
     private Instant created;
+    @ElementCollection
+    private HashSet<UserRole> roles;
 
     protected User() {
     }
@@ -42,6 +47,8 @@ public class User {
         this.bio = bio;
         this.personalPronouns = personalPronouns;
         this.email = email;
+        this.roles = new HashSet<UserRole>();
+
     }
 
     public int getID() {
@@ -128,6 +135,10 @@ public class User {
 
     public void setCreated(Instant created) { this.created = created; }
 
+    public HashSet<UserRole> getRoles() {
+        return roles;
+    }
+    
     public String getFullName() {
         if (this.middleName == null){
             return this.firstName + " " + this.lastName;

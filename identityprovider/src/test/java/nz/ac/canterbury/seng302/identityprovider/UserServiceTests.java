@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.identityprovider;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserService;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,15 @@ public class UserServiceTests {
         when(userRepository.findByUsername("testUser"))
                 .thenReturn((testUser));
         assertThat(userService.getUserByUsername("testUser")).isEqualTo(testUser);
+    }
+
+    @Test
+    public void addRole() {
+        userService.addRoleToUser(testUser.getID(), Role.TEACHER);
+        User userAgain = userRepository.findByUsername("testUser");
+        System.out.println(testUser.getRoles());
+        System.out.println(userAgain.getRoles());
+            
     }
 
 }
