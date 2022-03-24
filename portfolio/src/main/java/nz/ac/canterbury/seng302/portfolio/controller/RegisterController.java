@@ -15,22 +15,20 @@ public class RegisterController {
 
     /**
      * Displays the Registration form page
-     * @param user
      * @return Registration page
      */
     @GetMapping("/register")
-    public String showRegistrationForm(User user) {
+    public String showRegistrationForm() {
         return "register";
     }
 
     /**
      *
-     * @param user
      * @param model
      * @return
      */
     @PostMapping("/register")
-    public String submitRegistrationForm(@Valid User user, BindingResult result, Model model) {
+    public String submitRegistrationForm(BindingResult result, Model model) {
 
         if (result.hasErrors()) {
             return "register";
