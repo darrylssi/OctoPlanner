@@ -1,14 +1,14 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${project.getName}"></title>
+    <title th:text="${project.getProjectName}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
 </head>
 <body>
 <div class="header">
     <div class="title">
-        <p class="title-name" th:text="${project.getName}" />
+        <p class="title-name" th:text="${project.getProjectName}" />
         <p class="title-date" th:text="${project.getStartDateString} + ' - ' + ${project.getEndDateString}" />
     </div>
     <button class="edit-project-button">
@@ -20,7 +20,7 @@
     </button>
 </div>
 <div class="content">
-    <div class="detail-block" th:text="${project.getDescription}" />
+    <div class="detail-block" th:text="${project.getProjectDescription}" />
     <hr/>
     <div th:each="sprint: ${sprints}">
         <div class="sprint-block">

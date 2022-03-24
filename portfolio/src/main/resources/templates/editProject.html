@@ -21,11 +21,11 @@
     <div class="horizontal-group">
         <div class="horizontal-group-element" >
             <label for="projectStartDate">Project Start Date</label> <br/>
-            <input id="projectStartDate" type="date" th:name="projectStartDate" th:value="${projectStartDate}">
+            <input id="projectStartDate" type="date" th:name="projectStartDate" th:value="${projectStartDate}" th:max="${projectEndDate}">
         </div>
         <div class="horizontal-group-element" >
             <label for="projectEndDate">Project End Date</label> <br/>
-            <input id="projectEndDate" type="date" th:name="projectEndDate" th:value="${projectEndDate}">
+            <input id="projectEndDate" type="date" th:name="projectEndDate" th:value="${projectEndDate}" th:min="${projectStartDate}">
         </div>
         <div class="horizontal-group-element" id="element-description" >
             <label for="projectDescription">Project Description</label> <br/>

@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.text.ParseException;
+import java.util.Date;
 
 
 /**
@@ -64,20 +66,25 @@ public class EditProjectController {
             BindingResult result,
             @PathVariable("id") int id,
             @RequestParam(value="projectName") String projectName,
-            @RequestParam(value="projectStartDate") String projectStartDate,
-            @RequestParam(value="projectEndDate") String projectEndDate,
-            @RequestParam(value="projectDescription") String projectDescription
-    ) throws ParseException {
+            @RequestParam(value="projectStartDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectStartDate,
+            @RequestParam(value="projectEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectEndDate,
+            @RequestParam(value="projectDescription") String projectDescription,
+            Model model
+    ) {
 
+        /* Return editProject template with user input */
         if (result.hasErrors()) {
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
             return "editProject";
         }
 
         /* Set (new) project details to the corresponding project */
         Project newProject = projectService.getProjectById(id);
         newProject.setProjectName(projectName);
-        newProject.setProjectStartDate(utils.toDate(projectStartDate));
-        newProject.setProjectEndDate(utils.toDate(projectEndDate));
+        newProject.setProjectStartDate(projectStartDate);
+        newProject.setProjectEndDate(projectEndDate);
         newProject.setProjectDescription(projectDescription);
         projectService.saveProject(newProject);
 
