@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import org.thymeleaf.util.DateUtils;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,7 +30,7 @@ public class Sprint {
     @NotBlank(message = "Sprint name cannot be empty")
     /** The name of the sprint. Just a string chosen by the user, but should default to the sprint label. */
     private String sprintName;
-//    @NotBlank(message = "Sprint label cannot be empty") // disabled for testing until auto-assign is implemented
+//    @NotBlank(message = "Sprint label cannot be empty") // TODO disabled for testing until auto-assign is implemented
     /**
      * Sprint labels must be unique, and are of the form "Sprint[x]", where [x] is a number, starting at 1.
      * Within a project, all sprints must have labels that increment, without gaps, from 1 to n in order of occurence.
@@ -47,6 +49,15 @@ public class Sprint {
 
     protected Sprint() {}
 
+    /**
+     * Constructor taking dates as date objects
+     * @param parentProjectId
+     * @param sprintName
+     * @param sprintLabel
+     * @param sprintDescription
+     * @param sprintStartDate start date, as a date object
+     * @param sprintEndDate end date, as a date object
+     */
     public Sprint(int parentProjectId, String sprintName, String sprintLabel, String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
@@ -54,6 +65,24 @@ public class Sprint {
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = sprintStartDate;
         this.sprintEndDate = sprintEndDate;
+    }
+
+    /**
+     * Constructor taking dates as strings
+     * @param parentProjectId
+     * @param sprintName
+     * @param sprintLabel
+     * @param sprintDescription
+     * @param sprintStartDate start date, as a string
+     * @param sprintEndDate end date, as a string
+     */
+    public Sprint(int parentProjectId, String sprintName, String sprintLabel, String sprintDescription, String sprintStartDate, String sprintEndDate) {
+        this.parentProjectId = parentProjectId;
+        this.sprintName = sprintName;
+        this.sprintLabel = sprintLabel;
+        this.sprintDescription = sprintDescription;
+        this.sprintStartDate = Project.stringToDate(sprintStartDate);
+        this.sprintEndDate = Project.stringToDate(sprintEndDate);
     }
 
     @Override
