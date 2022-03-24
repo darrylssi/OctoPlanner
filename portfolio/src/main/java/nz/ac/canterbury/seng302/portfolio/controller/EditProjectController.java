@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
 import java.text.ParseException;
 
 
@@ -37,11 +39,10 @@ public class EditProjectController {
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
-        model.addAttribute("projectId", id);
-        model.addAttribute("projectName", project.getName());
-        model.addAttribute("projectStartDate", utils.toString(project.getStartDate()));
-        model.addAttribute("projectEndDate", utils.toString(project.getEndDate()));
-        model.addAttribute("projectDescription", project.getDescription());
+        model.addAttribute("id", id);
+        model.addAttribute("project", project);
+        model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+        model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
         return "editProject";
@@ -59,6 +60,8 @@ public class EditProjectController {
      */
     @PostMapping("/edit-project/{id}")
     public String projectSave(
+            @Valid Project project,
+            BindingResult result,
             @PathVariable("id") int id,
             @RequestParam(value="projectName") String projectName,
             @RequestParam(value="projectStartDate") String projectStartDate,
@@ -66,13 +69,17 @@ public class EditProjectController {
             @RequestParam(value="projectDescription") String projectDescription
     ) throws ParseException {
 
+        if (result.hasErrors()) {
+            return "editProject";
+        }
+
         /* Set (new) project details to the corresponding project */
-        Project project = projectService.getProjectById(id);
-        project.setName(projectName);
-        project.setStartDate(utils.toDate(projectStartDate));
-        project.setEndDate(utils.toDate(projectEndDate));
-        project.setDescription(projectDescription);
-        projectService.saveProject(project);
+        Project newProject = projectService.getProjectById(id);
+        newProject.setProjectName(projectName);
+        newProject.setProjectStartDate(utils.toDate(projectStartDate));
+        newProject.setProjectEndDate(utils.toDate(projectEndDate));
+        newProject.setProjectDescription(projectDescription);
+        projectService.saveProject(newProject);
 
         /* Redirect to details page when done */
         return "redirect:/details";
