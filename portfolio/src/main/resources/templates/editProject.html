@@ -34,11 +34,9 @@
     </div>
     <br/>
     <div class="buttons">
-        <a th:href="@{'/details'}">
-            <button class="cancel" type="button">
-                Cancel
-            </button>
-        </a>
+        <button class="cancel" type="button" th:onclick="window.location.href='/details'">
+            Cancel
+        </button>
         <button class="save" type="submit">Save</button>
     </div>
 </form>

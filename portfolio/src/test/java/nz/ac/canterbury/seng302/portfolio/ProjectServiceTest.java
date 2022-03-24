@@ -29,7 +29,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getProjectValidId() {
+    void getProjectValidId() throws Exception {
         when(projectRepository.findProjectById(1))
                 .thenReturn(project1);
 
@@ -37,7 +37,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getProjectInvalidId() {
+    void getProjectInvalidId() throws Exception {
         when(projectRepository.findProjectById(2))
                 .thenReturn(null);
         assertThat(projectService.getProjectById(2)).isEqualTo(null);

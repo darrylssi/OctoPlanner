@@ -33,7 +33,7 @@ public class EditProjectController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@PathVariable("id") int id, Model model){
+    public String projectForm(@PathVariable("id") int id, Model model) throws Exception{
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
@@ -64,7 +64,7 @@ public class EditProjectController {
             @RequestParam(value="projectStartDate") String projectStartDate,
             @RequestParam(value="projectEndDate") String projectEndDate,
             @RequestParam(value="projectDescription") String projectDescription
-    ) throws ParseException {
+    ) throws Exception {
 
         /* Set (new) project details to the corresponding project */
         Project project = projectService.getProjectById(id);

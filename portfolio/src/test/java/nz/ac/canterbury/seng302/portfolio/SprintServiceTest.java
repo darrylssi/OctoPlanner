@@ -31,7 +31,7 @@ public class SprintServiceTest {
     }
 
     @Test
-    void getProjectValidId() {
+    void getProjectValidId() throws Exception {
         when(sprintRepository.findSprintById(1))
                 .thenReturn(sprint1);
 
@@ -39,7 +39,7 @@ public class SprintServiceTest {
     }
 
     @Test
-    void getProjectInvalidId() {
+    void getProjectInvalidId() throws Exception{
         when(sprintRepository.findSprintById(2))
                 .thenReturn(null);
         assertThat(sprintService.getSprintById(2)).isEqualTo(null);

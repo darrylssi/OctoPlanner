@@ -25,8 +25,13 @@ public class SprintService {
     /**
      * Get sprint by id
      */
-    public Sprint getSprintById(Integer id) {
-        return repository.findSprintById(id);
+    public Sprint getSprintById(Integer id) throws Exception {
+        Sprint sprint = repository.findSprintById(id);
+        if (sprint != null) {
+            return sprint;
+        } else {
+            throw new Exception("Sprint not found.");
+        }
     }
 
     /**
