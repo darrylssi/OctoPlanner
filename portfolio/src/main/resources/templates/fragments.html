@@ -38,7 +38,9 @@
                 </button>
                 <div id="userMenu" class="dropdown-content">
                     <a href="/profile/6">Profile</a>
-                    <a href="/logout">Logout</a>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit"> Logout </button>
+                    </form>
                 </div>
             </div>
         </div>
