@@ -134,4 +134,8 @@ a {
     align-items: center;
 }
 
+.error {
+    color: red;
+}
+
 
