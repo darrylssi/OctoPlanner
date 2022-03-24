@@ -1,13 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
-import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 // more info here https://codebun.com/spring-boot-crud-application-using-thymeleaf-and-spring-data-jpa/
 
@@ -17,29 +15,30 @@ public class SprintService {
     private SprintRepository repository;
 
     /**
-     * Get list of all sprints
+     * Gets a List of all Sprint objects currently in the database.
      */
     public List<Sprint> getAllSprints() {
-        List<Sprint> list = (List<Sprint>) repository.findAll();
-        return list;
+        return (List<Sprint>) repository.findAll();
     }
 
     /**
-     * Get a list of all sprints for a certain project id
+     * Gets a list of all sprints for a specified project id. Returns a List of Sprint objects.
+     * @return list a List object of Sprint objects
      */
     public List<Sprint> getSprintByParentProjectId(int parentProjectId) {
-        List<Sprint> list = repository.findByParentProjectId(parentProjectId);
-        return list;
+        return repository.findByParentProjectId(parentProjectId);
     }
 
     /**
-     * Get sprint by id
+     * Returns the one sprint object matching that id.
+     * @return the sprint with the specified id
+     * @throws Exception if the sprint is not found, an exception is thrown.
      */
     public Sprint getSprintById(Integer id) throws Exception {
 
-        Optional<Sprint> sprint = repository.findById(id);
+       Sprint sprint = repository.findSprintById(id);
         if(sprint!=null) {
-            return sprint.get();
+            return sprint;
         }
         else
         {
@@ -48,10 +47,10 @@ public class SprintService {
     }
 
     /**
-     * Get sprint by name
+     * Returns all sprints that match the described name in a List object - not a sprint object!
+     * @return list a list type of sprint objects.
      */
     public List<Sprint> getSprintBySprintName(String name) {
-        List<Sprint> list = repository.findBySprintName(name);
-        return list;
+        return repository.findBySprintName(name);
     }
 }

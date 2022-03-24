@@ -98,12 +98,12 @@ public class SprintTests {
     @Test
     public void nameSearch() {
         when(sprintRepository.findBySprintName("Sprint 1")).thenReturn(List.of(sprint));
-        assertThat(sprintService.getSprintBySprintName("Sprint 1")).isEqualTo(sprint);
+        assertThat(sprintService.getSprintBySprintName("Sprint 1")).isEqualTo(List.of(sprint));
     }
 
     @Test
     public void idSearch() throws Exception {
-        when(sprintRepository.findById(sprint.getId())).thenReturn(sprint);
+        when(sprintRepository.findSprintById(sprint.getId())).thenReturn(sprint);
         assertThat(sprintService.getSprintById(sprint.getId())).isEqualTo(sprint);
     }
 
@@ -111,7 +111,7 @@ public class SprintTests {
     public void parentProjectIdSearch() {
         sprint.setParentProjectId(5);
         when(sprintRepository.findByParentProjectId(5)).thenReturn(List.of(sprint));
-        assertThat(sprintService.getSprintByParentProjectId(5)).isEqualTo(sprint);
+        assertThat(sprintService.getSprintByParentProjectId(5)).isEqualTo(List.of(sprint));
     }
 
     /**

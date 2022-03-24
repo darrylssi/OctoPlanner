@@ -15,5 +15,5 @@ public interface ProjectRepository extends CrudRepository<Project, Integer> {
     // don't make a method that returns an optional because it breaks things; just rename it
     List<Project> findByProjectName(String projectName);
 
-    Project findProjectById(int id);
+    Project findProjectById(int id); // renamed to avoid returning an <Optional>
 }
