@@ -12,7 +12,8 @@ public interface ProjectRepository extends CrudRepository<Project, Integer> {
     // you can create queries using method names
     // start with "findBy", and then put one or more names (and they MUST match the java class file names!)
     // you can join multiple attributes with and, e.g. findByProjectNameAndId for attributes ProjectName, Id
+    // don't make a method that returns an optional because it breaks things; just rename it
     List<Project> findByProjectName(String projectName);
 
-    Project findById(int id);
+    Project findProjectById(int id);
 }

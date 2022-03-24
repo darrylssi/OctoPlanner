@@ -19,8 +19,7 @@ public class ProjectService {
      * Get list of all projects
      */
     public List<Project> getAllProjects() {
-        List<Project> list = (List<Project>) repository.findAll();
-        return list;
+        return (List<Project>) repository.findAll();
     }
 
     /**
@@ -28,12 +27,10 @@ public class ProjectService {
      */
     public Project getProjectById(Integer id) throws Exception {
 
-        Optional<Project> project = repository.findById(id);
-        if(project!=null) {
-            return project.get();
-        }
-        else
-        {
+        Project project = repository.findProjectById(id);
+        if(project !=  null) {
+            return project;
+        } else {
             throw new Exception("Project not found");
         }
     }
@@ -43,7 +40,6 @@ public class ProjectService {
      */
     public List<Project> getProjectByProjectName(String name) {
 
-        List<Project> projectList = repository.findByProjectName(name);
-        return projectList;
+        return repository.findByProjectName(name);
     }
 }

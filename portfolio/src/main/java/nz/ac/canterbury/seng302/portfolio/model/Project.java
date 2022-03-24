@@ -159,4 +159,8 @@ public class Project {
     public void setEndDateString(String date) {
         this.setEndDate(Project.stringToDate(date));
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }
