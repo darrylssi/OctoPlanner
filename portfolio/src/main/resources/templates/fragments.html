@@ -6,7 +6,6 @@
     <header th:fragment="header">
         <script>
             function toggleMenu() {
-                console.log('button clicked!');
                 if(document.getElementById("userMenu").className == "dropdown-content") {
                     document.getElementById("userMenu").className = "dropdown-content show";
                 } else {
@@ -34,10 +33,11 @@
                 <div class="title-date" th:text="${subtitle}" />
             </div>
             <div class="dropdown">
+<!--                TODO use the actual user's profile image-->
                 <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
                 </button>
                 <div id="userMenu" class="dropdown-content">
-                    <button href="/users/1">Profile</button>
+                    <a href="/users/current"><buttton>Profile</buttton></a>
                     <form th:action="@{/logout}" method="post">
                         <button type="submit"> Logout </button>
                     </form>
