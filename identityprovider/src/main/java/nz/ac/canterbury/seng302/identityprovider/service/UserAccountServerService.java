@@ -40,7 +40,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
         List<ValidationError> errors = validateRegisterRequest(request);
 
-        if(errors.size() > 0) {
+        if(errors.size() > 0) { // If there are errors in the request
             reply
                     .setIsSuccess(false)
                     .setMessage("User could not be created")
@@ -80,13 +80,15 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     public List<ValidationError> validateRegisterRequest(UserRegisterRequest request) {
         List<ValidationError> errors = new ArrayList<>();
 
-        if (request.getUsername().isBlank()) {
+        if (request.getUsername().isBlank()) {  // Checks that the username field isn't empty
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("Username")
                     .setErrorText("Username cannot be empty")
                     .build();
             errors.add(error);
-        } else if (repository.findByUsername(request.getUsername()) != null) {
+        }
+        // Checks that the username isn't already in the database
+        else if (repository.findByUsername(request.getUsername()) != null) {
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("Username")
                     .setErrorText("Username is already in use")
@@ -94,7 +96,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getPassword().isBlank()) {
+        if (request.getPassword().isBlank()) {  // Checks that the password field isn't empty
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("Password")
                     .setErrorText("Password cannot be empty")
@@ -102,7 +104,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getFirstName().isBlank()) {
+        if (request.getFirstName().isBlank()) { // Checks that the first name field isn't empty
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("FirstName")
                     .setErrorText("FirstName cannot be empty")
@@ -110,7 +112,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getLastName().isBlank()) {
+        if (request.getLastName().isBlank()) {  // Checks that the last name field isn't empty
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("LastName")
                     .setErrorText("LastName cannot be empty")
@@ -118,7 +120,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getEmail().isBlank()) {
+        if (request.getEmail().isBlank()) { // Checks that the email field isn't empty
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("Email")
                     .setErrorText("Email cannot be empty")
