@@ -30,7 +30,7 @@ public class User {
     private String email;
     @CreationTimestamp
     private Instant created;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated
     private Set<UserRole> roles;
 

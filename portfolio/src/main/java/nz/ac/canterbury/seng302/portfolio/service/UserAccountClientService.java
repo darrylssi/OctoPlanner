@@ -70,4 +70,12 @@ public class UserAccountClientService {
         return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
     }
 
+    public UserRoleChangeResponse addRoleToUser(final int userId, final UserRole role) {
+        ModifyRoleOfUserRequest addRoleRequest = ModifyRoleOfUserRequest.newBuilder()
+            .setUserId(userId)
+            .setRole(role)
+            .build();
+        return userAccountStub.addRoleToUser(addRoleRequest);
+    }
+
 }

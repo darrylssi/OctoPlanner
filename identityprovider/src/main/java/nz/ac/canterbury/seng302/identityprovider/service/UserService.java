@@ -32,9 +32,10 @@ public class UserService {
     /**
      * Gets a specific user from the repository
      * @param id The id of the user to retrieve
+     * @throws NoSuchElementException If the ID points to a non-existent user
      * @return The user with the specified id
      */
-    public User getUser(int id)
+    public User getUser(int id) throws NoSuchElementException
     {
         return userRepository.findById(id).get();
     }
@@ -59,7 +60,9 @@ public class UserService {
      */
     public boolean addRoleToUser(int id, UserRole role) throws NoSuchElementException {
         User user = getUser(id);            // Throws NoSuchElementException if the user ID is wrong
-        return user.getRoles().add(role);
+        boolean ret = user.addRole(role);
+        userRepository.save(user);
+        return ret;
     }
     
     /**
@@ -72,7 +75,9 @@ public class UserService {
      */
     public boolean removeRoleFromUser(int id, UserRole role) throws NoSuchElementException {
         User user = getUser(id);            // Throws NoSuchElementException if the user ID is wrong
-        return user.getRoles().remove(role);
+        boolean ret = user.removeRole(role);
+        userRepository.save(user);
+        return ret;
     }
 
     /**

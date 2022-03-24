@@ -1,12 +1,14 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.Timestamp;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc.UserAccountServiceImplBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @GrpcService
-public class UserAccountServerService extends UserAccountServiceImplBase {
+public class UserAccountServerService extends UserAccountServiceGrpc.UserAccountServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
@@ -44,6 +46,8 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
                     request.getMiddleName(), request.getLastName(), request.getNickname(),
                     request.getBio(), request.getPersonalPronouns(), request.getEmail());
+            // All users are initially given a `student` role
+            user.addRole(UserRole.STUDENT);
 
             // Sets the current time as the users register date
             long millis = System.currentTimeMillis();
@@ -110,6 +114,53 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void addRoleToUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
+        logger.info("addRoleToUser() has been called");
+
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+        try {
+            // If the user didn't already have this role
+            if (userService.addRoleToUser(userId, role)) {
+                reply.setIsSuccess(true);
+            } else {
+                reply.setIsSuccess(false);
+            }
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            reply.setIsSuccess(false);
+        }
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void removeRoleFromUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
+        logger.info("removeRoleFromUser() has been called");
+
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+        try {
+            // If the user had this role
+            if (userService.removeRoleFromUser(userId, role)) {
+                reply.setIsSuccess(true);
+            } else {
+                reply.setIsSuccess(false);
+            }
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            reply.setIsSuccess(false);
+        }
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
+
+
     /**
      * Sets the field in a userResponse object using a user object
      * @param user The user object to extract fields from
@@ -126,7 +177,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
                 .setProfileImagePath("/") // TODO Path to users profile image once implemented
-                .addRoles(STUDENT)           // TODO Get role(s) from database once implemented
+                .addAllRoles(user.getRoles())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
                         .setSeconds(user.getCreated().getEpochSecond())
                         .setNanos(user.getCreated().getNano()));
