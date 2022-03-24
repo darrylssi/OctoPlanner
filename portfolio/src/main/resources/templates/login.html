@@ -13,12 +13,12 @@
             <br>
             <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
             <br>
+            <p id="error" th:text="${loginMessage}" />
             <button type="submit" class="inputs">Log In</button>
         </form>
         <a th:href="@{/register}">
             <button type="submit" class="inputs"> Register </button>
         </a>
-        <p id="error" th:text="${loginMessage}" />
     </div>
     
 </body>

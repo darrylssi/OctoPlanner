@@ -70,7 +70,7 @@ public class RegisterController {
                 return "redirect:/users/" + loginReply.getUserId();
             }
         } catch (StatusRuntimeException e){
-            model.addAttribute("registerMessage", "Error connecting to Identity Provider...");
+            model.addAttribute("IdPErrorMessage", "Error connecting to Identity Provider...");
             return "register";
         }
 

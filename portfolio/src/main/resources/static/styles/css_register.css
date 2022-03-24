@@ -85,3 +85,7 @@ form .submit input:hover {
     content:"*";
     color: red;
 }
+
+#error {
+    color: red;
+}
