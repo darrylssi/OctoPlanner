@@ -4,6 +4,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Set;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 
@@ -30,7 +31,8 @@ public class User {
     @CreationTimestamp
     private Instant created;
     @ElementCollection
-    private HashSet<UserRole> roles;
+    @Enumerated
+    private Set<UserRole> roles;
 
     protected User() {
     }
@@ -135,8 +137,28 @@ public class User {
 
     public void setCreated(Instant created) { this.created = created; }
 
-    public HashSet<UserRole> getRoles() {
+    public Set<UserRole> getRoles() {
         return roles;
+    }
+
+    /**
+     * Add a role to this user
+     * 
+     * @param role The role enum type to be added
+     * @return <code>true</code> if the user didn't already have this role
+     */
+    public boolean addRole(UserRole role) {
+        return roles.add(role);
+    }
+
+    /**
+     * Add a role to this user
+     * 
+     * @param role The role enum type to be added
+     * @return <code>true</code> if the user had this item removed
+     */
+    public boolean removeRole(UserRole role) {
+        return roles.remove(role);
     }
     
     public String getFullName() {
