@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
 
-// annotation validation https://hibernate.org/validator/documentation/getting-started/
-
-
 /**
  * Holds unit tests for the Project class.
  * These tests (should) make sure that the JPA annotations (e.g. @NotEmpty) work correctly.
+ * For more information on validating annotations, see https://hibernate.org/validator/documentation/getting-started/
+ * Note that the annotations don't stop setters from setting invalid values, but they will stop invalid objects from
+ * being saved to the database.
  */
 @SpringBootTest
 public class ProjectTests {
@@ -40,33 +40,33 @@ public class ProjectTests {
     @MockBean
     private ProjectRepository projectRepository;
 
-    private Project project;
+    private Project baseProject;
 
     @BeforeEach
     public void setUpProject() {
-        project = new Project();
-        project.setName("Project 1");
-        project.setDescription("The first.");
-        project.setStartDateString("01/JAN/2022");
-        project.setEndDateString("01/OCT/2022");
-        project.setId(1);
+        baseProject = new Project();
+        baseProject.setName("Project 1");
+        baseProject.setDescription("The first.");
+        baseProject.setStartDateString("01/JAN/2022");
+        baseProject.setEndDateString("01/OCT/2022");
+        baseProject.setId(1);
     }
 
-    @Test // these constraints don't actually stop the setter from working, but the test checks that an error is raised
-    public void nameNotNull() {
-        project.setName(null);
-        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(project);
+    @Test
+    public void setNullName_getViolation() {
+        baseProject.setName(null);
+        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
-                "Project name cannot be empty", // this should match the (message = "asdf") bit
+                "Project name cannot be empty", // this should match the (message = "asdf") part of the annotation
                 constraintViolations.iterator().next().getMessage()
         );
     }
 
     @Test
-    public void descriptionNotNull() {
-        project.setDescription(null);
-        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(project);
+    public void setNullDescription_getViolation() {
+        baseProject.setDescription(null);
+        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
                 "must not be null",
@@ -75,18 +75,41 @@ public class ProjectTests {
     }
 
     @Test
-    public void nameSearch() {
-        project.setName("Project 1");
-        projectRepository.save(project);
-        when(projectRepository.findByProjectName("Project 1")).thenReturn(List.of(project));
-        assertThat(projectService.getProjectByProjectName("Project 1")).isEqualTo(List.of(project));
+    public void setNullStartDate_getViolation() {
+        baseProject.setStartDate(null);
+        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
+        assertEquals( 1, constraintViolations.size() );
+        assertEquals(
+                "must not be null",
+                constraintViolations.iterator().next().getMessage()
+        );
     }
 
     @Test
-    public void idSearch() throws Exception {
-        projectRepository.save(project);
-        when(projectRepository.findProjectById(project.getId())).thenReturn(project);
-        assertThat(projectService.getProjectById(project.getId())).isEqualTo(project);
+    public void setNullEndDate_getViolation() {
+        baseProject.setEndDate(null);
+        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
+        assertEquals( 1, constraintViolations.size() );
+        assertEquals(
+                "must not be null",
+                constraintViolations.iterator().next().getMessage()
+        );
+    }
+
+    @Test
+    public void searchByName_getProject() {
+        String nameToSearch = "Project 1";
+        baseProject.setName(nameToSearch);
+        projectRepository.save(baseProject);
+        when(projectRepository.findByProjectName(nameToSearch)).thenReturn(List.of(baseProject));
+        assertThat(projectService.getProjectByProjectName(nameToSearch)).isEqualTo(List.of(baseProject));
+    }
+
+    @Test
+    public void searchById_getProject() throws Exception {
+        projectRepository.save(baseProject);
+        when(projectRepository.findProjectById(baseProject.getId())).thenReturn(baseProject);
+        assertThat(projectService.getProjectById(baseProject.getId())).isEqualTo(baseProject);
     }
 
     @Test
@@ -101,8 +124,8 @@ public class ProjectTests {
     @Test
     void saveNullNameProject_getException() {
         try {
-            Project nullNameProject = new Project(null, "Desc", "01/jan/2022", "02/jan/2022");
-            projectRepository.save(nullNameProject);
+            baseProject.setName(null);
+            projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
@@ -111,8 +134,8 @@ public class ProjectTests {
     @Test
     void saveEmptyNameProject_getException() {
         try {
-            Project emptyNameProject = new Project("", "Desc", "01/jan/2022", "02/jan/2022");
-            projectRepository.save(emptyNameProject);
+            baseProject.setName("");
+            projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
@@ -121,30 +144,28 @@ public class ProjectTests {
     @Test
     void saveNullDescriptionProject_getException() {
         try {
-            Project nullDescriptionProject = new Project("P1", null, "01/jan/2022", "02/jan/2022");
-            projectRepository.save(nullDescriptionProject);
+            baseProject.setDescription(null);
+            projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
     }
-
 
     @Test
     void saveNullStartDateProject_getException() {
         try {
-            Project nullStartDateProject = new Project("P1", "This is Project 1", null, "02/jan/2022");
-            projectRepository.save(nullStartDateProject);
+            baseProject.setStartDate(null);
+            projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
     }
 
-
     @Test
     void saveNullEndDateProject_getException() {
         try {
-            Project nullEndDateProject = new Project("P1", "This is Project 1", "02/jan/2022", null);
-            projectRepository.save(nullEndDateProject);
+            baseProject.setEndDate(null);
+            projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }

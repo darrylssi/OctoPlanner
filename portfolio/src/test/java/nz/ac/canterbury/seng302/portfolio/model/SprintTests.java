@@ -7,15 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
 
@@ -39,22 +38,22 @@ public class SprintTests {
     @MockBean
     private SprintRepository sprintRepository;
 
-    private Sprint sprint;
+    private Sprint baseSprint;
 
     @BeforeEach
     public void setUp() {
-        sprint = new Sprint();
-        sprint.setSprintName("Sprint 1");
-        sprint.setSprintDescription("The first.");
-        sprint.setParentProjectId(5);
-        sprint.setStartDateString("05/FEB/2022");
-        sprint.setEndDateString("24/MAR/2022");
+        baseSprint = new Sprint();
+        baseSprint.setSprintName("Sprint 1");
+        baseSprint.setSprintDescription("The first.");
+        baseSprint.setParentProjectId(5);
+        baseSprint.setStartDateString("05/FEB/2022");
+        baseSprint.setEndDateString("24/MAR/2022");
     }
 
     @Test
-    public void nameNotNull() {
-        sprint.setSprintName(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(sprint);
+    public void setNullName_getViolation() {
+        baseSprint.setSprintName(null);
+        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
                 "Sprint name cannot be empty", // this should match the (message = "asdf") bit
@@ -63,9 +62,9 @@ public class SprintTests {
     }
 
     @Test
-    public void descriptionNotNull() {
-        sprint.setSprintDescription(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(sprint);
+    public void setNullDescription_getViolation() {
+        baseSprint.setSprintDescription(null);
+        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
                 "must not be null",
@@ -74,9 +73,9 @@ public class SprintTests {
     }
 
     @Test
-    public void startDateNotNull() {
-        sprint.setStartDate(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(sprint);
+    public void setNullStartDate_getViolation() {
+        baseSprint.setStartDate(null);
+        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
                 "must not be null",
@@ -85,9 +84,9 @@ public class SprintTests {
     }
 
     @Test
-    public void endDateNotNull() {
-        sprint.setEndDate(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(sprint);
+    public void setNullEndDate_getViolation() {
+        baseSprint.setEndDate(null);
+        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
                 "must not be null",
@@ -96,35 +95,82 @@ public class SprintTests {
     }
 
     @Test
-    public void nameSearch() {
-        when(sprintRepository.findBySprintName("Sprint 1")).thenReturn(List.of(sprint));
-        assertThat(sprintService.getSprintBySprintName("Sprint 1")).isEqualTo(List.of(sprint));
+    public void searchByName_getSprint() {
+        String nameToSearch = "Sprint 1";
+        when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
+        assertThat(sprintService.getSprintBySprintName(nameToSearch)).isEqualTo(List.of(baseSprint));
     }
 
     @Test
-    public void idSearch() throws Exception {
-        when(sprintRepository.findSprintById(sprint.getId())).thenReturn(sprint);
-        assertThat(sprintService.getSprintById(sprint.getId())).isEqualTo(sprint);
+    public void searchById_getSprint() throws Exception {
+        when(sprintRepository.findSprintById(baseSprint.getId())).thenReturn(baseSprint);
+        assertThat(sprintService.getSprintById(baseSprint.getId())).isEqualTo(baseSprint);
     }
 
     @Test
-    public void parentProjectIdSearch() {
-        sprint.setParentProjectId(5);
-        when(sprintRepository.findByParentProjectId(5)).thenReturn(List.of(sprint));
-        assertThat(sprintService.getSprintByParentProjectId(5)).isEqualTo(List.of(sprint));
+    public void searchByParentProjectId_getSprint() {
+        int parentProjectIdToSearch = 5;
+        baseSprint.setParentProjectId(parentProjectIdToSearch);
+        when(sprintRepository.findByParentProjectId(parentProjectIdToSearch)).thenReturn(List.of(baseSprint));
+        assertThat(sprintService.getSprintByParentProjectId(parentProjectIdToSearch)).isEqualTo(List.of(baseSprint));
     }
 
-    /**
-     * This SHOULD just test whether individual fields are validated correctly,
-     * but it needs additional dependencies to get an assert statement.
-     */
     @Test
-    public void testRepository() {
-        sprint.setStartDateString("12/jan/2022");
-        sprint.setEndDateString("02/feb/2022");
-        sprint.setSprintName("Sprint One");
-        sprint.setSprintDescription("The first.");
+    void saveNullSprint_getException() {
+        try { // this is how to get at nested exceptions
+            sprintRepository.save(new Sprint());
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
 
-        sprintRepository.save(sprint);
+    @Test
+    void saveNullNameSprint_getException() {
+        try {
+            baseSprint.setSprintName(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+    @Test
+    void saveEmptyNameSprint_getException() {
+        try {
+            baseSprint.setSprintName("");
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+    @Test
+    void saveNullDescriptionSprint_getException() {
+        try {
+            baseSprint.setSprintDescription(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+    @Test
+    void saveNullStartDateSprint_getException() {
+        try {
+            baseSprint.setStartDate(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+    @Test
+    void saveNullEndDateSprint_getException() {
+        try {
+            baseSprint.setEndDate(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
     }
 }
