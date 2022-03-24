@@ -2,8 +2,6 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.Timestamp;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
@@ -17,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 
 @GrpcService
@@ -48,7 +45,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                     request.getBio(), request.getPersonalPronouns(), request.getEmail());
             // All users are initially given a `student` role
             user.addRole(UserRole.STUDENT);
-
+            
             // Sets the current time as the users register date
             long millis = System.currentTimeMillis();
             Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
@@ -79,10 +76,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("getUserAccountById has been called");
         UserResponse.Builder reply = UserResponse.newBuilder();
 
-        Optional<User> userResponse = repository.findById(request.getId());
-        User user;
-        if (userResponse.isPresent()) {
-            user = userResponse.get();
+        User user = repository.findById(request.getId());
+        if (user != null) {
             setUserResponse(user, reply);
         }
 

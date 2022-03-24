@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException.NotImplemented;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class UserService {
      */
     public User getUser(int id) throws NoSuchElementException
     {
-        return userRepository.findById(id).get();
+        return userRepository.findById(id);
     }
 
     /**
@@ -60,6 +59,9 @@ public class UserService {
      */
     public boolean addRoleToUser(int id, UserRole role) throws NoSuchElementException {
         User user = getUser(id);            // Throws NoSuchElementException if the user ID is wrong
+        if (user == null) {
+            throw new NoSuchElementException("No user has an ID of " + id);
+        }
         boolean ret = user.addRole(role);
         userRepository.save(user);
         return ret;

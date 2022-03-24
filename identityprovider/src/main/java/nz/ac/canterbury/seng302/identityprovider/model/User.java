@@ -50,7 +50,6 @@ public class User {
         this.personalPronouns = personalPronouns;
         this.email = email;
         this.roles = new HashSet<UserRole>();
-
     }
 
     public int getID() {
