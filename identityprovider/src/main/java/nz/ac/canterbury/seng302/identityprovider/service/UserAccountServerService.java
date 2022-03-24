@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc.UserAccountServiceImplBase;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,33 +38,95 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     public void register(UserRegisterRequest request, StreamObserver<UserRegisterResponse> responseObserver) {
         logger.info("register() has been called");
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
+        List<ValidationError> errors = validateRegisterRequest(request);
 
-        if (repository.findByUsername(request.getUsername()) == null) {
-
-            // Creates a user object from the parameters in the request
-            User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
-                    request.getMiddleName(), request.getLastName(), request.getNickname(),
-                    request.getBio(), request.getPersonalPronouns(), request.getEmail());
-
-            // Sets the current time as the users register date
-            long millis = System.currentTimeMillis();
-            Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
-                    .setNanos((int) ((millis % 1000) * 1000000)).build();
-            user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
-
-            repository.save(user);  // Saves the user object to the database
-
-            reply
-                    .setIsSuccess(true)
-                    .setNewUserId(user.getID())
-                    .setMessage("User created successfully");
-        } else {
+        if(errors.size() > 0) {
             reply
                     .setIsSuccess(false)
-                    .setMessage("That username is taken! Choose another");
+                    .setMessage("User could not be created")
+                    .addAllValidationErrors(errors);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
         }
+
+        // Creates a user object from the parameters in the request
+        User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
+                request.getMiddleName(), request.getLastName(), request.getNickname(),
+                request.getBio(), request.getPersonalPronouns(), request.getEmail());
+
+        // Sets the current time as the users register date
+        long millis = System.currentTimeMillis();
+        Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+                .setNanos((int) ((millis % 1000) * 1000000)).build();
+        user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
+
+        repository.save(user);  // Saves the user object to the database
+
+        reply
+                .setIsSuccess(true)
+                .setNewUserId(user.getID())
+                .setMessage("User created successfully");
+
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Validates the fields in a register request
+     * @param request The register request to validate
+     * @return A list of validation errors in the register request
+     */
+    public List<ValidationError> validateRegisterRequest(UserRegisterRequest request) {
+        List<ValidationError> errors = new ArrayList<>();
+
+        if (request.getUsername().isBlank()) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("Username")
+                    .setErrorText("Username cannot be empty")
+                    .build();
+            errors.add(error);
+        } else if (repository.findByUsername(request.getUsername()) != null) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("Username")
+                    .setErrorText("Username is already in use")
+                    .build();
+            errors.add(error);
+        }
+
+        if (request.getPassword().isBlank()) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("Password")
+                    .setErrorText("Password cannot be empty")
+                    .build();
+            errors.add(error);
+        }
+
+        if (request.getFirstName().isBlank()) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("FirstName")
+                    .setErrorText("FirstName cannot be empty")
+                    .build();
+            errors.add(error);
+        }
+
+        if (request.getLastName().isBlank()) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("LastName")
+                    .setErrorText("LastName cannot be empty")
+                    .build();
+            errors.add(error);
+        }
+
+        if (request.getEmail().isBlank()) {
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("Email")
+                    .setErrorText("Email cannot be empty")
+                    .build();
+            errors.add(error);
+        }
+
+        return errors;
     }
 
     /**
