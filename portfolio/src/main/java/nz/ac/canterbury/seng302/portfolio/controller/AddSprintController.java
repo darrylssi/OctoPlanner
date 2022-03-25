@@ -17,9 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.text.ParseException;
+import javax.validation.Valid;
 import java.util.Date;
 
 
@@ -44,7 +43,7 @@ public class AddSprintController {
      * @return The sprint add page
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@PathVariable("id") int id, Model model) {
+    public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
@@ -52,12 +51,17 @@ public class AddSprintController {
         Sprint sprint = new Sprint();
         sprint.setParentProjectId(id);
 
+        model.addAttribute("sprint", sprint);
+
+        model.addAttribute("parentProjectId", id);
         model.addAttribute("projectName", project.getName() + " - Add Sprint");
         model.addAttribute("sprintLabel", "Add Sprint - Sprint 1");
 //        model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
+        model.addAttribute("sprintStartDate", "");
+        model.addAttribute("sprintEndDate", "");
+
         model.addAttribute("sprintName",  "");
         model.addAttribute("sprintDescription",  "");
-        model.addAttribute("sprintDateError",  "");
 
         /* Return the name of the Thymeleaf template */
         return "addSprint";
@@ -72,22 +76,23 @@ public class AddSprintController {
      * @return To the teacherProjectDetails page
      */
     @PostMapping("/add-sprint/{id}")
-    public String projectSave(
+    public String sprintSave(
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") Date sprintStartDate,
             @RequestParam(name="sprintEndDate") Date sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
-            @ModelAttribute("sprintDateError") String sprintDateError,
+            @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
-            Sprint sprint,
             Model model
-    ) throws ParseException {
+    ) throws Exception {
 
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
         if (result.hasErrors()) {
-            fetchDateErrorResult(parentProject, sprintStartDate, sprintEndDate, model);
+            model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
+            model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
+            return "addSprint";
         }
         // Adding the new sprint
         sprint.setParentProjectId(parentProject.getId());
@@ -96,25 +101,23 @@ public class AddSprintController {
         sprint.setEndDate(sprintEndDate);
         sprint.setSprintDescription(sprintDescription);
 
-        sprintService.saveOrUpdateSprint(sprint);
-        return "details";
-
-
+        sprintService.saveSprint(sprint);
+        return "redirect:/details";
     }
 
-
-    @RequestMapping(value="/add-sprint/error" , method=RequestMethod.GET)
-    public @ResponseBody String fetchDateErrorResult(Project project, Date sprintStartDate, Date sprintEndDate, Model model) {
-
-        if (!sprintStartDate.after(project.getStartDate()) || !project.getEndDate().after(sprintEndDate)) {
-            model.addAttribute("sprintDateError", "The sprint dates must be within the project dates.");
-        } else if (!sprintEndDate.after(sprintStartDate)) {
-            model.addAttribute("sprintDateError", "The start sprint date must be before end sprint date.");
-        } else {
-            model.addAttribute("sprintDateError", "The project dates are incorrect.");
-        }
-        return "addSprint";
-    }
+//
+//    @RequestMapping(value="/add-sprint/error" , method=RequestMethod.GET)
+//    public @ResponseBody String fetchDateErrorResult(Project project, Date sprintStartDate, Date sprintEndDate, Model model) {
+//
+//        if (!sprintStartDate.after(project.getStartDate()) || !project.getEndDate().after(sprintEndDate)) {
+//            model.addAttribute("sprintDateError", "The sprint dates must be within the project dates.");
+//        } else if (!sprintEndDate.after(sprintStartDate)) {
+//            model.addAttribute("sprintDateError", "The start sprint date must be before end sprint date.");
+//        } else {
+//            model.addAttribute("sprintDateError", "The project dates are incorrect.");
+//        }
+//        return "addSprint";
+//    }
 
 
 }

@@ -25,12 +25,12 @@
     <hr/>
     <div th:each="sprint: ${sprints}">
         <div class="sprint-block">
-            <div class="sprint-label" th:text="${sprint.getLabel}" />
+            <div class="sprint-label" th:text="${sprint.getSprintLabel}" />
             <div class="detail-block">
                 <div>
-                    <div class="sprint-title" th:text="${sprint.getName}" />
+                    <div class="sprint-title" th:text="${sprint.getSprintName}" />
                     <div class="sprint-date" th:text="${sprint.getStartDateString} + ' - ' + ${sprint.getEndDateString}" />
-                    <div class="sprint-description" th:text="${sprint.getDescription}" />
+                    <div class="sprint-description" th:text="${sprint.getSprintDescription}" />
                 </div>
                 <div>
                     <button class="edit-button">

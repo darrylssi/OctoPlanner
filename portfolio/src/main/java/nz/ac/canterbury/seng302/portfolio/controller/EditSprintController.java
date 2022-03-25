@@ -8,6 +8,11 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.springframework.beans.factory.annotation.Autowired;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 
 
 /**
@@ -16,17 +21,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class EditSprintController {
 
+    @Autowired
+    ProjectService projectService;
+
+    @Autowired
+    SprintService sprintService;
+
+    @Autowired
+    private DateUtils utils;
+
     /* Create default sprint page. */
     Sprint sprint = new Sprint(1, "First Sprint", "This is my first sprint.", "04/11/2021", "08/07/2022");
 
     @GetMapping("/edit-sprint")
-    public String sprintForm(Model model) {
+    public String sprintForm(@PathVariable("id") int id, Model model) {
         /* Add sprint details to the model */
-        model.addAttribute("sprintLabel", sprint.getLabel());
-        model.addAttribute("sprintName", sprint.getName());
-        model.addAttribute("sprintStartDate", sprint.getStartDate());
-        model.addAttribute("sprintEndDate", sprint.getEndDate());
-        model.addAttribute("sprintDescription", sprint.getDescription());
+        Sprint sprint = sprintService.getSprintById(id);
+        model.addAttribute("sprintId", sprint.getId());
+
+        model.addAttribute("sprintLabel", sprint.getSprintLabel());
+        model.addAttribute("sprintName", sprint.getSprintName());
+        model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintDescription", sprint.getSprintDescription());
+
 
 
         /* Return the name of the Thymeleaf template */

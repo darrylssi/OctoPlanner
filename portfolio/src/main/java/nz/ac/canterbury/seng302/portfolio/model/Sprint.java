@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity // this is an entity, assumed to be in a table called Sprint
@@ -14,12 +15,14 @@ public class Sprint {
     private int parentProjectId;
 
     @Column
+    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column
+    @Column(nullable = true)
+    @Size(max=200, message="The character lenght must not exceed 200.") //TODO testing values
     private String sprintDescription;
 
     @Column
@@ -60,15 +63,15 @@ public class Sprint {
         return  id;
     }
 
-    public void setParentProjectId(int parentProjectId) {
-        this.parentProjectId = parentProjectId;
+    public void setParentProjectId(int id) {
+        this.parentProjectId = id;
     }
 
     public int getParentProjectId() {
         return parentProjectId;
     }
 
-    public String getName() {
+    public String getSprintName() {
         return sprintName;
     }
 
@@ -76,11 +79,11 @@ public class Sprint {
         this.sprintName = newName;
     }
 
-    public String getLabel() {
+    public String getSprintLabel() {
         return sprintLabel;
     }
 
-    public String getDescription(){
+    public String getSprintDescription(){
         return sprintDescription;
     }
 
@@ -88,7 +91,7 @@ public class Sprint {
         this.sprintDescription = newDescription;
     }
 
-    public Date getStartDate() {
+    public Date getSprintStartDate() {
         return sprintStartDate;
     }
 
@@ -104,7 +107,7 @@ public class Sprint {
         this.sprintStartDate = Project.stringToDate(date);
     }
 
-    public Date getEndDate() {
+    public Date getSprintEndDate() {
         return sprintEndDate;
     }
 
@@ -129,6 +132,8 @@ public class Sprint {
             return false;
         }
     }
+
+    public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
 //    @AssertTrue(message = "Start date must be before end date")
 //    public boolean isPasswordsEqual() {

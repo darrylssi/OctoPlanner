@@ -13,33 +13,36 @@
     </div>
 </div>
 <div class="content">
-    <form onclick="checkDatesValidation()" th:action="@{/details}" th:method="post">
+    <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
         <div>
             <label for="sprintName">Sprint Name</label> <br/>
-            <input id="sprintName" th:type="text" th:name="sprintName" th:required="required"/>
+            <input id="sprintName" th:type="text" th:name="sprintName" th:field="*{sprintName} th:required="required" "/>
+            <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         </div><br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate">Sprint Start Date</label> <br/>
-                <input id="sprintStartDate" type="date"  th:name="sprintStartDate" th:required="required" />
+                <input id="sprintStartDate" type="date"  th:name="sprintStartDate" th:value="*{sprintStartDate}"
+                onchange="setNewMin()" th:required="required" "/>
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintEndDate">Sprint End Date</label> <br/>
-                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:required="required" />
+                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="*{sprintEndDate}"
+                       onchange="setNewMax()" th:required="required" />
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintDescription">Sprint Description</label> <br/>
                 <textarea th:class="description-input" th:type="text" class="description-input" id="sprintDescription"
-                          th:name="sprintDescription" ></textarea>
+                          th:name="sprintDescription" th:field="*{sprintDescription}"></textarea>
+                <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
             </div>
         </div> <br/>
-<!--        <span th:text="${sprintDateError}" th:errorclass="error"></span>-->
         <br/>
         <div class="buttons">
             <button class="cancel" type="button">
                 <a th:href="@{'/details'}">Cancel</a>
             </button>
-            <button onclick="checkDatesValidation()" class="save" type="submit">Save</button>
+            <button class="save" type="submit">Save</button>
         </div>
     </form>
 </div>
@@ -47,13 +50,45 @@
 </html>
 
 <script>
-    let checkError = 0;
-    function checkDatesValidation() {
-        let sprintStartDate = new Date(document.getElementById("sprintStartDate").value);
-        let sprintEndDate = new Date(document.getElementById("sprintEndDate").value);
 
-        if(sprintStartDate > sprintEndDate) {
-            document.getElementById("sprintStartDate").innerHTML = 'The sprint dates must be within the project dates.';
-        }
+    function importClass(Project) {
+        let startDate = document.getElementById('sprintStartDate').value;
+        let endDate = document.getElementById('sprintEndDate').value;
+
     }
+
+    // Sprint min date so that sprint can't end before start date
+    function setNewMin() {
+
+        <!--        if (startDate < project.projectStartDate) {-->
+        document.getElementById('sprintStartDate').setAttribute('min', project.projectStartDate);
+        <!--        } else if (startDate > endDate){-->
+        <!--            document.getElementById('sprintEndDate').setAttribute('min', startDate);-->
+        <!--        }-->
+
+    }
+
+    // Set max date so that sprint can't start after end date
+    function setNewMax() {
+        var startDate = document.getElementById('sprintStartDate').value;
+        var endDate = document.getElementsById('sprintEndDate').value;
+
+
+        if (endDate > project.projectEndDate) {
+            document.getElementById('sprintEndDate').setAttribute('max', project.projectEndDate);
+        } else if (endDate < startDate){
+            document.getElementById('sprintEndDate').setAttribute('max', endDate);
+        }
+
+    }
+
+    <!--    let checkError = 0;-->
+    <!--    function checkDatesValidation() {-->
+    <!--        let sprintStartDate = new Date(document.getElementById("sprintStartDate").value);-->
+    <!--        let sprintEndDate = new Date(document.getElementById("sprintEndDate").value);-->
+
+    <!--        if(sprintStartDate > sprintEndDate) {-->
+    <!--            document.getElementById("sprintStartDate").innerHTML = 'The sprint dates must be within the project dates.';-->
+    <!--        }-->
+    <!--    }-->
 </script>
