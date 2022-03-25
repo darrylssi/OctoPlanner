@@ -15,6 +15,7 @@
             <div class="input-box">
                 <label class="required"> Username </label>
                 <input type="text" placeholder="Enter your username" th:field="*{username}" th:required="required" maxlength="15"/><br>
+                <p th:text="${registerMessage}" id="error"/>
                 <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" th:errorclass="error" />
             </div>
             <div class="input-box">
@@ -72,7 +73,7 @@
             <input type="submit" value="Submit">
         </div>
     </form>
-    <p th:text="${registerMessage}" />
+    <p th:text="${IdPErrorMessage}" id="error"/>
 </div>
 </body>
 </html>
