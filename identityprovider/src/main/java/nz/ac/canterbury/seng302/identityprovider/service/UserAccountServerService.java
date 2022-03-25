@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.Timestamp;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
@@ -68,7 +69,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Gets a user from the database by its id and returns it as a UserResponse to the portfolio
+     * Gets a user from the database by its id and returns it as a UserResponse to the portfolio.
+     * 
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
      * @param request An object containing the id of the user to retrieve
      */
     @Override
@@ -79,10 +82,12 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         User user = repository.findById(request.getId());
         if (user != null) {
             setUserResponse(user, reply);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(Status.NOT_FOUND.asException());
         }
 
-        responseObserver.onNext(reply.build());
-        responseObserver.onCompleted();
     }
 
     @Override
@@ -109,6 +114,12 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         responseObserver.onCompleted();
     }
 
+    /**
+     * <p>Assigns a role to the given user.</p>
+     * 
+     * Returns true if the user didn't already have this role.
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
     @Override
     public void addRoleToUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("addRoleToUser() has been called");
@@ -117,21 +128,23 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         int userId = request.getUserId();
         UserRole role = request.getRole();
         try {
-            // If the user didn't already have this role
-            if (userService.addRoleToUser(userId, role)) {
-                reply.setIsSuccess(true);
-            } else {
-                reply.setIsSuccess(false);
-            }
+            // If the user didn't have this role, add it and return true
+            // Otherwise does nothing, returning false.
+            reply.setIsSuccess(userService.addRoleToUser(userId, role));
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            reply.setIsSuccess(false);
+            responseObserver.onError(Status.NOT_FOUND.asException());
         }
-
-        responseObserver.onNext(reply.build());
-        responseObserver.onCompleted();
     }
 
+    /**
+     * <p>Removes a role from the given user.</p>
+     * 
+     * Returns false if the user didn't already have this role.
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
     @Override
     public void removeRoleFromUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("removeRoleFromUser() has been called");
@@ -140,19 +153,15 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         int userId = request.getUserId();
         UserRole role = request.getRole();
         try {
-            // If the user had this role
-            if (userService.removeRoleFromUser(userId, role)) {
-                reply.setIsSuccess(true);
-            } else {
-                reply.setIsSuccess(false);
-            }
+            // If the user had this role, remove it and return true
+            // Otherwise does nothing, returning false.
+            reply.setIsSuccess(userService.removeRoleFromUser(userId, role));
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            reply.setIsSuccess(false);
+            responseObserver.onError(Status.NOT_FOUND.asException());
         }
-
-        responseObserver.onNext(reply.build());
-        responseObserver.onCompleted();
     }
 
 
