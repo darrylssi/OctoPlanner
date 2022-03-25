@@ -62,4 +62,38 @@ public class DetailsController {
         // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion
     }
 
+    /**
+     * Deletes a sprint and redirects back to the project view
+     * @param principal
+     * @param projectId the id of the project to redirect back to
+     * @param sprintId the id of the sprint to be deleted
+     * @return a redirect to the project view
+     * @throws Exception
+     */
+    @GetMapping("project/{projectId}/delete/{sprintId}")
+    public String testDelete(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="projectId") int projectId,
+            @PathVariable(name="sprintId") int sprintId,
+            @RequestParam(name="role", required=false) String debugRole
+            ) throws Exception {
+
+        if (debugRole != null) {
+            if(debugRole.contains("teacher")) {
+                sprintService.deleteSprint(sprintId);
+                return "redirect:/project/" + projectId + "?role=teacher";
+            }
+        } else {
+            if(principal.getClaimsList().stream()
+                    .filter(claim -> claim.getType().equals("role"))
+                    .findFirst()
+                    .map(ClaimDTO::getValue)
+                    .orElse("NOT FOUND").contains("teacher")) {
+                sprintService.deleteSprint(sprintId);
+                return "redirect:/project/" + projectId;
+            }
+        }
+        return "redirect:/project/" + projectId;
+    }
+
 }

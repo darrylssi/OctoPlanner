@@ -47,4 +47,11 @@ public class SprintService {
     public List<Sprint> getSprintsOfProjectById(Integer id) {
         return repository.findByParentProjectId(id);
     }
+
+    /**
+     * Deletes a sprint
+     */
+    public void deleteSprint(int sprintId) {
+        repository.deleteById(sprintId);
+    }
 }
