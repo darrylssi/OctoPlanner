@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/profile.css}>
+    <link rel="stylesheet" th:href=@{/styles/form.css}>
     <link rel="stylesheet" th:href=@{/styles/style.css}>
 
 </head>
@@ -42,12 +43,13 @@
             <!--/*
                 Only render if the logged in user's ID is this page's ID 
             */-->
-            <a>
-                <button>Edit</button>
-            </a>
     </div>
-
-        <div th:text="${dateCreated}"></div>
+        <div  style="justify-content:space-between" class="sprint-block">
+            <div th:text="${dateCreated}"></div>
+            <a th:if="${isCurrentUser}">
+                <button class="form-button save">Edit Profile</button>
+            </a>
+        </div>
     </div>
 
 </body>
