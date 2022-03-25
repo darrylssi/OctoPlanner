@@ -8,7 +8,6 @@
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/profile.css}>
     <link rel="stylesheet" th:href=@{/styles/form.css}>
-    <link rel="stylesheet" th:href=@{/styles/style.css}>
 
 </head>
 
@@ -40,12 +39,13 @@
             /* This broke when changing the way fields are added and I don't really know what it does so I'm not going to fix it just yet */
             <p th:if="*{getBio()}" class="bio" th:utext="*{| &lt;hr&gt; ${#strings.replace(#strings.escapeXml(getBio()), '&#10', '&lt;br&gt;')} |}" />
             -->
-            <!--/*
-                Only render if the logged in user's ID is this page's ID 
-            */-->
     </div>
         <div  style="justify-content:space-between" class="sprint-block">
             <div th:text="${dateCreated}"></div>
+
+            <!--/*
+                Only render if the logged in user's ID is this page's ID
+            */-->
             <a th:if="${isCurrentUser}">
                 <button class="form-button save">Edit Profile</button>
             </a>
