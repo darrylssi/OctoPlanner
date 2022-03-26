@@ -15,42 +15,43 @@ public class SprintService {
     private SprintRepository repository;
 
     /**
-     * Gets a List of all Sprint objects currently in the database.
+     * Get list of all sprints
      */
     public List<Sprint> getAllSprints() {
-        return (List<Sprint>) repository.findAll();
+        List<Sprint> list = (List<Sprint>) repository.findAll();
+        return list;
     }
 
     /**
-     * Gets a list of all sprints for a specified project id. Returns a List of Sprint objects.
-     * @return list a List object of Sprint objects
+     * Get sprint by id
      */
-    public List<Sprint> getSprintByParentProjectId(int parentProjectId) {
-        return repository.findByParentProjectId(parentProjectId);
+    public Sprint getSprintById(Integer id) {
+        return repository.findSprintById(id);
     }
 
     /**
-     * Returns the one sprint object matching that id.
-     * @return the sprint with the specified id
-     * @throws Exception if the sprint is not found, an exception is thrown.
+     * Adds a new sprint into the database if the sprint with the given ID does not exist.
+     * Otherwise, updates the sprint with the given ID.
+     * @param sprint sprint to be added to the database
      */
-    public Sprint getSprintById(Integer id) throws Exception {
-
-       Sprint sprint = repository.findSprintById(id);
-        if(sprint!=null) {
-            return sprint;
-        }
-        else
-        {
-            throw new Exception("Sprint not found");
-        }
+    public void saveSprint(Sprint sprint) {
+        repository.save(sprint);
     }
 
     /**
-     * Returns all sprints that match the described name in a List object - not a sprint object!
-     * @return list a list type of sprint objects.
+     * Savdes a sprint to the repository
+     * @param sprint The sprint object to save to the repository
      */
-    public List<Sprint> getSprintBySprintName(String name) {
-        return repository.findBySprintName(name);
+    public void saveOrUpdateSprint(Sprint sprint) {
+        repository.save(sprint);
     }
+
+    /**
+     * Deletes a specific user from the repository
+     * @param id The id of the sprint to delete
+     */
+    public void delete(int id) {
+        repository.deleteById(id);
+    }
+
 }

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 // more info here https://codebun.com/spring-boot-crud-application-using-thymeleaf-and-spring-data-jpa/
 
@@ -19,20 +18,25 @@ public class ProjectService {
      * Get list of all projects
      */
     public List<Project> getAllProjects() {
-        return (List<Project>) repository.findAll();
+        List<Project> list = (List<Project>) repository.findAll();
+        return list;
     }
 
     /**
      * Get project by id
      */
-    public Project getProjectById(Integer id) throws Exception {
+    public Project getProjectById(Integer id) {
+        return repository.findProjectById(id);
 
-        Project project = repository.findProjectById(id);
-        if(project !=  null) {
-            return project;
-        } else {
-            throw new Exception("Project not found");
-        }
+    }
+
+    /**
+     * Saves a new project to the database if the project of the given ID does not exist.
+     * Otherwise, it updates the details of the project if there are any changes.
+     * @param project Project to be saved or updated.
+     */
+    public void saveProject(Project project) {
+        repository.save(project);
     }
 
     /**
@@ -40,6 +44,7 @@ public class ProjectService {
      */
     public List<Project> getProjectByProjectName(String name) {
 
-        return repository.findByProjectName(name);
+        List<Project> projectList = repository.findByProjectName(name);
+        return projectList;
     }
 }

@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title th:text="${projectName}"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="@{/styles/main.css}" rel="stylesheet" />
+    <link th:href="@{/styles/form.css}" rel="stylesheet" />
+</head>
+<body>
+<div class="header">
+    <div class="title">
+        <div class="title-name" th:text="${sprintLabel}" ></div>
+    </div>
+</div>
+<div class="content">
+    <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
+        <div>
+            <label for="sprintName">Sprint Name</label> <br/>
+            <input id="sprintName" th:type="text" th:name="sprintName" th:field="*{sprintName} th:required="required" "/>
+            <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
+        </div><br/>
+        <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="sprintStartDate">Sprint Start Date</label> <br/>
+                <input id="sprintStartDate" type="date"  th:name="sprintStartDate" th:value="*{sprintStartDate}"
+                onchange="setNewMin()" th:required="required" "/>
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="sprintEndDate">Sprint End Date</label> <br/>
+                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="*{sprintEndDate}"
+                       onchange="setNewMax()" th:required="required" />
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="sprintDescription">Sprint Description</label> <br/>
+                <textarea th:class="description-input" th:type="text" class="description-input" id="sprintDescription"
+                          th:name="sprintDescription" th:field="*{sprintDescription}"></textarea>
+                <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
+            </div>
+        </div> <br/>
+        <br/>
+        <div class="buttons">
+            <button class="cancel" type="button">
+                <a th:href="@{'/details'}">Cancel</a>
+            </button>
+            <button class="save" type="submit">Save</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+
+<script>
+
+    function importClass(Project) {
+        let startDate = document.getElementById('sprintStartDate').value;
+        let endDate = document.getElementById('sprintEndDate').value;
+
+    }
+
+    // Sprint min date so that sprint can't end before start date
+    function setNewMin() {
+
+        <!--        if (startDate < project.projectStartDate) {-->
+        document.getElementById('sprintStartDate').setAttribute('min', project.projectStartDate);
+        <!--        } else if (startDate > endDate){-->
+        <!--            document.getElementById('sprintEndDate').setAttribute('min', startDate);-->
+        <!--        }-->
+
+    }
+
+    // Set max date so that sprint can't start after end date
+    function setNewMax() {
+        var startDate = document.getElementById('sprintStartDate').value;
+        var endDate = document.getElementsById('sprintEndDate').value;
+
+
+        if (endDate > project.projectEndDate) {
+            document.getElementById('sprintEndDate').setAttribute('max', project.projectEndDate);
+        } else if (endDate < startDate){
+            document.getElementById('sprintEndDate').setAttribute('max', endDate);
+        }
+
+    }
+
+    <!--    let checkError = 0;-->
+    <!--    function checkDatesValidation() {-->
+    <!--        let sprintStartDate = new Date(document.getElementById("sprintStartDate").value);-->
+    <!--        let sprintEndDate = new Date(document.getElementById("sprintEndDate").value);-->
+
+    <!--        if(sprintStartDate > sprintEndDate) {-->
+    <!--            document.getElementById("sprintStartDate").innerHTML = 'The sprint dates must be within the project dates.';-->
+    <!--        }-->
+    <!--    }-->
+</script>

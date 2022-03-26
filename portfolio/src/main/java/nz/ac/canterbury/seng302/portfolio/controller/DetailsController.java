@@ -26,7 +26,7 @@ public class DetailsController {
     private SprintService sprintService;
 
     @GetMapping("/details")
-    public String details(@AuthenticationPrincipal AuthState principal, Model model) throws Exception {
+    public String details(@AuthenticationPrincipal AuthState principal, Model model) {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(0);
@@ -45,11 +45,11 @@ public class DetailsController {
 
         /* Return the name of the Thymeleaf template */
         // detects the role of the current user and returns appropriate page
-        if (role.equals("teacher")) {
+//        if (role.equals("teacher")) {  TODO commented out to see teachers view
             return "teacherProjectDetails";
-        } else {
-            return "userProjectDetails";
-        }
+//        } else {
+//            return "userProjectDetails";
+//        }
     }
 
 }
