@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -22,13 +24,16 @@ public class Sprint {
     private String sprintLabel;
 
     @Column(nullable = true)
-    @Size(max=200, message="The character lenght must not exceed 200.") //TODO testing values
+    @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
     private String sprintDescription;
 
-    @Column
+    // This is "org.springframework.format.annotation.DateTimeFormat"
+    @Column (nullable = false)
+    @DateTimeFormat(pattern="dd-MMM-yyyy")
     private Date sprintStartDate;
 
-    @Column
+    @Column (nullable = false)
+    @DateTimeFormat(pattern="dd-MMM-yyyy")
     private Date sprintEndDate;
 
     public Sprint() {}
@@ -47,6 +52,7 @@ public class Sprint {
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = Project.stringToDate(sprintStartDate);
         this.sprintEndDate = Project.stringToDate(sprintEndDate);
+
     }
 
 

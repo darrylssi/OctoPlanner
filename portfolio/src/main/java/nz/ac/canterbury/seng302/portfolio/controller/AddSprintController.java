@@ -57,8 +57,8 @@ public class AddSprintController {
         model.addAttribute("projectName", project.getName() + " - Add Sprint");
         model.addAttribute("sprintLabel", "Add Sprint - Sprint 1");
 //        model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
-        model.addAttribute("sprintStartDate", "");
-        model.addAttribute("sprintEndDate", "");
+//        model.addAttribute("sprintStartDate", "");
+//        model.addAttribute("sprintEndDate", "");
 
         model.addAttribute("sprintName",  "");
         model.addAttribute("sprintDescription",  "");
@@ -79,26 +79,30 @@ public class AddSprintController {
     public String sprintSave(
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
-            @RequestParam(name="sprintStartDate") Date sprintStartDate,
-            @RequestParam(name="sprintEndDate") Date sprintEndDate,
+            @RequestParam(name="sprintStartDate") String sprintStartDate,
+            @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
     ) throws Exception {
 
-        Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
-
         if (result.hasErrors()) {
-            model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
-            model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
+            model.addAttribute("sprintStartDate", utils.toDate(sprintStartDate));
+            model.addAttribute("sprintEndDate", utils.toDate(sprintEndDate));
+//            model.addAttribute("sprintStartDate", sprintStartDate);
+//            model.addAttribute("sprintEndDate", sprintEndDate);
             return "addSprint";
         }
+
         // Adding the new sprint
+        Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
-        sprint.setStartDate(sprintStartDate);
-        sprint.setEndDate(sprintEndDate);
+        sprint.setStartDate(utils.toDate(sprintStartDate));
+        sprint.setEndDate(utils.toDate(sprintEndDate));
+//        sprint.setStartDate(sprintStartDate);
+//        sprint.setEndDate(sprintEndDate);
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
