@@ -19,7 +19,7 @@ public class User {
     private String middleName;
     @Column(nullable = false)
     private String lastName;
-    private String nickName;
+    private String nickname;
     private String bio;
     private String personalPronouns;
     @Column(nullable = false, unique = true)
@@ -31,14 +31,14 @@ public class User {
     }
 
     public User(String username, String password, String firstName,
-                String middleName, String lastName, String nickName,
+                String middleName, String lastName, String nickname,
                 String bio, String personalPronouns, String email) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
-        this.nickName = nickName;
+        this.nickname = nickname;
         this.bio = bio;
         this.personalPronouns = personalPronouns;
         this.email = email;
@@ -92,12 +92,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getNickName() {
-        return this.nickName;
+    public String getNickname() {
+        return this.nickname;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getBio() {

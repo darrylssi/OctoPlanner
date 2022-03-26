@@ -21,9 +21,15 @@ public class EditUserController {
             @PathVariable int id) {
 
         // TODO replace with something other than a test user
-        userAccountClientService.editUser(id, "editFirst", "editMiddle",
-                "editLast", "editNick", "editBio",
-                "edit/edit", "editEmail");
+        if(id == 1){
+            userAccountClientService.editUser(id, "editFirst", "editMiddle",
+                    "editLast", "editNick", "editBio",
+                    "edit/edit", "edit@Email");
+        }else if(id == 2){
+            userAccountClientService.editUser(id, "e", "e",
+                    "e", "e", "e",
+                    "e", "editEmail");
+        }
 
         return "editUser";
     }
