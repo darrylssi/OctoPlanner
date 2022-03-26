@@ -174,7 +174,13 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getFirstName().length() < 2 ||  // First name isn't too short
+        if (request.getFirstName().isBlank()) { // First name field isn't empty
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("FirstName")
+                    .setErrorText("First name cannot be empty")
+                    .build();
+            errors.add(error);
+        } else if (request.getFirstName().length() < 2 ||  // First name isn't too short
                 request.getFirstName().length() > 20) { // First name isn't too long
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("FirstName")
@@ -191,7 +197,13 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (request.getLastName().length() < 2 ||   // Last name isn't too short
+        if (request.getLastName().isBlank()) {  // Last name field isn't empty
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("LastName")
+                    .setErrorText("Last name cannot be empty")
+                    .build();
+            errors.add(error);
+        } else if (request.getLastName().length() < 2 ||   // Last name isn't too short
                 request.getLastName().length() > 20) { // Last name isn't too long
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("LastName")
@@ -232,7 +244,13 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             errors.add(error);
         }
 
-        if (!validateEmail(request.getEmail())) {   // Check that email is valid
+        if (request.getEmail().isBlank()) { // Email field isn't empty
+            ValidationError error = ValidationError.newBuilder()
+                    .setFieldName("Email")
+                    .setErrorText("Email cannot be empty")
+                    .build();
+            errors.add(error);
+        } else if (!validateEmail(request.getEmail())) {   // Check that email is valid
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("Email")
                     .setErrorText("Email must be valid")

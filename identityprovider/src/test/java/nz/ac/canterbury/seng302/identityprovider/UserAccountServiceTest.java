@@ -102,6 +102,38 @@ public class UserAccountServiceTest {
     }
 
     @Test
+    void testEdit_whenMissingFirstName() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        EditUserRequest request = EditUserRequest.newBuilder()
+                .setUserId(1)
+                .setFirstName("")
+                .setMiddleName("editMiddleName")
+                .setLastName("editLastName")
+                .setNickname("editNickname")
+                .setBio("editBio")
+                .setPersonalPronouns("edit/pronouns")
+                .setEmail("edit@example.com")
+                .build();
+        StreamObserver<EditUserResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.editUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<EditUserResponse> captor = ArgumentCaptor.forClass(EditUserResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        EditUserResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("FirstName")
+                .setErrorText("First name cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
     void testEdit_whenFirstNameTooShort() {
         when(userRepository.findById(1))
                 .thenReturn(Optional.ofNullable((testUser)));
@@ -191,6 +223,38 @@ public class UserAccountServiceTest {
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("MiddleName")
                 .setErrorText("Middle name must have less than 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testEdit_whenMissingLastName() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        EditUserRequest request = EditUserRequest.newBuilder()
+                .setUserId(1)
+                .setFirstName("editFirstName")
+                .setMiddleName("editMiddleName")
+                .setLastName("")
+                .setNickname("editNickname")
+                .setBio("editBio")
+                .setPersonalPronouns("edit/pronouns")
+                .setEmail("edit@example.com")
+                .build();
+        StreamObserver<EditUserResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.editUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<EditUserResponse> captor = ArgumentCaptor.forClass(EditUserResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        EditUserResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("LastName")
+                .setErrorText("Last name cannot be empty")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -385,6 +449,38 @@ public class UserAccountServiceTest {
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("PersonalPronouns")
                 .setErrorText("Personal pronouns must contain a \"/\"")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testEdit_whenMissingEmail() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        EditUserRequest request = EditUserRequest.newBuilder()
+                .setUserId(1)
+                .setFirstName("editFirstName")
+                .setMiddleName("editMiddleName")
+                .setLastName("editLastName")
+                .setNickname("editNickname")
+                .setBio("editBio")
+                .setPersonalPronouns("edit/pronouns")
+                .setEmail("")
+                .build();
+        StreamObserver<EditUserResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.editUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<EditUserResponse> captor = ArgumentCaptor.forClass(EditUserResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        EditUserResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Email")
+                .setErrorText("Email cannot be empty")
                 .build();
 
         assertFalse(response.getIsSuccess());
