@@ -31,13 +31,17 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
         User user = userService.getUserByUsername(request.getUsername());
 
-       if (user == null) {
+        if (user == null) {
             reply
-                    .setMessage("Log in attempt failed: No users found with that username")
-                    .setSuccess(false)
-                    .setToken("");
-        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {  // TODO replace getPassword() for when passwords are hashed
-
+            .setMessage("Username not registered.")
+            .setSuccess(false)
+            .setToken("");
+        } else if (!request.getPassword().equals(user.getPassword())) { // TODO replace getPassword() for when passwords are hashed
+            reply
+            .setMessage("Incorrect password!")
+            .setSuccess(false)
+            .setToken("");
+        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) { 
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
             reply
                 .setEmail(user.getEmail())

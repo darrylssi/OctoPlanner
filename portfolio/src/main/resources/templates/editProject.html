@@ -7,11 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div class="header">
-    <div class="title">
-        <div class="title-name">Edit Project</div>
-    </div>
-</div>
+<div th:replace="fragments :: header(title='Edit Project')"></div>
 <div class="content">
 <form th:action="@{/edit-project}"
       method="post">
@@ -33,10 +29,10 @@
         <textarea class="description-input" id="projectDescription" th:name="projectDescription" th:text="*{projectDescription}"></textarea>
     </div>
     <br/>
-    <button class="cancel" type="button">
+    <button class="form-button cancel" type="button">
         <a th:href="@{'/details'}">Cancel</a>
     </button>
-    <button class="save" type="submit">Save</button>
+    <button class="form-button save" type="submit">Save</button>
 </form>
 </div>
 </body>

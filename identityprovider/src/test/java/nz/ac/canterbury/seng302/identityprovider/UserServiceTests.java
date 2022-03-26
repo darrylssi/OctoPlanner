@@ -3,17 +3,18 @@ package nz.ac.canterbury.seng302.identityprovider;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@DirtiesContext
 public class UserServiceTests {
 
     @Autowired
@@ -30,11 +31,6 @@ public class UserServiceTests {
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
         userRepository.save(testUser);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        userRepository.delete(testUser);
     }
 
     @Test
