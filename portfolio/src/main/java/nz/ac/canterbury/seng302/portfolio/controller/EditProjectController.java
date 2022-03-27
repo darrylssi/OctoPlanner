@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.text.ParseException;
 import java.util.Date;
 
 
@@ -40,11 +41,15 @@ public class EditProjectController {
     public String projectForm(@PathVariable("id") int id, Model model){
 
         /* Add project details to the model */
-        Project project = projectService.getProjectById(id);
-        model.addAttribute("id", id);
-        model.addAttribute("project", project);
-        model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
-        model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+        try {
+            Project project = projectService.getProjectById(id);
+            model.addAttribute("id", id);
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
+        }
 
         /* Return the name of the Thymeleaf template */
         return "editProject";
