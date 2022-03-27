@@ -29,7 +29,7 @@ input {
     border: 1px solid black;
 }
 
-button {
+.form-button {
     padding: 10px 20px;
     font-size: large;
     border-radius: 10px;
