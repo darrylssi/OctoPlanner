@@ -25,10 +25,12 @@ public class EditUserController {
             userAccountClientService.editUser(id, "editFirst", "editMiddle",
                     "editLast", "editNick", "editBio",
                     "edit/edit", "edit@Email");
+            userAccountClientService.changeUserPassword(id, "abc1234", "changed");
         }else if(id == 2){
             userAccountClientService.editUser(id, "e", "e",
                     "e", "e", "e",
                     "e", "editEmail");
+            userAccountClientService.changeUserPassword(id, "somethingwrong", "changed");
         }
 
         return "editUser";

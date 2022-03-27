@@ -71,7 +71,7 @@ public class UserAccountClientService {
     }
 
     /**
-     * Sends an EditUserRequest to the identity provider.
+     * Sends an EditUserRequest to the identity provider
      * @param userId The id of the user to edit
      * @param firstName The edited first name of the user
      * @param middleName The edited middle name of the user
@@ -98,4 +98,20 @@ public class UserAccountClientService {
         return userAccountStub.editUser(editUserRequest);
     }
 
+    /**
+     * Sends a ChangePasswordRequest to the identity provider
+     * @param userId The id of the user to edit
+     * @param currentPassword The user's current password
+     * @param newPassword The user's new password to be changed to
+     * @return A ChangePasswordResponse containing the success of the request
+     */
+    public ChangePasswordResponse changeUserPassword(final int userId, final String currentPassword,
+                                                     final String newPassword) {
+        ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.newBuilder()
+                .setUserId(userId)
+                .setCurrentPassword(currentPassword)
+                .setNewPassword(newPassword)
+                .build();
+        return userAccountStub.changeUserPassword(changePasswordRequest);
+    }
 }

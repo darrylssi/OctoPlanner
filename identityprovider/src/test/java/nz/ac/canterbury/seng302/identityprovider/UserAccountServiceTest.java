@@ -5,10 +5,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserAccountServerService;
 import nz.ac.canterbury.seng302.identityprovider.service.UserService;
-import nz.ac.canterbury.seng302.shared.identityprovider.EditUserRequest;
-import nz.ac.canterbury.seng302.shared.identityprovider.EditUserResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterRequest;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -513,6 +510,168 @@ public class UserAccountServiceTest {
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("Email")
                 .setErrorText("Email must be valid")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testChangePassword_whenValid() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("testPassword")
+                .setNewPassword("changedPassword")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        assertTrue(response.getIsSuccess());
+    }
+
+    @Test
+    void testChangePassword_whenMissingCurrentPassword() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("")
+                .setNewPassword("changedPassword")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("CurrentPassword")
+                .setErrorText("Current password cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testChangePassword_whenCurrentPasswordIsInvalid() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("wrongPassword")
+                .setNewPassword("changedPassword")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("CurrentPassword")
+                .setErrorText("Current password does not match password in database")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testChangePassword_whenMissingNewPassword() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("testPassword")
+                .setNewPassword("")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("NewPassword")
+                .setErrorText("New password cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testChangePassword_whenNewPasswordTooShort() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("testPassword")
+                .setNewPassword("change")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("NewPassword")
+                .setErrorText("New password must be between 7 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testChangePassword_whenNewPasswordTooLong() {
+        when(userRepository.findById(1))
+                .thenReturn(Optional.ofNullable((testUser)));
+
+        ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
+                .setUserId(1)
+                .setCurrentPassword("testPassword")
+                .setNewPassword("changedPasswordabcdef")
+                .build();
+
+        StreamObserver<ChangePasswordResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.changeUserPassword(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<ChangePasswordResponse> captor = ArgumentCaptor.forClass(ChangePasswordResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        ChangePasswordResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("NewPassword")
+                .setErrorText("New password must be between 7 to 20 characters")
                 .build();
 
         assertFalse(response.getIsSuccess());
