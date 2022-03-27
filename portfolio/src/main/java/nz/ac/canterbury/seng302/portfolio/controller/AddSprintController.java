@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -62,6 +63,9 @@ public class AddSprintController {
 
         model.addAttribute("sprintName",  "");
         model.addAttribute("sprintDescription",  "");
+//        model.addAttribute("minProjectDate", project.getStartDate());
+//        model.addAttribute("maxProjectDate", project.getEndDate());
+        model.addAttribute("invalidDateRange", "");
 
         /* Return the name of the Thymeleaf template */
         return "addSprint";
@@ -88,15 +92,16 @@ public class AddSprintController {
     ) throws Exception {
 
         if (result.hasErrors()) {
-            model.addAttribute("sprintStartDate", utils.toDate(sprintStartDate));
-            model.addAttribute("sprintEndDate", utils.toDate(sprintEndDate));
-//            model.addAttribute("sprintStartDate", sprintStartDate);
-//            model.addAttribute("sprintEndDate", sprintEndDate);
             return "addSprint";
         }
 
-        // Adding the new sprint
+
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), parentProject.getStartDate(),  parentProject.getEndDate(),  sprintList);
+        model.addAttribute("invalidDateRange", dateOutOfRange);
+
+        // Adding the new sprint
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
         sprint.setStartDate(utils.toDate(sprintStartDate));

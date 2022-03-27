@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
 
 @Entity // this is an entity, assumed to be in a table called Sprint
 @Table (name = "Sprint")
@@ -29,12 +30,13 @@ public class Sprint {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd-MMM-yyyy")
+    @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd-MMM-yyyy")
+    @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
+
 
     public Sprint() {}
 
@@ -141,13 +143,24 @@ public class Sprint {
 
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
-//    @AssertTrue(message = "Start date must be before end date")
-//    public boolean isPasswordsEqual() {
-//        if (this.sprintStartDate.before(this.sprintEndDate)) {
-//            return true;
-//        }
-//        return false;
-//
-//    }
+
+    public String validSprintDateRanges(Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) {
+        String invalidDateRange = "";
+
+        if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
+            invalidDateRange += "Dates must be within the project dates of " + projectEndDate + "-" + projectEndDate;
+        } else if (!sprintList.isEmpty()) {
+            for (Sprint eachSprint: sprintList) {
+                if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
+                        (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
+                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + eachSprint.getSprintStartDate() + "-" +
+                            eachSprint.getSprintEndDate();
+                    break;
+                }
+            }
+        }
+        return invalidDateRange;
+
+    }
 
 }
