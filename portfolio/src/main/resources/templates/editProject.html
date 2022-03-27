@@ -17,6 +17,7 @@
       method="post" th:object="${project}">
     <label for="projectName">Project Name</label> <br/>
     <input id="projectName" type="text" th:field="*{projectName}">
+    <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
     <br/>
     <div class="horizontal-group">
         <div class="horizontal-group-element" >
@@ -31,14 +32,10 @@
         <div class="horizontal-group-element" id="element-description" >
             <label for="projectDescription">Project Description</label> <br/>
             <textarea class="description-input" id="projectDescription" th:field="*{projectDescription}"></textarea>
+            <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
         </div>
     </div>
     <br/>
-    <div th:if="${#fields.hasAnyErrors()}">
-        <ul>
-            <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
-        </ul>
-    </div>
     <div class="buttons">
         <button class="cancel" type="button">
             <a th:href="@{'/details'}">Cancel</a>

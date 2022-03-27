@@ -53,4 +53,17 @@ public class ProjectControllerTest {
                 .andExpect(content().string(containsString("Project name is required")));
     }
 
+    @Test
+    public void postProjectWithInvalidDesc_thenShowError() throws Exception {
+        this.mockMvc.perform(post("/edit-project/0")
+                        .param("projectName", "")
+                        .param("projectDescription", "Lorem ipsum dolor sit amet, consectetur adipisicing " +
+                                "elit, sed do eiusmod cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat " +
+                                "cupidatat non proident, sunt in culpa qui officia deserunt moll.")
+                        .param("projectStartDate", "2021-03-04")
+                        .param("projectEndDate", "2022-03-05"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Description cannot be more than 200 characters")));
+    }
+
 }
