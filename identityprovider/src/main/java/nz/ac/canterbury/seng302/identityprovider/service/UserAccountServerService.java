@@ -11,6 +11,7 @@ import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -54,6 +55,10 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
                 request.getMiddleName(), request.getLastName(), request.getNickname(),
                 request.getBio(), request.getPersonalPronouns(), request.getEmail());
+
+        // Hash password
+        String hashedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
+        user.setPassword(hashedPassword);
 
         // Sets the current time as the users register date
         long millis = System.currentTimeMillis();
@@ -186,7 +191,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                 .setFirstName(user.getFirstName())
                 .setMiddleName(user.getMiddleName())
                 .setLastName(user.getLastName())
-                .setNickname(user.getNickName())
+                .setNickname(user.getNickname())
                 .setBio(user.getBio())
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
