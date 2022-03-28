@@ -1,10 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Edit Profile</title>
+
+    <link rel="stylesheet" th:href=@{/styles/main.css}>
+    <link rel="stylesheet" th:href=@{/styles/profile.css}>
+    <link rel="stylesheet" th:href=@{/styles/form.css}>
+
 </head>
+
 <body>
+    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found')"></div>
+
+    <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
+        <th th:text="${errMsg}"></th>
+        <br/>
+
+    <div class="content" th:if="${userExists}" th:object="${profileInfo}">
+        <div th:text="${dateCreated}"></div>
+        <form th:action="@{|/users/${userId}/edit|}"
+            method="post">
+            <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="username">Username</label> <br/>
+                <input id="username" type="text" th:name="username" th:value="${profileInfo.getUsername}" th:disabled="disabled">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="email">Email</label> <br/>
+                <input id="email" type="email" th:name="email" th:value="${profileInfo.getEmail}" th:required="required">
+            </div>
+            </div>
+            <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="firstName">First Name</label> <br/>
+                <input id="firstName" type="text" th:name="firstName" th:value="${profileInfo.getFirstName}" th:required="required">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="middleName">Middle Name</label> <br/>
+                <input id="middleName" type="text" th:name="middleName" th:value="${profileInfo.getMiddleName}">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="lastName">Last Name</label> <br/>
+                <input id="lastName" type="text" th:name="lastName" th:value="${profileInfo.getLastName}" th:required="required">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="nickname">Nickname</label> <br/>
+                <input id="nickname" type="text" th:name="nickname" th:value="${profileInfo.getNickname}">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="pronouns">Personal Pronouns</label> <br/>
+                <input id="pronouns" type="text" th:name="pronouns" th:value="${profileInfo.getPersonalPronouns}">
+            </div>
+            </div>
+            <div>
+                <label for="bio">Bio</label> <br/>
+                <textarea class="description-input" id="bio" th:name="bio" th:text="${profileInfo.getBio}"></textarea>
+            </div>
+            <br/>
+            <button class="form-button save" type="submit">Change Details</button>
+        </form><br/>
+        <div th:text="'Password change is performed separately'"></div>
+        <form th:action="@{|/users/${userId}/change-password|}"
+            method="post">
+            <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="oldPw">Old Password</label> <br/>
+                <input id="oldPw" type="password" th:name="oldPw" th:required="required">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="newPw">New Password</label> <br/>
+                <input id="newPw" type="password" th:name="newPw" th:required="required">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="confirmPw">Confirm Password</label> <br/>
+                <input id="confirmPw" type="password" th:name="confirmPw" th:required="required">
+            </div>
+            </div>
+            <br/>
+            <button class="form-button cancel" type="button">
+                <a th:href="@{|'/users/${userId}'|}">Cancel</a>
+            </button>
+            <button class="form-button save" type="submit">Change Password</button>
+        </form>
+    </div>
+    </div>
 
 </body>
+
 </html>
