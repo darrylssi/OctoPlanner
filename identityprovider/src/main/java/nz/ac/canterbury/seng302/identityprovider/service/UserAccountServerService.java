@@ -159,9 +159,11 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     public void getPaginatedUsers(GetPaginatedUsersRequest request, StreamObserver<PaginatedUsersResponse> responseObserver) {
         logger.info("getPaginatedUsers has been called");
         PaginatedUsersResponse.Builder reply = PaginatedUsersResponse.newBuilder();
-
+        int limit = request.getLimit();
+        int offset = request.getOffset();
+        String orderBy = request.getOrderBy();
         List<User> users;
-        users = userService.getAllUsers();
+        users = userService.getUsersPaginated(offset, limit, orderBy);
 
         List<UserResponse> userResponses = new ArrayList<>();
 
