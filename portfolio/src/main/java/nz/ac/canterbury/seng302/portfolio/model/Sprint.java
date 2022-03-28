@@ -54,6 +54,8 @@ public class Sprint {
         return parentProjectId;
     }
 
+    public void setParentProjectId(int id) { this.parentProjectId = id; }
+
     public String getName() {
         return sprintName;
     }
