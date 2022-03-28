@@ -44,6 +44,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
             // Convert all the roles into a comma-separated string of roles
             String[] userRoles = (String[]) user.getRoles().stream().map(UserRole::toString).toArray();
             String commaSeparatedUserRoles = String.join(",", userRoles);
+            commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
             reply
                 .setEmail(user.getEmail())
