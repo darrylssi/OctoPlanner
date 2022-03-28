@@ -24,23 +24,28 @@ public class ListUsersController {
      */
     @GetMapping("/users")
     public String GetListOfUsers(
-            @RequestParam(name="page", defaultValue="0") int page,
-            @RequestParam(name="orderBy", defaultValue="ID") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
+            @RequestParam(name="page", defaultValue="1") int page,
+            @RequestParam(name="orderBy", defaultValue="firstName") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
             @RequestParam(name="dir", defaultValue="asc") String dir,
             Model model
     ) {
-        PaginatedUsersResponse users;
-        if (dir.equals("asc")) {
-           users  = userAccountClientService.getPaginatedUsers(page, 10, orderBy);
-        } else {
-            users = userAccountClientService.getPaginatedUsers(page, 10, orderBy);
-        }
+        int limit = 10;
+
+        /* Get users by page */
+        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, limit, orderBy);
+
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
         model.addAttribute("dir", dir.equals("asc") ? "desc" : "asc");
-        System.out.println(page);
-        System.out.println(orderBy);
+
+        /* Total number of pages */
+        int totalPages = (users.getResultSetSize() + limit - 1) / limit;
+        model.addAttribute("totalPages", totalPages);
+
+        System.out.println(totalPages);
+        System.out.println(users.getResultSetSize());
+
         return "users";
     }
 }

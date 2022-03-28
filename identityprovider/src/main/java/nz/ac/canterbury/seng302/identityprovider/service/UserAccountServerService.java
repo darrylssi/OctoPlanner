@@ -162,8 +162,8 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         int limit = request.getLimit();
         int offset = request.getOffset();
         String orderBy = request.getOrderBy();
-        List<User> users;
-        users = userService.getUsersPaginated(offset, limit, orderBy);
+        List<User> users = userService.getUsersPaginated(offset, limit, orderBy);
+        List<User> allUsers = userService.getAllUsers();
 
         List<UserResponse> userResponses = new ArrayList<>();
 
@@ -175,7 +175,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
 
         reply
                 .addAllUsers(userResponses)
-                .setResultSetSize(users.size());
+                .setResultSetSize(allUsers.size());
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();

@@ -35,7 +35,7 @@ th:last-child {
 
 td, th {
     padding: 12px 15px;
-    height: 40px;
+    height: 50px;
 }
 
 tr:nth-child(odd) {
@@ -44,4 +44,27 @@ tr:nth-child(odd) {
 
 tr:nth-child(even) {
     background-color: #f3f3f3;
+}
+
+.pagination {
+    margin: auto;
+    text-align: center;
+    width: 30%;
+}
+
+.pages {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 40px;
+}
+
+.otherPages {
+    color: #6495ED;
+}
+
+.currentPage {
+    color: black;
 }
