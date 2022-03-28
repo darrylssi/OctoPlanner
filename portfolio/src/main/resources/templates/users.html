@@ -5,21 +5,26 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Profile</title>
 
-    <link rel="stylesheet" th:href=@{/styles/style.css}>
+    <link rel="stylesheet" th:href=@{/styles/main.css}>
+    <link rel="stylesheet" th:href=@{/styles/users.css}>
 
 </head>
 
 <body>
-<header th:replace="~{fragments :: header}"></header>
-
+<div th:replace="fragments :: header(title='Users')"></div>
+<br>
 <div class="users" >
     <table>
         <thead>
         <tr>
-            <th> Name </th>
-            <th> Username </th>
-            <th> Alias </th>
-            <th> Roles </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=ID&dir=' + ${dir}}">Id </a>
+                <span th:text="${dir == 'asc' and orderBy == 'ID'} ? '▼' : '▲'" /> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&dir=' + ${dir}}">Username</a>
+                <span th:text="${dir == 'asc' and orderBy == 'username'} ? '▼' : '▲'" /> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&dir=' + ${dir}}">Alias</a>
+                <span th:text="${dir == 'asc' and orderBy == 'nicname'} ? '▼' : '▲'" /> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=role&dir=' + ${dir}}">Role</a>
+                <span th:text="${dir == 'asc' and orderBy == 'role'} ? '▼' : '▲'" /> </th>
         </tr>
         </thead>
         <tbody>

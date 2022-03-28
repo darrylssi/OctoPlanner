@@ -25,14 +25,21 @@ public class ListUsersController {
     @GetMapping("/users")
     public String GetListOfUsers(
             @RequestParam(name="page", defaultValue="0") int page,
-            @RequestParam(name="size", defaultValue="10") int size,             // TODO ! DEBUG VALUE, THIS SHOULDN'T BE ACCESSABLE TO USERS
             @RequestParam(name="orderBy", defaultValue="ID") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
+            @RequestParam(name="dir", defaultValue="asc") String dir,
             Model model
     ) {
-        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page, size, orderBy);
+        PaginatedUsersResponse users;
+        if (dir.equals("asc")) {
+           users  = userAccountClientService.getPaginatedUsers(page, 10, orderBy);
+        } else {
+            users = userAccountClientService.getPaginatedUsers(page, 10, orderBy);
+        }
+        model.addAttribute("page", page);
+        model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
+        model.addAttribute("dir", dir.equals("asc") ? "desc" : "asc");
         System.out.println(page);
-        System.out.println(size);
         System.out.println(orderBy);
         return "users";
     }
