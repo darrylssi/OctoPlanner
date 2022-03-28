@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/profile.css}>
+    <link rel="stylesheet" th:href=@{/styles/editUser.css}>
     <link rel="stylesheet" th:href=@{/styles/form.css}>
 
 </head>
@@ -17,72 +18,92 @@
     <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
         <th th:text="${errMsg}"></th>
         <br/>
-
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div th:text="${dateCreated}"></div>
+        <div class="centre-box">
+            <img class="profile-image" th:src=@{/img/default-pfp.jpg}><br/>
+            <!--Add a button to edit the profile image here-->
+        </div>
         <form th:action="@{|/users/${userId}/edit|}"
             method="post">
-            <div class="horizontal-group">
-            <div class="horizontal-group-element" >
-                <label for="username">Username</label> <br/>
-                <input id="username" type="text" th:name="username" th:value="${profileInfo.getUsername}" th:disabled="disabled">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="email">Email</label> <br/>
-                <input id="email" type="email" th:name="email" th:value="${profileInfo.getEmail}" th:required="required">
-            </div>
-            </div>
-            <div class="horizontal-group">
-            <div class="horizontal-group-element" >
-                <label for="firstName">First Name</label> <br/>
-                <input id="firstName" type="text" th:name="firstName" th:value="${profileInfo.getFirstName}" th:required="required">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="middleName">Middle Name</label> <br/>
-                <input id="middleName" type="text" th:name="middleName" th:value="${profileInfo.getMiddleName}">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="lastName">Last Name</label> <br/>
-                <input id="lastName" type="text" th:name="lastName" th:value="${profileInfo.getLastName}" th:required="required">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="nickname">Nickname</label> <br/>
-                <input id="nickname" type="text" th:name="nickname" th:value="${profileInfo.getNickname}">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="pronouns">Personal Pronouns</label> <br/>
-                <input id="pronouns" type="text" th:name="pronouns" th:value="${profileInfo.getPersonalPronouns}">
-            </div>
-            </div>
-            <div>
-                <label for="bio">Bio</label> <br/>
-                <textarea class="description-input" id="bio" th:name="bio" th:text="${profileInfo.getBio}"></textarea>
+            <div class="user-info">
+                <div class="input-box">
+                    <label> Username </label>
+                    <input type="text" th:field="*{username}" th:value="${profileInfo.getUsername}" th:disabled="disabled"/><br>
+                    <p th:text="${editMessage}" id="error"/>
+                </div>
+                <div class="input-box">
+                    <label class="required"> First Name </label>
+                    <input type="text" th:field="*{firstName}" th:value="${profileInfo.getFirstName}" th:required="required" maxlength="20"/><br>
+                    <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label> Middle Name </label>
+                    <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" th:value="${profileInfo.getMiddleName}" maxlength="20" />
+                    <span th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label class="required"> Last Name </label>
+                    <input type="text" th:field="*{lastName}" th:value="${profileInfo.getLastName}" th:required="required" maxlength="20"/><br>
+                    <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label> Nickname </label>
+                    <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" th:value="${profileInfo.getNickname}" maxlength="20" />
+                    <span th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label> Personal Pronouns </label>
+                    <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" th:value="${profileInfo.getPersonalPronouns}" maxlength="10" />
+                    <span th:if="${#fields.hasErrors('personalPronouns')}" th:errors="*{personalPronouns}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label class="required"> Email </label>
+                    <input th:type="email" th:field="*{email}" th:value="${profileInfo.getEmail}" th:required="required" /><br>
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="error" />
+                </div>
+                <div class="input-box">
+                    <label> Bio </label>
+                    <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" th:value="${profileInfo.getBio}" maxlength="200"/><br>
+                    <span th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}" th:errorclass="error" />
+                </div>
             </div>
             <br/>
-            <button class="form-button save" type="submit">Change Details</button>
+            <div class="centre-box">
+                <button class="form-button cancel" type="button">
+                    <a th:href="@{|'/users/${userId}'|}">Cancel</a>
+                </button>
+                <button class="form-button save" type="submit">Change Details</button>
+            </div>
         </form><br/>
-        <div th:text="'Password change is performed separately'"></div>
+        <hr/>
         <form th:action="@{|/users/${userId}/change-password|}"
-            method="post">
-            <div class="horizontal-group">
-            <div class="horizontal-group-element" >
-                <label for="oldPw">Old Password</label> <br/>
-                <input id="oldPw" type="password" th:name="oldPw" th:required="required">
+            method="post" th:object="${user}">
+            <div class="user-info">
+            <div class="input-box">
+                <label class="required"> Current Password </label>
+                <input type="password" placeholder="Enter your password" th:name="oldPassword" th:required="required" /><br>
+                <p th:text="${pwMessage}" id="error"/>
             </div>
-            <div class="horizontal-group-element" >
-                <label for="newPw">New Password</label> <br/>
-                <input id="newPw" type="password" th:name="newPw" th:required="required">
+            <div class="input-box">
+                <label class="required"> New Password </label>
+                <input type="password" placeholder="Enter your new password" th:field="*{password}" th:required="required" /><br>
+                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="error" />
             </div>
-            <div class="horizontal-group-element" >
-                <label for="confirmPw">Confirm Password</label> <br/>
-                <input id="confirmPw" type="password" th:name="confirmPw" th:required="required">
+            <div class="input-box">
+                <label class="required"> Confirm New Password </label>
+                <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
+                       placeholder="Password" th:field="*{confirmPassword}">
+                <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
+                       placeholder="Password" th:field="*{confirmPassword}">
+                <span th:errorclass="error" th:if="${#fields.hasErrors('passwordsEqual')}" th:errors="*{passwordsEqual}"></span>
             </div>
             </div>
-            <br/>
-            <button class="form-button cancel" type="button">
-                <a th:href="@{|'/users/${userId}'|}">Cancel</a>
-            </button>
-            <button class="form-button save" type="submit">Change Password</button>
+            <div class="centre-box">
+                <p th:text="${pwErrorMessage}" id="error"/>
+                <br/>
+                <button class="form-button save" type="submit">Change Password</button>
+            </div>
         </form>
     </div>
     </div>

@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
@@ -31,9 +28,10 @@ public class EditUserController {
     public String edit(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
+            User user,
             Model model
     ) {
-        UserResponse user = userAccountClientService.getUserAccountById(id);
+        UserResponse userResponse = userAccountClientService.getUserAccountById(id);
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
@@ -43,16 +41,18 @@ public class EditUserController {
                 .findFirst()
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
-        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
-
-        if(user.hasCreated()) {
-            model.addAttribute("profileInfo", user);
+        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) &&
+                !currentUserId.equals("NOT FOUND")));
+        
+        if(userResponse.hasCreated()) {
+            model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
-                    user.getFirstName(), user.getMiddleName(),  user.getLastName()));
+                    userResponse.getFirstName(), userResponse.getMiddleName(),
+                    userResponse.getLastName()));
             model.addAttribute("userId", Integer.toString(id));
             model.addAttribute("dateCreated",
-                    ProfilePageController.getDateCreated(user.getCreated()));
+                    ProfilePageController.getDateCreated(userResponse.getCreated()));
         } else {
             errors.add("Invalid ID");
         }
@@ -101,9 +101,9 @@ public class EditUserController {
             User user,
             @PathVariable int id,
             BindingResult result,
-            @RequestParam(name="oldPw") String oldPassword,
-            @RequestParam(name="newPw") String newPassword,
-            @RequestParam(name="confirmPw") String confirmPassword,
+            @RequestParam(name="oldPassword") String oldPassword,
+            @RequestParam(name="password") String newPassword,
+            @RequestParam(name="confirmPassword") String confirmPassword,
             Model model
     ) {
         
@@ -112,21 +112,22 @@ public class EditUserController {
         if (result.hasErrors()) {
             return "/users/" + id + "/edit";
         }
-        if(oldPassword == newPassword) {
-            try {
-                changeReply = userAccountClientService.changeUserPassword(id, oldPassword, newPassword);
+        if(!newPassword.equals(confirmPassword)) {
+            model.addAttribute("pwErrorMessage", "These passwords do not match");
+        }
+        try {
+            changeReply = userAccountClientService.changeUserPassword(id, oldPassword, newPassword);
 
-                if (changeReply.getIsSuccess()) {
-                    /* Redirect to profile page when done */
-                    return "redirect:/users/" + id;
-                }
-            } catch (StatusRuntimeException e){
-                //TODO: Handle errors consistently across this page. add error attr here
-                return "redirect:/users/" + id + "/edit";
+            if (changeReply.getIsSuccess()) {
+                /* Redirect to profile page when done */
+                return "redirect:/users/" + id;
             }
+        } catch (StatusRuntimeException e){
+            model.addAttribute("pwErrorMessage", "Error changing password");
+            return "redirect:/users/" + id + "/edit";
         }
 
-        //TODO: handle errors consistently. add error attr here
+        model.addAttribute("pwMessage", changeReply.getMessage());
         return "redirect:/users/" + id + "/edit";
     }
 }

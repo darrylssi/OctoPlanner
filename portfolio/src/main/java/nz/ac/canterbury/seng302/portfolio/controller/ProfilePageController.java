@@ -70,6 +70,7 @@ public class ProfilePageController {
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", getFullName(
                     user.getFirstName(), user.getMiddleName(),  user.getLastName()));
+            model.addAttribute("id", id);
             model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
         } else {
             errors.add("Invalid ID");
