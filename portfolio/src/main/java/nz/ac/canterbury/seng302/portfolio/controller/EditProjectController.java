@@ -38,7 +38,7 @@ public class EditProjectController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@PathVariable("id") int id, Model model) throws Exception{
+    public String projectForm(@PathVariable("id") int id, Model model) {
 
         /* Add project details to the model */
         try {
@@ -75,7 +75,7 @@ public class EditProjectController {
             @RequestParam(value="projectEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectEndDate,
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
-    ) {
+    ) throws Exception {
 
         /* Return editProject template with user input */
         if (result.hasErrors()) {

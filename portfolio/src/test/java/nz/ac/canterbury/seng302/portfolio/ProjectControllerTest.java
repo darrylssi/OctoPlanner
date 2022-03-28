@@ -43,7 +43,7 @@ public class ProjectControllerTest {
     }
 
     @Test
-    public void postProjectWithInvalidName_thenShowError() throws Exception {
+    public void postProjectWithNoName_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                 .param("projectName", "")
                 .param("projectDescription", "desc")
@@ -51,6 +51,18 @@ public class ProjectControllerTest {
                 .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Project name is required")));
+    }
+
+    @Test
+    public void postProjectWitLongName_thenShowError() throws Exception {
+        this.mockMvc.perform(post("/edit-project/0")
+                        .param("projectName", "Lorem ipsum dolor sit amet, consectetur adipisicing " +
+                                "elit, sed do eiusmod cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat ")
+                        .param("projectDescription", "desc")
+                        .param("projectStartDate", "2021-03-04")
+                        .param("projectEndDate", "2022-03-05"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")));
     }
 
     @Test
