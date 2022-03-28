@@ -85,7 +85,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
         } else {
-            responseObserver.onError(Status.NOT_FOUND.asException());
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         }
 
     }
@@ -135,7 +135,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.asException());
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         }
     }
 
@@ -160,7 +160,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.asException());
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
         }
     }
 

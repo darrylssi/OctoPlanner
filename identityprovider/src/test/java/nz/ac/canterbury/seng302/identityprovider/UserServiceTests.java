@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +13,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+
+import java.util.NoSuchElementException;
 
 @SpringBootTest
 @DirtiesContext
-// @TestInstance(Lifecycle.PER_CLASS)
 public class UserServiceTests {
 
     @Autowired
@@ -30,55 +28,53 @@ public class UserServiceTests {
     @MockBean
     private UserRepository userRepository;
 
+    private static final String testUsername = "testUser";
+    private static final int userID = 999;
     private User testUser;
-    private static String testUsername = "testUser";
-    private int userId;
 
     @BeforeEach
     public void setup() {
         testUser = new User(testUsername, "testPassword", "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
-        userRepository.save(testUser);
-        userId = testUser.getID();
-    }
-
-    @AfterEach
-    public void teardown() {
-        userRepository.delete(testUser);
+        testUser.addRole(UserRole.TEACHER);
     }
 
     @Test
-    public void searchByUsername() {
+    public void test_SearchByUsername() {
         when(userRepository.findByUsername(testUsername))
-            .thenReturn(testUser);
+                .thenReturn(testUser);
         assertThat(userService.getUserByUsername(testUsername)).isNotNull().isEqualTo(testUser);
     }
 
     @Test
-    public void test_userCanBeGivenARole() {
-        when(userRepository.findById(testUser.getID()))
-            .thenReturn(testUser);
-
-        // Given: A user doesn't have a 'TEACHER' role
-        assertFalse(testUser.getRoles().contains(UserRole.TEACHER));
+    public void test_UserCanBeGivenARole() {
+        when(userRepository.findById(userID))
+                .thenReturn(testUser);
         // When: A user is given the 'TEACHER' role
-        userService.addRoleToUser(testUser.getID(), UserRole.TEACHER);
+        userService.addRoleToUser(userID, UserRole.TEACHER);
         // Then: The user's account will show them as a 'TEACHER'
-        assertTrue(testUser.getRoles().contains(UserRole.TEACHER), "addRoleToUser() couldn't add a new role to the class");
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER),
+                "addRoleToUser() couldn't add a new role to the class");
     }
 
     @Test
-    public void test_userCanHaveRoleRemoved() {
-        when(userRepository.findById(userId))
-            .thenReturn(testUser);
-                
-        // Given: A user has a 'STUDENT' role
-        userService.addRoleToUser(testUser.getID(), UserRole.TEACHER);
+    public void test_UserCanHaveRoleRemoved() {
+        when(userRepository.findById(userID))
+                .thenReturn(testUser);
         // When: We take away their 'STUDENT' role
-        userService.removeRoleFromUser(userId, UserRole.STUDENT);
+        userService.removeRoleFromUser(userID, UserRole.STUDENT);
         // Then: The user's account will no longer show them as a 'STUDENT'
-        assertFalse(testUser.getRoles().contains(UserRole.STUDENT), "removeRoleToUser() couldn't remove the STUDENT role from the class");
+        assertFalse(testUser.getRoles().contains(UserRole.STUDENT),
+                "removeRoleToUser() couldn't remove the STUDENT role from the class");
+    }
+
+    @Test
+    public void test_CantRemoveRoleFromNonexistentUser() {
+        // When: We take away their 'STUDENT' role
+        assertThrows(NoSuchElementException.class, () -> 
+            userService.removeRoleFromUser(userID, UserRole.STUDENT)
+        );
     }
 
 }
