@@ -9,6 +9,15 @@ import java.util.List;
 @Entity // this is an entity, assumed to be in a table called Sprint
 @Table (name = "Sprint")
 public class Sprint {
+    public static final int MIN_NAME_LENGTH = 2;
+    public static final int MAX_NAME_LENGTH = 32;
+    public static final String ERROR_NAME_WRONG_LENGTH = "Sprint name must be between " +
+            MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters long"; // can't use String.format!
+    public static final int MAX_DESCRIPTION_LENGTH = 200;
+    public static final String ERROR_DESCRIPTION_WRONG_LENGTH = "Sprint description cannot be more than "
+            + MAX_DESCRIPTION_LENGTH + " characters long";
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -17,14 +26,14 @@ public class Sprint {
     private int parentProjectId;
 
     @Column
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH, message=ERROR_NAME_WRONG_LENGTH)
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column(nullable = true)
-    @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
+    @Column
+    @Size(max=MAX_DESCRIPTION_LENGTH, message=ERROR_DESCRIPTION_WRONG_LENGTH)
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
@@ -74,7 +83,7 @@ public class Sprint {
 
     /**
      * Returns the Sprint object as a string
-     * @return
+     * @return string listing Sprint's attributes as "Sprint[attribute=value, ...]"
      */
     @Override
     public String toString() {
