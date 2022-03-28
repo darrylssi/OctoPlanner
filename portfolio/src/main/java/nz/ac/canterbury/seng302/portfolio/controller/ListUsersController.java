@@ -32,12 +32,14 @@ public class ListUsersController {
         int limit = 10;
 
         /* Get users by page */
-        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, limit, orderBy);
+        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, limit, orderBy, dir);
 
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
-        model.addAttribute("dir", dir.equals("asc") ? "desc" : "asc");
+        model.addAttribute("dir", dir);
+        model.addAttribute("reverseDir", dir.equals("asc") ? "desc" : "asc");
+
 
         /* Total number of pages */
         int totalPages = (users.getResultSetSize() + limit - 1) / limit;

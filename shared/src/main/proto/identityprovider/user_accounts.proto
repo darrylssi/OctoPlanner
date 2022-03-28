@@ -103,6 +103,7 @@ message GetPaginatedUsersRequest {
    int32 Offset = 1; // How many results to skip (offset of 0 means start at beginning, i.e page 1)
    int32 Limit = 2; // Max results to get - "results per page"
    string OrderBy = 3; // When paginating, we must sort on the server, not the frontend (why is this?)
+   string Dir = 4;
 }
 message PaginatedUsersResponse {
    repeated UserResponse Users = 1;

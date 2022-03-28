@@ -61,11 +61,12 @@ public class UserAccountClientService {
      * @param orderBy How to sort the results
      * @return A PaginatedUserResponse with a list of users and the total number of users in the response
      */
-    public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy) {
+    public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy, final String dir) {
         GetPaginatedUsersRequest paginatedUsersRequest = GetPaginatedUsersRequest.newBuilder()
                 .setOffset(offset)
                 .setLimit(limit)
                 .setOrderBy(orderBy)
+                .setDir(dir)
                 .build();
         return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
     }

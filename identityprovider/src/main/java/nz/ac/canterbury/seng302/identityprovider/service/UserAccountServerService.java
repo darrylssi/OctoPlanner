@@ -162,7 +162,8 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         int limit = request.getLimit();
         int offset = request.getOffset();
         String orderBy = request.getOrderBy();
-        List<User> users = userService.getUsersPaginated(offset, limit, orderBy);
+        String dir = request.getDir();
+        List<User> users = userService.getUsersPaginated(offset, limit, orderBy, dir);
         List<User> allUsers = userService.getAllUsers();
 
         List<UserResponse> userResponses = new ArrayList<>();

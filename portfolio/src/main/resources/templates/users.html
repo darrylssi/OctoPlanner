@@ -17,13 +17,13 @@
     <table>
         <thead>
         <tr>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=firstName&dir=' + ${dir}}"> First name </a>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=firstName&dir=' + ${reverseDir}}"> First name </a>
                 <span th:if="${orderBy == 'firstName'}"> <span th:text="${dir == 'asc'} ? '▼' : '▲'" /> </span> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&dir=' + ${dir}}">Username</a>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&dir=' + ${reverseDir}}">Username</a>
                 <span th:if="${orderBy == 'username'}"> <span th:text="${dir == 'asc'} ? '▼' : '▲'" /> </span> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&dir=' + ${dir}}">Alias</a>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&dir=' + ${reverseDir}}">Alias</a>
                 <span th:if="${orderBy == 'nickname'}"> <span th:text="${dir == 'asc'} ? '▼' : '▲'" /> </span> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=role&dir=' + ${dir}}">Role</a>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=role&dir=' + ${reverseDir}}">Role</a>
                 <span th:if="${orderBy == 'role'}"> <span th:text="${dir == 'asc'} ? '▼' : '▲'" /> </span> </th>
         </tr>
         </thead>
@@ -46,7 +46,7 @@
             <a th:href="@{'/users/?page=1&orderBy=' + ${orderBy} + '&dir=' + ${dir}}"> First </a>
         </span>
 <!--        add link to all pages -->
-        <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
+        <span class="pages" th:each="i: ${#numbers.sequence(1, 7)}">
             <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&dir=' + ${dir}}" th:if="${page != i}"
                 class="otherPages">[[${i}]]</a>
             <span th:unless="${page != i}" class="currentPage">[[${i}]]</span>
