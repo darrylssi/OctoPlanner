@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -69,7 +71,7 @@ public class DetailsController {
      */
     @DeleteMapping("project/{projectId}/delete/{sprintId}")
     @ResponseBody
-    public String deleteSprint(
+    public ResponseEntity<String> deleteSprint(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="projectId") int projectId,
             @PathVariable(name="sprintId") int sprintId,
@@ -82,9 +84,9 @@ public class DetailsController {
             if(debugRole.contains("teacher")) {
                 try {
                     sprintService.deleteSprint(sprintId);
-                    return "Sprint Deleted";
+                    return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
                 } catch (Exception e) {
-                    return e.getMessage();
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         } else {
@@ -95,13 +97,13 @@ public class DetailsController {
                     .orElse("NOT FOUND").contains("teacher")) {
                 try {
                     sprintService.deleteSprint(sprintId);
-                    return "Sprint Deleted.";
+                    return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
                 } catch (Exception e) {
-                    return e.getMessage();
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         }
-        return "User not authorised to delete sprints.";
+        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
     }
 
 }
