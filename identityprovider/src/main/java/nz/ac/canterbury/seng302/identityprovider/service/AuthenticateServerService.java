@@ -10,10 +10,15 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticationServiceGrpc.AuthenticationServiceImplBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @GrpcService
 public class AuthenticateServerService extends AuthenticationServiceImplBase{
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticateServerService.class);
 
     @Autowired
     private UserService userService;
@@ -27,21 +32,24 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
      */
     @Override
     public void authenticate(AuthenticateRequest request, StreamObserver<AuthenticateResponse> responseObserver) {
+        logger.info("authenticate() has been called");
         AuthenticateResponse.Builder reply = AuthenticateResponse.newBuilder();
 
         User user = userService.getUserByUsername(request.getUsername());
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         if (user == null) {
             reply
             .setMessage("Username not registered.")
             .setSuccess(false)
             .setToken("");
-        } else if (!request.getPassword().equals(user.getPassword())) { // TODO replace getPassword() for when passwords are hashed
+        } else if (!encoder.matches(request.getPassword(), user.getPassword())) {
             reply
             .setMessage("Incorrect password!")
             .setSuccess(false)
             .setToken("");
-        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) { 
+        } else if (request.getUsername().equals(user.getUsername())) {
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
             reply
                 .setEmail(user.getEmail())
@@ -68,6 +76,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
      */
     @Override
     public void checkAuthState(Empty request, StreamObserver<AuthState> responseObserver) {
+        logger.info("checkAuthState() has been called");
         responseObserver.onNext(AuthenticationServerInterceptor.AUTH_STATE.get());
         responseObserver.onCompleted();
     }
