@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticationServiceGrpc.AuthenticationServiceImplBase;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,8 +18,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
     @Autowired
     private UserService userService;
-
-    private final String ROLE_OF_USER = "student"; // Puce teams may want to change this to "teacher" to test some functionality
 
     private JwtTokenUtil jwtTokenService = JwtTokenUtil.getInstance();
 
@@ -41,8 +40,11 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
             .setMessage("Incorrect password!")
             .setSuccess(false)
             .setToken("");
-        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) { 
-            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
+        } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {
+            // Convert all the roles into a comma-separated string of roles
+            String[] userRoles = (String[]) user.getRoles().stream().map(UserRole::toString).toArray();
+            String commaSeparatedUserRoles = String.join(",", userRoles);
+            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
             reply
                 .setEmail(user.getEmail())
                 .setFirstName(user.getFirstName())
