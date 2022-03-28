@@ -36,6 +36,7 @@ public class EditSprintController {
     public String sprintForm(@PathVariable("id") int id, Model model) throws Exception{
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
+        model.addAttribute("sprint", sprint);
         model.addAttribute("sprintId", sprint.getId());
         model.addAttribute("sprintLabel", sprint.getLabel());
         model.addAttribute("sprintName", sprint.getName());
@@ -74,7 +75,7 @@ public class EditSprintController {
         sprint.setSprintDescription(description);
         sprintService.saveSprint(sprint);
 
-        return "redirect:/details";
+        return "redirect:/project/" + id;
     }
 
 }

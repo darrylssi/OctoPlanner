@@ -75,7 +75,7 @@ public class EditProjectController {
         projectService.saveProject(project);
 
         /* Redirect to details page when done */
-        return "redirect:/details";
+        return "redirect:/project/" + id;
     }
 
 }

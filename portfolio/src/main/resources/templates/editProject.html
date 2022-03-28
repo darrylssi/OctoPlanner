@@ -30,9 +30,11 @@
     </div>
     <br/>
     <div class="buttons">
-        <button class=" form-button cancel" type="button" th:onclick="window.location.href='/details'">
-            Cancel
-        </button>
+        <a th:href="@{/project/{id}(id = ${projectId})}">
+            <button class="form-button cancel" type="button">
+                Cancel
+            </button>
+        </a>
         <button class="form-button save" type="submit">Save</button>
     </div>
 </form>
