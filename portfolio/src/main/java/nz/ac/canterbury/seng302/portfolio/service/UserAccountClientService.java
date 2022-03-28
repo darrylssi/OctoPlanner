@@ -109,12 +109,12 @@ public class UserAccountClientService {
      * @throws StatusException <code>NOT_FOUND</code> if the user ID points to no one.
      */
     public boolean removeRoleFromUser(final int userId, final UserRole role) throws StatusException {
-        ModifyRoleOfUserRequest addRoleRequest = ModifyRoleOfUserRequest.newBuilder()
+        ModifyRoleOfUserRequest removeRoleRequest = ModifyRoleOfUserRequest.newBuilder()
             .setUserId(userId)
             .setRole(role)
             .build();
         try {
-            return userAccountStub.addRoleToUser(addRoleRequest).getIsSuccess();
+            return userAccountStub.removeRoleFromUser(removeRoleRequest).getIsSuccess();
         } catch (StatusRuntimeException e) {
             // Convert to a forced-to-catch exception
             throw Status.fromThrowable(e).asException();
