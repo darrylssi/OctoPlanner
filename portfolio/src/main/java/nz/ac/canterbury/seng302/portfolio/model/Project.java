@@ -127,5 +127,5 @@ public class Project {
         this.projectEndDate = Project.stringToDate(date);
     }
 
-
+    public void setId(int i) { this.id = i; }
 }

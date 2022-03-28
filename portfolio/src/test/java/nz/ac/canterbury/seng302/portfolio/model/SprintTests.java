@@ -98,11 +98,11 @@ public class SprintTests {
     public void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
         when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintBySprintName(nameToSearch)).isEqualTo(List.of(baseSprint));
+        assertThat(sprintService.getSprintByName(nameToSearch)).isEqualTo(List.of(baseSprint));
     }
 
     @Test
-    public void searchById_getSprint() throws Exception {
+    public void searchById_getSprint() {
         when(sprintRepository.findSprintById(baseSprint.getId())).thenReturn(baseSprint);
         assertThat(sprintService.getSprintById(baseSprint.getId())).isEqualTo(baseSprint);
     }

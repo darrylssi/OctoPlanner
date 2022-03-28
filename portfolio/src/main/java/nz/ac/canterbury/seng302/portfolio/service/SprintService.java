@@ -18,8 +18,25 @@ public class SprintService {
      * Get list of all sprints
      */
     public List<Sprint> getAllSprints() {
-        List<Sprint> list = (List<Sprint>) repository.findAll();
-        return list;
+        return (List<Sprint>) repository.findAll();
+    }
+
+    /**
+     * Returns a list of all sprints that match the given name
+     * @param name the sprint name to search for
+     * @return list of matching sprints, or empty list if no matches
+     */
+    public List<Sprint> getSprintByName(String name) {
+        return repository.findBySprintName(name);
+    }
+
+    /**
+     * Returns a list of all sprints for a given project
+     * @param id the id of the project to find sprints from
+     * @return list of matching sprints, or empty list if no matches
+     */
+    public List<Sprint> getSprintByParentProjectId(int id) {
+        return repository.findByParentProjectId(id);
     }
 
     /**
