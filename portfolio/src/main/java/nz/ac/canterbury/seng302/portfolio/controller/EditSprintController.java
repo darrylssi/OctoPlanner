@@ -33,9 +33,10 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@PathVariable("id") int id, Model model) {
+    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception{
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
+        model.addAttribute("sprint", sprint);
         model.addAttribute("sprintId", sprint.getId());
         model.addAttribute("sprintLabel", sprint.getLabel());
         model.addAttribute("sprintName", sprint.getName());
@@ -64,7 +65,7 @@ public class EditSprintController {
             @RequestParam(value="sprintStartDate") String startDate,
             @RequestParam(value="sprintEndDate") String endDate,
             @RequestParam(value="sprintDescription") String description
-    ) throws ParseException {
+    ) throws Exception {
 
         /* Set (new) sprint details to the corresponding sprint */
         Sprint sprint = sprintService.getSprintById(id);
@@ -74,7 +75,7 @@ public class EditSprintController {
         sprint.setSprintDescription(description);
         sprintService.saveSprint(sprint);
 
-        return "redirect:/details";
+        return "redirect:/project/" + id;
     }
 
 }

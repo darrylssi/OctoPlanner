@@ -2,8 +2,11 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,18 @@ public class ProfilePageController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
+    @GetMapping("/users/current")
+    public String profileRedirect(@AuthenticationPrincipal AuthState principal) {
+
+        String id = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("0");
+
+        return "redirect:/users/" + id;
+    }
+
     /**
      * Generates the profile page for the requested user
      *
@@ -34,6 +49,7 @@ public class ProfilePageController {
      */
     @GetMapping("/users/{id}")
     public String GetProfile(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
     ) {
@@ -42,7 +58,14 @@ public class ProfilePageController {
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
 
-        if(user.isInitialized()) {
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
+
+        if(user.hasCreated()) {
             model.addAttribute("profileInfo", user);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", getFullName(

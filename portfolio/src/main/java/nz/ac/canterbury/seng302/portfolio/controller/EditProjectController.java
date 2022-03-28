@@ -38,7 +38,7 @@ public class EditProjectController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@PathVariable("id") int id, Model model){
+    public String projectForm(@PathVariable("id") int id, Model model) throws Exception{
 
         /* Add project details to the model */
         try {
@@ -94,7 +94,7 @@ public class EditProjectController {
         projectService.saveProject(newProject);
 
         /* Redirect to details page when done */
-        return "redirect:/details";
+        return "redirect:/project/" + id;
     }
 
 }

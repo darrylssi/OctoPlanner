@@ -7,11 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div class="header">
-    <div class="title">
-        <div class="title-name">Edit Project</div>
-    </div>
-</div>
+<div th:replace="fragments :: header(title='Edit Project')"></div>
 <div class="content">
 <form th:action="@{/edit-project/{id}(id = ${id})}"
       method="post" th:object="${project}">
@@ -37,10 +33,12 @@
     </div>
     <br/>
     <div class="buttons">
-        <button class="cancel" type="button">
-            <a th:href="@{'/details'}">Cancel</a>
-        </button>
-        <button class="save" type="submit">Save</button>
+        <a th:href="@{/project/{id}(id = ${projectId})}">
+            <button class="form-button cancel" type="button">
+                Cancel
+            </button>
+        </a>
+        <button class="form-button save" type="submit">Save</button>
     </div>
 
 </form>
@@ -76,6 +74,4 @@
 
 </script>
 </body>
-
-
 </html>

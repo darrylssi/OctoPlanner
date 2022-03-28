@@ -1,0 +1,17 @@
+#loginform {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    text-align: center;
+}
+.inputs {
+    width: 20em;
+    height: 2em;
+    margin: 2px;
+}
+
+#error {
+    color: red;
+}

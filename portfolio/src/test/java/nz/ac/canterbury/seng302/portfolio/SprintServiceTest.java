@@ -12,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -31,7 +33,7 @@ public class SprintServiceTest {
     }
 
     @Test
-    void getProjectValidId() {
+    void getSprintValidId_thenReturnSprint() throws Exception {
         when(sprintRepository.findSprintById(1))
                 .thenReturn(sprint1);
 
@@ -39,10 +41,12 @@ public class SprintServiceTest {
     }
 
     @Test
-    void getProjectInvalidId() {
-        when(sprintRepository.findSprintById(2))
-                .thenReturn(null);
-        assertThat(sprintService.getSprintById(2)).isEqualTo(null);
+    void getSprintInvalidId_thenThrowException() {
+        Exception e = assertThrows(Exception.class, () -> {
+            sprintService.getSprintById(2);
+        });
+        String expectedMessage = "Sprint not found.";
+        assertTrue(e.getMessage().contains(expectedMessage));
     }
 
     @Test

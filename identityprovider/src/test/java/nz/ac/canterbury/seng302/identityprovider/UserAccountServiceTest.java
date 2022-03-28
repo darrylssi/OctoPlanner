@@ -1,29 +1,37 @@
 package nz.ac.canterbury.seng302.identityprovider;
 
 import io.grpc.stub.StreamObserver;
+import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserAccountServerService;
+import nz.ac.canterbury.seng302.identityprovider.service.UserService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@SpringJUnitConfig(classes = UserAccountServiceTestConfiguration.class)
+@DirtiesContext
 public class UserAccountServiceTest {
 
     @Autowired
     private UserAccountServerService userAccountServerService;
 
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private UserRepository userRepository;
+
     @Test
     void testValidRegister() {
+
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
                 .setUsername("test1")
                 .setPassword("testPassword")

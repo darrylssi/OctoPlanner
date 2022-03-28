@@ -25,8 +25,22 @@ public class SprintService {
     /**
      * Get sprint by id
      */
-    public Sprint getSprintById(Integer id) {
-        return repository.findSprintById(id);
+    public Sprint getSprintById(Integer id) throws Exception {
+        Sprint sprint = repository.findSprintById(id);
+        if (sprint != null) {
+            return sprint;
+        } else {
+            throw new Exception("Sprint not found.");
+        }
+    }
+
+    /**
+     * Gets all the sprints that belong to a given project.
+     * 
+     * TODO [Andrew]: Tried making the relationship part of the Project class using @OneToMany & @ManyToOne, didn't work. If someone can figure it out, I'd rather use that.
+     */
+    public List<Sprint> getSprintsOfProjectById(Integer id) {
+        return repository.findByParentProjectId(id);
     }
 
     /**
