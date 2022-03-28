@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import java.util.List;
+
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -42,7 +44,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
             .setToken("");
         } else if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {
             // Convert all the roles into a comma-separated string of roles
-            String[] userRoles = (String[]) user.getRoles().stream().map(UserRole::toString).toArray();
+            List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
             String commaSeparatedUserRoles = String.join(",", userRoles);
             commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
             String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
