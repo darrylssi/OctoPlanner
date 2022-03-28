@@ -5,9 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -64,24 +62,30 @@ public class DetailsController {
 
     /**
      * Deletes a sprint and redirects back to the project view
-     * @param principal
+     * @param principal used to check if the user is authorised to delete sprints
      * @param projectId the id of the project to redirect back to
      * @param sprintId the id of the sprint to be deleted
      * @return a redirect to the project view
-     * @throws Exception
      */
-    @GetMapping("project/{projectId}/delete/{sprintId}")
-    public String testDelete(
+    @DeleteMapping("project/{projectId}/delete/{sprintId}")
+    @ResponseBody
+    public String deleteSprint(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="projectId") int projectId,
             @PathVariable(name="sprintId") int sprintId,
             @RequestParam(name="role", required=false) String debugRole
-            ) throws Exception {
+            ) {
 
+        // Check if the user is authorised to delete sprints
+        // TODO remove debug role option
         if (debugRole != null) {
             if(debugRole.contains("teacher")) {
-                sprintService.deleteSprint(sprintId);
-                return "redirect:/project/" + projectId + "?role=teacher";
+                try {
+                    sprintService.deleteSprint(sprintId);
+                    return "Sprint Deleted";
+                } catch (Exception e) {
+                    return e.getMessage();
+                }
             }
         } else {
             if(principal.getClaimsList().stream()
@@ -89,11 +93,15 @@ public class DetailsController {
                     .findFirst()
                     .map(ClaimDTO::getValue)
                     .orElse("NOT FOUND").contains("teacher")) {
-                sprintService.deleteSprint(sprintId);
-                return "redirect:/project/" + projectId;
+                try {
+                    sprintService.deleteSprint(sprintId);
+                    return "Sprint Deleted.";
+                } catch (Exception e) {
+                    return e.getMessage();
+                }
             }
         }
-        return "redirect:/project/" + projectId;
+        return "User not authorised to delete sprints.";
     }
 
 }

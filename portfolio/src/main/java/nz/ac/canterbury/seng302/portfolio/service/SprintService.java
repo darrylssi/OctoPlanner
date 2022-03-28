@@ -49,7 +49,8 @@ public class SprintService {
     }
 
     /**
-     * Deletes a sprint
+     * Deletes a sprint from the repository
+     * @param sprintId the id of the sprint to be deleted
      */
     public void deleteSprint(int sprintId) {
         repository.deleteById(sprintId);

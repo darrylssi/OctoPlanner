@@ -192,3 +192,7 @@ a {
 .show {
     display:block;
 }
+
+button:hover {
+    cursor: pointer;
+}
