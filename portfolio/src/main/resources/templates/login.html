@@ -3,40 +3,23 @@
 <head>
     <title>Log In</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" th:href="@{/styles/login.css}" />
 </head>
 <body>
-<p th:text="${loginMessage}" />
 
     <div id="loginform">
         <form th:action="@{/login}" method="post">
-            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="username">
+            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">
             <br>
-            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="password">
+            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
             <br>
+            <p id="error" th:text="${loginMessage}" />
             <button type="submit" class="inputs">Log In</button>
         </form>
         <a th:href="@{/register}">
-            <button type="submit" class="inputs"> Register </button>   <!-- replace with register page -->
+            <button type="submit" class="inputs"> Register </button>
         </a>
-        <p th:text="${loginMessage}" />
     </div>
     
 </body>
-
-<style>
-    #loginform {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        padding: 30px;
-        text-align: center;
-    }
-    .inputs {
-        width: 20em;
-        height: 2em;
-        margin: 2px;
-    }
-</style>
-
 </html>

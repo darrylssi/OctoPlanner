@@ -34,8 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         security.logout()
                 .permitAll()
                 .invalidateHttpSession(true)
-                .deleteCookies("lens-session-token")
-                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK));
+                .deleteCookies("lens-session-token");
 
         // Disable basic http security and the spring security login form
         security
