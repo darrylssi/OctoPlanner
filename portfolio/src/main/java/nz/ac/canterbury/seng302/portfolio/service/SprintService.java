@@ -35,6 +35,15 @@ public class SprintService {
     }
 
     /**
+     * Gets all the sprints that belong to a given project.
+     * 
+     * TODO [Andrew]: Tried making the relationship part of the Project class using @OneToMany & @ManyToOne, didn't work. If someone can figure it out, I'd rather use that.
+     */
+    public List<Sprint> getSprintsOfProjectById(Integer id) {
+        return repository.findByParentProjectId(id);
+    }
+
+    /**
      * Adds a new sprint into the database if the sprint with the given ID does not exist.
      * Otherwise, updates the sprint with the given ID.
      * @param sprint sprint to be added to the database

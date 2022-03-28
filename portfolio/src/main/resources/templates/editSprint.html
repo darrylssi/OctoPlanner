@@ -7,11 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div class="header">
-    <div class="title">
-        <div class="title-name">Edit Sprint</div>
-    </div>
-</div>
+<div th:replace="fragments :: header(title='Edit Sprint')"></div>
 <div class="content">
     <form th:action="@{/edit-sprint/{id}(id = ${sprintId})}"
           method="post">
@@ -34,10 +30,10 @@
         </div>
         <br/>
         <div class="buttons">
-            <button class="cancel" type="button" th:onclick="window.location.href='/details'">
+            <button class="form-button cancel" type="button" th:onclick="window.location.href='/details'">
                 Cancel
             </button>
-            <button class="save" type="submit">Save</button>
+            <button class="form-button save" type="submit">Save</button>
         </div>
     </form>
 </div>
