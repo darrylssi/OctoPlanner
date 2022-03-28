@@ -70,6 +70,8 @@
             </div>
             <br/>
             <div class="centre-box">
+                <p th:text="${editErrorMessage}" id="error"/>
+                <br/>
                 <button class="form-button cancel" type="button">
                     <a th:href="@{|'/users/${userId}'|}">Cancel</a>
                 </button>

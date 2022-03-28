@@ -69,7 +69,7 @@ public class EditUserController {
             @RequestParam(name="lastName") String lastName,
             @RequestParam(name="nickname", required=false) String nickname,
             @RequestParam(name="bio", required=false) String bio,
-            @RequestParam(name="pronouns", required=false) String personalPronouns,
+            @RequestParam(name="personalPronouns", required=false) String personalPronouns,
             @RequestParam(name="email") String email,
             Model model
     ) {
@@ -77,7 +77,7 @@ public class EditUserController {
         /* Set (new) user details to the corresponding user */
         EditUserResponse editReply;
         if (result.hasErrors()) {
-            return "/users/" + id + "/edit";
+            return "editUser";
         }
         try {
             editReply = userAccountClientService.editUser(id, firstName, middleName,
@@ -88,12 +88,12 @@ public class EditUserController {
                 return "redirect:/users/" + id;
             }
         } catch (StatusRuntimeException e){
-            //TODO: Handle errors consistently on this page. add error attr here
-            return "redirect:/users/" + id + "/edit";
+            model.addAttribute("editErrorMessage", "Error updating details");
+            return "editUser";
         }
 
-        //TODO: handle errors consistently. add error attr here
-        return "redirect:/users/" + id + "/edit";
+        model.addAttribute("editMessage", editReply.getMessage());
+        return "editUser";
     }
 
     @PostMapping("/users/{id}/change-password")
@@ -110,7 +110,7 @@ public class EditUserController {
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
-            return "/users/" + id + "/edit";
+            return "editUser";
         }
         if(!newPassword.equals(confirmPassword)) {
             model.addAttribute("pwErrorMessage", "These passwords do not match");
@@ -124,10 +124,10 @@ public class EditUserController {
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("pwErrorMessage", "Error changing password");
-            return "redirect:/users/" + id + "/edit";
+            return "editUser";
         }
 
         model.addAttribute("pwMessage", changeReply.getMessage());
-        return "redirect:/users/" + id + "/edit";
+        return "editUser";
     }
 }
