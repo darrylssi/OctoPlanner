@@ -66,6 +66,10 @@ public class Sprint {
         return sprintLabel;
     }
 
+    public void setLabel(String newLabel) {
+        this.sprintLabel = newLabel;
+    }
+
     public String getDescription(){
         return sprintDescription;
     }
