@@ -1,15 +1,15 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${project.getName}"></title>
+    <title th:text="${project.getProjectName}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title=${project.getName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
+<div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
 <div class="content">
     <div class="detail-block">
-        <div  th:text="${project.getDescription}"/>
+        <div  th:text="${project.getProjectDescription}"/>
         <button class="edit-button" th:if="${canEdit}">
             <a th:href="@{'/edit-project/' + ${project.getId}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">

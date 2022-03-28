@@ -200,3 +200,12 @@ button {
 .show {
     display:block;
 }
+
+.error {
+    color: red;
+}
+
+.required:after {
+    content:"*";
+    color: red;
+}
