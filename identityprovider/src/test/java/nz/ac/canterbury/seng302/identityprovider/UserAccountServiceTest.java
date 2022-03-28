@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Optional;
@@ -33,11 +34,14 @@ public class UserAccountServiceTest {
 
     private User testUser;
 
+    private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
+
     @BeforeEach
     public void setup() {
         testUser = new User("testUser", "testPassword", "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
+        testUser.setPassword(encoder.encode(testUser.getPassword()));
         userRepository.save(testUser);
     }
 
@@ -255,7 +259,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenValid() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -289,7 +293,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenMissingFirstName() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -321,7 +325,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenFirstNameTooShort() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -353,7 +357,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenFirstNameTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -385,7 +389,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenMiddleNameTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -417,7 +421,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenMissingLastName() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -449,7 +453,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenLastNameTooShort() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -481,7 +485,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenLastNameTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -513,7 +517,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenNicknameTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -545,7 +549,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenBioTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -579,7 +583,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenPronounsTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -611,7 +615,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenPronounsAreInvalid() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -643,7 +647,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenMissingEmail() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -675,7 +679,7 @@ public class UserAccountServiceTest {
     @Test
     void testEdit_whenEmailIsInvalid() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         EditUserRequest request = EditUserRequest.newBuilder()
                 .setUserId(1)
@@ -707,7 +711,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenValid() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)
@@ -729,7 +733,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenMissingCurrentPassword() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)
@@ -757,7 +761,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenCurrentPasswordIsInvalid() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)
@@ -785,7 +789,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenMissingNewPassword() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)
@@ -813,7 +817,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenNewPasswordTooShort() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)
@@ -841,7 +845,7 @@ public class UserAccountServiceTest {
     @Test
     void testChangePassword_whenNewPasswordTooLong() {
         when(userRepository.findById(1))
-                .thenReturn(Optional.ofNullable((testUser)));
+                .thenReturn(testUser);
 
         ChangePasswordRequest request = ChangePasswordRequest.newBuilder()
                 .setUserId(1)

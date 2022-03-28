@@ -16,8 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +25,8 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 public class UserAccountServerService extends UserAccountServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
+
+    private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
     @Autowired
     private UserRepository repository;
@@ -60,7 +60,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                 request.getBio(), request.getPersonalPronouns(), request.getEmail());
 
         // Hash password
-        String hashedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
+        String hashedPassword = encoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
 
         // Sets the current time as the users register date
@@ -148,12 +148,8 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         logger.info("getUserAccountById has been called");
         UserResponse.Builder reply = UserResponse.newBuilder();
 
-        Optional<User> userResponse = repository.findById(request.getId());
-        User user;
-        if (userResponse.isPresent()) {
-            user = userResponse.get();
-            setUserResponse(user, reply);
-        }
+        User user = repository.findById(request.getId());
+        setUserResponse(user, reply);
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
@@ -189,12 +185,12 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
      */
     @Override
     public void editUser(EditUserRequest request, StreamObserver<EditUserResponse> responseObserver) {
-        logger.info("editUser has been called");
+        logger.info("editUser() has been called");
         EditUserResponse.Builder reply = EditUserResponse.newBuilder();
 
-        Optional<User> userResponse = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
 
-        List<ValidationError> errors = validateEditUserRequest(request, userResponse);
+        List<ValidationError> errors = validateEditUserRequest(request, user);
 
         if(errors.size() > 0) { // If there are errors in the request
 
@@ -210,8 +206,6 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             responseObserver.onCompleted();
             return;
         }
-
-        User user = userResponse.get(); // isPresent() check occurs in validateEditRequest()
 
         // Set the user's details to the details provided in the edit request
         user.setFirstName(request.getFirstName());
@@ -236,10 +230,10 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
      * @param request The edit user request to validate
      * @return A list of validation errors in the edit user request
      */
-    public List<ValidationError> validateEditUserRequest(EditUserRequest request, Optional<User> user) {
+    public List<ValidationError> validateEditUserRequest(EditUserRequest request, User user) {
         List<ValidationError> errors = new ArrayList<>();
 
-        if (user.isEmpty()) {    // Check that the user exists in the database
+        if (user == null) {    // Check that the user exists in the database
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("UserId")
                     .setErrorText("User does not exist")
@@ -341,12 +335,12 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
      */
     @Override
     public void changeUserPassword(ChangePasswordRequest request, StreamObserver<ChangePasswordResponse> responseObserver) {
-        logger.info("changeUserPassword has been called");
+        logger.info("changeUserPassword() has been called");
         ChangePasswordResponse.Builder reply = ChangePasswordResponse.newBuilder();
 
-        Optional<User> userResponse = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
 
-        List<ValidationError> errors = validateChangePasswordRequest(request, userResponse);
+        List<ValidationError> errors = validateChangePasswordRequest(request, user);
 
         if(errors.size() > 0) { // If there are errors in the request
 
@@ -364,18 +358,10 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
             return;
         }
 
-        User user = userResponse.get(); // isPresent() check occurs in validateChangePasswordRequest()
-
         // Set the user's password to the new password provided in the edit request
-
-        // TODO use this instead once merged
-        /*
         // Hash password
-        String hashedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
+        String hashedPassword = encoder.encode(request.getNewPassword());
         user.setPassword(hashedPassword);
-        */
-
-        user.setPassword(request.getNewPassword());
 
         repository.save(user);  // Saves the user object to the database
         reply
@@ -391,10 +377,10 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
      * @param request The change password request to validate
      * @return A list of validation errors in the change password request
      */
-    public List<ValidationError> validateChangePasswordRequest(ChangePasswordRequest request, Optional<User> user) {
+    public List<ValidationError> validateChangePasswordRequest(ChangePasswordRequest request, User user) {
         List<ValidationError> errors = new ArrayList<>();
 
-        if (user.isEmpty()) {    // Check that the user exists in the database
+        if (user == null) {    // Check that the user exists in the database
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("UserId")
                     .setErrorText("User does not exist")
@@ -409,8 +395,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                     .setErrorText("Current password cannot be empty")
                     .build();
             errors.add(error);
-            // TODO change to hashed password check once merged
-        } else if (!Objects.equals(user.get().getPassword(), request.getCurrentPassword())) {   // Passwords match
+        } else if (!encoder.matches(request.getCurrentPassword(), user.getPassword())) {   // Passwords don't match
             ValidationError error = ValidationError.newBuilder()
                     .setFieldName("CurrentPassword")
                     .setErrorText("Current password does not match password in database")
