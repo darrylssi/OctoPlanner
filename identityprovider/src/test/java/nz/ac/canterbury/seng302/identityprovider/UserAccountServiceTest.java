@@ -97,14 +97,14 @@ public class UserAccountServiceTest {
                 .thenReturn(testUser);
 
         // * Given: A user has a role
-        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+        testUser.addRole(UserRole.TEACHER);
 
         // * When: We try to take this role away from them
         ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
                 .setUserId(testUserID)
                 .setRole(UserRole.TEACHER)
                 .build();
-        userAccountServerService.addRoleToUser(request, observer);
+        userAccountServerService.removeRoleFromUser(request, observer);
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
@@ -112,7 +112,7 @@ public class UserAccountServiceTest {
 
         // * Then: They no longer have this role
         assertTrue(response.getIsSuccess());
-        assertTrue(testUser.getRoles().contains(UserRole.TEACHER));
+        assertFalse(testUser.getRoles().contains(UserRole.TEACHER));
     }
 
     @Test
@@ -124,19 +124,19 @@ public class UserAccountServiceTest {
 
         ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
                 .setUserId(testUserID)
-                .setRole(UserRole.STUDENT)
+                .setRole(UserRole.TEACHER)
                 .build();
 
         // * Given: A user is given a role multiple times
         userAccountServerService.addRoleToUser(request, observer);
         verify(observer, atLeastOnce()).onCompleted();
         verify(observer, atLeastOnce()).onNext(captor.capture());
-        assertTrue(testUser.getRoles().contains(UserRole.STUDENT)); // They've been given the role
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER)); // They've been given the role
         // Add again
         userAccountServerService.addRoleToUser(request, observer);
         verify(observer, atLeastOnce()).onCompleted();
         verify(observer, atLeastOnce()).onNext(captor.capture());
-        assertTrue(testUser.getRoles().contains(UserRole.STUDENT)); // User still has the role
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER)); // User still has the role
 
         // * When: This role is removed
         userAccountServerService.removeRoleFromUser(request, observer);
@@ -146,7 +146,7 @@ public class UserAccountServiceTest {
 
         // * Then: The role is removed
         assertTrue(response.getIsSuccess());
-        assertFalse(testUser.getRoles().contains(UserRole.STUDENT));    // User still has role
+        assertFalse(testUser.getRoles().contains(UserRole.TEACHER));    // User still has role
     }
 
     @Test
@@ -181,8 +181,8 @@ public class UserAccountServiceTest {
                 .thenReturn(testUser);
 
         // * Given: A user doesn't have a role
-        
         assertFalse(testUser.getRoles().contains(UserRole.COURSE_ADMINISTRATOR));
+
         // * When: Someone tries to remove said role
         ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
                 .setUserId(testUserID)
@@ -233,5 +233,34 @@ public class UserAccountServiceTest {
         StatusRuntimeException error = errorCaptor.getValue();
 
         assertEquals(error.getStatus().getCode(), Status.NOT_FOUND.getCode());
+    }
+
+    @Test
+    void test_UsersMustAlwaysHaveAtLeastOneRole() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+        // * Given: A user only has one role
+        assertTrue(testUser.getRoles().size() == 1);
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+        // * When: We try to take away their only role
+
+        
+        // * When: Someone tries to remove said role
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.COURSE_ADMINISTRATOR)
+                .build();
+        userAccountServerService.removeRoleFromUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: It fails and they keep their role
+        assertFalse(response.getIsSuccess()); 
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+
     }
 }
