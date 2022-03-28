@@ -1,12 +1,17 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.text.ParseException;
 
 
 /**
@@ -14,52 +19,63 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class EditSprintController {
-    private String sprintName = "Sprint 1";
-    private String sprintStartDate = "04/Mar/2022";
-    private String sprintEndDate = "25/Mar/2022";
-    private String sprintDescription = "This is the first sprint.";
 
-    private void setSprintName(String name) {
-        this.sprintName = name;
-    }
-    private void setSprintStartDate(String date) {
-        this.sprintStartDate = date;
-    }
-    private void setSprintEndDate(String date) {
-        this.sprintEndDate = date;
-    }
-    private void setSprintDescription(String description) {
-        this.sprintDescription = description;
-    }
+    @Autowired
+    private SprintService sprintService;
 
-    @GetMapping("/edit-sprint")
-    public String sprintForm(Model model) {
+    @Autowired
+    private DateUtils utils;
+
+    /**
+     * Show the edit-sprint page.
+     * @param id ID of the sprint to be edited
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Edit-sprint page
+     */
+    @GetMapping("/edit-sprint/{id}")
+    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception{
         /* Add sprint details to the model */
-        model.addAttribute("sprintLabel", "Sprint 1");
-        model.addAttribute("sprintName", this.sprintName);
-        model.addAttribute("sprintStartDate", this.sprintStartDate);
-        model.addAttribute("sprintEndDate", this.sprintEndDate);
-        model.addAttribute("sprintDescription", this.sprintDescription);
-
+        Sprint sprint = sprintService.getSprintById(id);
+        model.addAttribute("sprint", sprint);
+        model.addAttribute("sprintId", sprint.getId());
+        model.addAttribute("sprintLabel", sprint.getLabel());
+        model.addAttribute("sprintName", sprint.getName());
+        model.addAttribute("sprintStartDate", utils.toString(sprint.getStartDate()));
+        model.addAttribute("sprintEndDate", utils.toString(sprint.getStartDate()));
+        model.addAttribute("sprintDescription", sprint.getDescription());
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
     }
 
-    @PostMapping("/edit-sprint")
+    /**
+     * Post request for editing a sprint with a given ID.
+     * @param id ID of the sprint to be edited
+     * @param name (New) name of the sprint
+     * @param startDate (New) start date of the sprint
+     * @param endDate (New) end date of the sprint
+     * @param description (New) description of the sprint
+     * @return Details page
+     * @throws ParseException If date is of a different format than expected
+     */
+    @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
-            @AuthenticationPrincipal AuthState principal,
-            @RequestParam(value="sprintName") String sprintName,
-            @RequestParam(value="sprintStartDate") String sprintStartDate,
-            @RequestParam(value="sprintEndDate") String sprintEndDate,
-            @RequestParam(value="sprintDescription") String sprintDescription,
-            Model model
-    ) {
-        this.sprintName = sprintName;
-        this.sprintStartDate = sprintStartDate;
-        this.sprintEndDate = sprintEndDate;
-        this.sprintDescription = sprintDescription;
-        return "redirect:/edit-sprint";
+            @PathVariable("id") int id,
+            @RequestParam(value="sprintName") String name,
+            @RequestParam(value="sprintStartDate") String startDate,
+            @RequestParam(value="sprintEndDate") String endDate,
+            @RequestParam(value="sprintDescription") String description
+    ) throws Exception {
+
+        /* Set (new) sprint details to the corresponding sprint */
+        Sprint sprint = sprintService.getSprintById(id);
+        sprint.setSprintName(name);
+        sprint.setStartDate(utils.toDate(startDate));
+        sprint.setEndDate(utils.toDate(endDate));
+        sprint.setSprintDescription(description);
+        sprintService.saveSprint(sprint);
+
+        return "redirect:/project/" + id;
     }
 
 }
