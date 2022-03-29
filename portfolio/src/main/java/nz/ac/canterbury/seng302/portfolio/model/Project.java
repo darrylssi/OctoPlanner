@@ -1,20 +1,34 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
 @Entity // this is an entity, assumed to be in a table called Project
+@Table (name = "Project")
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @Column (nullable = false)
+    @Size (max = 50, message = "Project name cannot be more than 50 characters")
+    @NotBlank (message = "Project name is required")
     private String projectName;
+
+    @Size (max = 200, message = "Description cannot be more than 200 characters.")
     private String projectDescription;
+
+    @Column (nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date projectStartDate;
+
+    @Column (nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date projectEndDate;
 
     protected Project() {}
@@ -68,57 +82,61 @@ public class Project {
 
     /* Getters/Setters */
 
-    public int getId(){
+    public int getId() {
         return id;
     }
 
-    public String getName() {
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getProjectName() {
         return projectName;
     }
 
-    public void setName(String newName) {
-        this.projectName = newName;
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
-    public String getDescription(){
+    public String getProjectDescription() {
         return projectDescription;
     }
 
-    public void setDescription(String newDescription) {
-        this.projectDescription = newDescription;
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
+    }
+
+    public Date getProjectStartDate() {
+        return projectStartDate;
+    }
+
+    public void setProjectStartDate(Date projectStartDate) {
+        this.projectStartDate = projectStartDate;
+    }
+
+    public Date getProjectEndDate() {
+        return projectEndDate;
+    }
+
+    public void setProjectEndDate(Date projectEndDate) {
+        this.projectEndDate = projectEndDate;
     }
 
     /* Dates have string get/set methods to interact with view */
 
-    public Date getStartDate() {
-        return projectStartDate;
-    }
-
     public String getStartDateString() {
         return Project.dateToString(this.projectStartDate);
-    }
-
-    public void setStartDate(Date newStartDate) {
-        this.projectStartDate = newStartDate;
     }
 
     public void setStartDateString(String date) {
         this.projectStartDate = Project.stringToDate(date);
     }
 
-    public Date getEndDate() {
-        return projectEndDate;
-    }
-
     public String getEndDateString() {
         return Project.dateToString(this.projectEndDate);
     }
 
-    public void setEndDate(Date newEndDate) {
-        this.projectEndDate = newEndDate;
-    }
-
     public void setEndDateString(String date) {
-        this.projectStartDate = Project.stringToDate(date);
+        this.projectEndDate = Project.stringToDate(date);
     }
 }

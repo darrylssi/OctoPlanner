@@ -29,6 +29,10 @@ input {
     border: 1px solid black;
 }
 
+#element-description {
+    flex-grow: 1;
+}
+
 .form-button {
     padding: 10px 20px;
     font-size: large;
@@ -46,4 +50,8 @@ input {
 .save {
     background-color: #5e0202;
     color: white;
+}
+
+.buttons {
+    float: right;
 }

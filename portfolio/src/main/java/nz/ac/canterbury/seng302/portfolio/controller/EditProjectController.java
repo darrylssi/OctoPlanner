@@ -1,13 +1,22 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.Valid;
+import java.util.Date;
 
 
 /**
@@ -15,37 +24,77 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class EditProjectController {
-    /* Create default project. TODO: use database to check for this*/
-    Project project = new Project("Project 2022", "", "04/Mar/2022",
-                                  "04/Nov/2022");
 
-    @GetMapping("/edit-project")
-    public String projectForm(Model model) {
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private DateUtils utils;
+
+    /**
+     * Show the edit-project page.
+     * @param id ID of the project to be edited
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Edit-project page
+     */
+    @GetMapping("/edit-project/{id}")
+    public String projectForm(@PathVariable("id") int id, Model model) {
+
         /* Add project details to the model */
-        model.addAttribute("projectName", project.getName());
-        model.addAttribute("projectStartDate", project.getStartDateString());
-        model.addAttribute("projectEndDate", project.getEndDateString());
-        model.addAttribute("projectDescription", project.getDescription());
-
+        try {
+            Project project = projectService.getProjectById(id);
+            model.addAttribute("id", id);
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
+        }
 
         /* Return the name of the Thymeleaf template */
         return "editProject";
     }
 
-    @PostMapping("/edit-project")
+    /**
+     * Post request for editing a project with a given ID.
+     * @param id ID of the project to be edited
+     * @param projectName (New) name of the project
+     * @param projectStartDate (New) project start date
+     * @param projectEndDate (New) project end date
+     * @param projectDescription (New) project description
+     * @return Details page
+     * @throws Exception If the date cannot be parsed
+     */
+    @PostMapping("/edit-project/{id}")
     public String projectSave(
-            @AuthenticationPrincipal AuthState principal,
+            @Valid Project project,
+            BindingResult result,
+            @PathVariable("id") int id,
             @RequestParam(value="projectName") String projectName,
-            @RequestParam(value="projectStartDate") String projectStartDate,
-            @RequestParam(value="projectEndDate") String projectEndDate,
+            @RequestParam(value="projectStartDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectStartDate,
+            @RequestParam(value="projectEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectEndDate,
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
-    ) {
-        project.setName(projectName);
-        project.setStartDateString(projectStartDate);
-        project.setEndDateString(projectEndDate);
-        project.setDescription(projectDescription);
-        return "redirect:/edit-project";
+    ) throws Exception {
+
+        /* Return editProject template with user input */
+        if (result.hasErrors()) {
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            return "editProject";
+        }
+
+        /* Set (new) project details to the corresponding project */
+        Project newProject = projectService.getProjectById(id);
+        newProject.setProjectName(projectName);
+        newProject.setProjectStartDate(projectStartDate);
+        newProject.setProjectEndDate(projectEndDate);
+        newProject.setProjectDescription(projectDescription);
+        projectService.saveProject(newProject);
+
+        /* Redirect to details page when done */
+        return "redirect:/project/" + id;
     }
 
 }
