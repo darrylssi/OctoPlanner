@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.identityprovider.model;
 import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -33,6 +34,11 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated
     private Set<UserRole> roles;
+
+//    @Transient
+//    public UserRole highestRole() {
+//        return roles.stream().max(Comparator.naturalOrder()).orElse(null);
+//    }
 
     protected User() {
     }
