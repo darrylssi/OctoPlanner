@@ -15,10 +15,6 @@ tbody, tr:last-of-type {
     border-bottom: 2px solid #b70f0a;
 }
 
-thead {
-    border-radius: 6px 6px 0 0;
-}
-
 th {
     background-color: #b70f0a;
     color: #ffffff;
@@ -33,9 +29,18 @@ th:last-child {
     border-radius:0 10px 0 0;
 }
 
-td, th {
+td {
     padding: 12px 15px;
     height: 50px;
+}
+
+th {
+    height: 50px;
+}
+
+th a {
+    display: block;
+    padding: 12px 15px;
 }
 
 tr:nth-child(odd) {

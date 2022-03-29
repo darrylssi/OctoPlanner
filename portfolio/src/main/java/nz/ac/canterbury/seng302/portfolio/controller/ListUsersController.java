@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ListUsersController {
 
+    private final int LIMIT = 10;
+
     @Autowired
     private UserAccountClientService userAccountClientService;
 
@@ -26,27 +28,22 @@ public class ListUsersController {
     public String GetListOfUsers(
             @RequestParam(name="page", defaultValue="1") int page,
             @RequestParam(name="orderBy", defaultValue="firstName") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
-            @RequestParam(name="dir", defaultValue="asc") String dir,
+            @RequestParam(name="asc", defaultValue="true") boolean isAscending,
             Model model
     ) {
-        int limit = 10;
-
         /* Get users by page */
-        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, limit, orderBy, dir);
+        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, LIMIT, orderBy, isAscending);
 
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
-        model.addAttribute("dir", dir);
-        model.addAttribute("reverseDir", dir.equals("asc") ? "desc" : "asc");
+        model.addAttribute("dir", isAscending);
+        model.addAttribute("reverseDir", !isAscending);
 
 
         /* Total number of pages */
-        int totalPages = (users.getResultSetSize() + limit - 1) / limit;
+        int totalPages = (users.getResultSetSize() + LIMIT - 1) / LIMIT;
         model.addAttribute("totalPages", totalPages);
-
-        System.out.println(totalPages);
-        System.out.println(users.getResultSetSize());
 
         return "users";
     }

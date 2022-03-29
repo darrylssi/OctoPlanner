@@ -173,14 +173,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         int limit = request.getLimit();
         int offset = request.getOffset();
         String orderBy = request.getOrderBy();
-        String dir = request.getDir();
+        boolean isAscending = request.getIsAscendingOrder();
         List<User> allUsers = userService.getAllUsers();
 
         List<User> users;
         if (!orderBy.equals("role")) {
-            users = userService.getUsersPaginated(offset, limit, orderBy, dir);
+            users = userService.getUsersPaginated(offset, limit, orderBy, isAscending);
         } else {
-            users = filterRoles(allUsers, offset, limit, dir);
+            users = filterRoles(allUsers, offset, limit, isAscending);
         }
 
         List<UserResponse> userResponses = new ArrayList<>();
@@ -200,44 +200,44 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
 
-    /* Manually sort and page roles list */
-    private List<User> filterRoles(List<User> users, int page, int limit, String dir) {
-        List<User> admins = new ArrayList<>();
-        List<User> teachers = new ArrayList<>();
-        List<User> students = new ArrayList<>();
+    /* Manually sort roles list, return only those that are to be displayed on the page */
+    private List<User> filterRoles(List<User> users, int page, int limit, boolean isAscending) {
+        List<User> first = new ArrayList<>();
+        List<User> middle = new ArrayList<>();
+        List<User> last = new ArrayList<>();
 
-        if (dir.equals("asc")) {
+        if (isAscending) { /* Take course admins first, then teachers, then students */
             for (User user : users) {
                 if (user.getRoles().contains(UserRole.COURSE_ADMINISTRATOR)) {
-                    admins.add(user);
+                    first.add(user);
                 } else if (user.getRoles().contains(UserRole.TEACHER)) {
-                    teachers.add(user);
+                    middle.add(user);
                 } else {
-                    students.add(user);
+                    last.add(user);
                 }
             }
-        } else {
+        } else { /* Take students first, then teachers, then course admins */
             for (User user : users) {
                 if (user.getRoles().contains(UserRole.STUDENT)) {
-                    admins.add(user);
+                    first.add(user);
                 } else if (user.getRoles().contains(UserRole.TEACHER)) {
-                    teachers.add(user);
+                    middle.add(user);
                 } else {
-                    students.add(user);
+                    last.add(user);
                 }
             }
         }
 
-        List<User> sorted = new ArrayList<>(admins);
-        sorted.addAll(teachers);
-        sorted.addAll(students);
+        List<User> sorted = new ArrayList<>(first);
+        sorted.addAll(middle);
+        sorted.addAll(last);
 
+        /* Get the sublist that is needed for the page */
         List<User> filtered;
-
-        if ((page+1)*limit >= sorted.size()) {
-            filtered = sorted.subList((page)*limit, sorted.size()-1);
+        if ((page + 1) * limit >= sorted.size()) {  // if there are fewer users than needed for the page
+            filtered = sorted.subList(page * limit, sorted.size() - 1);
         } else {
-            filtered = sorted.subList((page)*limit, (page+1)*limit);
+            filtered = sorted.subList(page * limit, (page + 1) * limit);
         }
 
         return filtered;

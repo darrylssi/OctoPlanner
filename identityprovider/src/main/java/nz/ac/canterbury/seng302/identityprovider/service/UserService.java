@@ -32,12 +32,12 @@ public class UserService {
         return users;
     }
 
-    public List<User> getUsersPaginated(int page, int size, String orderBy, String dir) {
+    public List<User> getUsersPaginated(int page, int size, String orderBy, boolean isAscending) {
         Pageable pageable;
-        if (dir.equals("desc")) {
-            pageable = PageRequest.of(page, size, Sort.by(orderBy).descending());
-        } else {
+        if (isAscending) {
             pageable = PageRequest.of(page, size, Sort.by(orderBy));
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(orderBy).descending());
         }
         return userRepository.findAll(pageable);
     }
