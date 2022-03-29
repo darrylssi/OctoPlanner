@@ -31,10 +31,18 @@ public class EditUserController {
                 .findFirst()
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
-        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) &&
-                !currentUserId.equals("NOT FOUND")));
+
+        boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
+                !currentUserId.equals("NOT FOUND"));
+        model.addAttribute("isCurrentUser", isCurrentUser);
         
-        if(userResponse.hasCreated()) {
+        if(!userResponse.hasCreated()) {
+            //TODO: send to error page
+            model.addAttribute("editErrorMessage", "Invald id");
+        } else if(!isCurrentUser) {
+            //TODO: send to error page
+            model.addAttribute("editErrorMessage", "You may not edit other users");
+        } else {
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -43,9 +51,6 @@ public class EditUserController {
             model.addAttribute("userId", Integer.toString(id));
             model.addAttribute("dateCreated",
                     ProfilePageController.getDateCreated(userResponse.getCreated()));
-        } else {
-            //TODO: send to error page
-            model.addAttribute("editErrorMessage", "Invald id");
         }
     }
 
@@ -99,7 +104,8 @@ public class EditUserController {
         return "editUser";
     }
 
-    @PostMapping("/users/{id}/change-password")
+    @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
+                                               "confirmPassword"})
     public String changePassword(
             User user,
             @PathVariable int id,
@@ -118,7 +124,7 @@ public class EditUserController {
             return "editUser";
         }
         if(!newPassword.equals(confirmPassword)) {
-            model.addAttribute("pwErrorMessage", "These passwords do not match");
+            model.addAttribute("pwErrorMessage", "New and confirm passwords do not match");
             return "editUser";
         }
         try {
