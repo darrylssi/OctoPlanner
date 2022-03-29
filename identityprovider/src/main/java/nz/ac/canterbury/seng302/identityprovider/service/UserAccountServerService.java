@@ -16,10 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 
 @GrpcService
@@ -172,8 +174,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         int offset = request.getOffset();
         String orderBy = request.getOrderBy();
         String dir = request.getDir();
-        List<User> users = userService.getUsersPaginated(offset, limit, orderBy, dir);
         List<User> allUsers = userService.getAllUsers();
+
+        List<User> users;
+        if (!orderBy.equals("role")) {
+            users = userService.getUsersPaginated(offset, limit, orderBy, dir);
+        } else {
+            users = filterRoles(allUsers, offset, limit, dir);
+        }
 
         List<UserResponse> userResponses = new ArrayList<>();
 
@@ -190,6 +198,51 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }
+
+
+    /* Manually sort and page roles list */
+    private List<User> filterRoles(List<User> users, int page, int limit, String dir) {
+        List<User> admins = new ArrayList<>();
+        List<User> teachers = new ArrayList<>();
+        List<User> students = new ArrayList<>();
+
+        if (dir.equals("asc")) {
+            for (User user : users) {
+                if (user.getRoles().contains(UserRole.COURSE_ADMINISTRATOR)) {
+                    admins.add(user);
+                } else if (user.getRoles().contains(UserRole.TEACHER)) {
+                    teachers.add(user);
+                } else {
+                    students.add(user);
+                }
+            }
+        } else {
+            for (User user : users) {
+                if (user.getRoles().contains(UserRole.STUDENT)) {
+                    admins.add(user);
+                } else if (user.getRoles().contains(UserRole.TEACHER)) {
+                    teachers.add(user);
+                } else {
+                    students.add(user);
+                }
+            }
+        }
+
+        List<User> sorted = new ArrayList<>(admins);
+        sorted.addAll(teachers);
+        sorted.addAll(students);
+
+        List<User> filtered;
+
+        if ((page+1)*limit >= sorted.size()) {
+            filtered = sorted.subList((page)*limit, sorted.size()-1);
+        } else {
+            filtered = sorted.subList((page)*limit, (page+1)*limit);
+        }
+
+        return filtered;
+    }
+
 
     /**
      * <p>Assigns a role to the given user.</p>

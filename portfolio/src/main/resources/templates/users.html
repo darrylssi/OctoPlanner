@@ -46,7 +46,7 @@
             <a th:href="@{'/users/?page=1&orderBy=' + ${orderBy} + '&dir=' + ${dir}}"> First </a>
         </span>
 <!--        add link to all pages -->
-        <span class="pages" th:each="i: ${#numbers.sequence(1, 7)}">
+        <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
             <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&dir=' + ${dir}}" th:if="${page != i}"
                 class="otherPages">[[${i}]]</a>
             <span th:unless="${page != i}" class="currentPage">[[${i}]]</span>
