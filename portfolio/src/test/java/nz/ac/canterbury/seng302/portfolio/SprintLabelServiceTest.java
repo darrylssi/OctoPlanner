@@ -62,21 +62,33 @@ public class SprintLabelServiceTest {
 
     @Test
     void refreshAllLabels_labelsAssignedProperlyAndNextLabel() throws ParseException {
-        when(projectService.getAllProjects()).thenReturn(Arrays.asList(testProject1, testProject2));
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2));
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_2)).thenReturn(List.of(sprint3));
-
         sprint3.setParentProjectId(PROJECT_ID_2);
         sprint3.setStartDate(utils.toDate("2023-04-02"));
         sprint3.setEndDate(utils.toDate("2022-05-01"));
 
+        when(projectService.getAllProjects()).thenReturn(Arrays.asList(testProject1, testProject2));
+        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2));
+        when(sprintService.getSprintsOfProjectById(PROJECT_ID_2)).thenReturn(Arrays.asList(sprint3));
+        // DO NOT change this (or anything else) to List.of(), even though Intellij wants you to, because it will break things
+        // see https://stackoverflow.com/questions/46579074/what-is-the-difference-between-list-of-and-arrays-aslist
+
         sprintLabelService.refreshAllSprintLabels();
+
         Assertions.assertEquals("sprint1", sprint1.getLabel());
         Assertions.assertEquals("sprint2", sprint2.getLabel());
         Assertions.assertEquals("sprint1", sprint3.getLabel());
 
         Assertions.assertEquals("sprint3", sprintLabelService.nextLabel(PROJECT_ID_1));
         Assertions.assertEquals("sprint2", sprintLabelService.nextLabel(PROJECT_ID_2));
+    }
+
+    @Test
+    void refreshLabelsOneSprint_labelAssignedProperly() {
+        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
+        sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
+
+        Assertions.assertEquals("sprint1", sprint1.getLabel());
+        Assertions.assertEquals("sprint2", sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 
     @Test
