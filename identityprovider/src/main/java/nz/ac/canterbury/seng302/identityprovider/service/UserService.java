@@ -5,6 +5,10 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +30,23 @@ public class UserService {
         List<User> users = new ArrayList<>();
         userRepository.findAll().forEach(user -> users.add(user));
         return users;
+    }
+
+    public List<User> getUsersPaginated(int page, int size, String orderBy, boolean isAscending) {
+        Pageable pageable;
+        if (isAscending) {
+            if (orderBy.equals("name"))
+                pageable = PageRequest.of(page, size, Sort.by("firstName").and(Sort.by("middleName")).and(Sort.by("lastName")));
+            else
+                pageable = PageRequest.of(page, size, Sort.by(orderBy));
+        } else {
+            if (orderBy.equals("name"))
+                pageable = PageRequest.of(page, size, Sort.by("firstName").descending()
+                        .and(Sort.by("middleName")).descending().and(Sort.by("lastName")).descending());
+            else
+                pageable = PageRequest.of(page, size, Sort.by(orderBy).descending());
+        }
+        return userRepository.findAll(pageable);
     }
 
     /**
@@ -105,4 +126,5 @@ public class UserService {
     {
         userRepository.deleteById(id);
     }
+    
 }

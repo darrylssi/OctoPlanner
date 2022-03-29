@@ -16,10 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 
 @GrpcService
@@ -168,9 +170,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     public void getPaginatedUsers(GetPaginatedUsersRequest request, StreamObserver<PaginatedUsersResponse> responseObserver) {
         logger.info("getPaginatedUsers has been called");
         PaginatedUsersResponse.Builder reply = PaginatedUsersResponse.newBuilder();
+        int limit = request.getLimit();
+        int offset = request.getOffset();
+        String orderBy = request.getOrderBy();
+        boolean isAscending = request.getIsAscendingOrder();
+        List<User> allUsers = userService.getAllUsers();
 
         List<User> users;
-        users = userService.getAllUsers();
+        if (!orderBy.equals("role")) {
+            users = userService.getUsersPaginated(offset, limit, orderBy, isAscending);
+        } else {
+            users = filterRoles(allUsers, offset, limit, isAscending);
+        }
 
         List<UserResponse> userResponses = new ArrayList<>();
 
@@ -182,11 +193,56 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         reply
                 .addAllUsers(userResponses)
-                .setResultSetSize(users.size());
+                .setResultSetSize(allUsers.size());
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }
+
+
+    /* Manually sort roles list, return only those that are to be displayed on the page */
+    private List<User> filterRoles(List<User> users, int page, int limit, boolean isAscending) {
+        List<User> first = new ArrayList<>();
+        List<User> middle = new ArrayList<>();
+        List<User> last = new ArrayList<>();
+
+        if (isAscending) { /* Take course admins first, then teachers, then students */
+            for (User user : users) {
+                if (user.getRoles().contains(UserRole.COURSE_ADMINISTRATOR)) {
+                    first.add(user);
+                } else if (user.getRoles().contains(UserRole.TEACHER)) {
+                    middle.add(user);
+                } else {
+                    last.add(user);
+                }
+            }
+        } else { /* Take students first, then teachers, then course admins */
+            for (User user : users) {
+                if (user.getRoles().contains(UserRole.STUDENT)) {
+                    first.add(user);
+                } else if (user.getRoles().contains(UserRole.TEACHER)) {
+                    middle.add(user);
+                } else {
+                    last.add(user);
+                }
+            }
+        }
+
+        List<User> sorted = new ArrayList<>(first);
+        sorted.addAll(middle);
+        sorted.addAll(last);
+
+        /* Get the sublist that is needed for the page */
+        List<User> filtered;
+        if ((page + 1) * limit >= sorted.size()) {  // if there are fewer users than needed for the page
+            filtered = sorted.subList(page * limit, sorted.size());
+        } else {
+            filtered = sorted.subList(page * limit, (page + 1) * limit);
+        }
+
+        return filtered;
+    }
+
 
     /**
      * <p>Assigns a role to the given user.</p>
