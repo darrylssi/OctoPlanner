@@ -71,6 +71,15 @@ public class ProfilePageController {
             model.addAttribute("fullName", getFullName(
                     user.getFirstName(), user.getMiddleName(),  user.getLastName()));
             model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
+            String roles = "";
+            for (int i = 0; i < user.getRolesCount(); i++) {
+                String roleString = user.getRoles(i).toString();
+                roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+            }
+            if (roles.length() > 2) {
+                roles = roles.substring(0, roles.length() - 2);
+            }
+            model.addAttribute("roles", roles);
         } else {
             errors.add("Invalid ID");
         }
