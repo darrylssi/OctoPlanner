@@ -33,13 +33,15 @@
                 <div class="title-date" th:text="${subtitle}" />
             </div>
             <div class="dropdown">
-<!--                TODO use the actual user's profile image-->
+                <!-- TODO use the actual user's profile image -->
                 <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
                 </button>
                 <div id="userMenu" class="dropdown-content">
-                    <a href="/users/current"><buttton>Profile</buttton></a>
+                    <a href="/users/current">
+                        <button th:text="Profile" />
+                    </a>
                     <form th:action="@{/logout}" method="post">
-                        <button type="submit"> Logout </button>
+                        <button type="submit" th:text="Logout" />
                     </form>
                 </div>
             </div>

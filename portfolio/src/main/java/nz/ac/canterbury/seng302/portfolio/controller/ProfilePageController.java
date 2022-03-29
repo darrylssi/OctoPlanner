@@ -49,6 +49,7 @@ public class ProfilePageController {
      */
     @GetMapping("/users/{id}")
     public String GetProfile(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
     ) {
@@ -57,7 +58,14 @@ public class ProfilePageController {
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
 
-        if(user.isInitialized()) {
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
+
+        if(user.hasCreated()) {
             model.addAttribute("profileInfo", user);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", getFullName(
