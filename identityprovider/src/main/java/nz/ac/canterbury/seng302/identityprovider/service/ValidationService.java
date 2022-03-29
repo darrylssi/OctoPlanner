@@ -257,7 +257,8 @@ public class ValidationService {
                     .build();
         }
 
-        String regex = "^(.+)/(.+)$";
+        //String regex = "^(.+)/(.+)(,(.+)/(.+))$";
+        String regex = "^([a-zA-Z]+)/([a-zA-Z]+)(\s*,\s*([a-zA-Z]+)/([a-zA-Z]+))*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(pronouns);
 
