@@ -50,6 +50,8 @@ public class Sprint {
         return  id;
     }
 
+    public void setParentProjectId ( int parentProjectId ) { this.parentProjectId = parentProjectId; }
+
     public int getParentProjectId() {
         return parentProjectId;
     }
