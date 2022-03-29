@@ -440,7 +440,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
      * @return True or false whether a "/" is found in the string
      */
     private Boolean validatePronouns(String pronouns) {
-        String regex = "^(.+)/(.+)$";
+        String regex = "(^(.+)/(.+)$|^$)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(pronouns);
         return matcher.matches();
