@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.Timestamp;
+
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserAccountServiceGrpc.UserAccountServiceImplBase;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +17,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @GrpcService
-public class UserAccountServerService extends UserAccountServiceImplBase {
+public class UserAccountServerService extends UserAccountServiceGrpc.UserAccountServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
@@ -58,6 +59,8 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         User user = new User(request.getUsername(), request.getPassword(), request.getFirstName(),
                 request.getMiddleName(), request.getLastName(), request.getNickname(),
                 request.getBio(), request.getPersonalPronouns(), request.getEmail());
+        // All users are initially given a `student` role
+        user.addRole(UserRole.STUDENT);
 
         // Hash password
         String hashedPassword = encoder.encode(user.getPassword());
@@ -140,7 +143,9 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
     }
 
     /**
-     * Gets a user from the database by its id and returns it as a UserResponse to the portfolio
+     * Gets a user from the database by its id and returns it as a UserResponse to the portfolio.
+     * 
+     * Gives a Status.NOT_FOUND error if the user ID is invalid.
      * @param request An object containing the id of the user to retrieve
      */
     @Override
@@ -149,10 +154,14 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         UserResponse.Builder reply = UserResponse.newBuilder();
 
         User user = repository.findById(request.getId());
-        setUserResponse(user, reply);
+        if (user != null) {
+            setUserResponse(user, reply);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+        }
 
-        responseObserver.onNext(reply.build());
-        responseObserver.onCompleted();
     }
 
     @Override
@@ -179,6 +188,66 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * <p>Assigns a role to the given user.</p>
+     * 
+     * Returns true if the user didn't already have this role.
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
+    @Override
+    public void addRoleToUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
+        logger.info("addRoleToUser() has been called");
+
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+        try {
+            // If the user didn't have this role, add it and return true
+            // Otherwise does nothing, returning false.
+            boolean success = userService.addRoleToUser(userId, role);
+            reply.setIsSuccess(success);
+            // TODO: Uncomment when sprint finishes, I don't wanna require a maven republish a day before it's over
+            // if (success)
+            //     reply.setMessage("Role successfully add");
+            // else
+            //     reply.setMessage("Couldn't add role: User already had this role.");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
+        }
+    }
+
+    /**
+     * <p>Removes a role from the given user.</p>
+     * 
+     * Returns false if the user didn't already have this role.
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
+    @Override
+    public void removeRoleFromUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
+        logger.info("removeRoleFromUser() has been called");
+
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+        try {
+            // If the user had this role, remove it and return true
+            // Otherwise does nothing, returning false.
+            boolean success = userService.removeRoleFromUser(userId, role);
+            reply.setIsSuccess(success);
+            // if (success)
+            //     reply.setMessage("Role successfully removed");
+            // else
+            //     reply.setMessage("Couldn't remove role: User didn't have this role");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
+        }
+    }
     /**
      * Changes a users details
      * @param request Contains the details of the user to change, and what to change their details to
@@ -462,7 +531,7 @@ public class UserAccountServerService extends UserAccountServiceImplBase {
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
                 .setProfileImagePath("/") // TODO Path to users profile image once implemented
-                .addRoles(STUDENT)           // TODO Get role(s) from database once implemented
+                .addAllRoles(user.getRoles())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
                         .setSeconds(user.getCreated().getEpochSecond())
                         .setNanos(user.getCreated().getNano()));

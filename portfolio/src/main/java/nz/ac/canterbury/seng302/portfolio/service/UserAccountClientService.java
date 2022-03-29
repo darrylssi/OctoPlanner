@@ -4,6 +4,10 @@ import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.springframework.stereotype.Service;
 
+import io.grpc.Status;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
+
 @Service
 public class UserAccountClientService {
 
@@ -45,13 +49,18 @@ public class UserAccountClientService {
     /**
      * Gets a user account from the identity provider with the specified id
      * @param id The id of the user account to get
-     * @return A UserResponse with the attributes of the requested user account
+     * @return A UserResponse with the attributes of the requested user account,
+     * or <code>null</code> if the user doesn't exist
      */
     public UserResponse getUserAccountById(final int id) {
         GetUserByIdRequest userRequest = GetUserByIdRequest.newBuilder()
                 .setId(id)
                 .build();
-        return userAccountStub.getUserAccountById(userRequest);
+        try {
+            return userAccountStub.getUserAccountById(userRequest);
+        } catch (StatusRuntimeException e) {
+            return null;
+        }
     }
 
     /**
@@ -70,6 +79,47 @@ public class UserAccountClientService {
         return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
     }
 
+    /**
+     * Assigns a role to the given user.
+     * 
+     * @param userId The user's ID
+     * @param role The enum object of the role getting added.
+     * @return <code>true</code> if the user didn't have this role before, but does now.
+     * @throws StatusException <code>NOT_FOUND</code> if the user ID points to no one.
+     */
+    public boolean addRoleToUser(final int userId, final UserRole role) throws StatusException {
+        ModifyRoleOfUserRequest addRoleRequest = ModifyRoleOfUserRequest.newBuilder()
+            .setUserId(userId)
+            .setRole(role)
+            .build();
+        try {
+            return userAccountStub.addRoleToUser(addRoleRequest).getIsSuccess();
+        } catch (StatusRuntimeException e) {
+            // Convert to a forced-to-catch exception
+            throw Status.fromThrowable(e).asException();
+        }
+    }
+
+    /**
+     * Removes a role from the given user.
+     * 
+     * @param userId The user's ID
+     * @param role The enum object of the role getting removed.
+     * @return <code>true</code> if the user had this role, but doesn't now.
+     * @throws StatusException <code>NOT_FOUND</code> if the user ID points to no one.
+     */
+    public boolean removeRoleFromUser(final int userId, final UserRole role) throws StatusException {
+        ModifyRoleOfUserRequest removeRoleRequest = ModifyRoleOfUserRequest.newBuilder()
+            .setUserId(userId)
+            .setRole(role)
+            .build();
+        try {
+            return userAccountStub.removeRoleFromUser(removeRoleRequest).getIsSuccess();
+        } catch (StatusRuntimeException e) {
+            // Convert to a forced-to-catch exception
+            throw Status.fromThrowable(e).asException();
+        }
+    }
     /**
      * Sends an EditUserRequest to the identity provider
      * @param userId The id of the user to edit
