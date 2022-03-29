@@ -15,7 +15,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
 
 @Controller
@@ -24,17 +23,8 @@ public class EditUserController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    @GetMapping("/users/{id}/edit")
-    public String edit(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable("id") int id,
-            User user,
-            Model model
-    ) {
+    private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
-
-        ArrayList<String> errors = new ArrayList<>();
-        model.addAttribute("errors", errors);
 
         String currentUserId = principal.getClaimsList().stream()
                 .filter(claim -> claim.getType().equals("nameid"))
@@ -54,14 +44,26 @@ public class EditUserController {
             model.addAttribute("dateCreated",
                     ProfilePageController.getDateCreated(userResponse.getCreated()));
         } else {
-            errors.add("Invalid ID");
+            //TODO: send to error page
+            model.addAttribute("editErrorMessage", "Invald id");
         }
+    }
+
+    @GetMapping("/users/{id}/edit")
+    public String edit(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            User user,
+            Model model
+    ) {
+        editHandler(model, id, principal);
         return "editUser";
     }
 
     @PostMapping("/users/{id}/edit")
     public String edit(
             User user,
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
             @RequestParam(name="firstName") String firstName,
@@ -73,7 +75,8 @@ public class EditUserController {
             @RequestParam(name="email") String email,
             Model model
     ) {
-        
+        editHandler(model, id, principal);
+
         /* Set (new) user details to the corresponding user */
         EditUserResponse editReply;
         if (result.hasErrors()) {
@@ -100,12 +103,14 @@ public class EditUserController {
     public String changePassword(
             User user,
             @PathVariable int id,
+            @AuthenticationPrincipal AuthState principal,
             BindingResult result,
             @RequestParam(name="oldPassword") String oldPassword,
             @RequestParam(name="password") String newPassword,
             @RequestParam(name="confirmPassword") String confirmPassword,
             Model model
     ) {
+        editHandler(model, id, principal);
         
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
@@ -114,6 +119,7 @@ public class EditUserController {
         }
         if(!newPassword.equals(confirmPassword)) {
             model.addAttribute("pwErrorMessage", "These passwords do not match");
+            return "editUser";
         }
         try {
             changeReply = userAccountClientService.changeUserPassword(id, oldPassword, newPassword);

@@ -67,13 +67,13 @@
                     <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" th:value="${profileInfo.getBio}" maxlength="200"/><br>
                     <span th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}" th:errorclass="error" />
                 </div>
+                <p th:text="${editErrorMessage}" id="error"/>
+                <br/>
             </div>
             <br/>
             <div class="centre-box">
-                <p th:text="${editErrorMessage}" id="error"/>
-                <br/>
                 <button class="form-button cancel" type="button">
-                    <a th:href="@{|'/users/${userId}'|}">Cancel</a>
+                    <a th:href="@{|/users/${userId}|}">Cancel</a>
                 </button>
                 <button class="form-button save" type="submit">Change Details</button>
             </div>
@@ -100,10 +100,10 @@
                        placeholder="Password" th:field="*{confirmPassword}">
                 <span th:errorclass="error" th:if="${#fields.hasErrors('passwordsEqual')}" th:errors="*{passwordsEqual}"></span>
             </div>
+            <p th:text="${pwErrorMessage}" id="error"/>
+            <br/>
             </div>
             <div class="centre-box">
-                <p th:text="${pwErrorMessage}" id="error"/>
-                <br/>
                 <button class="form-button save" type="submit">Change Password</button>
             </div>
         </form>
