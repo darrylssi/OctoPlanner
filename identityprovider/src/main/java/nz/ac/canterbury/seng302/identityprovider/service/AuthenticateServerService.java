@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import java.util.List;
+
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -9,6 +11,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticationServiceGrpc.AuthenticationServiceImplBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +25,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
     @Autowired
     private UserService userService;
-
-    private final String ROLE_OF_USER = "student"; // Puce teams may want to change this to "teacher" to test some functionality
 
     private JwtTokenUtil jwtTokenService = JwtTokenUtil.getInstance();
 
@@ -50,7 +51,11 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
             .setSuccess(false)
             .setToken("");
         } else if (request.getUsername().equals(user.getUsername())) {
-            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
+            // Convert all the roles into a comma-separated string of roles
+            List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
+            String commaSeparatedUserRoles = String.join(",", userRoles);
+            commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
+            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
             reply
                 .setEmail(user.getEmail())
                 .setFirstName(user.getFirstName())
