@@ -17,7 +17,7 @@
     <table>
         <thead>
         <tr>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=name&asc=' + ${reverseDir}}"> First name
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=name&asc=' + ${reverseDir}}"> Name
                 <span th:if="${orderBy == 'name'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
             <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&asc=' + ${reverseDir}}"> Username
                 <span th:if="${orderBy == 'username'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
