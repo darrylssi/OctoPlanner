@@ -231,7 +231,8 @@ public class ValidationService {
                     .build();
         }
 
-        String regex = "^(.+)@(.+)$";   // This regex can be changed to be more complex for more in-depth validation
+        String regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+$";
+
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
 
