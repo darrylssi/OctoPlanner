@@ -65,42 +65,27 @@ public class DetailsController {
     /**
      * Deletes a sprint and redirects back to the project view
      * @param principal used to check if the user is authorised to delete sprints
-     * @param projectId the id of the project to redirect back to
      * @param sprintId the id of the sprint to be deleted
      * @return a redirect to the project view
      */
-    @DeleteMapping("project/{projectId}/delete/{sprintId}")
+    @DeleteMapping("/delete-sprint/{sprintId}")
     @ResponseBody
     public ResponseEntity<String> deleteSprint(
             @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name="projectId") int projectId,
-            @PathVariable(name="sprintId") int sprintId,
-            @RequestParam(name="role", required=false) String debugRole
+            @PathVariable(name="sprintId") int sprintId
             ) {
 
         // Check if the user is authorised to delete sprints
-        // TODO remove debug role option
-        if (debugRole != null) {
-            if(debugRole.contains("teacher")) {
-                try {
-                    sprintService.deleteSprint(sprintId);
-                    return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
-                } catch (Exception e) {
-                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-            }
-        } else {
-            if(principal.getClaimsList().stream()
-                    .filter(claim -> claim.getType().equals("role"))
-                    .findFirst()
-                    .map(ClaimDTO::getValue)
-                    .orElse("NOT FOUND").contains("teacher")) {
-                try {
-                    sprintService.deleteSprint(sprintId);
-                    return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
-                } catch (Exception e) {
-                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                }
+        if(principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("role"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND").contains("teacher")) {
+            try {
+                sprintService.deleteSprint(sprintId);
+                return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
