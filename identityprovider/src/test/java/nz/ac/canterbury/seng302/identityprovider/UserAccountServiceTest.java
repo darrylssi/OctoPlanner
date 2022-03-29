@@ -269,7 +269,7 @@ public class UserAccountServiceTest {
         assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
     }
 
-    
+    @Test
     void testRegister_whenMissingUsername() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
                 .setUsername("")

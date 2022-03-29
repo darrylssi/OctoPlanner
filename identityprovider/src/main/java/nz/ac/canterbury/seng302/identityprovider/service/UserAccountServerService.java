@@ -204,12 +204,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         try {
             // If the user didn't have this role, add it and return true
             // Otherwise does nothing, returning false.
-            reply.setIsSuccess(userService.addRoleToUser(userId, role));
+            boolean success = userService.addRoleToUser(userId, role);
+            reply.setIsSuccess(success);
+            // TODO: Uncomment when sprint finishes, I don't wanna require a maven republish a day before it's over
+            // if (success)
+            //     reply.setMessage("Role successfully add");
+            // else
+            //     reply.setMessage("Couldn't add role: User already had this role.");
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
         }
     }
 
@@ -229,12 +235,17 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         try {
             // If the user had this role, remove it and return true
             // Otherwise does nothing, returning false.
-            reply.setIsSuccess(userService.removeRoleFromUser(userId, role));
+            boolean success = userService.removeRoleFromUser(userId, role);
+            reply.setIsSuccess(success);
+            // if (success)
+            //     reply.setMessage("Role successfully removed");
+            // else
+            //     reply.setMessage("Couldn't remove role: User didn't have this role");
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
         }
     }
     /**
