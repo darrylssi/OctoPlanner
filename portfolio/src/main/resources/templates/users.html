@@ -17,8 +17,8 @@
     <table>
         <thead>
         <tr>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=firstName&asc=' + ${reverseDir}}"> First name
-                <span th:if="${orderBy == 'firstName'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=name&asc=' + ${reverseDir}}"> First name
+                <span th:if="${orderBy == 'name'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
             <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&asc=' + ${reverseDir}}"> Username
                 <span th:if="${orderBy == 'username'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
             <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&asc=' + ${reverseDir}}"> Alias
@@ -32,7 +32,7 @@
             <td colspan="2"> No users found </td>
         </tr>
         <tr th:each="user : ${users}">
-            <td><span th:text="${user.getFirstName()}"> Name </span></td>
+            <td><span th:text="${user.getFirstName() +' '+ user.getMiddleName() + ' ' + user.getLastName()}"> Name </span></td>
             <td><span th:text="${user.getUsername()}"> Username </span></td>
             <td><span th:text="${user.getNickname()}"> Alias </span></td>
             <td><span th:text="${user.getRolesList()}"> Roles </span></td>

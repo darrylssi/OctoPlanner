@@ -235,7 +235,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         /* Get the sublist that is needed for the page */
         List<User> filtered;
         if ((page + 1) * limit >= sorted.size()) {  // if there are fewer users than needed for the page
-            filtered = sorted.subList(page * limit, sorted.size() - 1);
+            filtered = sorted.subList(page * limit, sorted.size());
         } else {
             filtered = sorted.subList(page * limit, (page + 1) * limit);
         }

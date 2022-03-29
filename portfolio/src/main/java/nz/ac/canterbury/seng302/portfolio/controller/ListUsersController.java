@@ -27,12 +27,12 @@ public class ListUsersController {
     @GetMapping("/users")
     public String GetListOfUsers(
             @RequestParam(name="page", defaultValue="1") int page,
-            @RequestParam(name="orderBy", defaultValue="firstName") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
+            @RequestParam(name="orderBy", defaultValue="name") String orderBy,    // ! USE A PRE-DEFINED LIST OF VALUES OR SOMETHING, BUT *DO NOT* LET USERS CHANGE THIS DIRECTLY
             @RequestParam(name="asc", defaultValue="true") boolean isAscending,
             Model model
     ) {
         /* Get users by page */
-        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page-1, LIMIT, orderBy, isAscending);
+        PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page - 1, LIMIT, orderBy, isAscending);
 
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
