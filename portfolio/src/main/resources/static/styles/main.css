@@ -1,7 +1,23 @@
 .header {
     background-color: #b70f0a;
+    height:auto;
+}
+
+.header-top-group {
     display: flex;
     justify-content: space-between;
+    height: auto;
+}
+
+.navigation-tabs {
+    display: inline;
+}
+
+.navigation-tabs a {
+    padding: 5px 10px;
+    border-radius: 10px 10px 0px 0px;
+    background-color: #888888;
+    color: white;
 }
 
 .title {
