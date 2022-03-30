@@ -60,7 +60,7 @@ public class EditSprintController {
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintLabel", "Edit Sprint - Sprint " + sprint.getId());
+        model.addAttribute("sprintLabel", " Edit Sprint - Sprint " + sprint.getId());
         model.addAttribute("sprintName", sprint.getSprintName());
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
         model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
@@ -87,7 +87,6 @@ public class EditSprintController {
      */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
-            BindingResult result,
             @PathVariable("id") int id,
             @RequestParam(value = "projectId") int projectId,
             @RequestParam(value = "sprintName") String sprintName,
@@ -95,6 +94,7 @@ public class EditSprintController {
             @RequestParam(value = "sprintEndDate") String sprintEndDate,
             @RequestParam(value = "sprintDescription") String sprintDescription,
             @Valid @ModelAttribute("sprint") Sprint sprint,
+            BindingResult result,
             Model model
     ) throws Exception {
         Project parentProject = projectService.getProjectById(projectId);
@@ -122,13 +122,13 @@ public class EditSprintController {
             sprintNewEndDate += utils.toString(Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
             // Checking the sprint dates validation with default sprint end date and returning appropriate error message
-            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getStartDate(), parentProject.getEndDate(), sprintList);
+            dateOutOfRange += sprint.validEditSprintDateRanges(id, utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
 
         } else {
             sprintNewEndDate += sprintEndDate;
 
             // Checking the sprint dates validation and returning appropriate error message
-            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getStartDate(), parentProject.getEndDate(), sprintList);
+            dateOutOfRange += sprint.validEditSprintDateRanges(id, utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
         }
 
         // Checking it there are errors in the input, and also doing the valid dates validation
@@ -144,7 +144,7 @@ public class EditSprintController {
             model.addAttribute("sprintDescription", sprintDescription);
 
             model.addAttribute("invalidDateRange", dateOutOfRange);
-            return "addSprint";
+            return "editSprint";
         }
 
         // Adding the new sprint object
@@ -155,7 +155,7 @@ public class EditSprintController {
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
-        return"redirect:/details";
+        return "redirect:/project/" + projectId;
     }
 
 }

@@ -60,13 +60,13 @@ public class AddSprintController {
 
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
-        model.addAttribute("projectName", project.getName() + " - Add Sprint");
+        model.addAttribute("projectName", project.getProjectName() + " - Add Sprint");
 //        model.addAttribute("sprintLabel", "Add Sprint - Sprint 1");
         model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
 
         // Puts the default sprint start date
         if (sprintList.size() == 0) {
-            model.addAttribute("sprintStartDate", utils.toString(project.getStartDate()));
+            model.addAttribute("sprintStartDate", utils.toString(project.getProjectStartDate()));
         } else {
             model.addAttribute("sprintStartDate", utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate()));
         }
@@ -120,13 +120,13 @@ public class AddSprintController {
             sprintNewEndDate += utils.toString(Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
             // Checking the sprint dates validation with default sprint end date and returning appropriate error message
-            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getStartDate(),  parentProject.getEndDate(),  sprintList);
+            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(),  parentProject.getProjectEndDate(),  sprintList);
 
         } else {
             sprintNewEndDate += sprintEndDate;
 
             // Checking the sprint dates validation and returning appropriate error message
-            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getStartDate(),  parentProject.getEndDate(),  sprintList);
+            dateOutOfRange += sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(),  parentProject.getProjectEndDate(),  sprintList);
         }
 
         // Checking it there are errors in the input, and also doing the valid dates validation
@@ -134,12 +134,12 @@ public class AddSprintController {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("parentProjectId", id);
-            model.addAttribute("projectName", parentProject.getName() + " - Add Sprint");
+            model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");
             model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
 
             // Puts the default sprint start date
             if (sprintList.size() == 0) {
-                model.addAttribute("sprintStartDate", utils.toString(parentProject.getStartDate()));
+                model.addAttribute("sprintStartDate", utils.toString(parentProject.getProjectStartDate()));
             } else {
                 model.addAttribute("sprintStartDate", utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate()));
             }
@@ -155,7 +155,7 @@ public class AddSprintController {
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
-        return "redirect:/details";
+        return "redirect:/project/" + id;
     }
 
 }

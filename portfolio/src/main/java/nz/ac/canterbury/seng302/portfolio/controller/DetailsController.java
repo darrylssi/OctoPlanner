@@ -42,7 +42,7 @@ public class DetailsController {
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         model.addAttribute("sprints", sprintList);
 
-
+        debugRole = "teacher";
         // TODO: Link this with George's role helper class once that's merged
         String role;
         if (debugRole != null) {

@@ -7,27 +7,22 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title='Edit Sprint')"></div>
-<div class="header">
-    <div class="title">
-        <div class="title-name" th:text="${sprintLabel}" ></div>
-    </div>
-</div>
+<div th:replace="fragments :: header(title=${sprintLabel})"></div>
 <div class="content">
     <form th:action="@{/edit-sprint/{id}(id = ${sprintId})}" modelAttribute="sprint"
           method="post" th:object="${sprint}">
-        <input id="projectId" th:name="projectId" th:type="hidden" th:value="${projectId}">
+        <input th:id="projectId" th:name="projectId" th:type="hidden" th:value="${projectId}">
         <label for="sprintName" class="required">Sprint Name</label> <br/>
         <input id="sprintName" type="text" th:name="sprintName" th:value="${sprintName}">
         <br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
-                <label for="startDate" class="required">Sprint Start Date</label> <br/>
-                <input id="startDate" type="date" th:name="startDate" th:value="${startDate}" th:required="required">
+                <label for="sprintStartDate" class="required">Sprint Start Date</label> <br/>
+                <input id="sprintStartDate" type="date" th:name="sprintStartDate" th:value="${sprintStartDate}" th:required="required">
             </div>
             <div class="horizontal-group-element" >
-                <label for="endDate" class="required">Sprint End Date</label> <br/>
-                <input id="endDate" type="date" th:name="endDate" th:value="${endDate}" th:required="required">
+                <label for="sprintEndDate" class="required">Sprint End Date</label> <br/>
+                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="${sprintEndDate}">
             </div>
             <div class="horizontal-group-element" id="element-description">
                 <label for="sprintDescription">Sprint Description</label> <br/>
@@ -36,7 +31,7 @@
         </div>
         <br/>
         <div class="buttons">
-            <a th:href="@{/details}">
+            <a th:href="@{/project/{id}(id = ${projectId})}">
                 <button class="form-button cancel" type="button">
                     Cancel
                 </button>

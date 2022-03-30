@@ -261,4 +261,41 @@ public class Sprint {
 
     }
 
+    /**
+     * This function check for the validation for add/edit sprints page. Here, first it checks if the start date is after
+     * the end date or end date is before the start date. Next, it checks if the sprint dates are within the project
+     * dates. Lastly, it checks if the sprint dates are overlapping with other sprint dates.
+     * @param sprintStartDate Gets the sprint start date given by the user
+     * @param sprintEndDate Gets the sprint end date given by the user
+     * @param projectStartDate Gets the project start date given by the user
+     * @param projectEndDate Gets the project end date given by the user
+     * @param sprintList Gets the sprint list that stores all the sprint objects for the project
+     * @return either "" or an error message string
+     */
+    public String validEditSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) {
+        String invalidDateRange = "";
+
+        if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
+            invalidDateRange += "Start date must always be before end date";
+        } else if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
+            invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
+        } else if (!sprintList.isEmpty()) {
+            for (Sprint eachSprint: sprintList) {
+                if (eachSprint.getId() == sprintId) {
+                    continue;
+                } else {
+                    if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
+                            (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate())) ||
+                            (sprintStartDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
+                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                                Project.dateToString(eachSprint.getSprintEndDate());
+                        break;
+                    }
+                }
+            }
+        }
+        return invalidDateRange;
+
+    }
+
 }
