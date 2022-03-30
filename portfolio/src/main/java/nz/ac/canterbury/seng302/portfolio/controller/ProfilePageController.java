@@ -74,6 +74,7 @@ public class ProfilePageController {
             String roles = "";
             for (int i = 0; i < user.getRolesCount(); i++) {
                 String roleString = user.getRoles(i).toString();
+                roleString = roleString.replace("_", " ");
                 roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
             }
             if (roles.length() > 2) {
