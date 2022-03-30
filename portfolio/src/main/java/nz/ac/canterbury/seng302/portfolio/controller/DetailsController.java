@@ -16,6 +16,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -45,6 +46,7 @@ public class DetailsController {
         labelUtils.refreshProjectSprintLabels(id);
 
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
+        sprintList.sort(Comparator.comparing(Sprint::getStartDate));
         model.addAttribute("sprints", sprintList);
 
 
