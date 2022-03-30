@@ -63,7 +63,7 @@ public class SprintLabelService {
     /**
      * Returns the next available sprint label for the given project id.
      * @param projectId the id of the project to get the next label for
-     * @return a label String of the form "sprint[x]", where [x] is a number
+     * @return a label String of the form (SPRINT_LABEL_BASE + [x]), where [x] is a number >= 1
      */
     public String nextLabel(int projectId) {
         return SPRINT_LABEL_BASE + (sprintService.getSprintsOfProjectById(projectId).size() + SPRINT_LABEL_OFFSET);
@@ -72,7 +72,7 @@ public class SprintLabelService {
     /**
      * Returns the next available sprint label for the given project.
      * @param project the project to get the next label for
-     * @return a label String of the form "sprint[x]", where [x] is a number
+     * @return a label String of the form (SPRINT_LABEL_BASE + [x]), where [x] is a number >= 1
      */
     public String nextLabel(Project project) {
         return nextLabel(project.getId());
