@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Profile</title>
+
+    <link rel="stylesheet" th:href=@{/styles/style.css}>
+
+</head>
+
+<body>
+<header th:replace="~{fragments :: header}"></header>
+
+<div class="users" >
+    <table>
+        <thead>
+        <tr>
+            <th> Name </th>
+            <th> Username </th>
+            <th> Alias </th>
+            <th> Roles </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${users.empty}">
+            <td colspan="2"> No users found </td>
+        </tr>
+        <tr th:each="user : ${users}">
+            <td><span th:text="${user.getFirstName()}"> Name </span></td>
+            <td><span th:text="${user.getUsername()}"> Username </span></td>
+            <td><span th:text="${user.getNickname()}"> Alias </span></td>
+            <td><span th:text="${user.getRolesList()}"> Roles </span></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+</body>
+
+</html>

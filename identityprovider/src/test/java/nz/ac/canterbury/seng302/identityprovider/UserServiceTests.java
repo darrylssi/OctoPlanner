@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.List;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@DirtiesContext
 public class UserServiceTests {
 
     @Autowired
@@ -23,20 +23,21 @@ public class UserServiceTests {
     @MockBean
     private UserRepository userRepository;
 
-    private User user1;
+    private User testUser;
 
     @BeforeEach
     public void setup() {
-        user1 = new User();
-        user1.setUsername("user1");
+        testUser = new User("testUser", "testPassword", "testFirstName",
+                "testMiddleName", "testLastName", "testNickname",
+                "testBio", "testPronouns", "testEmail@example.com");
+        userRepository.save(testUser);
     }
 
     @Test
     public void searchByUsername() {
-        when(userRepository.findByUsername("user1"))
-                .thenReturn(List.of(user1));
-
-        assertThat(userService.getUserByUsername("user1")).isEqualTo(user1);
+        when(userRepository.findByUsername("testUser"))
+                .thenReturn((testUser));
+        assertThat(userService.getUserByUsername("testUser")).isEqualTo(testUser);
     }
 
 }

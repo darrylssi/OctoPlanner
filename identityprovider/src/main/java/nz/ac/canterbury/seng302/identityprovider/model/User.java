@@ -1,12 +1,14 @@
 package nz.ac.canterbury.seng302.identityprovider.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @Table (name = "Users")
 public class User {
     @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private int ID;
     @Column(nullable = false, unique = true)
     private String username;
@@ -17,12 +19,30 @@ public class User {
     private String middleName;
     @Column(nullable = false)
     private String lastName;
-    private String nickName;
+    private String nickname;
     private String bio;
     private String personalPronouns;
     @Column(nullable = false, unique = true)
     private String email;
-    private Date registerDate;
+    @CreationTimestamp
+    private Instant created;
+
+    protected User() {
+    }
+
+    public User(String username, String password, String firstName,
+                String middleName, String lastName, String nickname,
+                String bio, String personalPronouns, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.nickname = nickname;
+        this.bio = bio;
+        this.personalPronouns = personalPronouns;
+        this.email = email;
+    }
 
     public int getID() {
         return this.ID;
@@ -72,12 +92,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getNickName() {
-        return this.nickName;
+    public String getNickname() {
+        return this.nickname;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getBio() {
@@ -104,13 +124,9 @@ public class User {
         this.email = email;
     }
 
-    public Date getRegisterDate() {
-        return this.registerDate;
-    }
+    public Instant getCreated() { return created; }
 
-    public void setRegisterDate(Date registerDate) {
-        this.registerDate = registerDate;
-    }
+    public void setCreated(Instant created) { this.created = created; }
 
     public String getFullName() {
         if (this.middleName == null){
