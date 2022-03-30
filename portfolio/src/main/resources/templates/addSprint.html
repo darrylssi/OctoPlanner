@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title th:text="${projectName}"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="@{/styles/main.css}" rel="stylesheet" />
+    <link th:href="@{/styles/form.css}" rel="stylesheet" />
+</head>
+<body>
+<div class="header">
+    <div class="title">
+        <div class="title-name" th:text="${sprintLabel}" ></div>
+    </div>
+</div>
+<div class="content">
+    <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
+        <div>
+            <label for="sprintName">Sprint Name</label> <br/>
+            <input id="sprintName" th:type="text" th:name="sprintName" th:field="*{sprintName}" th:required="required" />
+            <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
+        </div><br/>
+        <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="sprintStartDate">Sprint Start Date</label> <br/>
+                <input id="sprintStartDate" type="date"  th:name="sprintStartDate" th:value="${sprintStartDate}" th:required="required" />
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="sprintEndDate">Sprint End Date</label> <br/>
+                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="*{sprintEndDate}" />
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="sprintDescription">Sprint Description</label> <br/>
+                <textarea th:class="description-input" th:type="text" class="description-input" id="sprintDescription"
+                          th:name="sprintDescription" th:field="*{sprintDescription}"></textarea>
+                <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
+            </div>
+        </div>
+        <div>
+            <p th:text="${invalidDateRange}" th:class="error"></p>
+        </div>
+        <br/>
+        <div class="buttons">
+            <button class="form-button cancel" type="button">
+                <a th:href="@{'/details'}">Cancel</a>
+            </button>
+            <button class="form-button save" type="submit">Save</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
