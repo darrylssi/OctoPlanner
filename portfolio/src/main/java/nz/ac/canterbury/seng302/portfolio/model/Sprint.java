@@ -72,13 +72,16 @@ public class Sprint {
      * @param sprintStartDate Gets the sprint start date as a string
      * @param sprintEndDate Gets the sprint end date as a string
      */
-    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,String sprintLabel,  String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
+        this.sprintLabel = sprintLabel;
         this.sprintDescription = sprintDescription;
-        this.sprintStartDate = Project.stringToDate(sprintStartDate);
-        this.sprintEndDate = Project.stringToDate(sprintEndDate);
+        this.sprintStartDate = sprintStartDate;
+        this.sprintEndDate = sprintEndDate;
     }
+
+
 
 
     /**
