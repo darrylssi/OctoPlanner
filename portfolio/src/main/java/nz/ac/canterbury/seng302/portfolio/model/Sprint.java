@@ -6,11 +6,17 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
-@Entity // this is an entity, assumed to be in a table called Sprint
-@Table (name = "Sprint")
+/**
+ * Represents a sprint object. Sprints must have a parent project object that they are a part of.
+ * Sprint objects are stored in a table called Sprint, as it is an @Entity.
+ */
+@Entity
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    /** The id of this sprint. This id should be unique between all sprints, regardless of which project they
+     * belong to. The id starts at 0 and should automatically increment.
+     */
     private int id;
 
     @Column
@@ -77,6 +83,9 @@ public class Sprint {
      * @return
      */
     @Override
+    /**
+     * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
+     */
     public String toString() {
         return String.format(
                 "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s']",

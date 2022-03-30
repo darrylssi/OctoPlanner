@@ -25,8 +25,13 @@ public class ProjectService {
     /**
      * Get project by id
      */
-    public Project getProjectById(Integer id) {
-        return repository.findProjectById(id);
+    public Project getProjectById(Integer id) throws Exception{
+        Project project = repository.findProjectById(id);
+        if (project != null) {
+            return project;
+        } else {
+            throw new Exception("Project not found.");
+        }
 
     }
 
@@ -37,14 +42,5 @@ public class ProjectService {
      */
     public void saveProject(Project project) {
         repository.save(project);
-    }
-
-    /**
-     * Get project by name
-     */
-    public List<Project> getProjectByProjectName(String name) {
-
-        List<Project> projectList = repository.findByProjectName(name);
-        return projectList;
     }
 }

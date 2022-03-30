@@ -16,8 +16,8 @@ tag-checker:
 junit-porfolio:
   stage: test
   script:
-    - cd portfolio
-    - ./gradlew test
+     - cd portfolio
+     - ./gradlew test
 
 junit-identityprovider:
   stage: test

@@ -12,6 +12,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.text.ParseException;
@@ -22,6 +28,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Date;
 
 
 /**
@@ -41,8 +48,7 @@ public class EditSprintController {
 
     /**
      * Show the edit-sprint page.
-     *
-     * @param id    ID of the sprint to be edited
+     * @param id ID of the sprint to be edited
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return Edit-sprint page
      */
@@ -151,7 +157,5 @@ public class EditSprintController {
         sprintService.saveSprint(sprint);
         return"redirect:/details";
     }
-
-
 
 }

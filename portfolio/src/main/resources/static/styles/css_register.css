@@ -81,3 +81,11 @@ form .submit input:hover {
     background: #6495ED	;
 }
 
+.required:after {
+    content:"*";
+    color: red;
+}
+
+#error {
+    color: red;
+}

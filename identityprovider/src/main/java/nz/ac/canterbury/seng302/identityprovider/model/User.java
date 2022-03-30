@@ -1,37 +1,62 @@
 package nz.ac.canterbury.seng302.identityprovider.model;
 
+import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import java.util.Date;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 
 @Entity
 @Table (name = "Users")
 public class User {
     @Id
-    //@GeneratedValue(strategy = GenerationType.AUTO) //TODO should this go here?
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private int ID;
-    @NotBlank(message = "Username must not be empty and not already in use")
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
-    @NotEmpty(message = "Password must not be empty") // NotEmpty allows for leading/trailing spaces
     private String password;
-    @NotBlank(message = "First name must not be empty")
+    @Column(nullable = false)
     private String firstName;
     private String middleName;
-    @NotBlank(message = "Last name must not be empty")
+    @Column(nullable = false)
     private String lastName;
-    private String nickName;
+    private String nickname;
     private String bio;
     private String personalPronouns;
     @Column(nullable = false, unique = true)
-    @NotBlank(message = "Email address must not be empty")
-    @Email(message = "Email address must be valid and not already in use")
     private String email;
-    @Column(nullable = false)
-    private Date registerDate;
+    @CreationTimestamp
+    private Instant created;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated
+    private Set<UserRole> roles;
+
+//    @Transient
+//    public UserRole highestRole() {
+//        return roles.stream().max(Comparator.naturalOrder()).orElse(null);
+//    }
+
+    protected User() {
+    }
+
+    public User(String username, String password, String firstName,
+                String middleName, String lastName, String nickname,
+                String bio, String personalPronouns, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.nickname = nickname;
+        this.bio = bio;
+        this.personalPronouns = personalPronouns;
+        this.email = email;
+        this.roles = new HashSet<UserRole>();
+    }
 
     public int getID() {
         return this.ID;
@@ -81,12 +106,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getNickName() {
-        return this.nickName;
+    public String getNickname() {
+        return this.nickname;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getBio() {
@@ -113,14 +138,34 @@ public class User {
         this.email = email;
     }
 
-    public Date getRegisterDate() {
-        return this.registerDate;
+    public Instant getCreated() { return created; }
+
+    public void setCreated(Instant created) { this.created = created; }
+
+    public Set<UserRole> getRoles() {
+        return roles;
     }
 
-    public void setRegisterDate(Date registerDate) {
-        this.registerDate = registerDate;
+    /**
+     * Add a role to this user
+     * 
+     * @param role The role enum type to be added
+     * @return <code>true</code> if the user didn't already have this role
+     */
+    public boolean addRole(UserRole role) {
+        return roles.add(role);
     }
 
+    /**
+     * Add a role to this user
+     * 
+     * @param role The role enum type to be added
+     * @return <code>true</code> if the user had this item removed
+     */
+    public boolean removeRole(UserRole role) {
+        return roles.remove(role);
+    }
+    
     public String getFullName() {
         if (this.middleName == null){
             return this.firstName + " " + this.lastName;

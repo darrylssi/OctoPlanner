@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import java.util.List;
+
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -9,36 +11,51 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticationServiceGrpc.AuthenticationServiceImplBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @GrpcService
 public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticateServerService.class);
+
     @Autowired
     private UserService userService;
 
-    private final String ROLE_OF_USER = "student"; // Puce teams may want to change this to "teacher" to test some functionality
-
     private JwtTokenUtil jwtTokenService = JwtTokenUtil.getInstance();
-
-    private User getUserByUsername(String username) {
-        return userService.getUserByUsername(username);
-    }
 
     /**
      * Attempts to authenticate a user with a given username and password. 
      */
     @Override
     public void authenticate(AuthenticateRequest request, StreamObserver<AuthenticateResponse> responseObserver) {
+        logger.info("authenticate() has been called");
         AuthenticateResponse.Builder reply = AuthenticateResponse.newBuilder();
 
-        User user = getUserByUsername(request.getUsername());
+        User user = userService.getUserByUsername(request.getUsername());
 
-        // TODO replace getPassword() for when passwords are hashed
-        if (request.getUsername().equals(user.getUsername()) && request.getPassword().equals(user.getPassword())) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), ROLE_OF_USER);
+        if (user == null) {
+            reply
+            .setMessage("Username not registered.")
+            .setSuccess(false)
+            .setToken("");
+        } else if (!encoder.matches(request.getPassword(), user.getPassword())) {
+            reply
+            .setMessage("Incorrect password!")
+            .setSuccess(false)
+            .setToken("");
+        } else if (request.getUsername().equals(user.getUsername())) {
+            // Convert all the roles into a comma-separated string of roles
+            List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
+            String commaSeparatedUserRoles = String.join(",", userRoles);
+            commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
+            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
             reply
                 .setEmail(user.getEmail())
                 .setFirstName(user.getFirstName())
@@ -64,6 +81,7 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
      */
     @Override
     public void checkAuthState(Empty request, StreamObserver<AuthState> responseObserver) {
+        logger.info("checkAuthState() has been called");
         responseObserver.onNext(AuthenticationServerInterceptor.AUTH_STATE.get());
         responseObserver.onCompleted();
     }

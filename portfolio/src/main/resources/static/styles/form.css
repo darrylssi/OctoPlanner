@@ -35,7 +35,7 @@ input {
     flex-grow: 1;
 }
 
-button {
+.form-button {
     padding: 10px 20px;
     font-size: large;
     border-radius: 10px;
