@@ -1,10 +1,18 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
@@ -42,6 +50,8 @@ public class Sprint {
     @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
 
+
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     public Sprint() {}
 
@@ -92,6 +102,9 @@ public class Sprint {
                 id, parentProjectId, sprintName, sprintLabel, sprintStartDate, sprintEndDate, sprintDescription);
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     /**
      * Gets the sprint id
@@ -275,21 +288,28 @@ public class Sprint {
     public String validEditSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) {
         String invalidDateRange = "";
 
+        logger.info("in function");
         if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
             invalidDateRange += "Start date must always be before end date";
         } else if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
             invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
         } else if (!sprintList.isEmpty()) {
             for (Sprint eachSprint: sprintList) {
+//                Integer eachSprintId = Integer.valueOf(eachSprint.getId());
                 if (eachSprint.getId() == sprintId) {
+                    logger.info("finally");
                     continue;
                 } else {
-                    if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
-                            (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate())) ||
-                            (sprintStartDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
-                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                                Project.dateToString(eachSprint.getSprintEndDate());
-                        break;
+                    if (!sprintStartDate.equals(eachSprint.sprintEndDate)) {
+                        logger.info("in last id");
+                        if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
+                                (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate())) ||
+                                (sprintStartDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
+                            invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                                    Project.dateToString(eachSprint.getSprintEndDate()) + " with ID " + eachSprint.getId() + " and you're "  + sprintId;
+                            logger.info("in last if");
+                            break;
+                        }
                     }
                 }
             }

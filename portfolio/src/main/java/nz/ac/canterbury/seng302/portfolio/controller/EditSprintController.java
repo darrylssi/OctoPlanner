@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the edit sprint details page
@@ -46,6 +48,8 @@ public class EditSprintController {
     @Autowired
     private DateUtils utils;
 
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+
     /**
      * Show the edit-sprint page.
      * @param id ID of the sprint to be edited
@@ -56,6 +60,7 @@ public class EditSprintController {
     public String sprintForm(@PathVariable("id") int id, Model model) throws Exception {
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
+        sprint.setId(id);
         model.addAttribute("id", id);
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
@@ -99,37 +104,14 @@ public class EditSprintController {
     ) throws Exception {
         Project parentProject = projectService.getProjectById(projectId);
 
+//        Sprint updateSprint = sprintService.getSprintById(id);
+
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
-        String dateOutOfRange = "";
-        String sprintNewEndDate = "";
+//        Integer newSprintId = Integer.valueOf(id);
 
-        // Checking if the sprint end date is not selected
-        if (sprintEndDate == null || sprintEndDate == "") {
-            // Converting the date to LocalDate, so we can add the three weeks of default end date
-            String newDate = utils.toString(new SimpleDateFormat("yyyy-MM-dd").parse(sprintStartDate));
-
-            // Converting date to LocalDate
-            Instant instant = utils.toDate(newDate).toInstant();
-            ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
-            LocalDate sprintOldEndDate = zdt.toLocalDate();
-
-            // Adding 3 weeks (21 days) of default sprint end date
-            LocalDate sprintLocalEndDate = sprintOldEndDate.plusDays(21);
-
-            // Converting the new sprint end date of LocalDate object to Date object
-            sprintNewEndDate += utils.toString(Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
-            // Checking the sprint dates validation with default sprint end date and returning appropriate error message
-            dateOutOfRange += sprint.validEditSprintDateRanges(id, utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
-
-        } else {
-            sprintNewEndDate += sprintEndDate;
-
-            // Checking the sprint dates validation and returning appropriate error message
-            dateOutOfRange += sprint.validEditSprintDateRanges(id, utils.toDate(sprintStartDate), utils.toDate(sprintNewEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
-        }
+        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
@@ -144,6 +126,9 @@ public class EditSprintController {
             model.addAttribute("sprintDescription", sprintDescription);
 
             model.addAttribute("invalidDateRange", dateOutOfRange);
+            logger.info("here editSprint");
+            logger.info(dateOutOfRange);
+
             return "editSprint";
         }
 
@@ -151,10 +136,11 @@ public class EditSprintController {
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
         sprint.setStartDate(utils.toDate(sprintStartDate));
-        sprint.setEndDate(utils.toDate(sprintNewEndDate));
+        sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
+        logger.info("here saveSprint");
         return "redirect:/project/" + projectId;
     }
 

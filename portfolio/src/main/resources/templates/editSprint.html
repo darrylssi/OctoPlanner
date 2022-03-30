@@ -29,6 +29,9 @@
                 <textarea class="description-input" id="sprintDescription" th:name="sprintDescription" th:value="${sprintDescription}"></textarea>
             </div>
         </div>
+        <div>
+            <p th:text="${invalidDateRange}" th:class="error"></p>
+        </div>
         <br/>
         <div class="buttons">
             <a th:href="@{/project/{id}(id = ${projectId})}">
@@ -36,7 +39,7 @@
                     Cancel
                 </button>
             </a>
-            <button class="form-button save" type="submit">Save</button>
+            <button class="save" type="submit">Save</button>
         </div>
     </form>
 </div>
