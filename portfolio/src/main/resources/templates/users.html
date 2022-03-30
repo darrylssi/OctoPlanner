@@ -3,23 +3,28 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Profile</title>
+    <title>Users</title>
 
-    <link rel="stylesheet" th:href=@{/styles/style.css}>
+    <link rel="stylesheet" th:href=@{/styles/main.css}>
+    <link rel="stylesheet" th:href=@{/styles/users.css}>
 
 </head>
 
 <body>
-<header th:replace="~{fragments :: header}"></header>
-
+<div th:replace="fragments :: header(title='Users')"></div>
+<br>
 <div class="users" >
     <table>
         <thead>
         <tr>
-            <th> Name </th>
-            <th> Username </th>
-            <th> Alias </th>
-            <th> Roles </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=name&asc=' + ${reverseDir}}"> Name
+                <span th:if="${orderBy == 'name'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&asc=' + ${reverseDir}}"> Username
+                <span th:if="${orderBy == 'username'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&asc=' + ${reverseDir}}"> Alias
+                <span th:if="${orderBy == 'nickname'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
+            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=role&asc=' + ${reverseDir}}"> Role
+                <span th:if="${orderBy == 'role'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
         </tr>
         </thead>
         <tbody>
@@ -27,13 +32,39 @@
             <td colspan="2"> No users found </td>
         </tr>
         <tr th:each="user : ${users}">
-            <td><span th:text="${user.getFirstName()}"> Name </span></td>
+            <td><span th:text="${user.getFirstName() +' '+ user.getMiddleName() + ' ' + user.getLastName()}"> Name </span></td>
             <td><span th:text="${user.getUsername()}"> Username </span></td>
             <td><span th:text="${user.getNickname()}"> Alias </span></td>
             <td><span th:text="${user.getRolesList()}"> Roles </span></td>
         </tr>
         </tbody>
     </table>
+    <br>
+    <div class="pagination" th:if="${totalPages > 1}">
+<!--        if not on first page, add link to first page -->
+        <span class="pages otherPages" th:if="${page > 1}">
+            <a th:href="@{'/users/?page=1&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> First </a>
+        </span>
+<!--        add link to PREV page -->
+        <span class="pages otherPages" th:if="${page > 1}">
+            <a th:href="@{'/users/?page=' + ${page - 1} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Prev </a>
+        </span>
+<!--        add link to all pages -->
+        <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
+            <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${page != i}"
+                class="otherPages">[[${i}]]</a>
+            <span th:unless="${page != i}" class="currentPage">[[${i}]]</span>
+        </span>
+<!--        add link to NEXT page -->
+        <span class="pages otherPages" th:if="${page < totalPages}">
+            <a th:href="@{'/users/?page=' + ${page + 1} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Next </a>
+        </span>
+<!--        add link to LAST page-->
+        <span class="pages otherPages" th:if="${page < totalPages}">
+            <a th:href="@{'/users/?page=' + ${totalPages} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Last </a>
+        </span>
+    </div>
+
 </div>
 
 

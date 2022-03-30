@@ -29,6 +29,7 @@
                     <br/>
                     <div class="sprint-description" th:text="'Username: ' + *{getUsername()}" />
                     <div class="sprint-description">Email: <a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}"/></div>
+                    <div class="sprint-description" th:text="|Role: ${roles}|"></div>
                 </div>
             </div>
         </div>
