@@ -75,9 +75,9 @@ public class SprintLabelServiceTest {
 
         sprintLabelService.refreshAllSprintLabels();
 
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 1, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 1, sprint3.getSprintLabel());
 
         Assertions.assertEquals(BASE + 3, sprintLabelService.nextLabel(PROJECT_ID_1));
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_2));
@@ -88,23 +88,23 @@ public class SprintLabelServiceTest {
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
 
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 
     @Test
     void refreshLabelsWithID_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 3, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
     }
     @Test
     void refreshLabelsWithProject_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(testProject1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 3, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
     }
 
     @Test
@@ -123,15 +123,15 @@ public class SprintLabelServiceTest {
     void deleteSprint_labelsAndNextLabelAdjust() {
         // assign base labels & verify
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 3, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
 
         // "delete" a sprint, and expect that the labels adjust, including nextLabel()
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint3));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint3.getSprintLabel());
         Assertions.assertEquals(BASE + 3, sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 
@@ -139,18 +139,18 @@ public class SprintLabelServiceTest {
     void addSprint_labelsAndNextLabelAdjust() throws ParseException {
         // assign base labels & verify
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 3, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
 
         // "add" a sprint, and expect that the labels adjust, including nextLabel()
         Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "label4", "desc", utils.toDate("2022-03-02"), utils.toDate("2022-04-01"));
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2, sprint3, sprint4));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
-        Assertions.assertEquals(BASE + 1, sprint1.getLabel());
-        Assertions.assertEquals(BASE + 2, sprint2.getLabel());
-        Assertions.assertEquals(BASE + 3, sprint4.getLabel()); // sprint4 starts before sprint3, so it should slot in here
-        Assertions.assertEquals(BASE + 4, sprint3.getLabel());
+        Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
+        Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
+        Assertions.assertEquals(BASE + 3, sprint4.getSprintLabel()); // sprint4 starts before sprint3, so it should slot in here
+        Assertions.assertEquals(BASE + 4, sprint3.getSprintLabel());
         Assertions.assertEquals(BASE + 5, sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 }
