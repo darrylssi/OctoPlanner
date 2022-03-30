@@ -201,6 +201,10 @@ button {
     display:block;
 }
 
+button:hover {
+    cursor: pointer;
+}
+
 .error {
     color: red;
 }
