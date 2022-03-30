@@ -44,11 +44,12 @@ public class DetailsController extends PageController {
 
 
         // Below code is just begging to be added as a method somewhere...
-        String role = debugRole != null ? debugRole : getUserRole(principal);
+        List<String> roles = getUserRole(principal);
+        roles.add(debugRole);
 
         /* Return the name of the Thymeleaf template */
         // detects the role of the current user and returns appropriate page
-        boolean hasEditPermissions = role.contains("teacher");
+        boolean hasEditPermissions = roles.contains("teacher") || roles.contains("course_administrator");
         model.addAttribute("canEdit", hasEditPermissions);
         return "projectDetails";
         // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion

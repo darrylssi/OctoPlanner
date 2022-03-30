@@ -1,8 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 
 import java.text.ParseException;
-
+import java.util.List;
 
 /**
  * Controller for the edit sprint details page
@@ -37,10 +39,10 @@ public class EditSprintController extends PageController {
     public String sprintForm(@PathVariable("id") int id, 
             @AuthenticationPrincipal AuthState principal,
             Model model) throws Exception {
-        /* Check that the user has at least teacher role */
-        //TODO: integrate debugRole
-        if (getUserRole(principal).equals("student")) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint");
+        /* Ensure that the user is at least a teacher */
+        List<String> roles = getUserRole(principal);
+        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
             return "error";
         }
 
@@ -78,10 +80,10 @@ public class EditSprintController extends PageController {
             @RequestParam(value="sprintDescription") String description,
             Model model
     ) throws Exception {
-        /* Check that the user has at least teacher role */
-        //TODO: integrate debugRole
-        if (getUserRole(principal).equals("student")) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint");
+        /* Ensure that the user is at least a teacher */
+        List<String> roles = getUserRole(principal);
+        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
             return "error";
         }
 

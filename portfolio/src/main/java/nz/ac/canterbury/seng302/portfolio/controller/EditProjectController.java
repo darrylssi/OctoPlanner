@@ -16,6 +16,7 @@ import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
+import java.util.List;
 
 
 /**
@@ -37,7 +38,17 @@ public class EditProjectController extends PageController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@PathVariable("id") int id, Model model) throws Exception{
+    public String projectForm(
+            @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) throws Exception {
+        /* Ensure that the user is at least a teacher */
+        List<String> roles = getUserRole(principal);
+        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            return "error";
+        }
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
@@ -64,6 +75,7 @@ public class EditProjectController extends PageController {
     @PostMapping("/edit-project/{id}")
     public String projectSave(
             @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
             @RequestParam(value="projectName") String projectName,
             @RequestParam(value="projectStartDate") String projectStartDate,
             @RequestParam(value="projectEndDate") String projectEndDate,
@@ -71,9 +83,9 @@ public class EditProjectController extends PageController {
             Model model
     ) throws Exception {
         /* Ensure that the user is at least a teacher */
-        //TODO: integrate debugRole
-        if (getUserRole(principal).equals("student") ||) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+        List<String> roles = getUserRole(principal);
+        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
             return "error";
         }
 
