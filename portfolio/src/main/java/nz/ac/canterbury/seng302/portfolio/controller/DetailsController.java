@@ -42,8 +42,6 @@ public class DetailsController extends PageController {
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         model.addAttribute("sprints", sprintList);
 
-
-        // Below code is just begging to be added as a method somewhere...
         List<String> roles = getUserRole(principal);
         roles.add(debugRole);
 
