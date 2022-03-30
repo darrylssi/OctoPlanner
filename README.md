@@ -78,7 +78,6 @@ By default, the Portfolio will run on local port 9000 (`http://localhost:9000`)
 
 - Update team name into `build.gradle`
 - Set up Gitlab CI server (refer to the student guide on learn)
-- Decide on a LICENSE
 
 ## Contributors
 

@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.identityprovider;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
@@ -17,13 +19,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @DirtiesContext
+@SuppressWarnings("unchecked")
 public class UserAccountServiceTest {
 
     @Autowired
@@ -34,19 +35,21 @@ public class UserAccountServiceTest {
 
     private User testUser;
 
+    private static final int testUserID = 999;
     private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
     @BeforeEach
     public void setup() {
-        testUser = new User("testUser", "testPassword", "testFirstName",
+        testUser = new User("testUser", encoder.encode("testPassword"), "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
-        testUser.setPassword(encoder.encode(testUser.getPassword()));
-        userRepository.save(testUser);
+        testUser.addRole(UserRole.STUDENT);
     }
 
     @Test
     void testRegister_whenValid() {
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
                 .setUsername("testValid")
                 .setPassword("testPassword")
@@ -58,15 +61,212 @@ public class UserAccountServiceTest {
                 .setPersonalPronouns("test/pronouns")
                 .setEmail("test@example.com")
                 .build();
-        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
         userAccountServerService.register(request, observer);
 
         verify(observer, times(1)).onCompleted();
-        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
         verify(observer, times(1)).onNext(captor.capture());
         UserRegisterResponse response = captor.getValue();
 
         assertTrue(response.getIsSuccess());
+    }
+
+    @Test
+    void test_CanAddRoleToUser() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+
+        // * Given: A user doesn't have a role
+        assertFalse(testUser.getRoles().contains(UserRole.COURSE_ADMINISTRATOR));
+        
+        // * When: We try to give them this role
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.TEACHER)
+                .build();
+        userAccountServerService.addRoleToUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: They now have this role
+        assertTrue(response.getIsSuccess());
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER));
+    }
+    @Test
+    void test_CanRemoveRoleFromUser() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+
+        // * Given: A user has a role
+        testUser.addRole(UserRole.TEACHER);
+
+        // * When: We try to take this role away from them
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.TEACHER)
+                .build();
+        userAccountServerService.removeRoleFromUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: They no longer have this role
+        assertTrue(response.getIsSuccess());
+        assertFalse(testUser.getRoles().contains(UserRole.TEACHER));
+    }
+
+    @Test
+    void test_CanRemoveRolesAfterDuplicateRoleAdds() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.TEACHER)
+                .build();
+
+        // * Given: A user is given a role multiple times
+        userAccountServerService.addRoleToUser(request, observer);
+        verify(observer, atLeastOnce()).onCompleted();
+        verify(observer, atLeastOnce()).onNext(captor.capture());
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER)); // They've been given the role
+        // Add again
+        userAccountServerService.addRoleToUser(request, observer);
+        verify(observer, atLeastOnce()).onCompleted();
+        verify(observer, atLeastOnce()).onNext(captor.capture());
+        assertTrue(testUser.getRoles().contains(UserRole.TEACHER)); // User still has the role
+
+        // * When: This role is removed
+        userAccountServerService.removeRoleFromUser(request, observer);
+        verify(observer, atLeastOnce()).onCompleted();
+        verify(observer, atLeastOnce()).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: The role is removed
+        assertTrue(response.getIsSuccess());
+        assertFalse(testUser.getRoles().contains(UserRole.TEACHER));    // User still has role
+    }
+
+    @Test
+    void test_FailsToAddDuplicateRoles() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+        // * Given: A user has a role
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+        // * When: A user is given a role they already have
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.STUDENT)
+                .build();
+        userAccountServerService.addRoleToUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: It fails, and the user's role doesn't change
+        assertFalse(response.getIsSuccess());
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+    }
+
+    @Test
+    void test_FailsToRemoveRoleThatUserDoesntHave() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+
+        // * Given: A user doesn't have a role
+        assertFalse(testUser.getRoles().contains(UserRole.COURSE_ADMINISTRATOR));
+
+        // * When: Someone tries to remove said role
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.COURSE_ADMINISTRATOR)
+                .build();
+        userAccountServerService.removeRoleFromUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: It fails, and the user's role doesn't change
+        assertFalse(response.getIsSuccess()); 
+        assertFalse(testUser.getRoles().contains(UserRole.COURSE_ADMINISTRATOR));
+    }
+
+    @Test
+    void test_FailToAddRoleToNonexistentUser() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<StatusRuntimeException> errorCaptor = ArgumentCaptor.forClass(StatusRuntimeException.class);
+        // * When: We try to add a role to a non-existent user
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(-99999)
+                .setRole(UserRole.TEACHER)
+                .build();
+        userAccountServerService.addRoleToUser(request, observer);
+
+        // * Then: The interface throws an error
+        verify(observer, times(1)).onError(errorCaptor.capture());
+        StatusRuntimeException error = errorCaptor.getValue();
+
+        assertEquals(error.getStatus().getCode(), Status.NOT_FOUND.getCode());
+    }
+
+    @Test
+    void test_FailToRemoveRoleToNonexistentUser() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<StatusRuntimeException> errorCaptor = ArgumentCaptor.forClass(StatusRuntimeException.class);
+        // * When: We try to add a role to a non-existent user
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(-99999)
+                .setRole(UserRole.TEACHER)
+                .build();
+        userAccountServerService.removeRoleFromUser(request, observer);
+
+        // * Then: The interface throws an error
+        verify(observer, times(1)).onError(errorCaptor.capture());
+        StatusRuntimeException error = errorCaptor.getValue();
+
+        assertEquals(error.getStatus().getCode(), Status.NOT_FOUND.getCode());
+    }
+
+    @Test
+    void test_UsersMustAlwaysHaveAtLeastOneRole() {
+        StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
+        when(userRepository.findById(testUserID))
+                .thenReturn(testUser);
+        // * Given: A user only has one role
+        assertEquals(1, testUser.getRoles().size());
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
+        // * When: We try to take away their only role
+
+        
+        // * When: Someone tries to remove said role
+        ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
+                .setUserId(testUserID)
+                .setRole(UserRole.COURSE_ADMINISTRATOR)
+                .build();
+        userAccountServerService.removeRoleFromUser(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRoleChangeResponse response = captor.getValue();
+
+        // * Then: It fails and they keep their role
+        assertFalse(response.getIsSuccess()); 
+        assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
     }
 
     @Test
@@ -100,9 +300,69 @@ public class UserAccountServiceTest {
     }
 
     @Test
+    void testRegister_whenUsernameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("u")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Username")
+                .setErrorText("Username must be between 2 to 15 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenUsernameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsernamelong")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Username")
+                .setErrorText("Username must be between 2 to 15 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
     void testRegister_whenMissingPassword() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingPassword")
+                .setUsername("testUsername")
                 .setPassword("")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -132,7 +392,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingFirstName() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingFirstName")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("")
                 .setMiddleName("Michael")
@@ -152,7 +412,97 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("FirstName")
-                .setErrorText("FirstName cannot be empty")
+                .setErrorText("First name cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenFirstNameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("f")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("FirstName")
+                .setErrorText("First name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenFirstNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frankabcdefghijklmnop")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("FirstName")
+                .setErrorText("First name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenMiddleNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michaelabcdefghijklmn")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("MiddleName")
+                .setErrorText("Middle name must have less than 20 characters")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -162,7 +512,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingLastName() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingLastName")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -182,7 +532,189 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("LastName")
-                .setErrorText("LastName cannot be empty")
+                .setErrorText("Last name cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenLastNameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("L")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("LastName")
+                .setErrorText("Last name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenLastNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucasabcdefghijklmnop")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("LastName")
+                .setErrorText("Last name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenNicknameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nickabcdefghijklmnopq")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Nickname")
+                .setErrorText("Nickname must have less than 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenBioTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio  This is a test bio  This is a test bio  This is a test bio  " +
+                        "This is a test bio  This is a test bio  This is a test bio  This is a test bio  " +
+                        "This is a test bio  This is a test bio201")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Bio")
+                .setErrorText("Bio must have less than 200 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenPronounsTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronounsabcdefgh")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("PersonalPronouns")
+                .setErrorText("Personal pronouns must have less than 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenPronounsAreInvalid() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("testpronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("PersonalPronouns")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -192,7 +724,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingEmail() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingEmail")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -220,14 +752,42 @@ public class UserAccountServiceTest {
     }
 
     @Test
+    void testRegister_whenEmailIsInvalid() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("testexample.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Email")
+                .setErrorText("Email must be valid")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
     void testRegister_whenUsernameIsTaken() {
-        User testUser = new User("testSameUser", "testPassword", "testFirstName",
-                "testMiddleName", "testLastName", "testNickname",
-                "testBio", "testPronouns", "testEmail@example.com");
-        userRepository.save(testUser); // Doesn't actually add to repository?
+        when(userRepository.findByUsername("testUser"))
+                .thenReturn(testUser);
 
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testSameUser")
+                .setUsername("testUser")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -250,10 +810,8 @@ public class UserAccountServiceTest {
                 .setErrorText("Username is already in use")
                 .build();
 
-        assertTrue(response.getIsSuccess()); // This should assert false
-        // TODO fix this test case so that it ACTUALLY works
-        //assertFalse(response.getIsSuccess());
-        //assertEquals(error, response.getValidationErrors(0));
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
     }
 
     @Test
@@ -637,7 +1195,7 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("PersonalPronouns")
-                .setErrorText("Personal pronouns must contain a \"/\"")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
                 .build();
 
         assertFalse(response.getIsSuccess());
