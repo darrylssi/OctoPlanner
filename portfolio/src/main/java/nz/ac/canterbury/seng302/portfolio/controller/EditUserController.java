@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
 import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
 
@@ -94,9 +95,12 @@ public class EditUserController {
             if (editReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
                 return "redirect:/users/" + id;
+            } else {
+                ValidationError err = editReply.getValidationErrors(0);
+                model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
-            model.addAttribute("editErrorMessage", "Error updating details");
+            model.addAttribute("editErrorMessage", "Unknown error updating details");
             return "editUser";
         }
 
@@ -124,7 +128,7 @@ public class EditUserController {
             return "editUser";
         }
         if(!newPassword.equals(confirmPassword)) {
-            model.addAttribute("pwErrorMessage", "New and confirm passwords do not match");
+            model.addAttribute("error_PasswordsEqual", "New and confirm passwords do not match");
             return "editUser";
         }
         try {
@@ -133,9 +137,12 @@ public class EditUserController {
             if (changeReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
                 return "redirect:/users/" + id;
+            } else {
+                ValidationError err = changeReply.getValidationErrors(0);
+                model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
-            model.addAttribute("pwErrorMessage", "Error changing password");
+            model.addAttribute("pwErrorMessage", "Unknown error changing password");
             return "editUser";
         }
 
