@@ -40,7 +40,7 @@
             </div>
             <div class="input-box">
                 <label> Personal Pronouns </label>
-                <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" maxlength="10" />
+                <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" maxlength="20" />
                 <span th:if="${#fields.hasErrors('personalPronouns')}" th:errors="*{personalPronouns}" th:errorclass="error" />
             </div>
             <div class="input-box">
