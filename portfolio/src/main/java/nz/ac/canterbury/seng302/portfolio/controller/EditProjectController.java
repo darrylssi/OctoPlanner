@@ -2,8 +2,11 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,9 +17,12 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.util.List;
+import javax.validation.Valid;
+import java.util.Date;
 
 
 /**
@@ -42,21 +48,24 @@ public class EditProjectController extends PageController {
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,
             Model model
-    ) throws Exception {
+    ) {
         /* Ensure that the user is at least a teacher */
         List<String> roles = getUserRole(principal);
         if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
             return "error";
         }
 
         /* Add project details to the model */
-        Project project = projectService.getProjectById(id);
-        model.addAttribute("projectId", id);
-        model.addAttribute("projectName", project.getName());
-        model.addAttribute("projectStartDate", utils.toString(project.getStartDate()));
-        model.addAttribute("projectEndDate", utils.toString(project.getEndDate()));
-        model.addAttribute("projectDescription", project.getDescription());
+        try {
+            Project project = projectService.getProjectById(id);
+            model.addAttribute("id", id);
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
+        }
 
         /* Return the name of the Thymeleaf template */
         return "editProject";
@@ -74,11 +83,13 @@ public class EditProjectController extends PageController {
      */
     @PostMapping("/edit-project/{id}")
     public String projectSave(
+            @Valid Project project,
+            BindingResult result,
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(value="projectName") String projectName,
-            @RequestParam(value="projectStartDate") String projectStartDate,
-            @RequestParam(value="projectEndDate") String projectEndDate,
+            @RequestParam(value="projectStartDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectStartDate,
+            @RequestParam(value="projectEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectEndDate,
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
     ) throws Exception {
@@ -89,13 +100,21 @@ public class EditProjectController extends PageController {
             return "error";
         }
 
+        /* Return editProject template with user input */
+        if (result.hasErrors()) {
+            model.addAttribute("project", project);
+            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            return "editProject";
+        }
+
         /* Set (new) project details to the corresponding project */
-        Project project = projectService.getProjectById(id);
-        project.setName(projectName);
-        project.setStartDate(utils.toDate(projectStartDate));
-        project.setEndDate(utils.toDate(projectEndDate));
-        project.setDescription(projectDescription);
-        projectService.saveProject(project);
+        Project newProject = projectService.getProjectById(id);
+        newProject.setProjectName(projectName);
+        newProject.setProjectStartDate(projectStartDate);
+        newProject.setProjectEndDate(projectEndDate);
+        newProject.setProjectDescription(projectDescription);
+        projectService.saveProject(newProject);
 
         /* Redirect to details page when done */
         return "redirect:/project/" + id;

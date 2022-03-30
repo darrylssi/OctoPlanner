@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.portfolio.service.AuthenticateClientService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -69,6 +70,9 @@ public class RegisterController {
                 AuthenticateResponse loginReply = authenticateClientService.authenticate(username, password);
                 loginController.createCookie(request, response, loginReply);
                 return "redirect:/users/" + loginReply.getUserId();
+            } else {
+                ValidationError err = registerReply.getValidationErrors(0);
+                model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("IdPErrorMessage", "Error connecting to Identity Provider...");

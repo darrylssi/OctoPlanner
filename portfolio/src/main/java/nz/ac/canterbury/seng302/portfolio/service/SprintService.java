@@ -44,6 +44,14 @@ public class SprintService {
     }
 
     /**
+     * Deletes a sprint from the repository
+     * @param sprintId the id of the sprint to be deleted
+     */
+    public void deleteSprint(int sprintId) {
+        repository.deleteById(sprintId);
+    }
+        
+    /**
      * Adds a new sprint into the database if the sprint with the given ID does not exist.
      * Otherwise, updates the sprint with the given ID.
      * @param sprint sprint to be added to the database

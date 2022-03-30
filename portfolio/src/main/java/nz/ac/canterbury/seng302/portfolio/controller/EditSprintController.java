@@ -42,7 +42,7 @@ public class EditSprintController extends PageController {
         /* Ensure that the user is at least a teacher */
         List<String> roles = getUserRole(principal);
         if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
             return "error";
         }
 
@@ -83,7 +83,7 @@ public class EditSprintController extends PageController {
         /* Ensure that the user is at least a teacher */
         List<String> roles = getUserRole(principal);
         if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project");
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
             return "error";
         }
 
