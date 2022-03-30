@@ -24,9 +24,9 @@ public class SprintLabelService {
     private SprintService sprintService;
 
     // the thing that goes at the start of every sprint label before the number
-    private static final String SPRINT_LABEL_BASE = "sprint";
+    public static final String SPRINT_LABEL_BASE = "Sprint ";
     // labels start at 0 if this is 0, so to start at 1, set it to 1.
-    private static final int SPRINT_LABEL_OFFSET = 1;
+    public static final int SPRINT_LABEL_OFFSET = 1;
 
     /**
      * Re-allocates all sprint labels across all projects.
