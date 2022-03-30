@@ -39,7 +39,7 @@ public class EditUserController {
         
         if(!userResponse.hasCreated()) {
             //TODO: send to error page
-            model.addAttribute("editErrorMessage", "Invald id");
+            model.addAttribute("editErrorMessage", "Invalid id");
         } else if(!isCurrentUser) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
