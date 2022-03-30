@@ -46,7 +46,7 @@ public class DetailsController {
         labelUtils.refreshProjectSprintLabels(id);
 
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
-        sprintList.sort(Comparator.comparing(Sprint::getStartDate));
+        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
 

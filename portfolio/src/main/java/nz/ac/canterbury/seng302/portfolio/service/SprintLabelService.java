@@ -44,10 +44,10 @@ public class SprintLabelService {
      */
     public void refreshProjectSprintLabels(int projectId) {
         List<Sprint> projectSprints = sprintService.getSprintsOfProjectById(projectId);
-        projectSprints.sort(Comparator.comparing(Sprint::getStartDate));
+        projectSprints.sort(Comparator.comparing(Sprint::getSprintStartDate));
         for (int i = 0; i < projectSprints.size(); i++) {
             Sprint sprint = projectSprints.get(i);
-            sprint.setLabel(SPRINT_LABEL_BASE + (i + SPRINT_LABEL_OFFSET));
+            sprint.setSprintLabel(SPRINT_LABEL_BASE + (i + SPRINT_LABEL_OFFSET));
             sprintService.saveSprint(sprint);
         }
     }
