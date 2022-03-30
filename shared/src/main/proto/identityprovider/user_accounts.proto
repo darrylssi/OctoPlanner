@@ -119,7 +119,6 @@ message UserRoleChangeResponse {
    string Message = 2;
 }
 
-
 service UserAccountService {
    rpc ChangeUserPassword (ChangePasswordRequest) returns (ChangePasswordResponse);
    rpc EditUser (EditUserRequest) returns (EditUserResponse);
