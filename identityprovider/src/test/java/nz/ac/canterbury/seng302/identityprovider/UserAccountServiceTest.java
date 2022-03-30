@@ -47,7 +47,7 @@ public class UserAccountServiceTest {
     }
 
     @Test
-    void testValidRegister() {
+    void testRegister_whenValid() {
         StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
@@ -248,7 +248,7 @@ public class UserAccountServiceTest {
         when(userRepository.findById(testUserID))
                 .thenReturn(testUser);
         // * Given: A user only has one role
-        assertTrue(testUser.getRoles().size() == 1);
+        assertEquals(1, testUser.getRoles().size());
         assertTrue(testUser.getRoles().contains(UserRole.STUDENT));
         // * When: We try to take away their only role
 
@@ -300,9 +300,69 @@ public class UserAccountServiceTest {
     }
 
     @Test
+    void testRegister_whenUsernameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("u")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Username")
+                .setErrorText("Username must be between 2 to 15 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenUsernameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsernamelong")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Username")
+                .setErrorText("Username must be between 2 to 15 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
     void testRegister_whenMissingPassword() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingPassword")
+                .setUsername("testUsername")
                 .setPassword("")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -332,7 +392,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingFirstName() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingFirstName")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("")
                 .setMiddleName("Michael")
@@ -352,7 +412,97 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("FirstName")
-                .setErrorText("FirstName cannot be empty")
+                .setErrorText("First name cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenFirstNameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("f")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("FirstName")
+                .setErrorText("First name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenFirstNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frankabcdefghijklmnop")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("FirstName")
+                .setErrorText("First name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenMiddleNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michaelabcdefghijklmn")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("MiddleName")
+                .setErrorText("Middle name must have less than 20 characters")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -362,7 +512,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingLastName() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingLastName")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -382,7 +532,189 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("LastName")
-                .setErrorText("LastName cannot be empty")
+                .setErrorText("Last name cannot be empty")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenLastNameTooShort() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("L")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("LastName")
+                .setErrorText("Last name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenLastNameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucasabcdefghijklmnop")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("LastName")
+                .setErrorText("Last name must be between 2 to 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenNicknameTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nickabcdefghijklmnopq")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Nickname")
+                .setErrorText("Nickname must have less than 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenBioTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio  This is a test bio  This is a test bio  This is a test bio  " +
+                        "This is a test bio  This is a test bio  This is a test bio  This is a test bio  " +
+                        "This is a test bio  This is a test bio201")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Bio")
+                .setErrorText("Bio must have less than 200 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenPronounsTooLong() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronounsabcdefgh")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("PersonalPronouns")
+                .setErrorText("Personal pronouns must have less than 20 characters")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
+    void testRegister_whenPronounsAreInvalid() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("testpronouns")
+                .setEmail("test@example.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("PersonalPronouns")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -392,7 +724,7 @@ public class UserAccountServiceTest {
     @Test
     void testRegister_whenMissingEmail() {
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testMissingEmail")
+                .setUsername("testUsername")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -420,14 +752,42 @@ public class UserAccountServiceTest {
     }
 
     @Test
+    void testRegister_whenEmailIsInvalid() {
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testUsername")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("testexample.com")
+                .build();
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        userAccountServerService.register(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        verify(observer, times(1)).onNext(captor.capture());
+        UserRegisterResponse response = captor.getValue();
+
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Email")
+                .setErrorText("Email must be valid")
+                .build();
+
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
+    }
+
+    @Test
     void testRegister_whenUsernameIsTaken() {
-        User testUser = new User("testSameUser", "testPassword", "testFirstName",
-                "testMiddleName", "testLastName", "testNickname",
-                "testBio", "testPronouns", "testEmail@example.com");
-        userRepository.save(testUser); // Doesn't actually add to repository?
+        when(userRepository.findByUsername("testUser"))
+                .thenReturn(testUser);
 
         UserRegisterRequest request = UserRegisterRequest.newBuilder()
-                .setUsername("testSameUser")
+                .setUsername("testUser")
                 .setPassword("testPassword")
                 .setFirstName("Frank")
                 .setMiddleName("Michael")
@@ -450,10 +810,8 @@ public class UserAccountServiceTest {
                 .setErrorText("Username is already in use")
                 .build();
 
-        assertTrue(response.getIsSuccess()); // This should assert false
-        // TODO fix this test case so that it ACTUALLY works
-        //assertFalse(response.getIsSuccess());
-        //assertEquals(error, response.getValidationErrors(0));
+        assertFalse(response.getIsSuccess());
+        assertEquals(error, response.getValidationErrors(0));
     }
 
     @Test
@@ -837,7 +1195,7 @@ public class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("PersonalPronouns")
-                .setErrorText("Personal pronouns must contain a \"/\"")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
                 .build();
 
         assertFalse(response.getIsSuccess());

@@ -81,7 +81,6 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
      */
     @Override
     public void checkAuthState(Empty request, StreamObserver<AuthState> responseObserver) {
-        logger.info("checkAuthState() has been called");
         responseObserver.onNext(AuthenticationServerInterceptor.AUTH_STATE.get());
         responseObserver.onCompleted();
     }
