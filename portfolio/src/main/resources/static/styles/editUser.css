@@ -1,0 +1,60 @@
+.centre-box {
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.content form .user-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 80%;
+    margin: auto;
+}
+
+form .user-info .input-box {
+    margin: 13px 0 5px 0;
+    width: 50%;
+    max-width: 50%;
+    height: 100px;
+    max-height: 100%;
+}
+
+.user-info .input-box label {
+    height: 30%;
+    display: block;
+    font-size: 18px;
+    margin: 15px 1px 5px 1px;
+}
+
+.user-info .input-box input {
+    width: 91%;
+    height: 35%;
+    font-size: 15px;
+}
+
+.user-info .input-box .error {
+    color: red;
+}
+
+.user-info .input-box .select-box {
+    width: 93.5%;
+    height: 42%;
+}
+
+.user-info .input-box .textarea {
+    height: 35%;
+    width: 91%;
+    max-width: 91%;
+    resize: none;
+}
+
+.required:after {
+    content:"*";
+    color: red;
+}
+
+#error {
+    color: red;
+}
