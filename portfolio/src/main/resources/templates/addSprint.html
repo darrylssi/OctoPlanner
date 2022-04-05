@@ -16,7 +16,7 @@
     <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
         <div>
             <label for="sprintName">Sprint Name</label> <br/>
-            <input id="sprintName" th:type="text" th:name="sprintName" th:field="*{sprintName}" th:required="required" />
+            <input id="sprintName" th:type="text" th:name="sprintName" th:value="${sprintName}" th:required="required" />
             <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         </div><br/>
         <div class="horizontal-group">
@@ -26,12 +26,12 @@
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintEndDate">Sprint End Date</label> <br/>
-                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="*{sprintEndDate}" />
+                <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="${sprintEndDate}" />
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintDescription">Sprint Description</label> <br/>
                 <textarea th:class="description-input" th:type="text" class="description-input" id="sprintDescription"
-                          th:name="sprintDescription" th:field="*{sprintDescription}"></textarea>
+                          th:name="sprintDescription" th:value="${sprintDescription}"></textarea>
                 <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
             </div>
         </div>

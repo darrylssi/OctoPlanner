@@ -39,15 +39,6 @@ public class SprintService {
         return repository.findByParentProjectId(id);
     }
 
-
-    /**
-     * Get a list of all sprints for a certain project id
-     */
-    public List<Sprint> getSprintByParentProjectId(int parentProjectId) {
-        List<Sprint> list = repository.findByParentProjectId(parentProjectId);
-        return list;
-    }
-
     /**
      * Get sprint by id
      */

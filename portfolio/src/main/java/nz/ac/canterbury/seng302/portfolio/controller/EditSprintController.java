@@ -104,13 +104,8 @@ public class EditSprintController {
     ) throws Exception {
         Project parentProject = projectService.getProjectById(projectId);
 
-//        Sprint updateSprint = sprintService.getSprintById(id);
-
-
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
-//        Integer newSprintId = Integer.valueOf(id);
-
         String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
