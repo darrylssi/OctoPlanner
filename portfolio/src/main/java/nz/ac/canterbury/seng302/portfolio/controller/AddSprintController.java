@@ -155,7 +155,7 @@ public class AddSprintController {
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
-        return "redirect:/project/" + id;
+        return "redirect:/project/" + parentProject.getId();
     }
 
 }

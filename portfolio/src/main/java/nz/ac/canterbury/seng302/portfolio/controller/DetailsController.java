@@ -1,13 +1,14 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -15,6 +16,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,6 +29,8 @@ public class DetailsController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
+    @Autowired
+    private SprintLabelService labelUtils;
 
     @GetMapping("/project/{id}")
     public String details(
@@ -38,8 +42,11 @@ public class DetailsController {
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
-        
+
+        labelUtils.refreshProjectSprintLabels(id);
+
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
+        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
         debugRole = "teacher";
@@ -60,6 +67,35 @@ public class DetailsController {
         model.addAttribute("canEdit", hasEditPermissions);
         return "projectDetails";
         // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion
+    }
+
+    /**
+     * Deletes a sprint and redirects back to the project view
+     * @param principal used to check if the user is authorised to delete sprints
+     * @param sprintId the id of the sprint to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/delete-sprint/{sprintId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteSprint(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="sprintId") int sprintId
+            ) {
+
+        // Check if the user is authorised to delete sprints
+        if(principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("role"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND").contains("teacher")) {
+            try {
+                sprintService.deleteSprint(sprintId);
+                return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
     }
 
 }

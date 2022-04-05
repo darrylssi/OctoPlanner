@@ -45,8 +45,8 @@ public class ProjectTests {
     @BeforeEach
     public void setUpProject() {
         baseProject = new Project();
-        baseProject.setName("Project 1");
-        baseProject.setDescription("The first.");
+        baseProject.setProjectName("Project 1");
+        baseProject.setProjectDescription("The first.");
         baseProject.setStartDateString("01/JAN/2022");
         baseProject.setEndDateString("01/OCT/2022");
         baseProject.setId(1);
@@ -54,55 +54,13 @@ public class ProjectTests {
 
     @Test
     public void setNullName_getViolation() {
-        baseProject.setName(null);
+        baseProject.setProjectName(null);
         Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
-                "Project name cannot be empty", // this should match the (message = "asdf") part of the annotation
+                "Project name is required", // this should match the (message = "asdf") part of the annotation
                 constraintViolations.iterator().next().getMessage()
         );
-    }
-
-    @Test
-    public void setNullDescription_getViolation() {
-        baseProject.setDescription(null);
-        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void setNullStartDate_getViolation() {
-        baseProject.setStartDate(null);
-        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void setNullEndDate_getViolation() {
-        baseProject.setEndDate(null);
-        Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void searchByName_getProject() {
-        String nameToSearch = "Project 1";
-        baseProject.setName(nameToSearch);
-        projectRepository.save(baseProject);
-        when(projectRepository.findByProjectName(nameToSearch)).thenReturn(List.of(baseProject));
-        assertThat(projectService.getProjectByProjectName(nameToSearch)).isEqualTo(List.of(baseProject));
     }
 
     @Test
@@ -124,7 +82,7 @@ public class ProjectTests {
     @Test
     void saveNullNameProject_getException() {
         try {
-            baseProject.setName(null);
+            baseProject.setProjectName(null);
             projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
@@ -134,7 +92,7 @@ public class ProjectTests {
     @Test
     void saveEmptyNameProject_getException() {
         try {
-            baseProject.setName("");
+            baseProject.setProjectName("");
             projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
@@ -144,7 +102,7 @@ public class ProjectTests {
     @Test
     void saveNullDescriptionProject_getException() {
         try {
-            baseProject.setDescription(null);
+            baseProject.setProjectDescription(null);
             projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
@@ -154,7 +112,7 @@ public class ProjectTests {
     @Test
     void saveNullStartDateProject_getException() {
         try {
-            baseProject.setStartDate(null);
+            baseProject.setProjectStartDate(null);
             projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
@@ -164,7 +122,7 @@ public class ProjectTests {
     @Test
     void saveNullEndDateProject_getException() {
         try {
-            baseProject.setEndDate(null);
+            baseProject.setProjectEndDate(null);
             projectRepository.save(baseProject);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());

@@ -42,6 +42,7 @@ input {
     border: none;
     font-weight: bold;
     min-width: 50px;
+    margin: 0 10px;
 }
 
 .cancel {
@@ -52,6 +53,10 @@ input {
 .save {
     background-color: #5e0202;
     color: white;
+}
+
+.buttons {
+    float: right;
 }
 
 .buttons {

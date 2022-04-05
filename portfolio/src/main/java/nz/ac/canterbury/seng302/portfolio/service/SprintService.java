@@ -18,9 +18,27 @@ public class SprintService {
      * Get list of all sprints
      */
     public List<Sprint> getAllSprints() {
-        List<Sprint> list = (List<Sprint>) repository.findAll();
-        return list;
+        return (List<Sprint>) repository.findAll();
     }
+
+    /**
+     * Returns a list of all sprints that match the given name
+     * @param name the sprint name to search for
+     * @return list of matching sprints, or empty list if no matches
+     */
+    public List<Sprint> getSprintByName(String name) {
+        return repository.findBySprintName(name);
+    }
+
+    /**
+     * Returns a list of all sprints for a given project
+     * @param id the id of the project to find sprints from
+     * @return list of matching sprints, or empty list if no matches
+     */
+    public List<Sprint> getSprintByParentProjectId(int id) {
+        return repository.findByParentProjectId(id);
+    }
+
 
     /**
      * Get a list of all sprints for a certain project id
@@ -52,19 +70,19 @@ public class SprintService {
     }
 
     /**
+     * Deletes a sprint from the repository
+     * @param sprintId the id of the sprint to be deleted
+     */
+    public void deleteSprint(int sprintId) {
+        repository.deleteById(sprintId);
+    }
+
+    /**
      * Adds a new sprint into the database if the sprint with the given ID does not exist.
      * Otherwise, updates the sprint with the given ID.
      * @param sprint sprint to be added to the database
      */
     public void saveSprint(Sprint sprint) {
-        repository.save(sprint);
-    }
-
-    /**
-     * Savdes a sprint to the repository
-     * @param sprint The sprint object to save to the repository
-     */
-    public void saveOrUpdateSprint(Sprint sprint) {
         repository.save(sprint);
     }
 

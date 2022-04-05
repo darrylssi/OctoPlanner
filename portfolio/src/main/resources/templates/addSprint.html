@@ -40,12 +40,10 @@
         </div>
         <br/>
         <div class="buttons">
-            <a th:href="@{/project/{id}(id = ${projectId})}">
-                <button class="form-button cancel" type="button">
-                    Cancel
-                </button>
-            </a>
-            <button class="save" type="submit">Save</button>
+            <button class="form-button cancel" type="button">
+                <a th:href="@{'/project/' + ${parentProjectId}}">Cancel</a>
+            </button>
+            <button class="form-button save" type="submit">Save</button>
         </div>
     </form>
 </div>

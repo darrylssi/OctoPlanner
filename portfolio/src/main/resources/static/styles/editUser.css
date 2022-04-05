@@ -1,25 +1,16 @@
-
-
-body {
+.centre-box {
+    width: 80%;
     display: flex;
     justify-content: center;
+    margin: auto;
 }
 
-.container {
-    max-width: 700px;
-    padding: 20px 10px 20px 30px;
-}
-
-.container .title {
-    font-size: 28px;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-.container form .user-info {
+.content form .user-info {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    width: 80%;
+    margin: auto;
 }
 
 form .user-info .input-box {
@@ -43,9 +34,6 @@ form .user-info .input-box {
     font-size: 15px;
 }
 
-.user-info .input-box span {
-}
-
 .user-info .input-box .error {
     color: red;
 }
@@ -62,33 +50,6 @@ form .user-info .input-box {
     resize: none;
 }
 
-form .submit {
-    height: 40px;
-    margin: 40px 0;
-}
-
-form .submit input {
-    height: 100%;
-    width: 97%;
-    color: white;
-    background: #357EC7;
-    font-size: 18px;
-    border-radius: 15px;
-    letter-spacing: 1px;
-}
-
-form .submit input:hover {
-    background: #6495ED	;
-}
-
-.required:after {
-    content:"*";
-    color: red;
-}
-
-#error {
-    color: red;
-}
 .required:after {
     content:"*";
     color: red;

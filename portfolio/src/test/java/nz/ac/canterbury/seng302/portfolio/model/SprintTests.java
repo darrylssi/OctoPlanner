@@ -51,54 +51,10 @@ public class SprintTests {
     }
 
     @Test
-    public void setNullName_getViolation() {
-        baseSprint.setSprintName(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "Sprint name cannot be empty", // this should match the (message = "asdf") bit
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void setNullDescription_getViolation() {
-        baseSprint.setSprintDescription(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void setNullStartDate_getViolation() {
-        baseSprint.setStartDate(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
-    public void setNullEndDate_getViolation() {
-        baseSprint.setEndDate(null);
-        Set<ConstraintViolation<Sprint>> constraintViolations = validator.validate(baseSprint);
-        assertEquals( 1, constraintViolations.size() );
-        assertEquals(
-                "must not be null",
-                constraintViolations.iterator().next().getMessage()
-        );
-    }
-
-    @Test
     public void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
         when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintBySprintName(nameToSearch)).isEqualTo(List.of(baseSprint));
+        assertThat(sprintService.getSprintByName(nameToSearch)).isEqualTo(List.of(baseSprint));
     }
 
     @Test
