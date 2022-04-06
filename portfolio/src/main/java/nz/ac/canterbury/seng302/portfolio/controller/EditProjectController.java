@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -27,6 +30,8 @@ public class EditProjectController {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private SprintService sprintService;
 
     @Autowired
     private DateUtils utils;
@@ -47,6 +52,7 @@ public class EditProjectController {
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectDescription", project.getProjectDescription());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
         }
@@ -76,12 +82,22 @@ public class EditProjectController {
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
     ) throws Exception {
+        // Getting sprint list containing all the sprints
+        List<Sprint> sprintList = sprintService.getAllSprints();
+
+        //
+        Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
+        Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
+        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
+
 
         /* Return editProject template with user input */
-        if (result.hasErrors()) {
+        if (result.hasErrors() || !dateOutOfRange.equals("")) {
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectDescription", projectDescription);
+            model.addAttribute("invalidDateRange", dateOutOfRange);
             return "editProject";
         }
 

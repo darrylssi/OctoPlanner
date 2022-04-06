@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the add sprint details page
@@ -45,6 +49,9 @@ public class AddSprintController {
     private DateUtils utils;
 
 
+
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+
     /**
      * Gets the project name and creates a new sprint label
      * @param model Used to display the project name in title
@@ -55,11 +62,7 @@ public class AddSprintController {
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
-        labelUtils.refreshProjectSprintLabels(id);
-
-        List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
-        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
-
+        List<Sprint> sprintList = sprintService.getAllSprints();
 
         // Creating a new sprint object
         Sprint sprint = new Sprint();
@@ -68,19 +71,33 @@ public class AddSprintController {
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
         model.addAttribute("projectName", project.getProjectName() + " - Add Sprint");
-        model.addAttribute("sprintLabel", "Add Sprint - " + sprint.getSprintLabel());
-        model.addAttribute("sprintName", sprint.getSprintLabel());
+        model.addAttribute("sprintLabel", "Add Sprint - " + labelUtils.nextLabel(id));
+        model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
 
         // Puts the default sprint start date
         String getSprintStartDate = "";
         if (sprintList.size() == 0) {
             getSprintStartDate += utils.toString(project.getProjectStartDate());
-            model.addAttribute("sprintStartDate", getSprintStartDate);
         } else {
-            getSprintStartDate += utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate());
-            model.addAttribute("sprintStartDate", getSprintStartDate);
+            String getLocalSprintStartDate = utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate());
+
+            // Creating default start date for the new sprint
+            // Converting the date to LocalDate, so we can add the three weeks of default end date
+            String newDate = utils.toString(new SimpleDateFormat("yyyy-MM-dd").parse(getLocalSprintStartDate));
+
+            // Converting date to LocalDate
+            Instant instant = utils.toDate(newDate).toInstant();
+            ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+            LocalDate sprintOldStartDate = zdt.toLocalDate();
+
+            // Adding 3 weeks (21 days) of default sprint end date
+            LocalDate sprintLocalStartDate = sprintOldStartDate.plusDays(1);
+
+            // Converting the new sprint end date of LocalDate object to Date object
+            getSprintStartDate += utils.toString(Date.from(sprintLocalStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
+        model.addAttribute("sprintStartDate", getSprintStartDate);
 
 
         // Creating default end date for the new sprint
@@ -122,7 +139,6 @@ public class AddSprintController {
             BindingResult result,
             Model model
     ) throws Exception {
-
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
@@ -130,19 +146,20 @@ public class AddSprintController {
         List<Sprint> sprintList = sprintService.getAllSprints();
 
         // Checking the sprint dates validation and returning appropriate error message
-        String dateOutOfRange = sprint.validSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), parentProject.getProjectStartDate(),  parentProject.getProjectEndDate(),  sprintList);
+        Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
+        Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
+        String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
-            model.addAttribute("parentProjectId", id);
             model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");
-            model.addAttribute("sprintLabel", "Add Sprint - " + sprint.getSprintLabel());
+            model.addAttribute("sprintLabel", "Add Sprint - " + labelUtils.nextLabel(id));
             model.addAttribute("sprintName", sprintName);
-            model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
+            model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
             return "addSprint";
         }

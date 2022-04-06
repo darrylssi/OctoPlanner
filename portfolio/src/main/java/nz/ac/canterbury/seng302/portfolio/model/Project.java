@@ -5,8 +5,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.text.ParseException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @Entity // this is an entity, assumed to be in a table called Project
 @Table (name = "Project")
@@ -152,4 +154,29 @@ public class Project {
     public void setEndDateString(String date) {
         this.projectEndDate = Project.stringToDate(date);
     }
+
+    public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
+        String invalidDateRange = "";
+        DateUtils utils = new DateUtils();
+
+        if (!sprintList.isEmpty()) {
+            for (Sprint eachSprint: sprintList) {
+                Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
+                Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
+                if ((projectStartDate.after(utilsSprintEndDate) || projectEndDate.before(utilsSprintStartDate)) ) {
+                    invalidDateRange += "Project dates must not be before or after the sprint dates " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                            Project.dateToString(eachSprint.getSprintEndDate());
+                    break;
+                } else if (((projectStartDate.after(utilsSprintStartDate)) && (projectStartDate.before(utilsSprintEndDate))) ||
+                        (projectStartDate.after(utilsSprintStartDate) && projectStartDate.before(utilsSprintEndDate)) ||
+                        (projectEndDate.after(utilsSprintStartDate) && projectEndDate.before(utilsSprintEndDate))) {
+                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                            Project.dateToString(eachSprint.getSprintEndDate());
+                    break;
+                }
+            }}
+        return invalidDateRange;
+
+    }
+
 }

@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,9 +42,10 @@ public class EditSprintController {
 
     @Autowired
     private ProjectService projectService;
-
     @Autowired
     private SprintService sprintService;
+    @Autowired
+    private SprintLabelService labelUtils;
 
     @Autowired
     private DateUtils utils;
@@ -65,7 +67,7 @@ public class EditSprintController {
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintLabel", " Edit Sprint - Sprint " + sprint.getId());
+        model.addAttribute("sprintLabel", " Edit Sprint - " + labelUtils.nextLabel(id) );
         model.addAttribute("sprintName", sprint.getSprintName());
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
         model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
@@ -93,11 +95,11 @@ public class EditSprintController {
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
             @PathVariable("id") int id,
-            @RequestParam(value = "projectId") int projectId,
-            @RequestParam(value = "sprintName") String sprintName,
-            @RequestParam(value = "sprintStartDate") String sprintStartDate,
-            @RequestParam(value = "sprintEndDate") String sprintEndDate,
-            @RequestParam(value = "sprintDescription") String sprintDescription,
+            @RequestParam(name = "projectId") int projectId,
+            @RequestParam(name = "sprintName") String sprintName,
+            @RequestParam(name = "sprintStartDate") String sprintStartDate,
+            @RequestParam(name = "sprintEndDate") String sprintEndDate,
+            @RequestParam(name = "sprintDescription") String sprintDescription,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -106,7 +108,11 @@ public class EditSprintController {
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
-        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), parentProject.getProjectStartDate(), parentProject.getProjectEndDate(), sprintList);
+
+        //
+        Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
+        Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
+        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
@@ -114,16 +120,12 @@ public class EditSprintController {
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
             model.addAttribute("sprintId", id);
-            model.addAttribute("sprintLabel", "Edit Sprint - Sprint " + id);
+            model.addAttribute("sprintLabel", "Edit Sprint - " + labelUtils.nextLabel(id));
             model.addAttribute("sprintName", sprintName);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
-
             model.addAttribute("invalidDateRange", dateOutOfRange);
-            logger.info("here editSprint");
-            logger.info(dateOutOfRange);
-
             return "editSprint";
         }
 
@@ -135,7 +137,6 @@ public class EditSprintController {
         sprint.setSprintDescription(sprintDescription);
 
         sprintService.saveSprint(sprint);
-        logger.info("here saveSprint");
         return "redirect:/project/" + projectId;
     }
 

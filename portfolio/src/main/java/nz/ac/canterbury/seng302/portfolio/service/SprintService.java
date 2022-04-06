@@ -76,13 +76,4 @@ public class SprintService {
     public void saveSprint(Sprint sprint) {
         repository.save(sprint);
     }
-
-    /**
-     * Deletes a specific sprint from the repository
-     * @param id The id of the sprint to delete
-     */
-    public void delete(int id) {
-        repository.deleteById(id);
-    }
-
 }

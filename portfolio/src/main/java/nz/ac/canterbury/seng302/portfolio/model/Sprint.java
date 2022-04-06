@@ -1,11 +1,14 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +52,6 @@ public class Sprint {
     @Column (nullable = false)
     @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
-
 
     private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
@@ -252,18 +254,25 @@ public class Sprint {
      * @param sprintList Gets the sprint list that stores all the sprint objects for the project
      * @return either "" or an error message string
      */
-    public String validSprintDateRanges(Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) {
+    public String validAddSprintDateRanges(Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
+        DateUtils utils = new DateUtils();
 
-        if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
-            invalidDateRange += "Start date must always be before end date";
-        } else if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
+        if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
             invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
+        } else if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
+            invalidDateRange += "Start date must always be before end date";
         } else if (!sprintList.isEmpty()) {
             for (Sprint eachSprint: sprintList) {
-                if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
-                        (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate())) ||
-                        (sprintStartDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
+                Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
+                Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
+                if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate) ) {
+                    invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                            Project.dateToString(eachSprint.getSprintEndDate());
+                    break;
+                } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
+                        (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
+                        (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
                     invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
                             Project.dateToString(eachSprint.getSprintEndDate());
                     break;
@@ -271,7 +280,6 @@ public class Sprint {
             }
         }
         return invalidDateRange;
-
     }
 
     /**
@@ -285,31 +293,31 @@ public class Sprint {
      * @param sprintList Gets the sprint list that stores all the sprint objects for the project
      * @return either "" or an error message string
      */
-    public String validEditSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) {
+    public String validEditSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
+        DateUtils utils = new DateUtils();
 
-        logger.info("in function");
-        if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
-            invalidDateRange += "Start date must always be before end date";
-        } else if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
+        if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
             invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
+        } else if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
+            invalidDateRange += "Start date must always be before end date";
         } else if (!sprintList.isEmpty()) {
             for (Sprint eachSprint: sprintList) {
-//                Integer eachSprintId = Integer.valueOf(eachSprint.getId());
                 if (eachSprint.getId() == sprintId) {
-                    logger.info("finally");
                     continue;
                 } else {
-                    if (!sprintStartDate.equals(eachSprint.sprintEndDate)) {
-                        logger.info("in last id");
-                        if (((sprintStartDate.after(eachSprint.getSprintStartDate())) && (sprintStartDate.before(eachSprint.getSprintEndDate()))) ||
-                                (sprintEndDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate())) ||
-                                (sprintStartDate.after(eachSprint.getSprintStartDate()) && sprintEndDate.before(eachSprint.getSprintEndDate()))) {
-                            invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                                    Project.dateToString(eachSprint.getSprintEndDate()) + " with ID " + eachSprint.getId() + " and you're "  + sprintId;
-                            logger.info("in last if");
-                            break;
-                        }
+                    Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
+                    Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
+                    if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate)) {
+                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                                Project.dateToString(eachSprint.getSprintEndDate());
+                        break;
+                    } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
+                                (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
+                                (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
+                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
+                                Project.dateToString(eachSprint.getSprintEndDate()) + " with ID " + eachSprint.getId() + " and you're "  + sprintId;
+                        break;
                     }
                 }
             }
