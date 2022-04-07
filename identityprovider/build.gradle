@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'se.thinkcode.cucumber-runner' version '0.0.8'
 }
 
 group = 'nz.ac.canterbury.seng302'
@@ -15,6 +16,13 @@ wrapper {
 repositories {
     mavenLocal()
     mavenCentral()
+}
+
+
+
+ext {
+    junitVersion = '5.7.2'
+    cucumberVersion = '6.10.4'
 }
 
 dependencies {
@@ -37,7 +45,9 @@ dependencies {
     implementation 'nz.ac.canterbury.seng302:shared:1.0' // Local package containing .proto files
 
     //Cucumber dependencies
-    testImplementation 'io.cucumber:cucumber-java:7.2.3'
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -55,30 +65,25 @@ configurations {
     }
 }
 
-sourceSets {
-    test {
-        resources.srcDirs = ['src/test/resources']
-        java.srcDirs = ['src/test/java', 'src/main/java']
-        runtimeClasspath = project.sourceSets.main.compileClasspath +
-                project.sourceSets.test.compileClasspath +
-                fileTree("src/test/resources/test") +
-                project.sourceSets.test.output + project.sourceSets.main.output
-    }
-}
-
-task cucumber() {
+task cucumberCli() {
     dependsOn assemble, testClasses
     doLast {
         javaexec {
             main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'gradle.cucumber', 'src/test/resources']
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = [
+                    '--plugin', 'pretty',
+                    '--plugin', 'html:target/cucumber-report.html',
+                    '--glue', 'com.accounting.cucumber',
+                    'src/test/resources']
         }
     }
 }
 
+cucumber {
+    main = 'io.cucumber.core.cli.Main'
+}
+
 tasks.named('test') {
     useJUnitPlatform()
-    // force the test task to run Cucumber too
-    finalizedBy cucumber
 }
