@@ -36,6 +36,9 @@ dependencies {
     implementation 'net.devh:grpc-spring-boot-starter:2.13.1.RELEASE' // GRPC server / client dependencies
     implementation 'nz.ac.canterbury.seng302:shared:1.0' // Local package containing .proto files
 
+    //Cucumber dependencies
+    testImplementation 'io.cucumber:cucumber-java:7.2.3'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 
@@ -46,6 +49,36 @@ dependencies {
 
 }
 
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+sourceSets {
+    test {
+        resources.srcDirs = ['src/test/resources']
+        java.srcDirs = ['src/test/java', 'src/main/java']
+        runtimeClasspath = project.sourceSets.main.compileClasspath +
+                project.sourceSets.test.compileClasspath +
+                fileTree("src/test/resources/test") +
+                project.sourceSets.test.output + project.sourceSets.main.output
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'gradle.cucumber', 'src/test/resources']
+        }
+    }
+}
+
 tasks.named('test') {
     useJUnitPlatform()
+    // force the test task to run Cucumber too
+    finalizedBy cucumber
 }
