@@ -88,13 +88,25 @@ public class ProfilePageController {
         return "profile";
     }
 
-    /**
-     * Combines a user's names into one string
-     * @param firstName The user's first name
-     * @param middleName The user's middle name
-     * @param lastName The user's last name
-     * @return A formatted string containing the user's full name, only including the middle name if they have one
-     */
+
+    @GetMapping("/fragments")
+    public void GetUserName(
+            @PathVariable("id") int id,
+            Model model
+    ) {
+        UserResponse user = userAccountClientService.getUserAccountById(id);
+        model.addAttribute("userName", user.getUsername());
+    }
+
+
+
+        /**
+         * Combines a user's names into one string
+         * @param firstName The user's first name
+         * @param middleName The user's middle name
+         * @param lastName The user's last name
+         * @return A formatted string containing the user's full name, only including the middle name if they have one
+         */
     public static String getFullName(String firstName, String middleName, String lastName) {
         if (middleName != null)
             return String.format("%s %s %s", firstName, middleName, lastName);

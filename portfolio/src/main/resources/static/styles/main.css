@@ -50,6 +50,12 @@
     font-size: large;
 }
 
+.title-username {
+    color: whitesmoke;
+    font-size: large;
+    /*margin-left: 1085px;*/
+}
+
 .content {
     margin: 10px;
     width:calc(100% - 20px);
@@ -175,8 +181,9 @@ button {
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
+    margin-top: 12px;
 }
 
 /* Dropdown Content (Hidden by Default) */
