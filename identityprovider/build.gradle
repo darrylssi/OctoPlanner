@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'se.thinkcode.cucumber-runner' version '0.0.8'
 }
 
 group = 'nz.ac.canterbury.seng302'
@@ -15,6 +16,13 @@ wrapper {
 repositories {
     mavenLocal()
     mavenCentral()
+}
+
+
+
+ext {
+    junitVersion = '5.7.2'
+    cucumberVersion = '6.10.4'
 }
 
 dependencies {
@@ -36,6 +44,11 @@ dependencies {
     implementation 'net.devh:grpc-spring-boot-starter:2.13.1.RELEASE' // GRPC server / client dependencies
     implementation 'nz.ac.canterbury.seng302:shared:1.0' // Local package containing .proto files
 
+    //Cucumber dependencies
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 
@@ -44,6 +57,31 @@ dependencies {
     // H2 Database
     runtimeOnly 'com.h2database:h2:2.1.210'
 
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+task cucumberCli() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = [
+                    '--plugin', 'pretty',
+                    '--plugin', 'html:target/cucumber-report.html',
+                    '--glue', 'com.accounting.cucumber',
+                    'src/test/resources']
+        }
+    }
+}
+
+cucumber {
+    main = 'io.cucumber.core.cli.Main'
 }
 
 tasks.named('test') {
