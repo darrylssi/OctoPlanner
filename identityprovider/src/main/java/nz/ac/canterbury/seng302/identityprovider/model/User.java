@@ -35,11 +35,6 @@ public class User {
     @Enumerated
     private Set<UserRole> roles;
 
-//    @Transient
-//    public UserRole highestRole() {
-//        return roles.stream().max(Comparator.naturalOrder()).orElse(null);
-//    }
-
     protected User() {
     }
 
@@ -172,5 +167,9 @@ public class User {
         }else {
             return this.firstName + " " + this.middleName + " " + this.lastName;
         }
+    }
+
+    public UserRole highestRole() {
+        return roles.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 }
