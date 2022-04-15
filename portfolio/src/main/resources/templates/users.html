@@ -17,14 +17,38 @@
     <table>
         <thead>
         <tr>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=name&asc=' + ${reverseDir}}"> Name
-                <span th:if="${orderBy == 'name'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=username&asc=' + ${reverseDir}}"> Username
-                <span th:if="${orderBy == 'username'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=nickname&asc=' + ${reverseDir}}"> Alias
-                <span th:if="${orderBy == 'nickname'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
-            <th> <a th:href="@{'/users/?page=' + ${page} + '&orderBy=role&asc=' + ${reverseDir}}"> Role
-                <span th:if="${orderBy == 'role'}"> <span th:text="${dir} ? '▼' : '▲'" /> </span> </a> </th>
+            <th>
+                <form method="post" th:action="@{/users/(page=${page}, orderBy='name')}">
+                    <a class="clickable" onclick="this.parentNode.submit()">
+                        Name
+                        <span th:if="${orderBy == 'name'}" th:text="${dir} ? '▼' : '▲'" />
+                    </a>
+                </form>
+            </th>
+            <th>
+                <form method="post" th:action="@{/users/(page=${page}, orderBy='username')}">
+                    <a class="clickable" onclick="this.parentNode.submit()">
+                        Username
+                        <span th:if="${orderBy == 'username'}" th:text="${dir} ? '▼' : '▲'" />
+                    </a>
+                </form>
+            </th>
+            <th>
+                <form method="post" th:action="@{/users/(page=${page}, orderBy='nickname')}">
+                    <a class="clickable" onclick="this.parentNode.submit()">
+                        Alias
+                        <span th:if="${orderBy == 'nickname'}" th:text="${dir} ? '▼' : '▲'" />
+                    </a>
+                </form>
+            </th>
+            <th>
+                <form method="post" th:action="@{/users/(page=${page}, orderBy='role')}">
+                    <a class="clickable" onclick="this.parentNode.submit()">
+                        Role
+                        <span th:if="${orderBy == 'role'}" th:text="${dir} ? '▼' : '▲'" />
+                    </a>
+                </form>
+            </th>
         </tr>
         </thead>
         <tbody>
