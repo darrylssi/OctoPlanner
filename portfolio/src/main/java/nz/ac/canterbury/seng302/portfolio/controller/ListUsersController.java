@@ -33,8 +33,11 @@ public class ListUsersController {
 
     private static final int PAGE_SIZE = 10;
     private static final String COOKIE_NAME_PREFIX = "page_order-";
+    private static final String COOKIE_VALUE_SEPARATOR = ":";
     private static final String DEFAULT_ORDER_COLUMN = "name";
     private static final boolean DEFAULT_IS_ASCENDING = true;
+
+    private static final Pair<String, Boolean> DEFAULT_COOKIE_VALUE_PAIR = Pair.of(DEFAULT_ORDER_COLUMN, DEFAULT_IS_ASCENDING);
 
     @Autowired
     private UserAccountClientService userAccountClientService;
@@ -51,7 +54,6 @@ public class ListUsersController {
             HttpServletResponse response
     ) {
         // Please for the love of god, someone make this easier
-        logger.info(principal.getClaimsList().stream().map(claim -> claim.getType() + "->" + claim.getValue()).toList().toString());
         String userId = principal.getClaimsList().stream()
             .filter(claim -> claim.getType().equals("nameid"))
             .findFirst()
@@ -68,7 +70,7 @@ public class ListUsersController {
             users = userAccountClientService.getPaginatedUsers(page - 1, PAGE_SIZE, orderBy, isAscending);
         } catch (IllegalArgumentException e) {
             // The orderBy column in the cookie is invalid, delete it
-            deleteOrderingCookie(userId, response);
+            clearPageOrdering(userId, response);
             // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
@@ -118,7 +120,7 @@ public class ListUsersController {
             isAscending = DEFAULT_IS_ASCENDING;
         }
         // Set the cookie
-        createOrderingCookie(orderBy, isAscending, userId, response);
+        createPageOrdering(orderBy, isAscending, userId, response);
 
         return "redirect:/users?page="+page;    // Send them back to the users page
     }
@@ -137,43 +139,61 @@ public class ListUsersController {
      *         If the cookie is abscent or invalid, it'll return the default values <code>("name", true(<i>ascending</i>))</code>
      */
     private static Pair<String, Boolean> getPageOrdering(HttpServletRequest request, String userId) {
-        final Pair<String, Boolean> DEFAULT_VALUES = Pair.of(DEFAULT_ORDER_COLUMN, DEFAULT_IS_ASCENDING);
-        
+        // Cookie should be in the format "<orderBy>:<ASC || DESC>" e.g. "username:DESC"
+        // * 1. Does the cookie exist?
         String value = CookieUtil.getValue(request, COOKIE_NAME_PREFIX+userId);
-        if (value == null) {        // Cookie doesn't exist
-            return DEFAULT_VALUES;
+        if (value == null) {
+            return DEFAULT_COOKIE_VALUE_PAIR;
         }
-        // Cookie is of the format "column:ASC/DESC"
-        String[] values = value.split(":");
-        if (values.length != 2) {   // Cookie has wrong number of values
-            logger.error("Cookie [{}] is of length {} (expected 2)", String.join(", ", values), values.length);
-            return DEFAULT_VALUES;
+        // * 2. Is the cookie made up of two values?
+        String[] values = value.split(COOKIE_VALUE_SEPARATOR);
+        if (values.length != 2) {
+            logger.error("Cookie \"{}\" is of length {} (expected 2)", value, values.length);
+            return DEFAULT_COOKIE_VALUE_PAIR;
         }
+        // * 3. Is the cookie's 2nd value (direction) valid?
         String orderBy = values[0];
         Boolean isAscending = switch (values[1]) {
                 case "ASC"  -> true;
                 case "DESC" -> false;
                 default     -> null;
         };
-        if (isAscending == null) {    // Direction must be literally "ASC" or "DESC"
+        if (isAscending == null) {
             logger.error("Expected \"ASC\" or \"DESC\", got \"{}\"", values[1]);
-            return DEFAULT_VALUES;
+            return DEFAULT_COOKIE_VALUE_PAIR;
         }
         return Pair.of(orderBy, isAscending);        
     }
 
-
-    void createOrderingCookie(String orderBy, boolean isAscending, String userId, HttpServletResponse response) {
+    /**
+     * Creates and sets the ordering cookie for the current user.
+     * 
+     * @param orderBy The column to be ordered by
+     * @param isAscending If the column's in ascending order
+     * @param userId A unique ID for each user, so different users on the same
+     *               machine keep the ordering when logging back in
+     * @param response Your endpoint's response object, to bind the cookie to.
+     */
+    void createPageOrdering(String orderBy, boolean isAscending, String userId, HttpServletResponse response) {
+        // Cookie should be in the format "<orderBy>:<ASC || DESC>" e.g. "username DESC"
         String strDirection = (isAscending) ? "ASC" : "DESC";
         // Give each user on this machine a different sorting cookie (AC6)
         String cookieName = COOKIE_NAME_PREFIX + userId;
-        Cookie cookie = new Cookie(cookieName, orderBy + ':' + strDirection);
+        Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
         cookie.setPath("/users");
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
         response.addCookie(cookie);
     }
 
-    void deleteOrderingCookie(String userId, HttpServletResponse response) {
+    /**
+     * <p>Invalidates the user's ordering cookie.</p>
+     * This can be useful if the cookie's data is "bad", and needs to be
+     * gotten rid of (e.g. sorting by an invalid column)
+     * 
+     * @param userId The ID associated with the cookie
+     * @param response Your endpoint's response object, to remove the cookie from
+     */
+    void clearPageOrdering(String userId, HttpServletResponse response) {
         CookieUtil.clear(response, COOKIE_NAME_PREFIX+userId);
     }
 }
