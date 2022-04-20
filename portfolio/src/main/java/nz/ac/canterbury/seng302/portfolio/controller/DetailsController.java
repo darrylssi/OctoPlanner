@@ -66,7 +66,6 @@ public class DetailsController {
         boolean hasEditPermissions = role.contains("teacher");
         model.addAttribute("canEdit", hasEditPermissions);
         return "projectDetails";
-        // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion
     }
 
     /**
