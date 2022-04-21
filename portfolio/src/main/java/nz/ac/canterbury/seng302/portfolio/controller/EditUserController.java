@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
@@ -24,17 +25,15 @@ public class EditUserController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private void editHandler(Model model, int id, AuthState principal) {
+    private void editHandler(
+            Model model,
+            int id,
+            @AuthenticationPrincipal AuthState principal
+        ) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
+        PrincipalData principalData = PrincipalData.from(principal);
 
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
-                !currentUserId.equals("NOT FOUND"));
+        boolean isCurrentUser = principalData.getID() == id;
         model.addAttribute("isCurrentUser", isCurrentUser);
         
         if(!userResponse.hasCreated()) {

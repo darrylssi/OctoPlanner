@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
@@ -30,13 +31,12 @@ public class ProfilePageController {
     @GetMapping("/users/current")
     public String profileRedirect(@AuthenticationPrincipal AuthState principal) {
 
-        String id = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("0");
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.isAuthenticated()) {
+            return "redirect:/users/";
+        }
 
-        return "redirect:/users/" + id;
+        return "redirect:/users/" + principalData.getID();
     }
 
     /**
@@ -53,17 +53,14 @@ public class ProfilePageController {
             @PathVariable("id") int id,
             Model model
     ) {
+        PrincipalData principalData = PrincipalData.from(principal);
         UserResponse user = userAccountClientService.getUserAccountById(id);
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
 
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
+        boolean isCurrentUser = principalData.getID() == id; // User's logged in, and this page is about them
+        model.addAttribute("isCurrentUser", isCurrentUser);
 
         if(user.hasCreated()) {
             model.addAttribute("profileInfo", user);

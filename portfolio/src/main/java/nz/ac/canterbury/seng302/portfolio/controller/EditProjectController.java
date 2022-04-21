@@ -1,6 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -10,17 +17,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
-import java.util.List;
 import javax.validation.Valid;
 import java.util.Date;
 
@@ -50,8 +52,8 @@ public class EditProjectController extends PageController {
             Model model
     ) {
         /* Ensure that the user is at least a teacher */
-        List<String> roles = getUserRole(principal);
-        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
             return "error";
         }
@@ -94,8 +96,8 @@ public class EditProjectController extends PageController {
             Model model
     ) throws Exception {
         /* Ensure that the user is at least a teacher */
-        List<String> roles = getUserRole(principal);
-        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
             return "error";
         }

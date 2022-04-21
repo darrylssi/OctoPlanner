@@ -1,5 +1,14 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -8,15 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 
 
 /**
@@ -43,15 +43,16 @@ public class EditSprintController extends PageController {
     @GetMapping("/edit-sprint/{id}")
     public String sprintForm(@PathVariable("id") int id, 
             @AuthenticationPrincipal AuthState principal,
-            Model model) throws Exception {
+            Model model) throws Exception { 
         /* Ensure that the user is at least a teacher */
-        List<String> roles = getUserRole(principal);
-        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
             return "error";
         }
 
         /* Add sprint details to the model */
+        // TODO Hey, maybe catch THIS error? Or make the exception more specific?
         Sprint sprint = sprintService.getSprintById(id);
         model.addAttribute("sprint", sprint);
         model.addAttribute("sprintId", sprint.getId());
@@ -79,8 +80,8 @@ public class EditSprintController extends PageController {
             Model model
     ) throws Exception {
         /* Ensure that the user is at least a teacher */
-        List<String> roles = getUserRole(principal);
-        if (!(roles.contains("teacher") || roles.contains("course_administrator"))) {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
             return "error";
         }
