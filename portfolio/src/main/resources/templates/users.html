@@ -67,25 +67,25 @@
     <div class="pagination" th:if="${totalPages > 1}">
 <!--        if not on first page, add link to first page -->
         <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{'/users/?page=1&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> First </a>
+            <a th:href="@{/users/(page=1)}"> First </a>
         </span>
 <!--        add link to PREV page -->
         <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{'/users/?page=' + ${page - 1} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Prev </a>
+            <a th:href="@{/users/(page=${page - 1})}"> Prev </a>
         </span>
 <!--        add link to all pages -->
         <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
-            <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${page != i}"
+            <a th:href="@{/users/(page=${i})}" th:if="${page != i}"
                 class="otherPages">[[${i}]]</a>
             <span th:unless="${page != i}" class="currentPage">[[${i}]]</span>
         </span>
 <!--        add link to NEXT page -->
         <span class="pages otherPages" th:if="${page < totalPages}">
-            <a th:href="@{'/users/?page=' + ${page + 1} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Next </a>
+            <a th:href="@{/users/(page=${page + 1})}"> Next </a>
         </span>
 <!--        add link to LAST page-->
         <span class="pages otherPages" th:if="${page < totalPages}">
-            <a th:href="@{'/users/?page=' + ${totalPages} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Last </a>
+            <a th:href="@{/users/(page=${totalPages})}"> Last </a>
         </span>
     </div>
 
