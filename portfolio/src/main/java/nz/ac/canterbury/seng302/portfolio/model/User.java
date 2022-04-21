@@ -32,8 +32,6 @@ public class User {
     @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String confirmPassword;
 
-    private boolean passwordsEqual;
-
     @Email(message = "Email should be valid")
     private String email;
 
@@ -134,10 +132,6 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public void setPasswordsEqual(boolean passwordsEqual) {
-        this.passwordsEqual = passwordsEqual;
     }
 
     @AssertTrue(message = "Passwords do not match")

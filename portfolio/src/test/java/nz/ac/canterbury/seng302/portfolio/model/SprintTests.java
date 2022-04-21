@@ -11,9 +11,7 @@ import org.springframework.transaction.TransactionSystemException;
 
 import javax.validation.*;
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
