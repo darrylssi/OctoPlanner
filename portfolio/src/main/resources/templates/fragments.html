@@ -28,22 +28,29 @@
             }
         </script>
         <div class="header">
-            <div class="title">
-                <div class="title-name" th:text="${title}" />
-                <div class="title-date" th:text="${subtitle}" />
-            </div>
-            <div class="dropdown">
-                <!-- TODO use the actual user's profile image -->
-                <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
-                </button>
-                <div id="userMenu" class="dropdown-content">
-                    <a href="/users/current">
-                        <button th:text="Profile" />
-                    </a>
-                    <form th:action="@{/logout}" method="post">
-                        <button type="submit" th:text="Logout" />
-                    </form>
+            <div class="header-top-group">
+                <div class="title">
+                    <div class="title-name" th:text="${title}" />
+                    <div class="title-date" th:text="${subtitle}" />
                 </div>
+
+                <div class="dropdown">
+                    <!-- TODO use the actual user's profile image -->
+                    <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
+                    </button>
+                    <div id="userMenu" class="dropdown-content">
+                        <a href="/users/current">
+                            <button th:text="Profile" />
+                        </a>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" th:text="Logout" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation-tabs">
+                <a href="/project/0">Project Details</a>
+                <a href="/users">Users</a>
             </div>
         </div>
     </header>

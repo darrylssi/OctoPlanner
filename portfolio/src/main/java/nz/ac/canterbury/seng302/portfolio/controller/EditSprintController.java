@@ -1,21 +1,23 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 
-import java.text.ParseException;
 import java.util.List;
+
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+
 
 /**
  * Controller for the edit sprint details page
@@ -24,7 +26,10 @@ import java.util.List;
 public class EditSprintController extends PageController {
 
     @Autowired
-    private SprintService sprintService;
+    ProjectService projectService;
+
+    @Autowired
+    SprintService sprintService;
 
     @Autowired
     private DateUtils utils;
@@ -50,27 +55,20 @@ public class EditSprintController extends PageController {
         Sprint sprint = sprintService.getSprintById(id);
         model.addAttribute("sprint", sprint);
         model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintLabel", sprint.getLabel());
-        model.addAttribute("sprintName", sprint.getName());
-        model.addAttribute("sprintStartDate", utils.toString(sprint.getStartDate()));
-        model.addAttribute("sprintEndDate", utils.toString(sprint.getStartDate()));
-        model.addAttribute("sprintDescription", sprint.getDescription());
+
+        model.addAttribute("sprintLabel", sprint.getSprintLabel());
+        model.addAttribute("sprintName", sprint.getSprintName());
+        model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintDescription", sprint.getSprintDescription());
+
+
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
     }
 
-    /**
-     * Post request for editing a sprint with a given ID.
-     * @param id ID of the sprint to be edited
-     * @param name (New) name of the sprint
-     * @param startDate (New) start date of the sprint
-     * @param endDate (New) end date of the sprint
-     * @param description (New) description of the sprint
-     * @return Details page
-     * @throws ParseException If date is of a different format than expected
-     */
-    @PostMapping("/edit-sprint/{id}")
+    @PostMapping("/edit-sprint")
     public String sprintSave(
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,

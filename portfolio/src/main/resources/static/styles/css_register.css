@@ -89,3 +89,11 @@ form .submit input:hover {
 #error {
     color: red;
 }
+.required:after {
+    content:"*";
+    color: red;
+}
+
+#error {
+    color: red;
+}

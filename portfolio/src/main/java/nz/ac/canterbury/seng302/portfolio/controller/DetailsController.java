@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,6 +29,8 @@ public class DetailsController extends PageController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
+    @Autowired
+    private SprintLabelService labelUtils;
 
     @GetMapping("/project/{id}")
     public String details(
@@ -38,8 +42,11 @@ public class DetailsController extends PageController {
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
-        
+
+        labelUtils.refreshProjectSprintLabels(id);
+
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
+        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
         List<String> roles = getUserRole(principal);
@@ -50,7 +57,6 @@ public class DetailsController extends PageController {
         boolean hasEditPermissions = roles.contains("teacher") || roles.contains("course_administrator");
         model.addAttribute("canEdit", hasEditPermissions);
         return "projectDetails";
-        // TODO [Andrew]: I have marked "userProjectDetails.html" for deletion
     }
 
     /**

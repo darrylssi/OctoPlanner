@@ -12,7 +12,7 @@ input {
 
 .horizontal-group {
     display: flex;
-    padding: 10px 0px;
+    padding: 10px;
     width: 100%;
 }
 
@@ -21,8 +21,10 @@ input {
 }
 
 .description-input {
-    width: 100%;
-    min-height: 100px;
+    width: 1480px;
+    max-width: 1480px;
+    height: 100px;
+    max-height: 200px;
     padding: 5px;
     font-size: large;
     border-radius: 8px;
@@ -51,6 +53,10 @@ input {
 .save {
     background-color: #5e0202;
     color: white;
+}
+
+.buttons {
+    float: right;
 }
 
 .buttons {
