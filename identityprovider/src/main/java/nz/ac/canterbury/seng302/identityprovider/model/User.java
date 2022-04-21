@@ -3,17 +3,15 @@ package nz.ac.canterbury.seng302.identityprovider.model;
 import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
-
 @Entity
-@Table (name = "Users")
+@Table(name = "Users")
 public class User {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int ID;
     @Column(nullable = false, unique = true)
     private String username;
@@ -22,7 +20,6 @@ public class User {
     @Column(nullable = false)
     private String firstName;
     private String middleName;
-    @Column(nullable = false)
     private String lastName;
     private String nickname;
     private String bio;
@@ -35,17 +32,12 @@ public class User {
     @Enumerated
     private Set<UserRole> roles;
 
-//    @Transient
-//    public UserRole highestRole() {
-//        return roles.stream().max(Comparator.naturalOrder()).orElse(null);
-//    }
-
     protected User() {
     }
 
     public User(String username, String password, String firstName,
-                String middleName, String lastName, String nickname,
-                String bio, String personalPronouns, String email) {
+            String middleName, String lastName, String nickname,
+            String bio, String personalPronouns, String email) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
@@ -138,9 +130,13 @@ public class User {
         this.email = email;
     }
 
-    public Instant getCreated() { return created; }
+    public Instant getCreated() {
+        return created;
+    }
 
-    public void setCreated(Instant created) { this.created = created; }
+    public void setCreated(Instant created) {
+        this.created = created;
+    }
 
     public Set<UserRole> getRoles() {
         return roles;
@@ -165,11 +161,11 @@ public class User {
     public boolean removeRole(UserRole role) {
         return roles.remove(role);
     }
-    
+
     public String getFullName() {
-        if (this.middleName == null){
+        if (this.middleName == null) {
             return this.firstName + " " + this.lastName;
-        }else {
+        } else {
             return this.firstName + " " + this.middleName + " " + this.lastName;
         }
     }
