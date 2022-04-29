@@ -259,7 +259,7 @@ public class Sprint {
         DateUtils utils = new DateUtils();
 
         if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
-            invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
+            invalidDateRange += "Dates must be within the project dates of " + utils.toString(projectStartDate) + " - " + utils.toString(projectEndDate);
         } else if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
             invalidDateRange += "Start date must always be before end date";
         } else if (!sprintList.isEmpty()) {
@@ -267,14 +267,14 @@ public class Sprint {
                 Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
                 Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
                 if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate) ) {
-                    invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                            Project.dateToString(eachSprint.getSprintEndDate());
+                    invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                            utils.toString(eachSprint.getSprintEndDate());
                     break;
                 } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
                         (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
                         (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
-                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                            Project.dateToString(eachSprint.getSprintEndDate());
+                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                            utils.toString(eachSprint.getSprintEndDate());
                     break;
                 }
             }
@@ -298,7 +298,7 @@ public class Sprint {
         DateUtils utils = new DateUtils();
 
         if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
-            invalidDateRange += "Dates must be within the project dates of " + Project.dateToString(projectStartDate) + " - " + Project.dateToString(projectEndDate);
+            invalidDateRange += "Dates must be within the project dates of " + utils.toString(projectStartDate) + " - " + utils.toString(projectEndDate);
         } else if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
             invalidDateRange += "Start date must always be before end date";
         } else if (!sprintList.isEmpty()) {
@@ -309,14 +309,14 @@ public class Sprint {
                     Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
                     Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
                     if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate)) {
-                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                                Project.dateToString(eachSprint.getSprintEndDate());
+                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                                utils.toString(eachSprint.getSprintEndDate());
                         break;
                     } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
                                 (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
                                 (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
-                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + Project.dateToString(eachSprint.getSprintStartDate()) + " - " +
-                                Project.dateToString(eachSprint.getSprintEndDate()) + " with ID " + eachSprint.getId() + " and you're "  + sprintId;
+                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                                utils.toString(eachSprint.getSprintEndDate());
                         break;
                     }
                 }

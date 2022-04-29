@@ -48,10 +48,6 @@ public class AddSprintController {
     @Autowired
     private DateUtils utils;
 
-
-
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
-
     /**
      * Gets the project name and creates a new sprint label
      * @param model Used to display the project name in title

@@ -16,6 +16,7 @@ import org.thymeleaf.util.StringUtils;
 import java.time.*;
 import java.util.ArrayList;
 
+
 /**
  * Controller class for the profile page.
  *
@@ -71,6 +72,7 @@ public class ProfilePageController {
             model.addAttribute("fullName", getFullName(
                     user.getFirstName(), user.getMiddleName(),  user.getLastName()));
             model.addAttribute("id", id);
+            model.addAttribute("userName", user.getUsername());
             model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
             String roles = "";
             for (int i = 0; i < user.getRolesCount(); i++) {
@@ -89,24 +91,13 @@ public class ProfilePageController {
     }
 
 
-    @GetMapping("/fragments")
-    public void GetUserName(
-            @PathVariable("id") int id,
-            Model model
-    ) {
-        UserResponse user = userAccountClientService.getUserAccountById(id);
-        model.addAttribute("userName", user.getUsername());
-    }
-
-
-
-        /**
-         * Combines a user's names into one string
-         * @param firstName The user's first name
-         * @param middleName The user's middle name
-         * @param lastName The user's last name
-         * @return A formatted string containing the user's full name, only including the middle name if they have one
-         */
+    /**
+     * Combines a user's names into one string
+     * @param firstName The user's first name
+     * @param middleName The user's middle name
+     * @param lastName The user's last name
+     * @return A formatted string containing the user's full name, only including the middle name if they have one
+     */
     public static String getFullName(String firstName, String middleName, String lastName) {
         if (middleName != null)
             return String.format("%s %s %s", firstName, middleName, lastName);

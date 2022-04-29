@@ -32,10 +32,8 @@
                 <div class="title">
                     <div class="title-name" th:text="${title}" />
                     <div class="title-date" th:text="${subtitle}" />
-                    <form th:action="@{/users/current}" method="post">
-                        <label class="title-username" th:text="${userName}" />
-                    </form>
                 </div>
+                <div class="title-username" th:text="${userName}" />
                 <div class="dropdown">
                     <!-- TODO use the actual user's profile image -->
                     <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">

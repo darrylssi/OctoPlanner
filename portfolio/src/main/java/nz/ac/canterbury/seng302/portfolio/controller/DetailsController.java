@@ -1,8 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,9 @@ import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Controller for the display project details page
  */
@@ -32,16 +38,21 @@ public class DetailsController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+
     @GetMapping("/project/{id}")
     public String details(
                             @AuthenticationPrincipal AuthState principal,
                             @PathVariable(name="id") int id,
                             @RequestParam(name="role", required=false) String debugRole,
+                            User user,
                             Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
+        logger.info(user.getUsername());
+        model.addAttribute("userName", user.getUsername());
 
         labelUtils.refreshProjectSprintLabels(id);
 
