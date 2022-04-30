@@ -16,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -210,11 +209,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             // Otherwise does nothing, returning false.
             boolean success = userService.addRoleToUser(userId, role);
             reply.setIsSuccess(success);
-            // TODO: Uncomment when sprint finishes, I don't wanna require a maven republish a day before it's over
-            // if (success)
-            //     reply.setMessage("Role successfully add");
-            // else
-            //     reply.setMessage("Couldn't add role: User already had this role.");
+            if (success)
+                reply.setMessage("Role successfully add");
+            else
+                reply.setMessage("Couldn't add role: User already had this role.");
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
@@ -241,10 +239,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             // Otherwise does nothing, returning false.
             boolean success = userService.removeRoleFromUser(userId, role);
             reply.setIsSuccess(success);
-            // if (success)
-            //     reply.setMessage("Role successfully removed");
-            // else
-            //     reply.setMessage("Couldn't remove role: User didn't have this role");
+            if (success)
+                reply.setMessage("Role successfully removed");
+            else
+                reply.setMessage("Couldn't remove role: User didn't have this role");
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {

@@ -16,6 +16,29 @@ Basic project template using `gradle`, `Spring Boot`, `Thymeleaf` and `Gitlab CI
 
 
 ## How to run
+The project must be imported into an IDE that supports Gradle. The steps for importing and setting up the project into Intellij are given below.
+  - Open Intellij IDE
+  - Click "Get from VCS" button
+  - Copy and paste team-800 HTTPS clone URL into URL in Intellij
+  - Select the directory to save the project
+  - Click "Clone"
+  - In project, Go to "File", select "Project Structure"
+  - Then, go to "SDKs" and set the language level to 17 
+
+The steps to run the project from here are:
+  - Open terminal and run the IDP module, then portfolio module (given below).
+  - Open a browser and paste "http://localhost:9000/login" URL to start
+  - Click "Register" button to register the user
+  - After registering, in login page, login using your registered username and password
+  - Click "Edit Profile" to edit the profile details
+  - Click "Users" to check the users registered 
+  - Click on image button on top right to open the drop down menu, and select "Profile" or "Logout" to go to the respective page.
+  - Click "Project Details" to open the default project
+  - Click on pencil shaped button under image button to edit the project details
+  - Click on "+ Add Sprint" to add a sprint to the project
+  - On each sprint, there is pencil shaped button to edit the sprint details
+  - On each sprint, there is bin shaped button to delete the sprint 
+
 
 ### 1 - Generating Java dependencies from the `shared` class library
 The `shared` class library is a dependency of the two main applications, so before you will be able to build either `portfolio` or `identityprovider`, you must make sure the shared library files are available via the local maven repository.
