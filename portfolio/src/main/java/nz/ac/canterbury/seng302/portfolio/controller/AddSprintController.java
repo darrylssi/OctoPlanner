@@ -3,8 +3,12 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,10 +47,14 @@ public class AddSprintController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+    @Autowired
+    private UserAccountClientService userAccountClientService;
 
     // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
     private DateUtils utils;
+
+    private String globalUsername;
 
     /**
      * Gets the project name and creates a new sprint label
@@ -54,7 +62,18 @@ public class AddSprintController {
      * @return The sprint add page
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
+    public String getsSprint(@AuthenticationPrincipal AuthState principal,
+                             @PathVariable("id") int id, Model model) throws Exception {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        globalUsername = getUsername;
+        model.addAttribute("userName", getUsername);
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
@@ -148,6 +167,7 @@ public class AddSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
+            model.addAttribute("userName", globalUsername);
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");

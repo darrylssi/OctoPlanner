@@ -42,19 +42,18 @@ public class RegisterController {
 
     @PostMapping("/register")
     public String register(
-            @Valid User user,
             BindingResult result,
             HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(name="username") String username,
-            @RequestParam(name="password") String password,
-            @RequestParam(name="firstName") String firstName,
-            @RequestParam(name="middleName") String middleName,
-            @RequestParam(name="lastName") String lastName,
-            @RequestParam(name="nickname") String nickname,
-            @RequestParam(name="bio") String bio,
-            @RequestParam(name="personalPronouns") String personalPronouns,
-            @RequestParam(name="email") String email,
+            @RequestParam(name = "username") String username,
+            @RequestParam(name = "password") String password,
+            @RequestParam(name = "firstName") String firstName,
+            @RequestParam(name = "middleName") String middleName,
+            @RequestParam(name = "lastName") String lastName,
+            @RequestParam(name = "nickname") String nickname,
+            @RequestParam(name = "bio") String bio,
+            @RequestParam(name = "personalPronouns") String personalPronouns,
+            @RequestParam(name = "email") String email,
             Model model
     ) {
         UserRegisterResponse registerReply;

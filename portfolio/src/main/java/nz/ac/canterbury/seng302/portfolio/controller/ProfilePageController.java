@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
+import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
@@ -65,7 +66,6 @@ public class ProfilePageController {
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
         model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
-
         if(user.hasCreated()) {
             model.addAttribute("profileInfo", user);
             model.addAttribute("userExists", true);

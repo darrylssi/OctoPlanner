@@ -7,7 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title='Edit Project')"></div>
+<div th:replace="fragments :: header(title='Edit Project', username=${userName})"></div>
 <div class="content">
 <form th:action="@{/edit-project/{id}(id = ${id})}"
       method="post" th:object="${project}">

@@ -4,8 +4,8 @@ import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,6 @@ import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import java.util.Comparator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the display project details page
@@ -37,8 +35,10 @@ public class DetailsController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
+    @Autowired
+    private UserAccountClientService userAccountClientService;
 
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+    private String globalUsername;
 
     @GetMapping("/project/{id}")
     public String details(
@@ -47,12 +47,21 @@ public class DetailsController {
                             @RequestParam(name="role", required=false) String debugRole,
                             User user,
                             Model model) throws Exception {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        globalUsername = getUsername;
+        model.addAttribute("userName", getUsername);
+
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
-        logger.info(user.getUsername());
-        model.addAttribute("userName", user.getUsername());
 
         labelUtils.refreshProjectSprintLabels(id);
 

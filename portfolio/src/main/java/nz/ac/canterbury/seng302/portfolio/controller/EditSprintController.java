@@ -5,8 +5,12 @@ import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -46,11 +50,12 @@ public class EditSprintController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
-
+    @Autowired
+    private UserAccountClientService userAccountClientService;
     @Autowired
     private DateUtils utils;
 
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+    private String globalUsername;
 
     /**
      * Show the edit-sprint page.
@@ -59,7 +64,19 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception {
+    public String sprintForm(@AuthenticationPrincipal AuthState principal,
+                             @PathVariable("id") int id, Model model) throws Exception {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        globalUsername = getUsername;
+        model.addAttribute("userName", getUsername);
+
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
         sprint.setId(id);
@@ -116,6 +133,7 @@ public class EditSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
+            model.addAttribute("userName", globalUsername);
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);

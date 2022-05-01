@@ -30,6 +30,7 @@ public class DebugAddRoleController {
     ) {
         try {
             var response = userAccountClientService.addRoleToUser(id, role);
+
             return String.valueOf(response);
         } catch (StatusException e) {
             if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {

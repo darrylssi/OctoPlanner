@@ -22,6 +22,8 @@ public class EditUserController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
+    private String globalUsername;
+
     private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
 
@@ -42,6 +44,10 @@ public class EditUserController {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
+            String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+            globalUsername = getUsername;
+            model.addAttribute("userName", getUsername);
+
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -66,7 +72,6 @@ public class EditUserController {
 
     @PostMapping("/users/{id}/edit")
     public String edit(
-            User user,
             @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
@@ -109,7 +114,6 @@ public class EditUserController {
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
                                                "confirmPassword"})
     public String changePassword(
-            User user,
             @PathVariable int id,
             @AuthenticationPrincipal AuthState principal,
             BindingResult result,
