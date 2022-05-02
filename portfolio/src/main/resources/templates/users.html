@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/users.css}>
+    <script th:src="@{/scripts/editRoles.js}"></script>
 
 </head>
 
@@ -35,7 +36,22 @@
             <td><span th:text="${user.getFirstName() +' '+ user.getMiddleName() + ' ' + user.getLastName()}"> Name </span></td>
             <td><span th:text="${user.getUsername()}"> Username </span></td>
             <td><span th:text="${user.getNickname()}"> Alias </span></td>
-            <td><span th:text="${user.getRolesList()}"> Roles </span></td>
+            <td style="display: flex; justify-content: space-between"><span style="display:none" th:text="${user.getRolesList()}"> Roles </span>
+                <div class="roles-list">
+                <div class="role" th:each="role: ${user.getRolesList()}">
+                    <div th:text="${role}"></div>
+                    <button th:if="${user.getRolesList().size() > 1}" class="remove-role-button" th:data-parameter1="${user.getId()}" th:data-parameter2="${role}" th:onclick="removeRole(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'))">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
+                </div>
+                </div>
+                <button class="add-role-button" th:onclick="addRole(33, 'COURSE_ADMINISTRATOR')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg></button>
+            </td>
         </tr>
         </tbody>
     </table>
