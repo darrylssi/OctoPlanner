@@ -24,8 +24,6 @@ public class ListUsersController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private String globalUsername;
-
     /**
      * Displays a list of users with their name, username, nickname and roles
      */
@@ -37,15 +35,8 @@ public class ListUsersController {
             @RequestParam(name="asc", defaultValue="true") boolean isAscending,
             Model model
     ) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        globalUsername = getUsername;
+        // Getting the current user's username for the header
+        String getUsername = getUsernameById(principal);
         model.addAttribute("userName", getUsername);
 
         /* Get users by page */
@@ -63,5 +54,17 @@ public class ListUsersController {
         model.addAttribute("totalPages", totalPages);
 
         return "users";
+    }
+
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 }

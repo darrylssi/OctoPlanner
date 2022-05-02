@@ -43,8 +43,6 @@ public class EditProjectController {
     @Autowired
     private DateUtils utils;
 
-    private String globalUsername;
-
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -57,15 +55,8 @@ public class EditProjectController {
 
         /* Add project details to the model */
         try {
-            // Setting the current user's username at the header
-            String currentUserId = principal.getClaimsList().stream()
-                    .filter(claim -> claim.getType().equals("nameid"))
-                    .findFirst()
-                    .map(ClaimDTO::getValue)
-                    .orElse("NOT FOUND");
-
-            String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-            globalUsername = getUsername;
+            // Setting username for the header
+            String getUsername = getUsernameById(principal);
             model.addAttribute("userName", getUsername);
 
             Project project = projectService.getProjectById(id);
@@ -115,7 +106,10 @@ public class EditProjectController {
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            model.addAttribute("userName", globalUsername);
+            // Setting username for the header
+            String getUsername = getUsernameById(principal);
+            model.addAttribute("userName", getUsername);
+
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
@@ -134,6 +128,18 @@ public class EditProjectController {
 
         /* Redirect to details page when done */
         return "redirect:/project/" + id;
+    }
+
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 
 }

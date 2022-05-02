@@ -22,8 +22,6 @@ public class EditUserController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private String globalUsername;
-
     private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
 
@@ -45,7 +43,6 @@ public class EditUserController {
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
             String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-            globalUsername = getUsername;
             model.addAttribute("userName", getUsername);
 
             model.addAttribute("profileInfo", userResponse);
@@ -151,4 +148,5 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
+
 }

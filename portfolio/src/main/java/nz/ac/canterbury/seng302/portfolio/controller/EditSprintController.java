@@ -55,8 +55,6 @@ public class EditSprintController {
     @Autowired
     private DateUtils utils;
 
-    private String globalUsername;
-
     /**
      * Show the edit-sprint page.
      * @param id ID of the sprint to be edited
@@ -66,15 +64,8 @@ public class EditSprintController {
     @GetMapping("/edit-sprint/{id}")
     public String sprintForm(@AuthenticationPrincipal AuthState principal,
                              @PathVariable("id") int id, Model model) throws Exception {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        globalUsername = getUsername;
+        // Get current user's username for the header
+        String getUsername = getUsernameById(principal);
         model.addAttribute("userName", getUsername);
 
         /* Add sprint details to the model */
@@ -111,6 +102,7 @@ public class EditSprintController {
      */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name = "projectId") int projectId,
             @RequestParam(name = "sprintName") String sprintName,
@@ -133,7 +125,10 @@ public class EditSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            model.addAttribute("userName", globalUsername);
+            // Get current user's username for the header
+            String getUsername = getUsernameById(principal);
+            model.addAttribute("userName", getUsername);
+
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
@@ -156,6 +151,18 @@ public class EditSprintController {
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + projectId;
+    }
+
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 
 }

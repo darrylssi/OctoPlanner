@@ -38,8 +38,6 @@ public class DetailsController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private String globalUsername;
-
     @GetMapping("/project/{id}")
     public String details(
                             @AuthenticationPrincipal AuthState principal,
@@ -47,15 +45,8 @@ public class DetailsController {
                             @RequestParam(name="role", required=false) String debugRole,
                             User user,
                             Model model) throws Exception {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        globalUsername = getUsername;
+        // Get current user's username for the header
+        String getUsername = getUsernameById(principal);
         model.addAttribute("userName", getUsername);
 
         /* Add project details to the model */
@@ -115,6 +106,18 @@ public class DetailsController {
             }
         }
         return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+    }
+
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 
 }

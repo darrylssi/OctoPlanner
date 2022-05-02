@@ -54,8 +54,6 @@ public class AddSprintController {
     @Autowired
     private DateUtils utils;
 
-    private String globalUsername;
-
     /**
      * Gets the project name and creates a new sprint label
      * @param model Used to display the project name in title
@@ -64,15 +62,7 @@ public class AddSprintController {
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(@AuthenticationPrincipal AuthState principal,
                              @PathVariable("id") int id, Model model) throws Exception {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        globalUsername = getUsername;
+        String getUsername = getUsernameById(principal);
         model.addAttribute("userName", getUsername);
 
         /* Getting project object by using project id */
@@ -145,6 +135,7 @@ public class AddSprintController {
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") String sprintStartDate,
@@ -167,7 +158,9 @@ public class AddSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            model.addAttribute("userName", globalUsername);
+            String getUsername = getUsernameById(principal);
+            model.addAttribute("userName", getUsername);
+
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");
@@ -189,6 +182,18 @@ public class AddSprintController {
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
+    }
+
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 
 }
