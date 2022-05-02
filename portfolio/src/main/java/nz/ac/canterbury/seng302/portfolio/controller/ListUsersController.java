@@ -89,4 +89,33 @@ public class ListUsersController {
         }
         return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
     }
+
+    @PatchMapping("/users/{id}/remove-role/{role}")
+    @ResponseBody
+    public ResponseEntity<String> removeRoleFromUser(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            @PathVariable("role") UserRole role
+    ) {
+        // Check if the user is authorised to add roles
+        if(principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("role"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND").contains("teacher")) {
+            try {
+                // Remove role from user
+                var response = userAccountClientService.removeRoleFromUser(id, role);
+                return new ResponseEntity<>(String.valueOf(response), HttpStatus.OK);
+            } catch (StatusException e) {
+                if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
+                    return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+                } else {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+    }
+
 }
