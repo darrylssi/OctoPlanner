@@ -15,38 +15,44 @@
             <div class="input-box">
                 <label class="required"> Username </label>
                 <input type="text" placeholder="Enter your username" th:field="*{username}" th:required="required" maxlength="15"/><br>
-                <p th:text="${registerMessage}" id="error"/>
                 <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" th:errorclass="error" />
+                <span class="error" th:text="${error_Username}"></span>
             </div>
             <div class="input-box">
                 <label class="required"> First Name </label>
                 <input type="text" placeholder="Enter your first name" th:field="*{firstName}" th:required="required" maxlength="20"/><br>
                 <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" th:errorclass="error" />
+                <span class="error" th:text="${error_FirstName}"></span>
             </div>
             <div class="input-box">
                 <label> Middle Name </label>
                 <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" maxlength="20" />
                 <span th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}" th:errorclass="error" />
+                <span class="error" th:text="${error_MiddleName}"></span>
             </div>
             <div class="input-box">
                 <label class="required"> Last Name </label>
                 <input type="text" placeholder="Enter your last name" th:field="*{lastName}" th:required="required" maxlength="20"/><br>
                 <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" th:errorclass="error" />
+                <span class="error" th:text="${error_LastName}"></span>
             </div>
             <div class="input-box">
                 <label> Nickname </label>
                 <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" maxlength="20" />
                 <span th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" th:errorclass="error" />
+                <span class="error" th:text="${error_Nickname}"></span>
             </div>
             <div class="input-box">
                 <label> Personal Pronouns </label>
-                <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" maxlength="10" />
+                <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" maxlength="20" />
                 <span th:if="${#fields.hasErrors('personalPronouns')}" th:errors="*{personalPronouns}" th:errorclass="error" />
+                <span class="error" th:text="${error_PersonalPronouns}"></span>
             </div>
             <div class="input-box">
                 <label class="required"> Password </label>
                 <input type="password" placeholder="Enter your password" th:field="*{password}" th:required="required" /><br>
                 <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="error" />
+                <span class="error" th:text="${error_Password}"></span>
 
             </div>
             <div class="input-box">
@@ -61,13 +67,15 @@
                 <label class="required"> Email </label>
                 <input th:type="email" placeholder="Enter your email" th:field="*{email}" th:required="required" /><br>
                 <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="error" />
+                <span class="error" th:text="${error_Email}"></span>
             </div>
             <div class="input-box">
                 <label> Bio </label>
                 <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" maxlength="200"/><br>
                 <span th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}" th:errorclass="error" />
+                <span class="error" th:text="${error_Bio}"></span>
             </div>
-
+            <p th:text="${registerMessage}" id="error"/>
         </div>
         <div class="submit">
             <input type="submit" value="Submit">
