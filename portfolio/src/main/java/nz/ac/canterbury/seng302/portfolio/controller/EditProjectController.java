@@ -39,7 +39,6 @@ public class EditProjectController {
     private SprintService sprintService;
     @Autowired
     private UserAccountClientService userAccountClientService;
-
     @Autowired
     private DateUtils utils;
 
@@ -51,7 +50,7 @@ public class EditProjectController {
      */
     @GetMapping("/edit-project/{id}")
     public String projectForm(@AuthenticationPrincipal AuthState principal,
-                              @PathVariable("id") int id, User user, Model model) {
+                              @PathVariable("id") int id, Model model) {
 
         /* Add project details to the model */
         try {
@@ -138,8 +137,7 @@ public class EditProjectController {
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
 
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
+        return userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
     }
 
 }

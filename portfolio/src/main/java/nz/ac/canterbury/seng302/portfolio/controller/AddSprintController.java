@@ -6,8 +6,6 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,8 +30,32 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+/**
+ * Controller for the adl;
+        import org.springframework.web.bind.annotation.GetMapping;
+        import org.springframework.web.bind.annotation.PathVariable;
+        import org.springframework.web.bind.annotation.PostMapping;
+        import nz.ac.canterbury.seng302.portfolio.model.Project;
+        import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+        import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.web.bind.annotation.RequestParam;
+        import org.springframework.web.bind.annotation.ModelAttribute;
+        import org.springframework.validation.BindingResult;
+
+        import javax.validation.Valid;
+        import java.util.Comparator;
+        import java.util.Date;
+        import java.time.Instant;
+        import java.time.LocalDate;
+        import java.text.SimpleDateFormat;
+        import java.time.ZoneId;
+        import java.time.ZonedDateTime;
+        import java.util.List;
+
+        import org.slf4j.Logger;
+        import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the add sprint details page
@@ -62,8 +84,6 @@ public class AddSprintController {
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(@AuthenticationPrincipal AuthState principal,
                              @PathVariable("id") int id, Model model) throws Exception {
-        String getUsername = getUsernameById(principal);
-        model.addAttribute("userName", getUsername);
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
@@ -192,8 +212,7 @@ public class AddSprintController {
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
 
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
+        return userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
     }
 
 }
