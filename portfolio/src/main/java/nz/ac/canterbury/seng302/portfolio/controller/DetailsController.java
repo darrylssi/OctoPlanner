@@ -38,7 +38,7 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
-                @RequestParam(name="role", required=false) UserRole debugRole,
+                @RequestParam(name="role", required=false) UserRole debugRole,  // TODO: Delete once we've gotten this sorted
                 Model model
     ) throws Exception {
         PrincipalData principalData = PrincipalData.from(principal);
@@ -53,11 +53,8 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        List<UserRole> roles = principalData.getRoles();
-        roles.add(debugRole);
-
         // If the user is at least a teacher, the template will render delete/edit buttons
-        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        boolean hasEditPermissions = debugRole == UserRole.TEACHER || principalData.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
         return "projectDetails";
     }

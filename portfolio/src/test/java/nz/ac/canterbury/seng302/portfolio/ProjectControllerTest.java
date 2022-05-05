@@ -1,27 +1,35 @@
 package nz.ac.canterbury.seng302.portfolio;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+
+import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@WithMockPrincipal(TEACHER)
 public class ProjectControllerTest {
+
+    final Logger logger = LoggerFactory.getLogger(ProjectControllerTest.class);
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     public void getProjectMissingId_throw404() throws Exception {
-        this.mockMvc.perform(get("/edit-project/999"))
+        this.mockMvc.perform(get("/edit-project/-1"))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason(containsString("Project not found")));
     }
