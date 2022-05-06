@@ -1,12 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -41,7 +39,6 @@ public class EditProjectController {
     private UserAccountClientService userAccountClientService;
     @Autowired
     private DateUtils utils;
-
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -54,11 +51,9 @@ public class EditProjectController {
 
         /* Add project details to the model */
         try {
-            // Setting username for the header
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
             Project project = projectService.getProjectById(id);
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
@@ -105,10 +100,8 @@ public class EditProjectController {
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Setting username for the header
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
@@ -127,17 +120,6 @@ public class EditProjectController {
 
         /* Redirect to details page when done */
         return "redirect:/project/" + id;
-    }
-
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        return userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
     }
 
 }

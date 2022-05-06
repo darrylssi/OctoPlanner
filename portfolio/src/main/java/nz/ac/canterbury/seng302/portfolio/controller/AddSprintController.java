@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
-import java.util.Comparator;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -30,32 +28,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-
-/**
- * Controller for the adl;
-        import org.springframework.web.bind.annotation.GetMapping;
-        import org.springframework.web.bind.annotation.PathVariable;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import nz.ac.canterbury.seng302.portfolio.model.Project;
-        import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-        import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-        import org.springframework.beans.factory.annotation.Autowired;
-        import org.springframework.web.bind.annotation.RequestParam;
-        import org.springframework.web.bind.annotation.ModelAttribute;
-        import org.springframework.validation.BindingResult;
-
-        import javax.validation.Valid;
-        import java.util.Comparator;
-        import java.util.Date;
-        import java.time.Instant;
-        import java.time.LocalDate;
-        import java.text.SimpleDateFormat;
-        import java.time.ZoneId;
-        import java.time.ZonedDateTime;
-        import java.util.List;
-
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the add sprint details page
@@ -71,10 +43,9 @@ public class AddSprintController {
     private SprintLabelService labelUtils;
     @Autowired
     private UserAccountClientService userAccountClientService;
-
-    // Initializes the DateUtils object to be used for converting date to string and string to date
-    @Autowired
+    @Autowired            // Initializes the DateUtils object to be used for converting date to string and string to date
     private DateUtils utils;
+
 
     /**
      * Gets the project name and creates a new sprint label
@@ -84,7 +55,6 @@ public class AddSprintController {
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(@AuthenticationPrincipal AuthState principal,
                              @PathVariable("id") int id, Model model) throws Exception {
-
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
         List<Sprint> sprintList = sprintService.getAllSprints();
@@ -93,6 +63,8 @@ public class AddSprintController {
         Sprint sprint = new Sprint();
         sprint.setParentProjectId(id);          // Setting parent project id
 
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
         model.addAttribute("projectName", project.getProjectName() + " - Add Sprint");
@@ -178,9 +150,8 @@ public class AddSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");
@@ -204,15 +175,5 @@ public class AddSprintController {
         return "redirect:/project/" + parentProject.getId();
     }
 
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        return userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-    }
 
 }

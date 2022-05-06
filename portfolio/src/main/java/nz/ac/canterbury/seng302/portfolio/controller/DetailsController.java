@@ -45,14 +45,12 @@ public class DetailsController {
                             @RequestParam(name="role", required=false) String debugRole,
                             User user,
                             Model model) throws Exception {
-        // Get current user's username for the header
-        String getUsername = getUsernameById(principal);
-        model.addAttribute("userName", getUsername);
-
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
         labelUtils.refreshProjectSprintLabels(id);
 
@@ -106,18 +104,6 @@ public class DetailsController {
             }
         }
         return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-    }
-
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
     }
 
 }

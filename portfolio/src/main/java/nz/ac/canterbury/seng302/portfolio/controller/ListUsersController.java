@@ -35,13 +35,11 @@ public class ListUsersController {
             @RequestParam(name="asc", defaultValue="true") boolean isAscending,
             Model model
     ) {
-        // Getting the current user's username for the header
-        String getUsername = getUsernameById(principal);
-        model.addAttribute("userName", getUsername);
-
         /* Get users by page */
         PaginatedUsersResponse users = userAccountClientService.getPaginatedUsers(page - 1, LIMIT, orderBy, isAscending);
 
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
@@ -56,15 +54,4 @@ public class ListUsersController {
         return "users";
     }
 
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
-    }
 }
