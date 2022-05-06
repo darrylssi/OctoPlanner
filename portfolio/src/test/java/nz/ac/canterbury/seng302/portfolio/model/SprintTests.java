@@ -141,12 +141,12 @@ public class SprintTests {
     }
 
     @Test
-    void checkGivenDatesAreValidForAddSprints_getStringMessage() throws Exception {
+    void checkGivenDatesAreValid_getStringMessage() throws Exception {
         Date projectStartDate = utils.toDate("2022-01-02");
         Date projectEndDate = utils.toDate("2022-12-31");
         Date sprintStartDate = utils.toDate("2022-01-02");
         Date sprintEndDate = utils.toDate("2022-02-02");
-        String errorMessage = baseSprint.validAddSprintDateRanges(sprintStartDate, sprintEndDate,
+        String errorMessage = baseSprint.validSprintDateRanges(2, sprintStartDate, sprintEndDate,
                 projectStartDate, projectEndDate, sprintList);
 
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
@@ -155,91 +155,26 @@ public class SprintTests {
         assertEquals("", errorMessage);
     }
 
-    @Test
-    void checkSprintStartDateOverlapsProjectStartDateForAddSprints_getStringMessage() throws Exception {
-        String projectStartDate = "2022-01-02";
-        String projectEndDate = "2022-12-31";
-        String sprintStartDate = "2022-01-01";
-        String sprintEndDate = " 2022-02-02";
-        String errorMessage = baseSprint.validAddSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
-                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
-
-        assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate, errorMessage);
-    }
-
-    @Test
-    void checkSprintEndDateOverlapsProjectEndDateForAddSprints_getStringMessage() throws Exception {
-        String projectStartDate = "2022-01-02";
-        String projectEndDate = "2022-12-31";
-        String sprintStartDate = "2022-11-02";
-        String sprintEndDate = "2023-01-02";
-        String errorMessage = baseSprint.validAddSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
-                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
-
-        assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate,
-                errorMessage);
-    }
-
-    @Test
-    void checkSprintStartDateOverlapsSprintEndDateForAddSprints_getStringMessage() throws Exception {
-        String projectStartDate = "2022-01-02";
-        String projectEndDate = "2022-12-31";
-        String sprintStartDate = "2022-01-10";
-        String sprintEndDate = "2022-01-08";
-        String errorMessage = baseSprint.validAddSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
-                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
-
-        assertEquals("Start date must always be before end date", errorMessage);
-    }
-
-    @Test
-    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForAddSprints_getStringMessage() throws Exception {
-        // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
-        String projectStartDate = "2022-01-02";
-        String projectEndDate = "2022-12-31";
-        String sprintStartDate = "2022-02-05";
-        String sprintEndDate = "2022-03-24";
-        String errorMessage = baseSprint.validAddSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
-                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
-
-        assertEquals("Dates must not overlap with other sprints & and it must not be same, it is overlapping with " +
-                utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
-    }
-
-    @Test
-    void checkCurrentSprintDatesOverlapsSprintListDatesForAddSprints_getStringMessage() throws Exception {
-        // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
-        String projectStartDate = "2022-01-02";
-        String projectEndDate = "2022-12-31";
-        String sprintStartDate = "2022-02-25";
-        String sprintEndDate = "2022-04-02";
-        String errorMessage = baseSprint.validAddSprintDateRanges(utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
-                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
-
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " +
-                utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
-    }
-
     //
     @Test
-    void checkSprintStartDateOverlapsProjectStartDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsProjectStartDate_getStringMessage() throws Exception {
         String projectStartDate = "2022-01-02";
         String projectEndDate = "2022-12-31";
         String sprintStartDate = "2022-01-01";
         String sprintEndDate = "2022-02-02";
-        String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
         assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate, errorMessage);
     }
 
     @Test
-    void checkSprintEndDateOverlapsProjectEndDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintEndDateOverlapsProjectEndDate_getStringMessage() throws Exception {
         String projectStartDate = "2022-01-02";
         String projectEndDate = "2022-12-31";
         String sprintStartDate = "2022-11-02";
         String sprintEndDate = "2023-01-02";
-        String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
         assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate,
@@ -247,25 +182,25 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintStartDateOverlapsSprintEndDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsSprintEndDate_getStringMessage() throws Exception {
         String projectStartDate = "2022-01-02";
         String projectEndDate = "2022-12-31";
         String sprintStartDate = "2022-01-10";
         String sprintEndDate = "2022-01-08";
-        String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
         assertEquals("Start date must always be before end date", errorMessage);
     }
 
     @Test
-    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForEditSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesHasSameDateAsOneSprintListDates_getStringMessage() throws Exception {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String projectStartDate = "2022-01-02";
         String projectEndDate = "2022-12-31";
         String sprintStartDate = "2022-02-05";
         String sprintEndDate = "2022-03-24";
-        String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
         assertEquals("Dates must not overlap with other sprints & and it must not be same, it is overlapping with " +
@@ -273,13 +208,13 @@ public class SprintTests {
     }
 
     @Test
-    void checkCurrentSprintDatesOverlapsSprintListDatesForEditSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesOverlapsSprintListDates_getStringMessage() throws Exception {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String projectStartDate = "2022-01-02";
         String projectEndDate = "2022-12-31";
         String sprintStartDate = "2022-02-25";
         String sprintEndDate = "2022-04-02";
-        String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
         assertEquals("Dates must not overlap with other sprints & it is overlapping with " +
