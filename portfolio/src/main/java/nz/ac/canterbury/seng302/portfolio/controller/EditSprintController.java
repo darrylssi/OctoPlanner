@@ -112,7 +112,7 @@ public class EditSprintController {
         //
         Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
         Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
-        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        String dateOutOfRange = sprint.validSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
