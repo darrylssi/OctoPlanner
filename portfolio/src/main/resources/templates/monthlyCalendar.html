@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang='en'>
+<head>
+    <meta charset='utf-8' />
+    <link href='https://unpkg.com/@fullcalendar/core@4.4.0/main.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth'
+            });
+            calendar.render();
+        });
+
+    </script>
+</head>
+<body>
+<style>
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+        font-size: 14px;
+    }
+
+    p {
+        text-align: center;
+    }
+
+    #calendar {
+        max-width: 900px;
+        margin: 50px auto;
+    }
+
+    .fc-resource-area td {
+        cursor: pointer;
+    }
+
+</style>
+    <h4> hahaha </h4><br>
+    <div id='calendar'></div><br>
+    <h4> hahaha </h4>
+<!--https://tutorialmeta.com/question/how-can-i-set-up-fullcalendar-correctly-with-script-tags-->
+</body>
+</html>
