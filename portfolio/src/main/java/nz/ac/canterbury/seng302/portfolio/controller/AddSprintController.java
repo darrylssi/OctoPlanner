@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,9 @@ public class AddSprintController {
 
     @Autowired
     private SprintService sprintService;                // Initializes the SprintService object
+
+    @Autowired
+    private SprintLabelService sprintLabelService;      // Initializes the SprintLabelService object
 
     // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
@@ -153,6 +157,7 @@ public class AddSprintController {
         sprint.setStartDate(utils.toDate(sprintStartDate));
         sprint.setEndDate(utils.toDate(sprintNewEndDate));
         sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel(sprintLabelService.nextLabel(id));
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
