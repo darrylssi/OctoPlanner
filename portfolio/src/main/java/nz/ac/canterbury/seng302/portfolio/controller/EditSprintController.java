@@ -69,7 +69,7 @@ public class EditSprintController extends PageController {
         return "editSprint";
     }
 
-    @PostMapping("/edit-sprint")
+    @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,

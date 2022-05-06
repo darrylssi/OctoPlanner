@@ -41,6 +41,25 @@ public class ProjectControllerTest {
     }
 
     @Test
+    @WithMockPrincipal(STUDENT)
+    public void getProjectEditPage_AccessDenied() throws Exception {
+        this.mockMvc.perform(get("/edit-project/0"))
+                .andExpect(content().string(containsString("403")));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    public void editProjectAsStudent_AccessDenied() throws Exception {
+        this.mockMvc.perform(post("/edit-project/0")
+                                .param("sprintName", "TEST")
+                                .param("sprintStartDate", "TEST")
+                                .param("sprintEndDate", "TEST")
+                                .param("sprintDescription", "TEST"))
+                .andExpect(status().is4xxClientError());
+                // .andExpect(content().string(containsString("403")));
+    }
+
+    @Test
     public void postValidProject_thenRedirect() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                 .param("projectName", "name")
