@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.AuthenticateClientService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -66,7 +65,7 @@ public class LoginController {
         }
         if (loginReply.getSuccess()) {
             createCookie(request, response, loginReply);
-            return "redirect:/users/" + loginReply.getUserId();   //TODO replace with user's profile page
+            return "redirect:/users/" + loginReply.getUserId();
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
         return "login";
