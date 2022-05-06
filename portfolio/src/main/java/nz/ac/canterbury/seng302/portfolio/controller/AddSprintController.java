@@ -3,8 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,9 +47,11 @@ public class AddSprintController {
     private DateUtils utils;
 
     /**
-     * Gets the project name and creates a new sprint label
-     * @param model Used to display the project name in title
-     * @return The sprint add page
+     * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
+     * @param id the id of the project the sprint belongs to
+     * @param model the model used to store information to be displayed on the page
+     * @return the name of the Thymeleaf .html page to be displayed
+     * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
@@ -166,6 +166,7 @@ public class AddSprintController {
         sprint.setStartDate(utils.toDate(sprintStartDate));
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel(sprintLabelService.nextLabel(id));
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();

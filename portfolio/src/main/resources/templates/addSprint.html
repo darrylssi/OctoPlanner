@@ -7,11 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div class="header">
-    <div class="title">
-        <div class="title-name" th:text="${sprintLabel}" ></div>
-    </div>
-</div>
+<div th:replace="fragments :: header(title='Add Sprint', subtitle=${projectName})"></div>
 <div class="content">
     <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
         <div>
