@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+ <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="${project.getProjectName}"></title>
@@ -61,7 +61,7 @@
     <div th:if="${#arrays.isEmpty(sprints)}" style="text-align:center">
         <b>[ This project has no sprints ]</b>
     </div>
-    <a th:href="@{'/add-sprint/' + ${project.getId}}">
+        <a th:href="@{'/add-sprint/' + ${project.getId}}">
         <button class="add-sprint" th:if="${canEdit}">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>

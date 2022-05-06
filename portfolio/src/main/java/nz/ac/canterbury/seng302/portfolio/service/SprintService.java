@@ -38,7 +38,7 @@ public class SprintService {
     public List<Sprint> getSprintByParentProjectId(int id) {
         return repository.findByParentProjectId(id);
     }
-    
+
     /**
      * Get sprint by id
      */
@@ -51,11 +51,9 @@ public class SprintService {
         }
     }
 
-
-
     /**
      * Gets all the sprints that belong to a given project.
-     * 
+     *
      * TODO [Andrew]: Tried making the relationship part of the Project class using @OneToMany & @ManyToOne, didn't work. If someone can figure it out, I'd rather use that.
      */
     public List<Sprint> getSprintsOfProjectById(Integer id) {
@@ -69,7 +67,7 @@ public class SprintService {
     public void deleteSprint(int sprintId) {
         repository.deleteById(sprintId);
     }
-        
+
     /**
      * Adds a new sprint into the database if the sprint with the given ID does not exist.
      * Otherwise, updates the sprint with the given ID.
@@ -78,21 +76,4 @@ public class SprintService {
     public void saveSprint(Sprint sprint) {
         repository.save(sprint);
     }
-
-    /**
-     * Savdes a sprint to the repository
-     * @param sprint The sprint object to save to the repository
-     */
-    public void saveOrUpdateSprint(Sprint sprint) {
-        repository.save(sprint);
-    }
-
-    /**
-     * Deletes a specific user from the repository
-     * @param id The id of the sprint to delete
-     */
-    public void delete(int id) {
-        repository.deleteById(id);
-    }
-
 }
