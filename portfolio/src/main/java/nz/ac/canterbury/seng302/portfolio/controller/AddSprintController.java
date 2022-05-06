@@ -45,11 +45,12 @@ public class AddSprintController {
     @Autowired
     private DateUtils utils;
 
-
     /**
-     * Gets the project name and creates a new sprint label
-     * @param model Used to display the project name in title
-     * @return The sprint add page
+     * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
+     * @param id the id of the project the sprint belongs to
+     * @param model the model used to store information to be displayed on the page
+     * @return the name of the Thymeleaf .html page to be displayed
+     * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
@@ -61,19 +62,36 @@ public class AddSprintController {
         // Creating a new sprint object
         Sprint sprint = new Sprint();
         sprint.setParentProjectId(id);          // Setting parent project id
-
-        model.addAttribute("sprint", sprint);
-        model.addAttribute("parentProjectId", id);
-        model.addAttribute("projectName", project.getProjectName() + " - Add Sprint");
-//        model.addAttribute("sprintLabel", "Add Sprint - Sprint 1");
-        model.addAttribute("sprintLabel", "Add Sprint - Sprint " + sprint.getId());
+        sprint.setSprintName(sprintLabelService.nextLabel(id));
 
         // Puts the default sprint start date
         if (sprintList.size() == 0) {
-            model.addAttribute("sprintStartDate", utils.toString(project.getProjectStartDate()));
+            sprint.setStartDate(project.getProjectStartDate());
         } else {
-            model.addAttribute("sprintStartDate", utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate()));
+            sprint.setStartDate(sprintList.get(sprintList.size()-1).getSprintEndDate());
         }
+
+        //Set the default sprint end date
+        // Converting date to LocalDate
+        Instant instant = sprint.getSprintStartDate().toInstant();
+        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
+        LocalDate sprintOldEndDate = zdt.toLocalDate();
+
+        // Adding 3 weeks (21 days) of default sprint end date
+        LocalDate sprintLocalEndDate = sprintOldEndDate.plusDays(21);
+
+        // Converting the new sprint end date of LocalDate object to Date object
+        sprint.setEndDate(Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        if (sprint.getSprintEndDate().after(project.getProjectEndDate())) {
+            sprint.setEndDate(project.getProjectEndDate());
+        }
+
+        model.addAttribute("sprint", sprint);
+        model.addAttribute("startDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("endDate", utils.toString(sprint.getSprintEndDate()));
+        model.addAttribute("parentProjectId", id);
+        model.addAttribute("projectName", project.getProjectName());
 
         /* Return the name of the Thymeleaf template */
         return "addSprint";
@@ -108,7 +126,7 @@ public class AddSprintController {
         String sprintNewEndDate = "";
 
         // Checking if the sprint end date is not selected
-        if (sprintEndDate == null || sprintEndDate == "") {
+        if (sprintEndDate == null || sprintEndDate.equals("")) {
             // Converting the date to LocalDate, so we can add the three weeks of default end date
             String newDate = utils.toString(new SimpleDateFormat("yyyy-MM-dd").parse(sprintStartDate));
 
