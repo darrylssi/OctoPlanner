@@ -35,10 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         timeZone: 'UTC',
-        defaultView: 'dayGridMonth',
-        events: 'https://fullcalendar.io/api/demo-feeds/events.json',
-        editable: true,
-        selectable: true
+        defaultView: 'dayGridMonth'
     });
 
     calendar.render();

@@ -17,11 +17,13 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Controller for displaying the project's monthly planner
+ */
 public class MonthlyCalendarController {
 
     @Autowired
-    private UserAccountClientService userAccountClientService;
+    private UserAccountClientService userAccountClientService; // Initializes the UserAccountClientService object
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
     @Autowired
@@ -29,12 +31,22 @@ public class MonthlyCalendarController {
 
     private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
+    /**
+     *
+     * @param principal Current authentication state
+     * @param id Current project id
+     * @param model Used to display the current attributes being passed to the html page
+     * @return The monthly calendar page
+     * @throws Exception
+     */
     @GetMapping("/monthlyCalendar/{id}")
     public String getMonthlyCalendar(@AuthenticationPrincipal AuthState principal,
                              @PathVariable(name="id") int id, Model model) throws Exception {
         logger.info("ha ha ha ----> " + id + " <---- finally here");
+        // Get the current project id
         Project project = projectService.getProjectById(id);
 
+        // Gets current user's username
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("projectId", id);
         model.addAttribute("project", project);
@@ -43,6 +55,14 @@ public class MonthlyCalendarController {
         return "monthlyCalendar";
     }
 
+    /**
+     *
+     * @param principal Current authentication state
+     * @param id Current user id
+     * @param result It is used to check errors and send appropriate response based on it
+     * @param model Used to display the current attributes being passed to the html page
+     * @return The monthly calendar page
+     */
     @PostMapping("/monthlyCalendar/{id}")
     public String postMonthlyCalendar(@AuthenticationPrincipal AuthState principal,
                              @PathVariable(name="id") int id,
