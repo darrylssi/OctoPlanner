@@ -52,6 +52,8 @@ public class ListUsersController {
         int totalPages = (users.getResultSetSize() + LIMIT - 1) / LIMIT;
         model.addAttribute("totalPages", totalPages);
 
+
+
         return "users";
     }
 
