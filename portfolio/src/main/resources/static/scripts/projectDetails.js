@@ -26,19 +26,25 @@ function deleteSprint(sprintId) {
     deleteRequest.send();
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 <!-- Monthly Calendar -->
 document.addEventListener('DOMContentLoaded', function() {
     let calendarEl = document.getElementById('calendar');
 
+    // // Getting the current project's start and end date
+    // let projectStartDate = new Date([[${project.getProjectStartDate()}]].toString().substring(0, 10));
+    // let projectEndDate = new Date([[${project.getProjectEndDate()}]].toString().substring(0, 10));
+    //
+    // // Adding an extra day to the project end date
+    // projectEndDate.setDate(projectEndDate.getDate() + 1);
+
     let calendar = new FullCalendar.Calendar(calendarEl, {
         timeZone: 'UTC',
-        defaultView: 'dayGridMonth'
+        defaultView: 'dayGridMonth',
+        validRange: {
+            start: [[${projectStartDate}]],
+            end: [[${projectEndDate}]]
+        }
     });
 
     calendar.render();
 });
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

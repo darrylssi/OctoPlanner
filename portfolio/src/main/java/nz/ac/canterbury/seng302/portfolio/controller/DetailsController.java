@@ -6,6 +6,8 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,9 @@ public class DetailsController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+
+
     @GetMapping("/project/{id}")
     public String details(
                             @AuthenticationPrincipal AuthState principal,
@@ -51,6 +56,11 @@ public class DetailsController {
         model.addAttribute("project", project);
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
+
+        logger.info(String.valueOf(project.getProjectStartDate()).substring(0, 10) + " ------ " + String.valueOf(project.getProjectEndDate()).substring(0, 10));
+        model.addAttribute("projectStartDate", String.valueOf(project.getProjectStartDate()).substring(0, 10));
+        model.addAttribute("projectEndDate", String.valueOf(project.getProjectEndDate()).substring(0, 10));
+
 
         labelUtils.refreshProjectSprintLabels(id);
 
