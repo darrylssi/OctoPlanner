@@ -111,6 +111,13 @@ public class SprintTests {
     }
 
     @Test
+    void saveNameSprint_getSprintName() {
+        baseSprint.setSprintName("Sprint 2");
+        sprintRepository.save(baseSprint);
+        assertEquals("Sprint 2", baseSprint.getSprintName());
+    }
+
+    @Test
     void saveNullDescriptionSprint_getException() {
         try {
             baseSprint.setSprintDescription(null);
@@ -118,6 +125,20 @@ public class SprintTests {
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
+    }
+
+    @Test
+    void saveEmptyDescriptionSprint_getEmptyDescription() {
+        baseSprint.setSprintDescription("");
+        sprintRepository.save(baseSprint);
+        assertEquals("", baseSprint.getSprintDescription());
+    }
+
+    @Test
+    void saveDescriptionSprint_getDescription() {
+        baseSprint.setSprintDescription("This is Sprint 2");
+        sprintRepository.save(baseSprint);
+        assertEquals("This is Sprint 2", baseSprint.getSprintDescription());
     }
 
     @Test

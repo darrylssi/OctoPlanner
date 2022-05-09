@@ -60,7 +60,7 @@ public class DetailsController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        debugRole = "teacher";
+
         // TODO: Link this with George's role helper class once that's merged
         String role;
         if (debugRole != null) {

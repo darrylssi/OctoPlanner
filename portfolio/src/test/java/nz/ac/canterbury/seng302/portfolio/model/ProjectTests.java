@@ -115,6 +115,13 @@ public class ProjectTests {
     }
 
     @Test
+    void saveNameProject_getProjectName() {
+        baseProject.setProjectName("Project 2");
+        projectRepository.save(baseProject);
+        assertEquals("Project 2", baseProject.getProjectName());
+    }
+
+    @Test
     void saveNullDescriptionProject_getException() {
         try {
             baseProject.setProjectDescription(null);
@@ -122,6 +129,20 @@ public class ProjectTests {
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
+    }
+
+    @Test
+    void saveEmptyDescriptionProject_getEmptyDescription() {
+        baseProject.setProjectDescription("");
+        projectRepository.save(baseProject);
+        assertEquals("", baseProject.getProjectDescription());
+    }
+
+    @Test
+    void saveDescriptionProject_getProjectName() {
+        baseProject.setProjectDescription("This is Project 2");
+        projectRepository.save(baseProject);
+        assertEquals("This is Project 2", baseProject.getProjectDescription());
     }
 
     @Test
