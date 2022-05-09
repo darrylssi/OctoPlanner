@@ -1,39 +1,20 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang='en'>
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
     <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
-    <link rel="stylesheet" href="/webjars/fullcalendar/5.10.2/main.css">
-
+    <link href="/webjars/fullcalendar/5.10.2/main.css" rel="stylesheet">
     <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
-    <script th:src="@{/scripts/projectDetails.js}"></script>
+
     <script th:src="@{/scripts/monthlyCalendar.js}"></script>
-    <script>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            let calendarEl = document.getElementById('calendar');
-
-            let calendar = new FullCalendar.Calendar(calendarEl, {
-                timeZone: 'UTC',
-                initialView: 'dayGridMonth',
-                events: 'https://fullcalendar.io/api/demo-feeds/events.json',
-                editable: true,
-                selectable: true
-            });
-
-            calendar.render();
-        });
-    </script>
 </head>
 <body>
-    <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${projectName}, username=${userName})"></div>
-
+    <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
     <div class="content">
-        <form th:action="@{/monthlyCalendar/{id}(id = ${projectId})}" method="post" th:object="${project}" modelAttribute="project">
-            <div id='calendar'></div><br>
-        </form>
+        <div id='calendar'></div>
     </div>
-<!--https://tutorialmeta.com/question/how-can-i-set-up-fullcalendar-correctly-with-script-tags-->
+    <!--https://tutorialmeta.com/question/how-can-i-set-up-fullcalendar-correctly-with-script-tags-->
 </body>
 </html>

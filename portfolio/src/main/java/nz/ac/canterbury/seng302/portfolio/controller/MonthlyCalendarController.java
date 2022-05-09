@@ -1,35 +1,34 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Controller for displaying the project's monthly planner
+ * Controller for the display project details page
  */
+@Controller
 public class MonthlyCalendarController {
 
     @Autowired
-    private UserAccountClientService userAccountClientService; // Initializes the UserAccountClientService object
+    private ProjectService projectService;
     @Autowired
-    private ProjectService projectService;              // Initializes the ProjectService object
+    private SprintService sprintService;
     @Autowired
-    private SprintService sprintService;                // Initializes the SprintService object
+    private UserAccountClientService userAccountClientService;
 
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     /**
      *
@@ -40,20 +39,20 @@ public class MonthlyCalendarController {
      * @throws Exception
      */
     @GetMapping("/monthlyCalendar/{id}")
-    public String getMonthlyCalendar(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable(name="id") int id, Model model) throws Exception {
-        logger.info("ha ha ha ----> " + id + " <---- finally here");
+    public String getMonthlyCalendar(
+                                    @AuthenticationPrincipal AuthState principal,
+                                    @PathVariable(name="id") int id,
+                                    Model model) throws Exception {
         // Get the current project id
         Project project = projectService.getProjectById(id);
 
-        // Gets current user's username
+        // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
-        model.addAttribute("projectId", id);
         model.addAttribute("project", project);
-        model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintList", sprintService.getSprintsOfProjectById(id));
         return "monthlyCalendar";
     }
+
 
     /**
      *
@@ -65,12 +64,11 @@ public class MonthlyCalendarController {
      */
     @PostMapping("/monthlyCalendar/{id}")
     public String postMonthlyCalendar(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable(name="id") int id,
-                             BindingResult result,
-                             Model model
+                                      @PathVariable(name="id") int id,
+                                      BindingResult result,
+                                      Model model
     ) {
 
         return "monthlyCalendar";
     }
-
 }

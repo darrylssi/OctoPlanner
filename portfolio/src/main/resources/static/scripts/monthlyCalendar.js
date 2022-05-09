@@ -1,8 +1,13 @@
-//
-// document.addEventListener('DOMContentLoaded', function() {
-//     var calendarEl = document.getElementById('calendar');
-//     var calendar = new FullCalendar.Calendar(calendarEl, {
-//         initialView: 'resourceTimelineWeek'
-//     });
-//     calendar.render();
-// });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    let calendarEl = document.getElementById('calendar');
+
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        timeZone: 'UTC',
+        defaultView: 'dayGridMonth'
+    });
+
+    calendar.render();
+});
