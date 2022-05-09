@@ -67,7 +67,6 @@ public class EditSprintController {
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintLabel", " Edit Sprint - " + labelUtils.nextLabel(id) );
         model.addAttribute("sprintName", sprint.getSprintName());
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
         model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
@@ -120,7 +119,6 @@ public class EditSprintController {
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
             model.addAttribute("sprintId", id);
-            model.addAttribute("sprintLabel", "Edit Sprint - " + labelUtils.nextLabel(id));
             model.addAttribute("sprintName", sprintName);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
@@ -135,8 +133,10 @@ public class EditSprintController {
         sprint.setStartDate(utils.toDate(sprintStartDate));
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
 
         sprintService.saveSprint(sprint);
+        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
         return "redirect:/project/" + projectId;
     }
 
