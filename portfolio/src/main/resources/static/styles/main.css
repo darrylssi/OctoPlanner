@@ -242,3 +242,7 @@ button:hover {
     content:"*";
     color: red;
 }
+
+.clickable {
+    cursor: pointer;
+}
