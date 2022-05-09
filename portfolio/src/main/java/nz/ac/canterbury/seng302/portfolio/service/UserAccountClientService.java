@@ -168,6 +168,11 @@ public class UserAccountClientService {
     }
 
 
+    /**
+     * Returns the username of the current logged-in user
+     * @param principal Gets the current user's authentication
+     * @return The username of the current user
+     */
     public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
         // Setting the current user's username at the header
         String currentUserId = principal.getClaimsList().stream()
