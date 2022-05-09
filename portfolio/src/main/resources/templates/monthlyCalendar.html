@@ -7,8 +7,11 @@
     <link href="/webjars/fullcalendar/5.10.2/main.css" rel="stylesheet">
     <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
 
+    <script>
+        let projectStartDate = "[[${projectStartDate}]]";
+        let projectEndDate = "[[${projectEndDate}]]";
+    </script>
     <script th:src="@{/scripts/monthlyCalendar.js}"></script>
-
 </head>
 <body>
     <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>

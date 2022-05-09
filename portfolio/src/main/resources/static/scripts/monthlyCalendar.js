@@ -6,8 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         timeZone: 'UTC',
-        defaultView: 'dayGridMonth'
+        defaultView: 'dayGridMonth',
+        validRange: {
+        start: projectStartDate,
+        end: projectEndDate
+        }
     });
+    calendar.gotoDate(projectStartDate);
 
     calendar.render();
 });
