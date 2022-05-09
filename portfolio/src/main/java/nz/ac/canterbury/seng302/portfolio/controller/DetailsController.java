@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -21,8 +22,15 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -39,17 +47,19 @@ public class DetailsController {
     private SprintLabelService labelUtils;
     @Autowired
     private UserAccountClientService userAccountClientService;
+    @Autowired
+    private DateUtils utils;
 
     private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
 
     @GetMapping("/project/{id}")
     public String details(
-                            @AuthenticationPrincipal AuthState principal,
-                            @PathVariable(name="id") int id,
-                            @RequestParam(name="role", required=false) String debugRole,
-                            User user,
-                            Model model) throws Exception {
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="id") int id,
+            @RequestParam(name="role", required=false) String debugRole,
+            User user,
+            Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
@@ -57,10 +67,28 @@ public class DetailsController {
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
-        logger.info(String.valueOf(project.getProjectStartDate()).substring(0, 10) + " ------ " + String.valueOf(project.getProjectEndDate()).substring(0, 10));
-        model.addAttribute("projectStartDate", String.valueOf(project.getProjectStartDate()).substring(0, 10));
-        model.addAttribute("projectEndDate", String.valueOf(project.getProjectEndDate()).substring(0, 10));
 
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+        // Getting project dates to limit the project dates in calendar
+        // Adding a day to the project end date
+        Date localProjectEndDate = project.getProjectEndDate();
+
+        // Converting date to LocalDate
+        LocalDate newLocalProjectEndDate = localProjectEndDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to default project end date
+        LocalDate newProjectEndLocalDate = newLocalProjectEndDate.plusDays(1);
+
+        // Converting the new sprint end date of LocalDate object to Date object
+        String newProjectEndDate = utils.toString(Date.from(newProjectEndLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        model.addAttribute("projectStartDate", String.valueOf(project.getProjectStartDate()));
+        model.addAttribute("projectEndDate", newProjectEndDate);
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
         labelUtils.refreshProjectSprintLabels(id);
 

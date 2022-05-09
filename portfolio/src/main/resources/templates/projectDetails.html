@@ -5,6 +5,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
     <link th:href="@{/styles/modals.css}" rel="stylesheet" />
+
+    <script>
+        let projectStartDate = "[[${projectStartDate}]]";
+        let projectEndDate = "[[${projectEndDate}]]";
+
+    </script>
     <script th:inline="javascript" th:src="@{/scripts/projectDetails.js}"></script>
 
 <!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
@@ -12,6 +18,8 @@
     <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
     <link rel="stylesheet" href="/webjars/fullcalendar/5.10.2/main.css">
     <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
+
+
 <!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
 <!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
 
