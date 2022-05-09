@@ -65,7 +65,7 @@ public class ProfilePageController {
                 .orElse("NOT FOUND");
         model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
 
-        if(user.hasCreated()) {
+        if (user != null) {
             model.addAttribute("profileInfo", user);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", getFullName(
