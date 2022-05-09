@@ -16,8 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
-import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
-
 @Controller
 public class EditUserController {
 
