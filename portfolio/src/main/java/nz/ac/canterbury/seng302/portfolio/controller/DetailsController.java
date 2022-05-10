@@ -42,7 +42,6 @@ public class DetailsController {
     public String details(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="id") int id,
-            @RequestParam(name="role", required=false) String debugRole,
             User user,
             Model model) throws Exception {
         /* Add project details to the model */
@@ -58,22 +57,17 @@ public class DetailsController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        debugRole = "teacher";
-        // TODO: Link this with George's role helper class once that's merged
-        String role;
-        if (debugRole != null) {
-            role = debugRole;
-        } else {
-            role = principal.getClaimsList().stream()
+        String role = principal.getClaimsList().stream()
                     .filter(claim -> claim.getType().equals("role"))
                     .findFirst()
                     .map(ClaimDTO::getValue)
                     .orElse("NOT FOUND");
-        }
-        /* Return the name of the Thymeleaf template */
+
         // detects the role of the current user and returns appropriate page
-        boolean hasEditPermissions = role.contains("teacher");
+        boolean hasEditPermissions = role.contains("teacher"); // TODO add course_admin role
         model.addAttribute("canEdit", hasEditPermissions);
+
+        /* Return the name of the Thymeleaf template */
         return "projectDetails";
     }
 
