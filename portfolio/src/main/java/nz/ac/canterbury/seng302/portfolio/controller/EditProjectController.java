@@ -3,9 +3,12 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,10 +35,10 @@ public class EditProjectController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
-
+    @Autowired
+    private UserAccountClientService userAccountClientService;
     @Autowired
     private DateUtils utils;
-
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -43,11 +46,14 @@ public class EditProjectController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@PathVariable("id") int id, Model model) {
+    public String projectForm(@AuthenticationPrincipal AuthState principal,
+                              @PathVariable("id") int id, Model model) {
 
         /* Add project details to the model */
         try {
             Project project = projectService.getProjectById(id);
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
@@ -73,6 +79,7 @@ public class EditProjectController {
      */
     @PostMapping("/edit-project/{id}")
     public String projectSave(
+            @AuthenticationPrincipal AuthState principal,
             @Valid Project project,
             BindingResult result,
             @PathVariable("id") int id,
@@ -93,6 +100,8 @@ public class EditProjectController {
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));

@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import io.grpc.Status;
@@ -182,5 +183,23 @@ public class UserAccountClientService {
                 .setNewPassword(newPassword)
                 .build();
         return userAccountStub.changeUserPassword(changePasswordRequest);
+    }
+
+
+    /**
+     * Returns the username of the current logged-in user
+     * @param principal Gets the current user's authentication
+     * @return The username of the current user
+     */
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 }

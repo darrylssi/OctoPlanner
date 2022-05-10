@@ -3,6 +3,9 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
-
 import javax.validation.Valid;
-import java.util.Comparator;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,8 +27,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the add sprint details page
@@ -41,9 +40,9 @@ public class AddSprintController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
-
-    // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
+    private UserAccountClientService userAccountClientService;
+    @Autowired            // Initializes the DateUtils object to be used for converting date to string and string to date
     private DateUtils utils;
 
     /**
@@ -54,8 +53,8 @@ public class AddSprintController {
      * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
-
+    public String getsSprint(@AuthenticationPrincipal AuthState principal,
+                             @PathVariable("id") int id, Model model) throws Exception {
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
         List<Sprint> sprintList = sprintService.getAllSprints();
@@ -64,6 +63,8 @@ public class AddSprintController {
         Sprint sprint = new Sprint();
         sprint.setParentProjectId(id);          // Setting parent project id
 
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
         model.addAttribute("projectName", project.getProjectName());
@@ -133,6 +134,7 @@ public class AddSprintController {
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") String sprintStartDate,
@@ -155,6 +157,8 @@ public class AddSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -179,5 +183,6 @@ public class AddSprintController {
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
     }
+
 
 }

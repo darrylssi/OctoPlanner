@@ -11,7 +11,7 @@
 </head>
 
 <body>
-<div th:replace="fragments :: header(title='Users')"></div>
+<div th:replace="fragments :: header(title='Users', username=${userName})"></div>
 <br>
 <div class="users" >
     <table>
