@@ -136,7 +136,6 @@ public class ListUsersController {
         return "redirect:/users?page="+page;    // Send them back to the users page
     }
 
-
     /**
      * Parses the user page ordering from the user's cookie, and returns the ordering column & direction (true if ascending).
      * <p>
