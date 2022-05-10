@@ -1,19 +1,38 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.*;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the edit sprint details page
@@ -22,13 +41,16 @@ import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 public class EditSprintController {
 
     @Autowired
-    ProjectService projectService;
-
+    private ProjectService projectService;
     @Autowired
-    SprintService sprintService;
+    private SprintService sprintService;
+    @Autowired
+    private SprintLabelService labelUtils;
 
     @Autowired
     private DateUtils utils;
+
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     /**
      * Show the edit-sprint page.
@@ -37,42 +59,85 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception{
+    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception {
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
+        sprint.setId(id);
+        model.addAttribute("id", id);
         model.addAttribute("sprint", sprint);
+        model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
-
-        model.addAttribute("sprintLabel", sprint.getSprintLabel());
         model.addAttribute("sprintName", sprint.getSprintName());
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
-        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
         model.addAttribute("sprintDescription", sprint.getSprintDescription());
-
-
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
     }
 
-    @PostMapping("/edit-sprint")
+    /**
+     * Post request for editing a sprint with a given ID.
+     *
+     * @param result
+     * @param id                ID of the sprint to be edited
+     * @param projectId
+     * @param sprintName        (New) name of the sprint
+     * @param sprintStartDate   (New) start date of the sprint
+     * @param sprintEndDate     (New) end date of the sprint
+     * @param sprintDescription (New) description of the sprint
+     * @param sprint
+     * @param model
+     * @return Details page
+     * @throws Exception
+     */
+    @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
             @PathVariable("id") int id,
-            @RequestParam(value="sprintName") String name,
-            @RequestParam(value="sprintStartDate") String startDate,
-            @RequestParam(value="sprintEndDate") String endDate,
-            @RequestParam(value="sprintDescription") String description
+            @RequestParam(name = "projectId") int projectId,
+            @RequestParam(name = "sprintName") String sprintName,
+            @RequestParam(name = "sprintStartDate") String sprintStartDate,
+            @RequestParam(name = "sprintEndDate") String sprintEndDate,
+            @RequestParam(name = "sprintDescription") String sprintDescription,
+            @Valid @ModelAttribute("sprint") Sprint sprint,
+            BindingResult result,
+            Model model
     ) throws Exception {
+        Project parentProject = projectService.getProjectById(projectId);
 
-        /* Set (new) sprint details to the corresponding sprint */
-        Sprint sprint = sprintService.getSprintById(id);
-        sprint.setSprintName(name);
-        sprint.setStartDate(utils.toDate(startDate));
-        sprint.setEndDate(utils.toDate(endDate));
-        sprint.setSprintDescription(description);
+        // Getting sprint list containing all the sprints
+        List<Sprint> sprintList = sprintService.getAllSprints();
+
+        //
+        Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
+        Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
+        String dateOutOfRange = sprint.validSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
+
+        // Checking it there are errors in the input, and also doing the valid dates validation
+        if (result.hasErrors() || !dateOutOfRange.equals("")) {
+            model.addAttribute("id", id);
+            model.addAttribute("sprint", sprint);
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("sprintId", id);
+            model.addAttribute("sprintName", sprintName);
+            model.addAttribute("sprintStartDate", sprintStartDate);
+            model.addAttribute("sprintEndDate", sprintEndDate);
+            model.addAttribute("sprintDescription", sprintDescription);
+            model.addAttribute("invalidDateRange", dateOutOfRange);
+            return "editSprint";
+        }
+
+        // Adding the new sprint object
+        sprint.setParentProjectId(parentProject.getId());
+        sprint.setSprintName(sprintName);
+        sprint.setStartDate(utils.toDate(sprintStartDate));
+        sprint.setEndDate(utils.toDate(sprintEndDate));
+        sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+
         sprintService.saveSprint(sprint);
-
-        return "redirect:/project/" + id;
+        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
+        return "redirect:/project/" + projectId;
     }
 
 }

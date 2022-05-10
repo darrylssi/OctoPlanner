@@ -7,17 +7,19 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title='Edit Sprint')"></div>
+<div th:replace="fragments :: header(title='Edit Sprint', subtitle=${sprintName})"></div>
 <div class="content">
-    <form th:action="@{/edit-sprint/{id}(id = ${sprintId})}"
+    <form th:action="@{/edit-sprint/{id}(id = ${sprintId})}" modelAttribute="sprint"
           method="post" th:object="${sprint}">
+        <input th:id="projectId" th:name="projectId" th:type="hidden" th:value="${projectId}">
         <label for="sprintName" class="required">Sprint Name</label> <br/>
-        <input id="sprintName" type="text" th:name="sprintName" th:value="${sprintName}">
+        <input id="sprintName" type="text" th:name="sprintName" th:field="*{sprintName}">
+        <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         <br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate" class="required">Sprint Start Date</label> <br/>
-                <input id="sprintStartDate" type="date" th:name="sprintStartDate" th:value="${sprintStartDate}">
+                <input id="sprintStartDate" type="date" th:name="sprintStartDate" th:value="${sprintStartDate}" th:required="required">
             </div>
             <div class="horizontal-group-element" >
                 <label for="sprintEndDate" class="required">Sprint End Date</label> <br/>
@@ -25,12 +27,16 @@
             </div>
             <div class="horizontal-group-element" id="element-description">
                 <label for="sprintDescription">Sprint Description</label> <br/>
-                <textarea class="description-input" id="sprintDescription" th:name="sprintDescription" th:text="${sprintDescription}"></textarea>
+                <textarea class="description-input" id="sprintDescription" th:name="sprintDescription" th:field ="*{sprintDescription}"></textarea>
+                <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
             </div>
+        </div>
+        <div>
+            <p th:text="${invalidDateRange}" th:class="error"></p>
         </div>
         <br/>
         <div class="buttons">
-            <a th:href="@{/project/{id}(id = *{parentProjectId})}">
+            <a th:href="@{/project/{id}(id = ${projectId})}">
                 <button class="form-button cancel" type="button">
                     Cancel
                 </button>

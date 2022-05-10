@@ -32,6 +32,9 @@
             <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
         </div>
     </div>
+    <div>
+        <p th:text="${invalidDateRange}" th:class="error"></p>
+    </div>
     <br/>
     <div class="buttons">
         <a th:href="@{/project/{id}(id = ${id})}">

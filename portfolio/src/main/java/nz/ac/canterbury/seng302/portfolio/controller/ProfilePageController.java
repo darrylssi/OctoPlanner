@@ -16,6 +16,7 @@ import org.thymeleaf.util.StringUtils;
 import java.time.*;
 import java.util.ArrayList;
 
+
 /**
  * Controller class for the profile page.
  *
@@ -71,6 +72,7 @@ public class ProfilePageController {
             model.addAttribute("fullName", getFullName(
                     user.getFirstName(), user.getMiddleName(),  user.getLastName()));
             model.addAttribute("id", id);
+            model.addAttribute("userName", user.getUsername());
             model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
             String roles = "";
             for (int i = 0; i < user.getRolesCount(); i++) {
@@ -87,6 +89,7 @@ public class ProfilePageController {
         }
         return "profile";
     }
+
 
     /**
      * Combines a user's names into one string
