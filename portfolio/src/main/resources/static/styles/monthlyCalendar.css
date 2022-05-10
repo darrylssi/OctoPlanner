@@ -1,0 +1,20 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+p, #calendarTitle {
+    text-align: center;
+}
+
+#calendar {
+    max-width: 950px;
+    margin: 50px auto;
+}
+
+.fc-resource-area td {
+    cursor: pointer;
+}
