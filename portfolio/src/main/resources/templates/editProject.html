@@ -5,31 +5,33 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
+    <script th:src="@{/scripts/editProject.js}"></script>
 </head>
 <body>
 <div th:replace="fragments :: header(title='Edit Project', username=${userName})"></div>
 <div class="content">
-<form th:action="@{/edit-project/{id}(id = ${id})}"
-      method="post" th:object="${project}">
-    <label for="projectName" class="required">Project Name</label> <br/>
-    <input id="projectName" type="text" th:field="*{projectName}">
-    <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
-    <br/>
-    <div class="horizontal-group">
-        <div class="horizontal-group-element" >
-            <label for="projectStartDate" class="required">Project Start Date</label> <br/>
-            <input id="projectStartDate" type="date" th:name="projectStartDate" th:value="${projectStartDate}" th:max="${projectEndDate}"
-                   onchange="setNewMin()" th:required="required">
-        </div>
-        <div class="horizontal-group-element" >
-            <label for="projectEndDate" class="required">Project End Date</label> <br/>
-            <input id="projectEndDate" type="date" th:name="projectEndDate" th:value="${projectEndDate}" th:min="${projectStartDate}"
-                   onchange="setNewMax()" th:required="required">
-        </div>
-        <div class="horizontal-group-element" id="element-description" >
-            <label for="projectDescription">Project Description</label> <br/>
-            <textarea class="description-input" id="projectDescription" th:field="*{projectDescription}"></textarea>
-            <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
+    <form th:action="@{/edit-project/{id}(id = ${id})}"
+          method="post" th:object="${project}">
+        <label for="projectName" class="required">Project Name</label> <br/>
+        <input id="projectName" type="text" th:field="*{projectName}">
+        <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
+        <br/>
+        <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="projectStartDate" class="required">Project Start Date</label> <br/>
+                <input id="projectStartDate" type="date" th:name="projectStartDate" th:value="${projectStartDate}" th:max="${projectEndDate}"
+                       onchange="setNewMin()" th:required="required">
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="projectEndDate" class="required">Project End Date</label> <br/>
+                <input id="projectEndDate" type="date" th:name="projectEndDate" th:value="${projectEndDate}" th:min="${projectStartDate}"
+                       onchange="setNewMax()" th:required="required">
+            </div>
+            <div class="horizontal-group-element" id="element-description" >
+                <label for="projectDescription">Project Description</label> <br/>
+                <textarea class="description-input" id="projectDescription" th:field="*{projectDescription}"></textarea>
+                <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
+            </div>
         </div>
     </div>
     <div>
@@ -45,37 +47,7 @@
         <button class="form-button save" type="submit">Save</button>
     </div>
 
-</form>
+    </form>
 </div>
-<script>
-
-    // Sprint min date so that sprint can't end before start date
-    function setNewMin() {
-        var newStart = document.getElementById('projectStartDate').value;
-        document.getElementById('projectEndDate').setAttribute('min', newStart);
-    }
-
-    // Set max date so that sprint can't start after end date
-    function setNewMax() {
-        var newEnd = document.getElementById('projectEndDate').value;
-        document.getElementById('projectStartDate').setAttribute('max', newEnd);
-    }
-
-    // Set project min date to last year
-    // A teacher can start a project up to a year ago (UPi AC4)
-    var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth() + 1;
-    var yyyy = today.getFullYear()-1;
-    if (dd < 10) {
-        dd = '0' + dd;
-    }
-    if (mm < 10) {
-        mm = '0' + mm;
-    }
-    today = yyyy + '-' + mm + '-' + dd;
-    document.getElementById('projectStartDate').setAttribute('min', today);
-
-</script>
 </body>
 </html>
