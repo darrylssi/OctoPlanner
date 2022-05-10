@@ -16,6 +16,7 @@ import org.thymeleaf.util.StringUtils;
 import java.time.*;
 import java.util.ArrayList;
 
+
 /**
  * Controller class for the profile page.
  *
@@ -61,28 +62,30 @@ public class ProfilePageController {
         boolean isCurrentUser = principalData.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
 
-        if(user.hasCreated()) {
-            model.addAttribute("profileInfo", user);
-            model.addAttribute("userExists", true);
-            model.addAttribute("fullName", getFullName(
-                    user.getFirstName(), user.getMiddleName(),  user.getLastName()));
-            model.addAttribute("id", id);
-            model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-            String roles = "";
-            for (int i = 0; i < user.getRolesCount(); i++) {
-                String roleString = user.getRoles(i).toString();
-                roleString = roleString.replace("_", " ");
-                roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+            if (user != null) {
+                model.addAttribute("profileInfo", user);
+                model.addAttribute("userExists", true);
+                model.addAttribute("fullName", getFullName(
+                        user.getFirstName(), user.getMiddleName(), user.getLastName()));
+                model.addAttribute("id", id);
+                model.addAttribute("userName", user.getUsername());
+                model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
+                String roles = "";
+                for (int i = 0; i < user.getRolesCount(); i++) {
+                    String roleString = user.getRoles(i).toString();
+                    roleString = roleString.replace("_", " ");
+                    roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+                }
+                if (roles.length() > 2) {
+                    roles = roles.substring(0, roles.length() - 2);
+                }
+                model.addAttribute("roles", roles);
+            } else {
+                errors.add("Invalid ID");
             }
-            if (roles.length() > 2) {
-                roles = roles.substring(0, roles.length() - 2);
-            }
-            model.addAttribute("roles", roles);
-        } else {
-            errors.add("Invalid ID");
-        }
         return "profile";
     }
+
 
     /**
      * Combines a user's names into one string
@@ -144,4 +147,6 @@ public class ProfilePageController {
 
         return String.format("Member since: %s %s %s %s", date.getDayOfMonth(), month, date.getYear(), timeAgo);
     }
+
+
 }

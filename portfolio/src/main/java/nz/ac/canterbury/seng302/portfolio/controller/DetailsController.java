@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * Controller for the display project details page
  */
@@ -33,6 +35,8 @@ public class DetailsController extends PageController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
+    @Autowired
+    private UserAccountClientService userAccountClientService;
 
     @GetMapping("/project/{id}")
     public String details(
@@ -46,6 +50,8 @@ public class DetailsController extends PageController {
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
         labelUtils.refreshProjectSprintLabels(id);
 

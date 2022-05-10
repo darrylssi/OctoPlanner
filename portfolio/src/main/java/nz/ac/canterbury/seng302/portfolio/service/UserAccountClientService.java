@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import io.grpc.Status;
@@ -65,19 +66,37 @@ public class UserAccountClientService {
 
     /**
      * Gets a paginated list of users from the identity provider
-     * @param offset How many results to skip (offset of 0 means start at beginning, i.e page 1)
-     * @param limit Max results to get - "results per page"
-     * @param orderBy How to sort the results
-     * @return A PaginatedUserResponse with a list of users and the total number of users in the response
+     * @param pageNumber What "page" of the users you want. Affected by the ordering and page size
+     * @param pageSize How many items you want from 
+     * @param orderBy How the list is ordered.
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"name"</code> - Ordered by their first, middle, and last name alphabetically</li>
+     *                    <li><code>"username"</code> - Ordered by their username alphabetically</li>
+     *                    <li><code>"nickname"</code> - Ordered by their nickname alphabetically</li>
+     *                    <li><code>"role"</code> - Ordered by their highest permission role</li>
+     *                  </ul>
+     * @param isAscending Is the list in ascending or descending order
+     * @return A list of users from that "page"
+     * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
      */
-    public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy, final boolean isAscending) {
+    public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy, final boolean isAscending) throws IllegalArgumentException {
         GetPaginatedUsersRequest paginatedUsersRequest = GetPaginatedUsersRequest.newBuilder()
                 .setOffset(offset)
                 .setLimit(limit)
                 .setOrderBy(orderBy)
                 .setIsAscendingOrder(isAscending)
                 .build();
-        return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
+        try {
+            return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.INVALID_ARGUMENT.getCode()) {
+                // Didn't order by a valid column
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -164,5 +183,23 @@ public class UserAccountClientService {
                 .setNewPassword(newPassword)
                 .build();
         return userAccountStub.changeUserPassword(changePasswordRequest);
+    }
+
+
+    /**
+     * Returns the username of the current logged-in user
+     * @param principal Gets the current user's authentication
+     * @return The username of the current user
+     */
+    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
+        // Setting the current user's username at the header
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return username;
     }
 }

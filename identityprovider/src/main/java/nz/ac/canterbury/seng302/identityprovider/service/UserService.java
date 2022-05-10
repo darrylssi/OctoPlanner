@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,20 +32,36 @@ public class UserService {
         return users;
     }
 
-    public List<User> getUsersPaginated(int page, int size, String orderBy, boolean isAscending) {
-        Pageable pageable;
-        if (isAscending) {
-            if (orderBy.equals("name"))
-                pageable = PageRequest.of(page, size, Sort.by("firstName").and(Sort.by("middleName")).and(Sort.by("lastName")));
-            else
-                pageable = PageRequest.of(page, size, Sort.by(orderBy));
-        } else {
-            if (orderBy.equals("name"))
-                pageable = PageRequest.of(page, size, Sort.by("firstName").descending()
-                        .and(Sort.by("middleName")).descending().and(Sort.by("lastName")).descending());
-            else
-                pageable = PageRequest.of(page, size, Sort.by(orderBy).descending());
+    /**
+     * @param page What "page" of the users you want. Affected by the ordering and page size
+     * @param limit How many items are in a page
+     * @param orderBy How the list is ordered.
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"name"</code> - Ordered by their first, middle, and last name alphabetically</li>
+     *                    <li><code>"username"</code> - Ordered by their username alphabetically</li>
+     *                    <li><code>"nickname"</code> - Ordered by their nickname alphabetically</li>
+     *                    <li><code>"roles"</code> - Ordered by their highest permission role</li>
+     *                  </ul>
+     * @param isAscending Is the list in ascending or descending order
+     * @return A list of users from that "page"
+     * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
+     */
+    public List<User> getUsersPaginated(int page, int limit, String orderBy, boolean isAscending) throws IllegalArgumentException {
+        Sort sortBy = switch (orderBy) {
+            case "name"     -> Sort.by("firstName").and(Sort.by("middleName")).and(Sort.by("lastName"));
+            case "username" -> Sort.by("username");
+            case "nickname" -> Sort.by("nickname");
+            case "role"     -> JpaSort.unsafe("MAX(roles)");    // WARNING: Doesn't work when using H2, so we bypass it in UserAccountServerService.getPaginatedUsers
+            default -> throw new IllegalArgumentException(String.format("Can not order users by '%s'", orderBy));
+        };
+
+        if (!isAscending) {
+            sortBy = sortBy.descending();
         }
+
+        Pageable pageable = PageRequest.of(page, limit, sortBy);
+
         return userRepository.findAll(pageable);
     }
 

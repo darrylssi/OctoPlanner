@@ -7,7 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title='Edit Project')"></div>
+<div th:replace="fragments :: header(title='Edit Project', username=${userName})"></div>
 <div class="content">
 <form th:action="@{/edit-project/{id}(id = ${id})}"
       method="post" th:object="${project}">
@@ -31,6 +31,9 @@
             <textarea class="description-input" id="projectDescription" th:field="*{projectDescription}"></textarea>
             <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
         </div>
+    </div>
+    <div>
+        <p th:text="${invalidDateRange}" th:class="error"></p>
     </div>
     <br/>
     <div class="buttons">
