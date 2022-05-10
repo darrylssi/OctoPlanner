@@ -160,7 +160,11 @@ public class User {
      * @return <code>true</code> if the user had this item removed
      */
     public boolean removeRole(UserRole role) {
-        return roles.remove(role);
+        if(roles.size() == 1) {
+            return false;
+        } else {
+            return roles.remove(role);
+        }
     }
 
     public String getFullName() {
