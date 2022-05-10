@@ -13,77 +13,77 @@
 </head>
 
 <body>
-    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found', username=${userName})"></div>
+<div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found')"></div>
 
-    <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
-        <th th:text="${errMsg}"></th>
-        <br/>
-    <div class="content" th:if="${userExists}" th:object="${profileInfo}">
-        <div th:text="${dateCreated}"></div>
-        <div class="centre-box">
-            <img class="profile-image" th:src=@{/img/default-pfp.jpg}><br/>
-            <!--Add a button to edit the profile image here if necessary-->
-        </div>
-        <form th:action="@{|/users/${userId}/edit|}"
-            method="post">
-            <div class="user-info">
-                <div class="input-box">
-                    <label> Username </label>
-                    <input type="text" th:field="*{username}" th:value="${profileInfo.getUsername}" th:disabled="disabled"/><br>
-                </div>
-                <div class="input-box">
-                    <p th:text="${editMessage}" id="error"/>
-                    <p th:text="${editErrorMessage}" id="error"/>
-                </div>
-                <div class="input-box">
-                    <label class="required"> First Name </label>
-                    <input type="text" th:field="*{firstName}" th:value="${profileInfo.getFirstName}" th:required="required" maxlength="20"/><br/>
-                    <span class="error" th:text="${error_FirstName}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Middle Name </label>
-                    <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" th:value="${profileInfo.getMiddleName}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_MiddleName}"></span>
-                </div>
-                <div class="input-box">
-                    <label class="required"> Last Name </label>
-                    <input type="text" th:field="*{lastName}" th:value="${profileInfo.getLastName}" th:required="required" maxlength="20"/><br/>
-                    <span class="error" th:text="${error_LastName}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Nickname </label>
-                    <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" th:value="${profileInfo.getNickname}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_Nickname}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Personal Pronouns </label>
-                    <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" th:value="${profileInfo.getPersonalPronouns}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_PersonalPronouns}"></span>
-                </div>
-                <div class="input-box">
-                    <label class="required"> Email </label>
-                    <input th:type="email" th:field="*{email}" th:value="${profileInfo.getEmail}" th:required="required" /><br/>
-                    <span class="error" th:text="${error_Email}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Bio </label>
-                    <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" th:value="${profileInfo.getBio}" maxlength="200"/><br/>
-                    <span class="error" th:text="${error_Bio}"></span>
-                </div>
-                <br/>
+<p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
+<th th:text="${errMsg}"></th>
+<br/>
+<div class="content" th:if="${userExists}" th:object="${profileInfo}">
+    <div th:text="${dateCreated}"></div>
+    <div class="centre-box">
+        <img class="profile-image" th:src=@{/img/default-pfp.jpg}><br/>
+        <!--Add a button to edit the profile image here if necessary-->
+    </div>
+    <form th:action="@{|/users/${userId}/edit|}"
+          method="post">
+        <div class="user-info">
+            <div class="input-box">
+                <label> Username </label>
+                <input type="text" th:field="*{username}" th:value="${profileInfo.getUsername}" th:disabled="disabled"/><br>
+            </div>
+            <div class="input-box">
+                <p th:text="${editMessage}" id="error"/>
+                <p th:text="${editErrorMessage}" id="error"/>
+            </div>
+            <div class="input-box">
+                <label class="required"> First Name </label>
+                <input type="text" th:field="*{firstName}" th:value="${profileInfo.getFirstName}" th:required="required" maxlength="20"/><br>
+                <span class="error" th:text="${error_FirstName}"></span>
+            </div>
+            <div class="input-box">
+                <label> Middle Name </label>
+                <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" th:value="${profileInfo.getMiddleName}" maxlength="20" />
+                <span class="error" th:text="${error_MiddleName}"></span>
+            </div>
+            <div class="input-box">
+                <label class="required"> Last Name </label>
+                <input type="text" th:field="*{lastName}" th:value="${profileInfo.getLastName}" th:required="required" maxlength="20"/><br>
+                <span class="error" th:text="${error_LastName}"></span>
+            </div>
+            <div class="input-box">
+                <label> Nickname </label>
+                <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" th:value="${profileInfo.getNickname}" maxlength="20" />
+                <span class="error" th:text="${error_Nickname}"></span>
+            </div>
+            <div class="input-box">
+                <label> Personal Pronouns </label>
+                <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" th:value="${profileInfo.getPersonalPronouns}" maxlength="20" />
+                <span class="error" th:text="${error_PersonalPronouns}"></span>
+            </div>
+            <div class="input-box">
+                <label class="required"> Email </label>
+                <input th:type="email" th:field="*{email}" th:value="${profileInfo.getEmail}" th:required="required" /><br>
+                <span class="error" th:text="${error_Email}"></span>
+            </div>
+            <div class="input-box">
+                <label> Bio </label>
+                <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" th:value="${profileInfo.getBio}" maxlength="200"/><br>
+                <span class="error" th:text="${error_Bio}"></span>
             </div>
             <br/>
-            <div class="centre-box">
-                <button class="form-button cancel" type="button">
-                    <a th:href="@{|/users/${userId}|}">Cancel</a>
-                </button>
-                <button class="form-button save" type="submit">Change Details</button>
-            </div>
-        </form><br/>
-        <hr/>
-        <form th:action="@{|/users/${userId}/edit|}"
-            method="post" th:object="${user}">
-            <div class="user-info">
+        </div>
+        <br/>
+        <div class="centre-box">
+            <button class="form-button cancel" type="button">
+                <a th:href="@{|/users/${userId}|}">Cancel</a>
+            </button>
+            <button class="form-button save" type="submit">Change Details</button>
+        </div>
+    </form><br/>
+    <hr/>
+    <form th:action="@{|/users/${userId}/edit|}"
+          method="post" th:object="${user}">
+        <div class="user-info">
             <div class="input-box">
                 <label class="required"> Current Password </label>
                 <input type="password" placeholder="Enter your password" th:name="oldPassword" th:required="required" /><br>
@@ -104,17 +104,16 @@
                        placeholder="Password" th:field="*{confirmPassword}">
                 <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
                        placeholder="Password" th:field="*{confirmPassword}">
-                <br/>
                 <span th:class="error" th:text="${error_PasswordsEqual}"></span>
             </div>
             <br/>
-            </div>
-            <div class="centre-box">
-                <button class="form-button save" type="submit">Change Password</button>
-            </div>
-        </form>
-    </div>
-    </div>
+        </div>
+        <div class="centre-box">
+            <button class="form-button save" type="submit">Change Password</button>
+        </div>
+    </form>
+</div>
+</div>
 
 </body>
 
