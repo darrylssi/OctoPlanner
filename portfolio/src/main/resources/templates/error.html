@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <style>
-        table td{
+        table td {
             vertical-align:top;
             border:solid 1px #888;
             padding:10px;
@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-<h1>Basic Thymeleaf Error Page (You may want to make something better)</h1>
+<h1>Error</h1>
 <table>
     <tr>
         <td>Date</td>
@@ -28,7 +28,7 @@
     </tr>
     <tr>
         <td>Status</td>
-        <td th:text="${status}"/>
+        <td id="errorCode" th:text="${status}" />
     </tr>
     <tr>
         <td>Message</td>
@@ -45,5 +45,11 @@
         </td>
     </tr>
 </table>
+<a href="/login">Here's a link to the login page.</a>
+<script>
+        if (document.getElementById('errorCode').textContent == '403') {
+            window.location.href = "/login";
+        }
+</script>
 </body>
 </html>
