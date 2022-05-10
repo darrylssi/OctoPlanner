@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -100,12 +101,11 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public void getUserAccountById(GetUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         logger.info("getUserAccountById has been called");
-        UserResponse.Builder reply = UserResponse.newBuilder();
 
         User user = repository.findById(request.getId());
         if (user != null) {
-            setUserResponse(user, reply);
-            responseObserver.onNext(reply.build());
+            UserResponse reply = buildUserResponse(user);
+            responseObserver.onNext(reply);
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.NOT_FOUND.asRuntimeException());
@@ -121,73 +121,63 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         int offset = request.getOffset();
         String orderBy = request.getOrderBy();
         boolean isAscending = request.getIsAscendingOrder();
-        List<User> allUsers = userService.getAllUsers();
 
-        List<User> users;
-        if (!orderBy.equals("role")) {
-            users = userService.getUsersPaginated(offset, limit, orderBy, isAscending);
-        } else {
-            users = filterRoles(allUsers, offset, limit, isAscending);
+        List<User> paginatedUsers;
+        try {
+            if (orderBy.equals("role")) { // Ordering by "role" means order by highest role ({STUDENT, COURSE_ADMIN} =>
+                                          // highest is COURSE_ADMIN).
+                                          // JPA allows ordering by joined tables, HOWEVER it generates SQL incompatible
+                                          // with H2. So, we have
+                                          // to bring the entire table into memory & sort here until that's migrated.
+                                          // TODO Andrew: Once we're on MariaDB, remove this function.
+                paginatedUsers = paginatedUsersOrderedByRole(offset, limit, isAscending);
+            } else {
+                paginatedUsers = userService.getUsersPaginated(offset, limit, orderBy, isAscending);
+            }
+        } catch (IllegalArgumentException e) { // `orderBy` wasn't a valid value.
+            Throwable statusError = Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException();
+            responseObserver.onError(statusError);
+            return;
         }
 
-        List<UserResponse> userResponses = new ArrayList<>();
-
-        for (User user : users) {
-            UserResponse.Builder userResponse = UserResponse.newBuilder();
-            setUserResponse(user, userResponse);
-            userResponses.add(userResponse.build());
-        }
-
+        List<UserResponse> userResponses = paginatedUsers.stream().map(UserAccountServerService::buildUserResponse).toList();
+        int numUsersInDatabase = (int) repository.count();
         reply
-                .addAllUsers(userResponses)
-                .setResultSetSize(allUsers.size());
+            .addAllUsers(userResponses)
+            .setResultSetSize(numUsersInDatabase);
 
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }
 
 
-    /* Manually sort roles list, return only those that are to be displayed on the page */
-    private List<User> filterRoles(List<User> users, int page, int limit, boolean isAscending) {
-        List<User> first = new ArrayList<>();
-        List<User> middle = new ArrayList<>();
-        List<User> last = new ArrayList<>();
-
-        if (isAscending) { /* Take course admins first, then teachers, then students */
-            for (User user : users) {
-                if (user.getRoles().contains(UserRole.COURSE_ADMINISTRATOR)) {
-                    first.add(user);
-                } else if (user.getRoles().contains(UserRole.TEACHER)) {
-                    middle.add(user);
-                } else {
-                    last.add(user);
-                }
-            }
-        } else { /* Take students first, then teachers, then course admins */
-            for (User user : users) {
-                if (user.getRoles().contains(UserRole.STUDENT)) {
-                    first.add(user);
-                } else if (user.getRoles().contains(UserRole.TEACHER)) {
-                    middle.add(user);
-                } else {
-                    last.add(user);
-                }
-            }
-        }
-
-        List<User> sorted = new ArrayList<>(first);
-        sorted.addAll(middle);
-        sorted.addAll(last);
+    /**
+     * Returns a paginated view of the database's users, order by each user's highest role.
+     * <p>
+     * In an ideal world we wouldn't need this, but as mentioned the JPA generated
+     * isn't valid H2, so until that's fixed we need this.
+     * </p>
+     *
+     * @param page What "page" of the users you want. Affected by the ordering and page size
+     * @param limit How many items are in a page
+     * @param isAscending Is the list in ascending or descending order
+     * @return A list of users from that "page"
+     */
+    private List<User> paginatedUsersOrderedByRole(int page, int limit, boolean isAscending) {
+        ArrayList<User> users = new ArrayList<User>(userService.getAllUsers());
+        if (isAscending)
+            users.sort((a, b) -> a.highestRole().getNumber() - b.highestRole().getNumber());
+        else
+            users.sort((a, b) -> b.highestRole().getNumber() - a.highestRole().getNumber());
 
         /* Get the sublist that is needed for the page */
-        List<User> filtered;
-        if ((page + 1) * limit >= sorted.size()) {  // if there are fewer users than needed for the page
-            filtered = sorted.subList(page * limit, sorted.size());
-        } else {
-            filtered = sorted.subList(page * limit, (page + 1) * limit);
+        int fromIndex = page * limit;
+        int toIndex = (page+1) * limit;
+        if (toIndex > users.size()) {    // If there are fewer users than needed for the page
+            toIndex = users.size();
         }
 
-        return filtered;
+        return users.subList(fromIndex, toIndex);
     }
 
 
@@ -341,12 +331,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Sets the field in a userResponse object using a user object
+     * Returns a UserResponse builder object from a User model.
+     *
      * @param user The user object to extract fields from
-     * @param userResponse The userResponse builder to set fields in
+     * @return A gRPC-ready response object with the user's fields copied in.
      */
-    private void setUserResponse(User user, UserResponse.Builder userResponse) {
-        userResponse
+    private static UserResponse buildUserResponse(User user) {
+        ArrayList<UserRole> sortedRoles = new ArrayList<UserRole>(user.getRoles());
+        sortedRoles.sort(Comparator.naturalOrder());
+
+        UserResponse.Builder userResponse = UserResponse
+            .newBuilder()
+                .setId(user.getID())
                 .setUsername(user.getUsername())
                 .setFirstName(user.getFirstName())
                 .setMiddleName(user.getMiddleName())
@@ -356,10 +352,13 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
                 .setProfileImagePath("/") // TODO Path to users profile image once implemented
+                .addAllRoles(sortedRoles)
                 .addAllRoles(user.getRoles())
                 .setId(user.getID())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
-                        .setSeconds(user.getCreated().getEpochSecond())
-                        .setNanos(user.getCreated().getNano()));
+                    .setSeconds(user.getCreated().getEpochSecond())
+                    .setNanos(user.getCreated().getNano()));
+
+        return userResponse.build();
     }
 }

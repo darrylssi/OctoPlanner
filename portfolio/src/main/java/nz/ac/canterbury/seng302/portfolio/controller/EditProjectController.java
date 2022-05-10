@@ -1,10 +1,16 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -15,8 +21,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,7 +33,7 @@ import java.util.List;
  * Controller for the edit project details page
  */
 @Controller
-public class EditProjectController {
+public class EditProjectController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -46,8 +50,17 @@ public class EditProjectController {
      * @return Edit-project page
      */
     @GetMapping("/edit-project/{id}")
-    public String projectForm(@AuthenticationPrincipal AuthState principal,
-                              @PathVariable("id") int id, Model model) {
+    public String projectForm(
+            @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) {
+        /* Ensure that the user is at least a teacher */
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
+            return "error";
+        }
 
         /* Add project details to the model */
         try {
@@ -89,6 +102,12 @@ public class EditProjectController {
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
     ) throws Exception {
+        /* Ensure that the user is at least a teacher */
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-project/" + Integer.toString(id));
+            return "error";
+        }
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
 
