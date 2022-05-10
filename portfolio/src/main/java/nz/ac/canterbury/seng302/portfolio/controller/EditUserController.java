@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
+import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+
 @Controller
 public class EditUserController {
 
@@ -34,16 +36,14 @@ public class EditUserController {
         boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
-        
-        if (userResponse == null) {
+
+        if(!userResponse.hasCreated()) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
-        } else if (!isCurrentUser) {
+        } else if(!isCurrentUser) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -68,6 +68,7 @@ public class EditUserController {
 
     @PostMapping("/users/{id}/edit")
     public String edit(
+            User user,
             @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
@@ -108,8 +109,9 @@ public class EditUserController {
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
-                                               "confirmPassword"})
+            "confirmPassword"})
     public String changePassword(
+            User user,
             @PathVariable int id,
             @AuthenticationPrincipal AuthState principal,
             BindingResult result,
@@ -119,7 +121,7 @@ public class EditUserController {
             Model model
     ) {
         editHandler(model, id, principal);
-        
+
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
@@ -147,5 +149,4 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
-
 }

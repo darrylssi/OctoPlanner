@@ -5,20 +5,17 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-
 import java.util.Comparator;
 import java.util.List;
 
@@ -38,6 +35,7 @@ public class DetailsController {
     @Autowired
     private UserAccountClientService userAccountClientService;
 
+
     @GetMapping("/project/{id}")
     public String details(
             @AuthenticationPrincipal AuthState principal,
@@ -51,7 +49,6 @@ public class DetailsController {
         model.addAttribute("project", project);
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
-
         labelUtils.refreshProjectSprintLabels(id);
 
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);

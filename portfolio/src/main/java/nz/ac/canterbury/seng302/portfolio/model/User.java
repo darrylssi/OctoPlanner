@@ -40,7 +40,6 @@ public class User {
     private boolean passwordsEqual;
 
     @Email(message = "Email should be valid")
-    @Pattern(regexp="^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$", message="Must be like something@someserver.com")
     private String email;
 
     @Size(max = 200, message = "Bio must have less than 200 characters")
