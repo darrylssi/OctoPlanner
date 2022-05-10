@@ -29,6 +29,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.webjars:fullcalendar:5.10.2'
+
 
 
     implementation 'net.devh:grpc-client-spring-boot-starter:2.13.1.RELEASE' // GRPC client dependencies

@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="@{/styles/main.css}" rel="stylesheet" />
+    <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
+    <link href="/webjars/fullcalendar/5.10.2/main.css" rel="stylesheet">
+    <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
+
+    <script th:src="@{/scripts/monthlyCalendar.js}"></script>
+
+</head>
+<body>
+    <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+    <div class="content">
+        <div id='calendar'></div>
+    </div>
+    <!--https://tutorialmeta.com/question/how-can-i-set-up-fullcalendar-correctly-with-script-tags-->
+</body>
+</html>
