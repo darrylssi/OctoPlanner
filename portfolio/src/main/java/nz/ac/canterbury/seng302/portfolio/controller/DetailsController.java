@@ -1,36 +1,23 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Comparator;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -47,10 +34,6 @@ public class DetailsController {
     private SprintLabelService labelUtils;
     @Autowired
     private UserAccountClientService userAccountClientService;
-    @Autowired
-    private DateUtils utils;
-
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
 
     @GetMapping("/project/{id}")
@@ -66,30 +49,6 @@ public class DetailsController {
         model.addAttribute("project", project);
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
-
-
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-        // Getting project dates to limit the project dates in calendar
-        // Adding a day to the project end date
-        Date localProjectEndDate = project.getProjectEndDate();
-
-        // Converting date to LocalDate
-        LocalDate newLocalProjectEndDate = localProjectEndDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        // Adding 1 day to default project end date
-        LocalDate newProjectEndLocalDate = newLocalProjectEndDate.plusDays(1);
-
-        // Converting the new sprint end date of LocalDate object to Date object
-        String newProjectEndDate = utils.toString(Date.from(newProjectEndLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
-        model.addAttribute("projectStartDate", String.valueOf(project.getProjectStartDate()));
-        model.addAttribute("projectEndDate", newProjectEndDate);
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
         labelUtils.refreshProjectSprintLabels(id);
 
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
