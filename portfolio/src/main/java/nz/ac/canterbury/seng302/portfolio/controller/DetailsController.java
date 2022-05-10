@@ -40,11 +40,11 @@ public class DetailsController {
 
     @GetMapping("/project/{id}")
     public String details(
-                            @AuthenticationPrincipal AuthState principal,
-                            @PathVariable(name="id") int id,
-                            @RequestParam(name="role", required=false) String debugRole,
-                            User user,
-                            Model model) throws Exception {
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="id") int id,
+            @RequestParam(name="role", required=false) String debugRole,
+            User user,
+            Model model) throws Exception {
         /* Add project details to the model */
         // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
@@ -58,17 +58,17 @@ public class DetailsController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-
+        debugRole = "teacher";
         // TODO: Link this with George's role helper class once that's merged
         String role;
         if (debugRole != null) {
             role = debugRole;
         } else {
             role = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("role"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
+                    .filter(claim -> claim.getType().equals("role"))
+                    .findFirst()
+                    .map(ClaimDTO::getValue)
+                    .orElse("NOT FOUND");
         }
         /* Return the name of the Thymeleaf template */
         // detects the role of the current user and returns appropriate page
@@ -88,7 +88,7 @@ public class DetailsController {
     public ResponseEntity<String> deleteSprint(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="sprintId") int sprintId
-            ) {
+    ) {
 
         // Check if the user is authorised to delete sprints
         if(principal.getClaimsList().stream()

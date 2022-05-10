@@ -50,7 +50,6 @@ public class ListUsersController {
     public String GetListOfUsers(
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(name="page", defaultValue="1") int page,
-            @AuthenticationPrincipal AuthState principal,
             Model model,
             HttpServletRequest request,
             HttpServletResponse response
