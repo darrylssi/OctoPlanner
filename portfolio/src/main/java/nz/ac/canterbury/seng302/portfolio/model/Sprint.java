@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -23,9 +22,6 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 public class Sprint {
-
-    @Autowired
-    private DateUtils utils;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -255,6 +251,7 @@ public class Sprint {
      */
     public String validSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
+        DateUtils utils = new DateUtils();
 
         if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
             invalidDateRange += "Dates must be within the project dates of " + utils.toString(projectStartDate) + " - " + utils.toString(projectEndDate);

@@ -15,6 +15,7 @@ public abstract class PageController {
      * Adds error information to the model
      *
      * @param err the type of error used
+     * @param source_page The URL that caused this error
      */
     public void configureError(Model model, ErrorType err, String source_page) {
         /* Set current timestamp and page */

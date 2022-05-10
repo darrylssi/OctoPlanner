@@ -34,6 +34,7 @@ public class PrincipalData {
      */
     protected PrincipalData() {
         this.authenticated = false;
+        this.id = -1;
         this.roles = List.of();
     }
 

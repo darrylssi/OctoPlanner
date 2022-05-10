@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -7,7 +8,9 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -34,7 +37,7 @@ import java.util.List;
  * Controller for the add sprint details page
  */
 @Controller
-public class AddSprintController {
+public class AddSprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
@@ -55,8 +58,16 @@ public class AddSprintController {
      * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable("id") int id, Model model) throws Exception {
+    public String getsSprint(
+        @AuthenticationPrincipal AuthState principal,
+        @PathVariable("id") int id,
+        Model model
+    ) throws Exception {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
+            return "error";
+        }
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
         List<Sprint> sprintList = sprintService.getAllSprints();
@@ -146,6 +157,11 @@ public class AddSprintController {
             BindingResult result,
             Model model
     ) throws Exception {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
+            return "error";
+        }
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 

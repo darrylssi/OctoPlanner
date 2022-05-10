@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
@@ -54,11 +55,12 @@ public class EditSprintController extends PageController {
     @GetMapping("/edit-sprint/{id}")
     public String sprintForm(@PathVariable("id") int id, 
             @AuthenticationPrincipal AuthState principal,
-            Model model) throws Exception { 
+            Model model
+        ) throws Exception { 
         /* Ensure that the user is at least a teacher */
         PrincipalData principalData = PrincipalData.from(principal);
         if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + id);
             return "error";
         }
 
@@ -110,11 +112,11 @@ public class EditSprintController extends PageController {
             Model model
     ) throws Exception {
 
-         /* Ensure that the user is at least a teacher */
-         PrincipalData principalData = PrincipalData.from(principal);
-         if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
-             configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + Integer.toString(id));
-             return "error";
+        /* Ensure that the user is at least a teacher */
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/edit-sprint/" + id);
+            return "error";
         }
         
         Project parentProject = projectService.getProjectById(projectId);

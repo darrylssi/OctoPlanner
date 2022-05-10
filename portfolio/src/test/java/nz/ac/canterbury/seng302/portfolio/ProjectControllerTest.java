@@ -83,13 +83,12 @@ public class ProjectControllerTest {
     @Test
     public void postProjectWitLongName_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
-                        .param("projectName", "Lorem ipsum dolor sit amet, consectetur adipisicing " +
-                                "elit, sed do eiusmod cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat ")
+                        .param("projectName", "blah".repeat(1000))
                         .param("projectDescription", "desc")
                         .param("projectStartDate", "2021-03-04")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")));
+                .andExpect(content().string(containsString("The character length must be between 2 and 32")));
     }
 
     @Test

@@ -79,7 +79,7 @@ public class DetailsController extends PageController {
         ) {
         PrincipalData principalData = PrincipalData.from(principal);
         // Check if the user is authorised to delete sprints
-        if(!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
         }
         try {

@@ -2,8 +2,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
 
 import javax.servlet.http.Cookie;
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.util.Pair;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 21st March 2022
  */
 @Controller
-public class ListUsersController {
+public class ListUsersController extends PageController {
 
     private static final Logger logger = LoggerFactory.getLogger(ListUsersController.class);
 
@@ -54,12 +53,8 @@ public class ListUsersController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        // Please for the love of god, someone make this easier
-        String userId = principal.getClaimsList().stream()
-            .filter(claim -> claim.getType().equals("nameid"))
-            .findFirst()
-            .map(ClaimDTO::getValue)
-            .orElse("-1");
+        PrincipalData principalData = PrincipalData.from(principal);
+        String userId = principalData.getID().toString();
         // Get sort column & direction from cookie
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String orderBy = ordering.getFirst();
@@ -106,12 +101,8 @@ public class ListUsersController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        // Please for the love of god, someone make this easier
-        String userId = principal.getClaimsList().stream()
-            .filter(claim -> claim.getType().equals("nameid"))
-            .findFirst()
-            .map(ClaimDTO::getValue)
-            .orElse("-1");
+        PrincipalData principalData = PrincipalData.from(principal);
+        String userId = principalData.getID().toString();
         // Get the user's existing ordering
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String savedOrderBy = ordering.getFirst();
