@@ -18,6 +18,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 
 /**
  * Holds unit tests for the Project class.
@@ -42,16 +43,28 @@ public class ProjectTests {
     @MockBean
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private DateUtils utils;
+
     private Project baseProject;
 
+    private Sprint sprint1;
+    private Sprint sprint2;
+    private List<Sprint> sprintList = new ArrayList<>();
+
     @BeforeEach
-    public void setUpProject() {
+    public void setUp() throws ParseException {
         baseProject = new Project();
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
         baseProject.setStartDateString("01/JAN/2022");
         baseProject.setEndDateString("01/OCT/2022");
         baseProject.setId(1);
+
+        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"));
+        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"));
+        sprintList.add(sprint1);
+        sprintList.add(sprint2);
     }
 
     @Test

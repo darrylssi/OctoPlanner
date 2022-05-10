@@ -1,22 +1,28 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.TransactionSystemException;
 
 import javax.validation.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
+import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+
 
 /**
  * Holds unit tests for the Sprint class.
@@ -26,6 +32,9 @@ import static org.assertj.core.api.Assertions.*;
 public class SprintTests {
     @Autowired
     private SprintService sprintService;
+
+    @Autowired
+    private DateUtils utils;
 
     private static Validator validator;
 
@@ -38,6 +47,7 @@ public class SprintTests {
     @MockBean
     private SprintRepository sprintRepository;
 
+    private List<Sprint> sprintList = new ArrayList<>();
     private Sprint baseSprint;
 
     @BeforeEach
