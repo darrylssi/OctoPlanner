@@ -11,8 +11,10 @@ import org.springframework.transaction.TransactionSystemException;
 
 import javax.validation.*;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
 
@@ -46,6 +48,7 @@ public class SprintTests {
         baseSprint.setParentProjectId(5);
         baseSprint.setStartDateString("05/FEB/2022");
         baseSprint.setEndDateString("24/MAR/2022");
+        sprintList.add(baseSprint);
     }
 
     @Test
@@ -99,6 +102,13 @@ public class SprintTests {
     }
 
     @Test
+    void saveNameSprint_getSprintName() {
+        baseSprint.setSprintName("Sprint 2");
+        sprintRepository.save(baseSprint);
+        assertEquals("Sprint 2", baseSprint.getSprintName());
+    }
+
+    @Test
     void saveNullDescriptionSprint_getException() {
         try {
             baseSprint.setSprintDescription(null);
@@ -106,6 +116,20 @@ public class SprintTests {
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
+    }
+
+    @Test
+    void saveEmptyDescriptionSprint_getEmptyDescription() {
+        baseSprint.setSprintDescription("");
+        sprintRepository.save(baseSprint);
+        assertEquals("", baseSprint.getSprintDescription());
+    }
+
+    @Test
+    void saveDescriptionSprint_getDescription() {
+        baseSprint.setSprintDescription("This is Sprint 2");
+        sprintRepository.save(baseSprint);
+        assertEquals("This is Sprint 2", baseSprint.getSprintDescription());
     }
 
     @Test
@@ -127,4 +151,86 @@ public class SprintTests {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
     }
+
+    @Test
+    void checkGivenDatesAreValid_getStringMessage() throws Exception {
+        Date projectStartDate = utils.toDate("2022-01-02");
+        Date projectEndDate = utils.toDate("2022-12-31");
+        Date sprintStartDate = utils.toDate("2022-01-02");
+        Date sprintEndDate = utils.toDate("2022-02-02");
+        String errorMessage = baseSprint.validSprintDateRanges(2, sprintStartDate, sprintEndDate,
+                projectStartDate, projectEndDate, sprintList);
+
+        // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
+        // Since our selected dates are 01/01/2022 -- 02/02/2022, this should return the error message as "", which tells
+        // us that the dates are valid
+        assertEquals("", errorMessage);
+    }
+
+    //
+    @Test
+    void checkSprintStartDateOverlapsProjectStartDate_getStringMessage() throws Exception {
+        String projectStartDate = "2022-01-02";
+        String projectEndDate = "2022-12-31";
+        String sprintStartDate = "2022-01-01";
+        String sprintEndDate = "2022-02-02";
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
+
+        assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate, errorMessage);
+    }
+
+    @Test
+    void checkSprintEndDateOverlapsProjectEndDate_getStringMessage() throws Exception {
+        String projectStartDate = "2022-01-02";
+        String projectEndDate = "2022-12-31";
+        String sprintStartDate = "2022-11-02";
+        String sprintEndDate = "2023-01-02";
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
+
+        assertEquals("Dates must be within the project dates of " + projectStartDate + " - " + projectEndDate,
+                errorMessage);
+    }
+
+    @Test
+    void checkSprintStartDateOverlapsSprintEndDate_getStringMessage() throws Exception {
+        String projectStartDate = "2022-01-02";
+        String projectEndDate = "2022-12-31";
+        String sprintStartDate = "2022-01-10";
+        String sprintEndDate = "2022-01-08";
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
+
+        assertEquals("Start date must always be before end date", errorMessage);
+    }
+
+    @Test
+    void checkCurrentSprintDatesHasSameDateAsOneSprintListDates_getStringMessage() throws Exception {
+        // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
+        String projectStartDate = "2022-01-02";
+        String projectEndDate = "2022-12-31";
+        String sprintStartDate = "2022-02-05";
+        String sprintEndDate = "2022-03-24";
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
+
+        assertEquals("Dates must not overlap with other sprints & and it must not be same, it is overlapping with " +
+                utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
+    }
+
+    @Test
+    void checkCurrentSprintDatesOverlapsSprintListDates_getStringMessage() throws Exception {
+        // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
+        String projectStartDate = "2022-01-02";
+        String projectEndDate = "2022-12-31";
+        String sprintStartDate = "2022-02-25";
+        String sprintEndDate = "2022-04-02";
+        String errorMessage = baseSprint.validSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
+                utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
+
+        assertEquals("Dates must not overlap with other sprints & it is overlapping with " +
+                utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
+    }
+
 }

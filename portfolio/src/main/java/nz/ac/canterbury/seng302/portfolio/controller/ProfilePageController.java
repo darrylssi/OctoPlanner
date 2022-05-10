@@ -65,27 +65,29 @@ public class ProfilePageController {
                 .map(ClaimDTO::getValue)
                 .orElse("NOT FOUND");
         model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
+        if (user.hasCreated()) {
 
-        if(user.hasCreated()) {
-            model.addAttribute("profileInfo", user);
-            model.addAttribute("userExists", true);
-            model.addAttribute("fullName", getFullName(
-                    user.getFirstName(), user.getMiddleName(),  user.getLastName()));
-            model.addAttribute("id", id);
-            model.addAttribute("userName", user.getUsername());
-            model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-            String roles = "";
-            for (int i = 0; i < user.getRolesCount(); i++) {
-                String roleString = user.getRoles(i).toString();
-                roleString = roleString.replace("_", " ");
-                roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+            if (user != null) {
+                model.addAttribute("profileInfo", user);
+                model.addAttribute("userExists", true);
+                model.addAttribute("fullName", getFullName(
+                        user.getFirstName(), user.getMiddleName(), user.getLastName()));
+                model.addAttribute("id", id);
+                model.addAttribute("userName", user.getUsername());
+                model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
+                String roles = "";
+                for (int i = 0; i < user.getRolesCount(); i++) {
+                    String roleString = user.getRoles(i).toString();
+                    roleString = roleString.replace("_", " ");
+                    roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+                }
+                if (roles.length() > 2) {
+                    roles = roles.substring(0, roles.length() - 2);
+                }
+                model.addAttribute("roles", roles);
+            } else {
+                errors.add("Invalid ID");
             }
-            if (roles.length() > 2) {
-                roles = roles.substring(0, roles.length() - 2);
-            }
-            model.addAttribute("roles", roles);
-        } else {
-            errors.add("Invalid ID");
         }
         return "profile";
     }
@@ -151,4 +153,6 @@ public class ProfilePageController {
 
         return String.format("Member since: %s %s %s %s", date.getDayOfMonth(), month, date.getYear(), timeAgo);
     }
+
+
 }

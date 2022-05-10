@@ -35,13 +35,15 @@ public class EditUserController {
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
         
-        if(!userResponse.hasCreated()) {
+        if (userResponse == null) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
-        } else if(!isCurrentUser) {
+        } else if (!isCurrentUser) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -66,7 +68,6 @@ public class EditUserController {
 
     @PostMapping("/users/{id}/edit")
     public String edit(
-            User user,
             @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
@@ -109,7 +110,6 @@ public class EditUserController {
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
                                                "confirmPassword"})
     public String changePassword(
-            User user,
             @PathVariable int id,
             @AuthenticationPrincipal AuthState principal,
             BindingResult result,
@@ -147,4 +147,5 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
+
 }

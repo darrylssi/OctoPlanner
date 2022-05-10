@@ -1,6 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import javax.validation.constraints.*;
 
 /**
@@ -32,7 +37,10 @@ public class User {
     @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String confirmPassword;
 
+    private boolean passwordsEqual;
+
     @Email(message = "Email should be valid")
+    @Pattern(regexp="^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$", message="Must be like something@someserver.com")
     private String email;
 
     @Size(max = 200, message = "Bio must have less than 200 characters")
@@ -138,6 +146,7 @@ public class User {
     public boolean isPasswordsEqual() {
         return (password == null) ? false : password.equals(confirmPassword);
     }
+
 
 
 }

@@ -10,6 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.TransactionSystemException;
 
 import javax.validation.*;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,6 +102,13 @@ public class ProjectTests {
     }
 
     @Test
+    void saveNameProject_getProjectName() {
+        baseProject.setProjectName("Project 2");
+        projectRepository.save(baseProject);
+        assertEquals("Project 2", baseProject.getProjectName());
+    }
+
+    @Test
     void saveNullDescriptionProject_getException() {
         try {
             baseProject.setProjectDescription(null);
@@ -106,6 +116,20 @@ public class ProjectTests {
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
+    }
+
+    @Test
+    void saveEmptyDescriptionProject_getEmptyDescription() {
+        baseProject.setProjectDescription("");
+        projectRepository.save(baseProject);
+        assertEquals("", baseProject.getProjectDescription());
+    }
+
+    @Test
+    void saveDescriptionProject_getProjectName() {
+        baseProject.setProjectDescription("This is Project 2");
+        projectRepository.save(baseProject);
+        assertEquals("This is Project 2", baseProject.getProjectDescription());
     }
 
     @Test
@@ -127,4 +151,49 @@ public class ProjectTests {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
         }
     }
+
+
+    @Test
+    void checkValidProjectDateRangesForEditProject_getErrorMessage() throws ParseException {
+        // Sprint list has two sprints with dates:
+        // Sprint 1:  2022-01-01 -- 2022-02-02
+        // Sprint 2:  2022-02-06 -- 2022-03-04
+
+        String newProjectStartDate = "2022-02-04";
+        String newProjectEndDate = "2022-08-05";
+        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+
+        assertEquals("Project dates must not be before or after the sprint dates " + utils.toString(sprint1.getSprintStartDate())
+                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+    }
+
+    @Test
+    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+        // Sprint list has two sprints with dates:
+        // Sprint 1:  2022-01-01 -- 2022-02-02
+        // Sprint 2:  2022-02-06 -- 2022-03-04
+
+        String newProjectStartDate = "2022-01-20";
+        String newProjectEndDate = "2022-08-20";
+        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+
+        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint1.getSprintStartDate())
+                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+    }
+
+    @Test
+    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+        // Sprint list has two sprints with dates:
+        // Sprint 1:  2022-01-01 -- 2022-02-02
+        // Sprint 2:  2022-02-06 -- 2022-03-04
+
+        String newProjectStartDate = "2022-01-01";
+        String newProjectEndDate = "2022-02-10";
+        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+
+        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint2.getSprintStartDate())
+                + " - " + utils.toString(sprint2.getSprintEndDate()) , errorMessage);
+    }
+
 }
+

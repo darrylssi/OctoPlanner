@@ -16,10 +16,10 @@
         <button id="deleteButton" class="modal-button delete">Delete</button>
     </div>
 </div>
-<div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
+<div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
 <div class="content">
     <div class="detail-block">
-        <div  th:text="${project.getProjectDescription}"/>
+        <div th:text="${project.getProjectDescription}"/>
         <button class="edit-button" th:if="${canEdit}">
             <a th:href="@{'/edit-project/' + ${project.getId}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
