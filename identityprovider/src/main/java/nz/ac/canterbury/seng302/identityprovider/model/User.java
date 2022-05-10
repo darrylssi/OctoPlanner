@@ -154,9 +154,9 @@ public class User {
     }
 
     /**
-     * Add a role to this user
+     * Remove a role from this user
      * 
-     * @param role The role enum type to be added
+     * @param role The role enum type to be removed
      * @return <code>true</code> if the user had this item removed
      */
     public boolean removeRole(UserRole role) {
