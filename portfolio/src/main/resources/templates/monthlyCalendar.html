@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <title>Project Calendar</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="@{/styles/main.css}" rel="stylesheet" />
     <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
@@ -12,10 +13,11 @@
         let projectStartDate = "[[${projectStartDate}]]";
         let projectEndDate = "[[${projectEndDate}]]";
 
-        // Getting all sprint's string names, start date and end date
+        // Getting all sprints' string names, start dates, end dates, and colours
         let sprintNames = "[[${sprintNames}]]";
         let sprintStartDates = "[[${sprintStartDates}]]";
         let sprintEndDates = "[[${sprintEndDates}]]";
+        let sprintColours = "[[${sprintColours}]]";
 
     </script>
     <script th:src="@{/scripts/monthlyCalendar.js}"></script>

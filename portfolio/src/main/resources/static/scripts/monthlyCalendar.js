@@ -8,13 +8,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let sprintNamesList = sprintNames.split(",");
     let sprintStartDatesList = sprintStartDates.split(",");
     let sprintEndDatesList = sprintEndDates.split(",");
+    let sprintColoursList = sprintColours.split(",");
+
 
     // Creating one list for calendar sprints
     let sprints = [];
-    let colours = ["cornflowerblue", "firebrick", "forestgreen", "blueviolet", "tomato", "darkslategrey", "darkorchid"];
+    // let colours = ["cornflowerblue", "firebrick", "forestgreen", "blueviolet", "tomato", "darkslategrey", "darkorchid"];
     for(let i = 0; i < sprintNamesList.length; i++) {
+        // sprints.push( {title: sprintNamesList[i], start: sprintStartDatesList[i],
+        //     end: sprintEndDatesList[i], backgroundColor: colours[i % colours.length]} )
         sprints.push( {title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i], backgroundColor: colours[i % colours.length]} )
+            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i]} )
     }
 
 

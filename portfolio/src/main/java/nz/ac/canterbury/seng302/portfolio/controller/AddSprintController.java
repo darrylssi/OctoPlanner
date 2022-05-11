@@ -66,6 +66,7 @@ public class AddSprintController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
+        model.addAttribute("sprintColour", "$ff0000");
 
         // Puts the default sprint start date
         String getSprintStartDate = "";
@@ -135,6 +136,7 @@ public class AddSprintController {
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
+            @RequestParam(name="sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -162,6 +164,7 @@ public class AddSprintController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("sprintColour", sprintColour);
             return "addSprint";
         }
 
@@ -172,6 +175,7 @@ public class AddSprintController {
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel(labelUtils.nextLabel(id));
+        sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
