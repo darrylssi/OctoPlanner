@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 
+
 import javax.validation.constraints.*;
 
 /**
@@ -31,6 +32,8 @@ public class User {
 
     @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
     private String confirmPassword;
+
+    private boolean passwordsEqual;
 
     @Email(message = "Email should be valid")
     @Pattern(regexp="^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$", message="Must be like something@someserver.com")
@@ -139,6 +142,7 @@ public class User {
     public boolean isPasswordsEqual() {
         return (password == null) ? false : password.equals(confirmPassword);
     }
+
 
 
 }

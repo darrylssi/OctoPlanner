@@ -157,7 +157,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * In an ideal world we wouldn't need this, but as mentioned the JPA generated
      * isn't valid H2, so until that's fixed we need this.
      * </p>
-     * 
+     *
      * @param page What "page" of the users you want. Affected by the ordering and page size
      * @param limit How many items are in a page
      * @param isAscending Is the list in ascending or descending order
@@ -176,7 +176,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if (toIndex > users.size()) {    // If there are fewer users than needed for the page
             toIndex = users.size();
         }
-        
+
         return users.subList(fromIndex, toIndex);
     }
 
@@ -332,14 +332,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     /**
      * Returns a UserResponse builder object from a User model.
-     * 
+     *
      * @param user The user object to extract fields from
      * @return A gRPC-ready response object with the user's fields copied in.
      */
     private static UserResponse buildUserResponse(User user) {
         ArrayList<UserRole> sortedRoles = new ArrayList<UserRole>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());
-        
+
         UserResponse.Builder userResponse = UserResponse
             .newBuilder()
                 .setId(user.getID())
@@ -353,10 +353,12 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setEmail(user.getEmail())
                 .setProfileImagePath("/") // TODO Path to users profile image once implemented
                 .addAllRoles(sortedRoles)
+                .addAllRoles(user.getRoles())
+                .setId(user.getID())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
                     .setSeconds(user.getCreated().getEpochSecond())
                     .setNanos(user.getCreated().getNano()));
-        
+
         return userResponse.build();
     }
 }

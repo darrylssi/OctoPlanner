@@ -1,10 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import io.grpc.Status;
+import io.grpc.StatusException;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -13,10 +16,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 21st March 2022
  */
 @Controller
-public class ListUsersController {
+public class ListUsersController extends PageController {
 
     private static final Logger logger = LoggerFactory.getLogger(ListUsersController.class);
 
@@ -47,18 +56,14 @@ public class ListUsersController {
      */
     @GetMapping("/users")
     public String GetListOfUsers(
-            @RequestParam(name="page", defaultValue="1") int page,
             @AuthenticationPrincipal AuthState principal,
+            @RequestParam(name="page", defaultValue="1") int page,
             Model model,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        // Please for the love of god, someone make this easier
-        String userId = principal.getClaimsList().stream()
-            .filter(claim -> claim.getType().equals("nameid"))
-            .findFirst()
-            .map(ClaimDTO::getValue)
-            .orElse("-1");
+        PrincipalData principalData = PrincipalData.from(principal);
+        String userId = principalData.getID().toString();
         // Get sort column & direction from cookie
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String orderBy = ordering.getFirst();
@@ -75,6 +80,8 @@ public class ListUsersController {
             throw e;
         }
 
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
@@ -87,9 +94,10 @@ public class ListUsersController {
         return "users";
     }
 
+
     /**
      * Endpoint for modifying the user list sort direction.
-     * 
+     *
      * @param page Used to redirect the user back to the original page
      * @param orderBy The column to order by. If they were already ordered by this, flip the direction
      * @return Redirects the user back to the page number they were just on
@@ -102,12 +110,8 @@ public class ListUsersController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        // Please for the love of god, someone make this easier
-        String userId = principal.getClaimsList().stream()
-            .filter(claim -> claim.getType().equals("nameid"))
-            .findFirst()
-            .map(ClaimDTO::getValue)
-            .orElse("-1");
+        PrincipalData principalData = PrincipalData.from(principal);
+        String userId = principalData.getID().toString();
         // Get the user's existing ordering
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String savedOrderBy = ordering.getFirst();
@@ -125,14 +129,13 @@ public class ListUsersController {
         return "redirect:/users?page="+page;    // Send them back to the users page
     }
 
-
     /**
      * Parses the user page ordering from the user's cookie, and returns the ordering column & direction (true if ascending).
      * <p>
      *   If the cookie is poorly formatted/non-existent, it returns the default ordering and direction.
      * </p>
      * NOTE: This won't check if the orderBy column will be accepted by the gRPC, merely that the format's correct
-     * 
+     *
      * @param request Your controller's request object
      * @param userId The ID of the logged in user. This is to satisfy AC6
      * @return A pair of type (orderBy, isAscending) for the page.
@@ -162,12 +165,12 @@ public class ListUsersController {
             logger.error("Expected \"ASC\" or \"DESC\", got \"{}\"", values[1]);
             return DEFAULT_COOKIE_VALUE_PAIR;
         }
-        return Pair.of(orderBy, isAscending);        
+        return Pair.of(orderBy, isAscending);
     }
 
     /**
      * Creates and sets the ordering cookie for the current user.
-     * 
+     *
      * @param orderBy The column to be ordered by
      * @param isAscending If the column's in ascending order
      * @param userId A unique ID for each user, so different users on the same
@@ -189,7 +192,7 @@ public class ListUsersController {
      * <p>Invalidates the user's ordering cookie.</p>
      * This can be useful if the cookie's data is "bad", and needs to be
      * gotten rid of (e.g. sorting by an invalid column)
-     * 
+     *
      * @param userId The ID associated with the cookie
      * @param response Your endpoint's response object, to remove the cookie from
      */

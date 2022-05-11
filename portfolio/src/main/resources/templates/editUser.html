@@ -13,7 +13,7 @@
 </head>
 
 <body>
-    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found')"></div>
+    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found', username=${userName})"></div>
 
     <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
         <th th:text="${errMsg}"></th>
