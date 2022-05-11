@@ -12,9 +12,8 @@ function removeRole(userId, role) {
     const url = "/users/" + userId + "/remove-role/" + role;
     const patchRequest = new XMLHttpRequest();
     patchRequest.open("PATCH", url, true);
-    patchRequest.onload = (response) => {
-//        window.location.reload();
-        console.log(response);
+    patchRequest.onload = () => {
+        window.location.reload();
     }
     patchRequest.send();
 }

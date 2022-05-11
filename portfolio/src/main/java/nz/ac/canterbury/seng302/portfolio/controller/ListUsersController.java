@@ -96,6 +96,10 @@ public class ListUsersController extends PageController {
         allRoles.add(UserRole.COURSE_ADMINISTRATOR);
         model.addAttribute("allRoles", allRoles);
 
+        // If the user is at least a teacher, the template will render delete/edit buttons
+        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        model.addAttribute("canEdit", hasEditPermissions);
+
         /* Total number of pages */
         int totalPages = (users.getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
         model.addAttribute("totalPages", totalPages);
