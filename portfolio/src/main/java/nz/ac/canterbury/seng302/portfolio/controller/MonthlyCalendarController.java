@@ -35,6 +35,7 @@ public class MonthlyCalendarController {
     @Autowired
     private DateUtils utils;
 
+    private List<Sprint> sprintList;
     /**
      *
      * @param principal Current authentication state
@@ -57,11 +58,15 @@ public class MonthlyCalendarController {
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
 
-        // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
-        ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintService.getSprintsOfProjectById(id));
-        model.addAttribute("sprintNames", getSprintsArrayList.get(0));
-        model.addAttribute("sprintStartDates", getSprintsArrayList.get(1));
-        model.addAttribute("sprintEndDates", getSprintsArrayList.get(2));
+        sprintList = sprintService.getSprintsOfProjectById(id);
+        if (!sprintList.isEmpty()) {
+            // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
+            ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintService.getSprintsOfProjectById(id));
+
+            model.addAttribute("sprintNames", getSprintsArrayList.get(0));
+            model.addAttribute("sprintStartDates", getSprintsArrayList.get(1));
+            model.addAttribute("sprintEndDates", getSprintsArrayList.get(2));
+        }
 
         return "monthlyCalendar";
     }
@@ -80,6 +85,7 @@ public class MonthlyCalendarController {
         String sprintNames = "";                // Initiating the sprint names list
         String sprintStartDates = "";           // Initiating the sprint start dates list
         String sprintEndDates = "";             // Initiating the sprint end dates list
+
 
         for (Sprint eachSprint: sprintList) {
             sprintNames += eachSprint.getSprintName() + ",";
