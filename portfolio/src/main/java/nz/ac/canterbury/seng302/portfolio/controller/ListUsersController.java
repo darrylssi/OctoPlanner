@@ -230,7 +230,7 @@ public class ListUsersController extends PageController {
     ) {
         // Check if the user is authorised to add roles
         PrincipalData principalData = PrincipalData.from(principal);
-        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Add the role to the user
                 var response = userAccountClientService.addRoleToUser(id, role);
@@ -254,7 +254,7 @@ public class ListUsersController extends PageController {
             @PathVariable("role") UserRole role
     ) {
         PrincipalData principalData = PrincipalData.from(principal);
-        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Remove role from user
                 var response = userAccountClientService.removeRoleFromUser(id, role);
