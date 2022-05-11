@@ -1,29 +1,33 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,7 +37,7 @@ import java.util.List;
  * Controller for the add sprint details page
  */
 @Controller
-public class AddSprintController {
+public class AddSprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
@@ -46,15 +50,24 @@ public class AddSprintController {
     @Autowired            // Initializes the DateUtils object to be used for converting date to string and string to date
     private DateUtils utils;
 
-
     /**
-     * Gets the project name and creates a new sprint label
-     * @param model Used to display the project name in title
-     * @return The sprint add page
+     * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
+     * @param id the id of the project the sprint belongs to
+     * @param model the model used to store information to be displayed on the page
+     * @return the name of the Thymeleaf .html page to be displayed
+     * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable("id") int id, Model model) throws Exception {
+    public String getsSprint(
+        @AuthenticationPrincipal AuthState principal,
+        @PathVariable("id") int id,
+        Model model
+    ) throws Exception {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
+            return "error";
+        }
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
         List<Sprint> sprintList = sprintService.getAllSprints();
@@ -67,8 +80,7 @@ public class AddSprintController {
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
-        model.addAttribute("projectName", project.getProjectName() + " - Add Sprint");
-        model.addAttribute("sprintLabel", "Add Sprint - " + labelUtils.nextLabel(id));
+        model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
 
@@ -110,8 +122,16 @@ public class AddSprintController {
         LocalDate sprintLocalEndDate = sprintOldEndDate.plusDays(21);
 
         // Converting the new sprint end date of LocalDate object to Date object
-        String sprintNewEndDate = utils.toString(Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        model.addAttribute("sprintEndDate", sprintNewEndDate);
+        Date sprintNewEndDate = Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        //Check if end date falls outside project dates
+        if(sprintNewEndDate.after(project.getProjectEndDate())){
+            sprintNewEndDate = project.getProjectEndDate();
+        };
+
+        model.addAttribute("sprintEndDate", utils.toString(sprintNewEndDate));
+        model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
+        model.addAttribute("maxDate", utils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
         return "addSprint";
@@ -137,6 +157,11 @@ public class AddSprintController {
             BindingResult result,
             Model model
     ) throws Exception {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
+            return "error";
+        }
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
@@ -144,9 +169,9 @@ public class AddSprintController {
         List<Sprint> sprintList = sprintService.getAllSprints();
 
         // Checking the sprint dates validation and returning appropriate error message
-        Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
-        Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
-        String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
+        Date utilsProjectStartDate = parentProject.getProjectStartDate();
+        Date utilsProjectEndDate = parentProject.getProjectEndDate();
+        String dateOutOfRange = sprint.validSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
@@ -154,8 +179,9 @@ public class AddSprintController {
             model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
-            model.addAttribute("projectName", parentProject.getProjectName() + " - Add Sprint");
-            model.addAttribute("sprintLabel", "Add Sprint - " + labelUtils.nextLabel(id));
+            model.addAttribute("projectName", parentProject.getProjectName());
+            model.addAttribute("minDate", utils.toString(parentProject.getProjectStartDate()));
+            model.addAttribute("maxDate", utils.toString(parentProject.getProjectEndDate()));
             model.addAttribute("sprintName", sprintName);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
@@ -170,6 +196,7 @@ public class AddSprintController {
         sprint.setStartDate(utils.toDate(sprintStartDate));
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel(labelUtils.nextLabel(id));
 
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
