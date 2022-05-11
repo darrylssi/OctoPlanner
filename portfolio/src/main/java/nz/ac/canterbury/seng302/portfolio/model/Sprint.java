@@ -30,7 +30,7 @@ public class Sprint {
     private int parentProjectId;
 
     @Column
-    @Size(min=2, max=32, message="The character length must be between 2 and 32") //TODO testing values
+    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
     private String sprintName;
 
     @Column(nullable = false)

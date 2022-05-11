@@ -18,7 +18,7 @@ public class Project {
     private int id;
 
     @Column (nullable = false)
-    @Size (min=2, max = 32, message = "The character length must be between 2 and 32")
+    @Size (max = 50, message = "Project name cannot be more than 50 characters")
     @NotBlank (message = "Project name is required")
     private String projectName;
 
