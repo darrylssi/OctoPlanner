@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
@@ -192,14 +193,22 @@ public class UserAccountClientService {
      * @return The username of the current user
      */
     public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
+        // TODO [Andrew]: Do we really need this?
+        // Actually in a broader sense, this method is EXCLUSIVELY used to grab the username
+        // of the current user and add it to the model, which is done individually in each endpoint.
+        // Spring provides a postHandle() interceptor for this https://stackoverflow.com/a/8008402
+        // which can grab the principal from the request object https://www.baeldung.com/get-user-in-spring-security#controller
 
-        String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        // !! This code has been replaced, as portfolio can't query the IdP during testing, causing
+        // !! said tests to fail. Refer to my above comments.
+        // String currentUserId = principal.getClaimsList().stream()
+        //         .filter(claim -> claim.getType().equals("nameid"))
+        //         .findFirst()
+        //         .map(ClaimDTO::getValue)
+        //         .orElse("NOT FOUND");
+
+        // String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        String username = PrincipalData.from(principal).getUsername();
         return username;
     }
 }

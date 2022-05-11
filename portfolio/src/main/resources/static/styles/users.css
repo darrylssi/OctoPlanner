@@ -7,8 +7,13 @@ table {
     table-layout: fixed;
 }
 
+thead {
+    border-radius:10px 0;
+}
+
 tbody, tr {
     border-bottom: 1px solid #dddddd;
+    height: auto;
 }
 
 tbody, tr:last-of-type {
@@ -31,7 +36,7 @@ th:last-child {
 
 td {
     padding: 12px 15px;
-    height: 50px;
+    height: auto;
 }
 
 th {
@@ -72,4 +77,40 @@ tr:nth-child(even) {
 
 .currentPage {
     color: black;
+}
+
+.roles-list {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.role {
+    display: inline-flex;
+    height: auto;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #5e0202;
+    color: #5e0202;
+    align-items: center;
+}
+
+.add-role-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    color: white;
+    border: none;
+    background-color: #5e0202;
+    justify-self: right;
+}
+
+.remove-role-button {
+    width: 15px;
+    height: 15px;
+    border-radius: 10px;
+    color: #5e0202;
+    border: none;
+    background-color: white;
+    font-weight: bold;
+    font-size: large;
 }

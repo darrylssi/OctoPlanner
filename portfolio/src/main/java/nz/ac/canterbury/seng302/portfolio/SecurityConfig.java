@@ -16,7 +16,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity security) throws Exception
     {
-        // Force authentication for all endpoints except /login
+        // Force authentication for all endpoints except /login and /register
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeRequests()

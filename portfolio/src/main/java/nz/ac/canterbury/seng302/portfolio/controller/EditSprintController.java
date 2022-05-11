@@ -1,27 +1,38 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the edit sprint details page
@@ -35,11 +46,11 @@ public class EditSprintController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
+
     @Autowired
     private DateUtils utils;
 
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     /**
      * Show the edit-sprint page.
@@ -48,13 +59,10 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable("id") int id, Model model) throws Exception {
+    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception {
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
         sprint.setId(id);
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("id", id);
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
@@ -85,7 +93,6 @@ public class EditSprintController {
      */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
-            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name = "projectId") int projectId,
             @RequestParam(name = "sprintName") String sprintName,
@@ -104,12 +111,10 @@ public class EditSprintController {
         //
         Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
         Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
-        String dateOutOfRange = sprint.validSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
@@ -134,6 +139,5 @@ public class EditSprintController {
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
         return "redirect:/project/" + projectId;
     }
-
 
 }

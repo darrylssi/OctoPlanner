@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="@{/styles/main.css}" rel="stylesheet" />
+    <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
+    <link th:href="@{/webjars/fullcalendar/5.10.2/main.css}" rel="stylesheet">
+    <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
+
+    <script>
+        // Getting the project start and end date
+        let projectStartDate = "[[${projectStartDate}]]";
+        let projectEndDate = "[[${projectEndDate}]]";
+
+        // Getting all sprint's string names, start date and end date
+        let sprintNames = "[[${sprintNames}]]";
+        let sprintStartDates = "[[${sprintStartDates}]]";
+        let sprintEndDates = "[[${sprintEndDates}]]";
+
+    </script>
+    <script th:src="@{/scripts/monthlyCalendar.js}"></script>
+
+</head>
+<body>
+    <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+    <div class="content">
+        <div id='calendar'></div>
+    </div>
+</body>
+</html>
