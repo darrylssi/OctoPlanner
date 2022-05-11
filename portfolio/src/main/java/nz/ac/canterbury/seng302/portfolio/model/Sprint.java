@@ -1,15 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-
 
 
 
@@ -36,7 +33,6 @@ public class Sprint {
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column(nullable = true)
     @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
     private String sprintDescription;
 

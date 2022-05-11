@@ -47,9 +47,9 @@ public class SprintLabelServiceTest {
         testProject2 = new Project("Name2", "desc2", utils.toDate("2023-01-01"), utils.toDate("2023-12-30"));
         testProject2.setId(PROJECT_ID_2);
 
-        sprint1 = new Sprint(PROJECT_ID_1, "Sprint 1", "desc", utils.toDate("2022-01-01"), utils.toDate("2022-02-01"));
-        sprint2 = new Sprint(PROJECT_ID_1, "Sprint 2", "desc", utils.toDate("2022-02-02"), utils.toDate("2022-03-01"));
-        sprint3 = new Sprint(PROJECT_ID_1, "Sprint 3", "desc", utils.toDate("2022-04-02"), utils.toDate("2022-05-01"));
+        sprint1 = new Sprint(PROJECT_ID_1, "Sprint 1", "desc", utils.toDate("2022-01-01"), utils.toDate("2022-02-01"), "#aabbcc");
+        sprint2 = new Sprint(PROJECT_ID_1, "Sprint 2", "desc", utils.toDate("2022-02-02"), utils.toDate("2022-03-01"), "#884477");
+        sprint3 = new Sprint(PROJECT_ID_1, "Sprint 3", "desc", utils.toDate("2022-04-02"), utils.toDate("2022-05-01"), "#aa0055");
         List<Sprint> sprintList = Arrays.asList(sprint1, sprint2, sprint3);
 
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(sprintList);
@@ -145,7 +145,7 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
 
         // "add" a sprint, and expect that the labels adjust, including nextLabel()
-        Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "desc", utils.toDate("2022-03-02"), utils.toDate("2022-04-01"));
+        Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "desc", utils.toDate("2022-03-02"), utils.toDate("2022-04-01"), "#987654");
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2, sprint3, sprint4));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());

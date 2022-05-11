@@ -29,7 +29,7 @@ public class SprintServiceTest {
 
     @BeforeEach
     void setUp() {
-        sprint1 = new Sprint(0, "name", "description", new Date(), new Date());
+        sprint1 = new Sprint(0, "name", "description", new Date(), new Date(), "#ff00aa");
     }
 
     @Test

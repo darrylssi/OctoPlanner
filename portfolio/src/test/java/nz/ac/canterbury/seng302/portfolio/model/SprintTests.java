@@ -142,6 +142,28 @@ public class SprintTests {
         }
     }
 
+
+    @Test
+    void saveNullColourSprint_getException() {
+        try {
+            baseSprint.setSprintColour("");
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+
+    @Test
+    void saveEmptyColourSprint_getException() {
+        try {
+            baseSprint.setSprintColour(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
     @Test
     void checkGivenDatesAreValidForAddSprints_getStringMessage() throws Exception {
         Date projectStartDate = utils.toDate("2022-01-02");
