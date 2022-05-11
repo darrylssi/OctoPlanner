@@ -11,10 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Creating one list for calendar sprints
     let sprints = [];
+    let colours = ["cornflowerblue", "firebrick", "forestgreen", "blueviolet", "tomato", "darkslategrey", "darkorchid"];
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i]} )
-    };
+            end: sprintEndDatesList[i], backgroundColor: colours[i % colours.length]} )
+    }
 
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
