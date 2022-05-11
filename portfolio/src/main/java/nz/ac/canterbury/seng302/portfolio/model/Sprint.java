@@ -268,9 +268,12 @@ public class Sprint {
                         invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
-                    } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
-                                (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
-                                (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
+
+                    } else if (
+                            sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate) ||
+                                    sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate) ||
+                                    sprintStartDate.before(utilsSprintStartDate) && sprintEndDate.after(utilsSprintEndDate)
+                    ) {
                         invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
