@@ -23,6 +23,16 @@ public class LoginController {
     private AuthenticateClientService authenticateClientService;
 
     /**
+     * Shows the login page as the default page
+     *
+     * @return a redirect to the Login page
+     */
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/login";
+    }
+
+    /**
      * Shows the login page.
      *
      * @return Login page
