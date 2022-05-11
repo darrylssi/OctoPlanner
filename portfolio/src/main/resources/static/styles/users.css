@@ -94,6 +94,11 @@ tr:nth-child(even) {
     align-items: center;
 }
 
+.role-label {
+    max-width: 150px;
+    overflow-wrap: break-word;
+}
+
 .add-role-button {
     width: 30px;
     height: 30px;
@@ -110,7 +115,7 @@ tr:nth-child(even) {
     border-radius: 10px;
     color: #5e0202;
     border: none;
-    background-color: white;
+    background-color: rgba(1, 1, 1, 0);
     font-weight: bold;
     font-size: large;
 }
