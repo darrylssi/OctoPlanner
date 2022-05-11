@@ -42,7 +42,6 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
-                @RequestParam(name="role", required=false) UserRole debugRole,  // TODO: Delete once we've gotten this sorted
                 Model model
     ) throws Exception {
         PrincipalData principalData = PrincipalData.from(principal);
@@ -60,8 +59,10 @@ public class DetailsController extends PageController {
         model.addAttribute("sprints", sprintList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
-        boolean hasEditPermissions = debugRole == UserRole.TEACHER || principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
+
+        /* Return the name of the Thymeleaf template */
         return "projectDetails";
     }
 
