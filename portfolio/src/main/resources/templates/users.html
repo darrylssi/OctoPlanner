@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/users.css}>
+    <script th:inline="javascript">var BASE_URL = /*[[ @{/} ]]*/ "/";</script>
     <script th:src="@{/scripts/editRoles.js}"></script>
 
 </head>
@@ -74,7 +75,8 @@
                 <button class="add-role-button" th:data-parameter="${user.getId()}" th:onclick="addRole(this.getAttribute('data-parameter'), 'COURSE_ADMINISTRATOR')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg></button>
+                    </svg>
+                </button>
             </td>
         </tr>
         </tbody>
