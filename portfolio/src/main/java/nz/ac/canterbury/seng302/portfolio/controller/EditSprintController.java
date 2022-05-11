@@ -71,6 +71,7 @@ public class EditSprintController {
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
         model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
         model.addAttribute("sprintDescription", sprint.getSprintDescription());
+        model.addAttribute("sprintColour", sprint.getSprintColour());
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
@@ -99,6 +100,7 @@ public class EditSprintController {
             @RequestParam(name = "sprintStartDate") String sprintStartDate,
             @RequestParam(name = "sprintEndDate") String sprintEndDate,
             @RequestParam(name = "sprintDescription") String sprintDescription,
+            @RequestParam(name = "sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -124,6 +126,7 @@ public class EditSprintController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("sprintColour", sprintColour);
             return "editSprint";
         }
 
@@ -134,6 +137,7 @@ public class EditSprintController {
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+        sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
