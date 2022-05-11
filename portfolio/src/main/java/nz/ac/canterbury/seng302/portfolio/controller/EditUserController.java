@@ -3,8 +3,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.EditUserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.ChangePasswordResponse;
@@ -16,32 +16,34 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
+import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+
 @Controller
 public class EditUserController {
 
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private void editHandler(
-            Model model,
-            int id,
-            @AuthenticationPrincipal AuthState principal
-        ) {
+    private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
-        PrincipalData principalData = PrincipalData.from(principal);
 
-        boolean isCurrentUser = principalData.getID() == id;
+        String currentUserId = principal.getClaimsList().stream()
+                .filter(claim -> claim.getType().equals("nameid"))
+                .findFirst()
+                .map(ClaimDTO::getValue)
+                .orElse("NOT FOUND");
+
+        boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
+                !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
-        
-        if (userResponse == null) {
+
+        if(!userResponse.hasCreated()) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
-        } else if (!isCurrentUser) {
+        } else if(!isCurrentUser) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -66,6 +68,7 @@ public class EditUserController {
 
     @PostMapping("/users/{id}/edit")
     public String edit(
+            User user,
             @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
@@ -106,8 +109,9 @@ public class EditUserController {
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
-                                               "confirmPassword"})
+            "confirmPassword"})
     public String changePassword(
+            User user,
             @PathVariable int id,
             @AuthenticationPrincipal AuthState principal,
             BindingResult result,
@@ -117,7 +121,7 @@ public class EditUserController {
             Model model
     ) {
         editHandler(model, id, principal);
-        
+
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
@@ -145,5 +149,4 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
-
 }
