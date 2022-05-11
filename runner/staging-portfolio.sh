@@ -6,5 +6,7 @@ java -jar staging-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --grpc.client.identity-provider-grpc-server.address=static://127.0.0.1:9500/test/identity/ \
     --grpc.client.identity-provider-grpc-server.enableKeepAlive=true \
     --grpc.client.identity-provider-grpc-server.keepAliveWithoutCalls=true \
-    --grpc.client.identity-provider-grpc-server.negotiationType=plaintext
+    --grpc.client.identity-provider-grpc-server.negotiationType=plaintext \
+    --spring.mvc.servlet.path=/test/portfolio/
     # --server.servlet.context-path=/test/portfolio/
+    
