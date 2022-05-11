@@ -1,43 +1,35 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
-
 import javax.validation.Valid;
+import java.util.Comparator;
 import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-
 
 /**
  * Controller for the add sprint details page
  */
 @Controller
-public class AddSprintController extends PageController {
+public class AddSprintController {
 
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
@@ -45,9 +37,9 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+
+    // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
-    private UserAccountClientService userAccountClientService;
-    @Autowired            // Initializes the DateUtils object to be used for converting date to string and string to date
     private DateUtils utils;
 
     /**
@@ -58,16 +50,8 @@ public class AddSprintController extends PageController {
      * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(
-        @AuthenticationPrincipal AuthState principal,
-        @PathVariable("id") int id,
-        Model model
-    ) throws Exception {
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
-            return "error";
-        }
+    public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
+
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
         List<Sprint> sprintList = sprintService.getAllSprints();
@@ -76,8 +60,6 @@ public class AddSprintController extends PageController {
         Sprint sprint = new Sprint();
         sprint.setParentProjectId(id);          // Setting parent project id
 
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("sprint", sprint);
         model.addAttribute("parentProjectId", id);
         model.addAttribute("projectName", project.getProjectName());
@@ -137,6 +119,7 @@ public class AddSprintController extends PageController {
         return "addSprint";
     }
 
+
     /**
      * Adds a sprint to the project
      * @param sprintName Gets the given name of the new sprint
@@ -147,7 +130,6 @@ public class AddSprintController extends PageController {
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
-            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") String sprintStartDate,
@@ -157,11 +139,6 @@ public class AddSprintController extends PageController {
             BindingResult result,
             Model model
     ) throws Exception {
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/add-sprint/"+id);
-            return "error";
-        }
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
@@ -171,12 +148,10 @@ public class AddSprintController extends PageController {
         // Checking the sprint dates validation and returning appropriate error message
         Date utilsProjectStartDate = parentProject.getProjectStartDate();
         Date utilsProjectEndDate = parentProject.getProjectEndDate();
-        String dateOutOfRange = sprint.validSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
+        String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -201,6 +176,5 @@ public class AddSprintController extends PageController {
         sprintService.saveSprint(sprint);
         return "redirect:/project/" + parentProject.getId();
     }
-
 
 }
