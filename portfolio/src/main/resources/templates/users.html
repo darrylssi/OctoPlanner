@@ -7,6 +7,11 @@
 
     <link rel="stylesheet" th:href=@{/styles/main.css}>
     <link rel="stylesheet" th:href=@{/styles/users.css}>
+    <!--/*
+        JS files are static, and thus don't know anything about the project.
+        This code sets a global variable inside this template (which does know the base URL),
+        which the imported script can access.
+    */-->
     <script th:inline="javascript">var BASE_URL = /*[[ @{/} ]]*/ "/";</script>
     <script th:src="@{/scripts/editRoles.js}"></script>
 
