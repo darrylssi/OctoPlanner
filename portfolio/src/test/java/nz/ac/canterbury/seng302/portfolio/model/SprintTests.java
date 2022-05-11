@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,12 +15,11 @@ import javax.validation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 
 
 /**

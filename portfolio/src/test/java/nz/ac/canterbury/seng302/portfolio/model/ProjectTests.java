@@ -18,7 +18,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 
 /**
  * Holds unit tests for the Project class.

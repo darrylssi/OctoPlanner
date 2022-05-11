@@ -7,7 +7,7 @@
     <link th:href="@{/styles/form.css}" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title=${sprintLabel}, username=${userName})"></div>
+<div th:replace="fragments :: header(title='Add Sprint', subtitle=${sprintName}, username=${userName})"></div>
 <div class="content">
     <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
         <div>
@@ -37,7 +37,7 @@
         <br/>
         <div class="buttons">
             <button class="form-button cancel" type="button">
-                <a th:href="@{'/project/' + ${parentProjectId}}">Cancel</a>
+                <a th:href="@{/project/${parentProjectId}}">Cancel</a>
             </button>
             <button class="form-button save" type="submit">Save</button>
         </div>

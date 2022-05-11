@@ -32,7 +32,7 @@ public class JwtTokenUtil implements Serializable {
 	public static final String NAME_CLAIM_TYPE = "name";
 	public static final String AUTHENTICATION_TYPE = "AuthenticationTypes.Federation";
 
-	private static final Map<Class, String> jwtValueTypesForJavaClasses = Map.of(
+	private static final Map<Class<?>, String> jwtValueTypesForJavaClasses = Map.of(
 		String.class, "http://www.w3.org/2001/XMLSchema#string",
 		int.class, "http://www.w3.org/2001/XMLSchema#integer",
 		Integer.class, "http://www.w3.org/2001/XMLSchema#integer"

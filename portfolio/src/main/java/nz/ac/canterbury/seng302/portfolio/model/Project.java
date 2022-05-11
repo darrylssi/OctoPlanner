@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;

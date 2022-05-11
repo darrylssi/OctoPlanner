@@ -1,10 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import javax.validation.constraints.*;
 
