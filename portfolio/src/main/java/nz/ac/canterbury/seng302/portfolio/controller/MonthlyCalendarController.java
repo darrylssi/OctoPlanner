@@ -126,5 +126,4 @@ public class MonthlyCalendarController {
 
         return newEndDate;
     }
-
 }
