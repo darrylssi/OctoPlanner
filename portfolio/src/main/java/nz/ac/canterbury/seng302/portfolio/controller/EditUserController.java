@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
+import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+
 @Controller
 public class EditUserController {
 
@@ -34,7 +36,7 @@ public class EditUserController {
         boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
-        
+
         if(!userResponse.hasCreated()) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
@@ -107,7 +109,7 @@ public class EditUserController {
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
-                                               "confirmPassword"})
+            "confirmPassword"})
     public String changePassword(
             User user,
             @PathVariable int id,
@@ -119,7 +121,7 @@ public class EditUserController {
             Model model
     ) {
         editHandler(model, id, principal);
-        
+
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {

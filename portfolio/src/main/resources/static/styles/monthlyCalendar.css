@@ -1,0 +1,13 @@
+
+p, #calendarTitle {
+    text-align: center;
+}
+
+#calendar {
+    max-width: 950px;
+    margin: 50px auto;
+}
+
+.fc-resource-area td {
+    cursor: pointer;
+}
