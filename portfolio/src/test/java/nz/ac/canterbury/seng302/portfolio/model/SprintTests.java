@@ -270,7 +270,7 @@ public class SprintTests {
         String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
-        assertEquals("Dates must not overlap with other sprints & and it must not be same, it is overlapping with " +
+        assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with " +
                 utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
     }
 
@@ -284,7 +284,7 @@ public class SprintTests {
         String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " +
+        assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with " +
                 utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
     }
 

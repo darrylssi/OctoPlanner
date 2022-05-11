@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.List;
 
 
-
-
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
@@ -84,11 +82,7 @@ public class Sprint {
         this.sprintEndDate = Project.stringToDate(sprintEndDate);
     }
 
-
-    /**
-     * Returns the Sprint object as a string
-     * @return
-     */
+    
     @Override
     /**
      * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
@@ -304,13 +298,16 @@ public class Sprint {
                     Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
                     Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
                     if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate)) {
-                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                        invalidDateRange += "Sprint dates must not overlap with other sprints. Dates are overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
-                    } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
-                            (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
-                            (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
-                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+
+                    } else if (
+                            sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate) ||
+                                    sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate) ||
+                                    sprintStartDate.before(utilsSprintStartDate) && sprintEndDate.after(utilsSprintEndDate)
+                    ) {
+                        invalidDateRange += "Sprint dates must not overlap with other sprints. Dates are overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
                     }

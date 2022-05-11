@@ -24,10 +24,10 @@
             <div class="detail-block">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />
-                    <div th:if="*{getPersonalPronouns} != ''" class="sprint-date" th:text="'Pronouns: ' + *{getPersonalPronouns()}" />
-                    <div th:if="*{getNickname} != ''" class="sprint-description" th:text="'Nickname: ' + *{getNickname()}" />
+                    <div th:if="*{getPersonalPronouns} != ''" class="sprint-date" th:text="|Pronouns: *{getPersonalPronouns()}|" />
+                    <div th:if="*{getNickname} != ''" class="sprint-description" th:text="|Nickname: *{getNickname()}|" />
                     <br/>
-                    <div class="sprint-description" th:text="'Username: ' + *{getUsername()}" />
+                    <div class="sprint-description" th:text="|Username: *{getUsername()}|" />
                     <div class="sprint-description">Email: <a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}"/></div>
                     <div class="sprint-description" th:text="|Role: ${roles}|"></div>
                 </div>
@@ -47,7 +47,7 @@
             <!--/*
                 Only render if the logged in user's ID is this page's ID
             */-->
-            <a th:if="${isCurrentUser}" th:href="'/users/' + ${id} + '/edit'">
+            <a th:if="${isCurrentUser}" th:href="@{/users/${id}/edit}">
                 <button class="form-button save">Edit Profile</button>
             </a>
         </div>

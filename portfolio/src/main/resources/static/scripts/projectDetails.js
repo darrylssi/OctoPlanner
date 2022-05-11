@@ -1,5 +1,5 @@
 
-<!--    When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint   -->
+/** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteModal(sprintId, sprintName) {
     const modal = document.getElementById("deleteSprintModal");
     const deleteButton = document.getElementById("deleteButton");
@@ -8,19 +8,19 @@ function showDeleteModal(sprintId, sprintName) {
     modal.style.display = "block";
 }
 
-<!-- Hides the confirm delete sprint modal without deleting a sprint -->
+/** Hides the confirm delete sprint modal without deleting a sprint */
 function hideModal() {
     const modal = document.getElementById("deleteSprintModal");
     modal.style.display = "none";
 }
 
-<!-- sends a http request to delete the sprint with the given id -->
+/** sends a http request to delete the sprint with the given id */
 function deleteSprint(sprintId) {
     const url = "/delete-sprint/" + sprintId;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        <!--        Reload the page to get the updated list of sprints after the delete -->
+        // Reload the page to get the updated list of sprints after the delete
         window.location.reload();
     }
     deleteRequest.send();
