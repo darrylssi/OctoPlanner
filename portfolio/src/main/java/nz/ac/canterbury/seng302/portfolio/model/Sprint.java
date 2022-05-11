@@ -265,7 +265,7 @@ public class Sprint {
                     Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
                     Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
                     if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate)) {
-                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                        invalidDateRange += "Dates must not overlap with other sprints & it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
 
