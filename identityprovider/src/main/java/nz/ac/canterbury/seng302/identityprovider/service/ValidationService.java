@@ -60,6 +60,13 @@ public class ValidationService {
                     .setErrorText("Password cannot be empty")
                     .build();
             errors.add(error);
+        } else if (request.getPassword().length() < 7 ||   // Password isn't too short
+            request.getPassword().length() > 20) { // Password isn't too long
+            ValidationError error = ValidationError.newBuilder()
+                .setFieldName("Password")
+                .setErrorText("Password must be between 7 to 20 characters")
+                .build();
+            errors.add(error);
         }
 
         return getValidationErrors(errors, request.getFirstName(), request.getMiddleName(), request.getLastName(),

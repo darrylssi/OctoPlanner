@@ -40,12 +40,12 @@ public class ProjectControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    @WithMockPrincipal(STUDENT)
-//    public void getProjectEditPage_AccessDenied() throws Exception {
-//        this.mockMvc.perform(get("/edit-project/0"))
-//                .andExpect(content().string(containsString("403")));
-//    }
+    @Test
+    @WithMockPrincipal(STUDENT)
+    public void getProjectEditPage_AccessDenied() throws Exception {
+        this.mockMvc.perform(get("/edit-project/0"))
+                .andExpect(content().string(containsString("403")));
+    }
 
     @Test
     @WithMockPrincipal(STUDENT)
