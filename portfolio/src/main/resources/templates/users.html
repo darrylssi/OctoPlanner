@@ -66,6 +66,7 @@
             <a th:href="@{'/users/?page=' + ${page - 1} + '&orderBy=' + ${orderBy} + '&asc=' + ${dir}}"> Prev </a>
         </span>
 <!--        add link to all pages -->
+<!--        check the total pages is less than or equal to two, then show pages based on it-->
         <th:block th:if="${totalPages <= 2}">
             <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
                 <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${i != page}"
@@ -73,27 +74,28 @@
                 <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
             </span>
         </th:block>
+<!--        check the total pages is more than two, then show pages based on it-->
         <th:block th:if="${totalPages > 2}">
-            <th:block th:if="${page <= 2 || page >= totalPages - 2}">
+            <th:block th:if="${page <= 2 || page >= totalPages - 1}">
                 <span class="pages" th:each="i: ${#numbers.sequence(1, 2)}">
                     <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
 
-                <a th:href="@{'/users/?page=' + 3 + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" class="otherPages">...</a>
+                <a th:href="@{'/users/?page=' + 3 + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" class="otherPages" th:if="${totalPages != 4}">...</a>
 
-                <span class="pages" th:each="i: ${#numbers.sequence(totalPages - 2, totalPages)}">
+                <span class="pages" th:each="i: ${#numbers.sequence(totalPages - 1, totalPages)}">
                     <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
             </th:block>
 
-            <th:block th:if="${page > 2 && page < totalPages - 2}">
+            <th:block th:if="${page > 2 && page < totalPages - 1}">
                 <a th:href="@{'/users/?page=' + ${page - 2} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" class="otherPages">...</a>
 
-                <span class="pages" th:each="i: ${#numbers.sequence(page - 2, page + 2)}">
+                <span class="pages" th:each="i: ${#numbers.sequence(page - 1, page + 1)}">
                     <a th:href="@{'/users/?page=' + ${i} + '&orderBy='+ ${orderBy} +'&asc=' + ${dir}}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
