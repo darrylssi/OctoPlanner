@@ -3,17 +3,19 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 
 /**
@@ -28,6 +30,8 @@ public class MonthlyCalendarController {
     private SprintService sprintService;
     @Autowired
     private UserAccountClientService userAccountClientService;
+    @Autowired
+    private DateUtils utils;
 
 
     /**
@@ -50,6 +54,26 @@ public class MonthlyCalendarController {
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("project", project);
         model.addAttribute("sprintList", sprintService.getSprintsOfProjectById(id));
+
+        // Getting project dates to limit the project dates in calendar
+        // Adding a day to the project end date
+        Date localProjectEndDate = project.getProjectEndDate();
+
+        // Converting date to LocalDate
+        LocalDate newLocalProjectEndDate = localProjectEndDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to default project end date
+        LocalDate newProjectEndLocalDate = newLocalProjectEndDate.plusDays(1);
+
+        // Converting the new sprint end date of LocalDate object to Date object
+        String newProjectEndDate = utils.toString(Date.from(newProjectEndLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        model.addAttribute("projectStartDate", String.valueOf(project.getProjectStartDate()));
+        model.addAttribute("projectEndDate", newProjectEndDate);
+
+
         return "monthlyCalendar";
     }
 
