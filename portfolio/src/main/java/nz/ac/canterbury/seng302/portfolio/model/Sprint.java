@@ -2,8 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -12,17 +11,12 @@ import java.util.Date;
 import java.util.List;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
  */
 @Entity
 public class Sprint {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     /** The id of this sprint. This id should be unique between all sprints, regardless of which project they
@@ -34,7 +28,7 @@ public class Sprint {
     private int parentProjectId;
 
     @Column
-    @Size(min=2, max=32, message="The character length must be between 2 and 32.") //TODO testing values
+    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
     private String sprintName;
 
     @Column(nullable = false)
@@ -53,7 +47,6 @@ public class Sprint {
     @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
 
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     public Sprint() {}
 
@@ -89,7 +82,7 @@ public class Sprint {
         this.sprintEndDate = Project.stringToDate(sprintEndDate);
     }
 
-
+    
     @Override
     /**
      * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
@@ -238,6 +231,7 @@ public class Sprint {
      */
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
+
     /**
      * This function check for the validation for add/edit sprints page. Here, first it checks if the start date is after
      * the end date or end date is before the start date. Next, it checks if the sprint dates are within the project
@@ -249,7 +243,46 @@ public class Sprint {
      * @param sprintList Gets the sprint list that stores all the sprint objects for the project
      * @return either "" or an error message string
      */
-    public String validSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
+    public String validAddSprintDateRanges(Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
+        String invalidDateRange = "";
+        DateUtils utils = new DateUtils();
+
+        if (sprintStartDate.before(projectStartDate) || sprintEndDate.after(projectEndDate)) {
+            invalidDateRange += "Dates must be within the project dates of " + utils.toString(projectStartDate) + " - " + utils.toString(projectEndDate);
+        } else if (sprintStartDate.after(sprintEndDate) || sprintEndDate.before(sprintStartDate)) {
+            invalidDateRange += "Start date must always be before end date";
+        } else if (!sprintList.isEmpty()) {
+            for (Sprint eachSprint: sprintList) {
+                Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
+                Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
+                if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate) ) {
+                    invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                            utils.toString(eachSprint.getSprintEndDate());
+                    break;
+                } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
+                        (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
+                        (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
+                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                            utils.toString(eachSprint.getSprintEndDate());
+                    break;
+                }
+            }
+        }
+        return invalidDateRange;
+    }
+
+    /**
+     * This function check for the validation for add/edit sprints page. Here, first it checks if the start date is after
+     * the end date or end date is before the start date. Next, it checks if the sprint dates are within the project
+     * dates. Lastly, it checks if the sprint dates are overlapping with other sprint dates.
+     * @param sprintStartDate Gets the sprint start date given by the user
+     * @param sprintEndDate Gets the sprint end date given by the user
+     * @param projectStartDate Gets the project start date given by the user
+     * @param projectEndDate Gets the project end date given by the user
+     * @param sprintList Gets the sprint list that stores all the sprint objects for the project
+     * @return either "" or an error message string
+     */
+    public String validEditSprintDateRanges(int sprintId, Date sprintStartDate, Date sprintEndDate, Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
         DateUtils utils = new DateUtils();
 
