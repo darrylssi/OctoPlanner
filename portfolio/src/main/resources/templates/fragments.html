@@ -12,11 +12,11 @@
             </div>
             <div class="title-username" th:text="${username}" />
             <div class="dropdown">
-<!--                 TODO use the actual user's profile image-->
-                <button style="background-image: url(/img/default-pfp.jpg)" class="profile-icon" onclick="toggleMenu()">
+                <!-- TODO use the actual user's profile image -->
+                <button th:style="|background-image: url(@{/img/default-pfp.jpg})|" class="profile-icon" onclick="toggleMenu()">
                 </button>
                 <div id="userMenu" class="dropdown-content">
-                    <a href="/users/current">
+                    <a th:href="@{/users/current}">
                         <button th:text="Profile" />
                     </a>
                     <form th:action="@{/logout}" method="post">
@@ -26,14 +26,12 @@
             </div>
         </div>
         <div class="navigation-tabs">
-            <a href="/project/0">Project Details</a>
-            <a href="/users">Users</a>
-            <a href="/monthlyCalendar/0">Calendar</a>
+            <a th:href="@{/project/0}">Project Details</a>
+            <a th:href="@{/users}">Users</a>
+            <a th:href="@{/monthlyCalendar/0}">Calendar</a>
         </div>
     </div>
 </header>
 
 </body>
-
-
 </html>

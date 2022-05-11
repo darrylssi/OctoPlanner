@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
-
 import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.Date;
@@ -120,6 +119,7 @@ public class AddSprintController {
         /* Return the name of the Thymeleaf template */
         return "addSprint";
     }
+
 
     /**
      * Adds a sprint to the project

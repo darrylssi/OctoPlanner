@@ -3,9 +3,11 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.AuthenticateClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthenticateResponse;
-
+import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +25,33 @@ public class LoginController {
     private AuthenticateClientService authenticateClientService;
 
     /**
+     * Shows the login page as the default page
+     *
+     * @return a redirect to the Login page
+     */
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/login";
+    }
+
+    /**
      * Shows the login page.
      *
-     * @return Login page
+     * @param principal authenticated user
+     * @return login page or user profile if logged in
      */
     @GetMapping("/login")
-    public String login() {
+    public String login (
+            @AuthenticationPrincipal AuthState principal
+    ) {
+        if (principal != null) {
+            String userId = principal.getClaimsList().stream()
+                    .filter(claim -> claim.getType().equals("nameid"))
+                    .findFirst()
+                    .map(ClaimDTO::getValue)
+                    .orElse("-1");
+            return "redirect:/users/" + userId;
+        }
         return "login";
     }
 
