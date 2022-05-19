@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -41,6 +42,8 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+    @Autowired
+    private ValidationService validator;
 
     // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
@@ -98,7 +101,6 @@ public class AddSprintController extends PageController {
             getSprintStartDate += utils.toString(Date.from(sprintLocalStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
         model.addAttribute("sprintStartDate", getSprintStartDate);
-
 
         // Creating default end date for the new sprint
         // Converting the date to LocalDate, so we can add the three weeks of default end date
