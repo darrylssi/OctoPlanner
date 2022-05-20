@@ -3,6 +3,9 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +15,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
@@ -29,7 +33,7 @@ import java.util.List;
  * Controller for the add sprint details page
  */
 @Controller
-public class AddSprintController {
+public class AddSprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
@@ -50,7 +54,12 @@ public class AddSprintController {
      * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
-    public String getsSprint(@PathVariable("id") int id, Model model) throws Exception {
+    public String getsSprint(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            Model model
+    ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
@@ -131,6 +140,7 @@ public class AddSprintController {
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name="sprintName") String sprintName,
             @RequestParam(name="sprintStartDate") String sprintStartDate,
@@ -141,6 +151,8 @@ public class AddSprintController {
             BindingResult result,
             Model model
     ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
