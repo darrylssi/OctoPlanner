@@ -16,19 +16,19 @@
                 <button th:style="|background-image: url(@{/img/default-pfp.jpg})|" class="profile-icon" onclick="toggleMenu()">
                 </button>
                 <div id="userMenu" class="dropdown-content">
-                    <a th:href="@{/users/current}">
+                    <a th:href="@{|${@environment.getProperty('base-url')}users/current|}">
                         <button th:text="Profile" />
                     </a>
-                    <form th:action="@{/logout}" method="post">
+                    <form th:action="@{|${@environment.getProperty('base-url')}logout|}" method="post">
                         <button type="submit" th:text="Logout" />
                     </form>
                 </div>
             </div>
         </div>
         <div class="navigation-tabs">
-            <a th:href="@{/project/0}">Project Details</a>
-            <a th:href="@{/users}">Users</a>
-            <a th:href="@{/monthlyCalendar/0}">Calendar</a>
+            <a th:href="@{|${@environment.getProperty('base-url')}project/0|}">Project Details</a>
+            <a th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
+            <a th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
         </div>
     </div>
 </header>

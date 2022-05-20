@@ -47,7 +47,7 @@
             <!--/*
                 Only render if the logged in user's ID is this page's ID
             */-->
-            <a th:if="${isCurrentUser}" th:href="@{|/users/${id}/edit|}">
+            <a th:if="${isCurrentUser}" th:href="|./${id}/edit|">
                 <button class="form-button save">Edit Profile</button>
             </a>
         </div>
