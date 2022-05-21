@@ -7,4 +7,4 @@ java -jar production-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --grpc.client.identity-provider-grpc-server.enableKeepAlive=true \
     --grpc.client.identity-provider-grpc-server.keepAliveWithoutCalls=true \
     --grpc.client.identity-provider-grpc-server.negotiationType=plaintext
-    # --server.servlet.context-path=/prod/portfolio/
+    --base-url=/prod/portfolio/
