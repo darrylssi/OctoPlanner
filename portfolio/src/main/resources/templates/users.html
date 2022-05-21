@@ -5,15 +5,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Users</title>
 
-    <link rel="stylesheet" th:href=@{/styles/main.css}>
-    <link rel="stylesheet" th:href=@{/styles/users.css}>
+    <link rel="stylesheet" th:href="|./styles/main.css|">
+    <link rel="stylesheet" th:href="|./styles/users.css|">
         <!--/*
         JS files are static, and thus don't know anything about the project (i.e. the base URL).
         This code sets a global variable inside this template (which does know the base URL),
         which the imported script can access.
     */-->
     <script th:inline="javascript">var BASE_URL = /*[[ @{/} ]]*/ "/";</script>
-    <script defer th:src="@{/scripts/editRoles.js}"></script>
+    <script defer th:src="|./scripts/editRoles.js|"></script>
 
 </head>
 
@@ -25,7 +25,7 @@
         <thead>
             <tr>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='name')}">
+                    <form method="post" th:action="@{./users/(page=${page}, orderBy='name')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Name
                             <span th:if="${orderBy == 'name'}" th:text="${dir} ? '▼' : '▲'" />
@@ -33,7 +33,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='username')}">
+                    <form method="post" th:action="@{./users/(page=${page}, orderBy='username')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Username
                             <span th:if="${orderBy == 'username'}" th:text="${dir} ? '▼' : '▲'" />
@@ -41,7 +41,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='nickname')}">
+                    <form method="post" th:action="@{./users/(page=${page}, orderBy='nickname')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Alias
                             <span th:if="${orderBy == 'nickname'}" th:text="${dir} ? '▼' : '▲'" />
@@ -49,7 +49,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='role')}">
+                    <form method="post" th:action="@{./users/(page=${page}, orderBy='role')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Role
                             <span th:if="${orderBy == 'role'}" th:text="${dir} ? '▼' : '▲'" />
