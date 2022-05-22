@@ -5,9 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Profile</title>
 
-    <link rel="stylesheet" th:href="|../styles/main.css|">
-    <link rel="stylesheet" th:href="|../styles/profile.css|">
-    <link rel="stylesheet" th:href="|../styles/form.css|">
+    <link rel="stylesheet" th:href=@{/styles/main.css}>
+    <link rel="stylesheet" th:href=@{/styles/profile.css}>
+    <link rel="stylesheet" th:href=@{/styles/form.css}>
 
 </head>
 
@@ -20,7 +20,7 @@
 
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div class="sprint-block">
-            <img class="profile-image" th:src="|../img/default-pfp.jpg|">
+            <img class="profile-image" th:src=@{/img/default-pfp.jpg}>
             <div class="detail-block">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />

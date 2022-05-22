@@ -94,7 +94,7 @@ public class EditUserController {
 
             if (editReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:../" + id;
+                return "redirect:/users/" + id;
             } else {
                 ValidationError err = editReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
@@ -136,7 +136,7 @@ public class EditUserController {
 
             if (changeReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:../" + id;
+                return "redirect:/users/" + id;
             } else {
                 ValidationError err = changeReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());

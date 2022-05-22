@@ -33,10 +33,10 @@ public class ProfilePageController {
 
         PrincipalData principalData = PrincipalData.from(principal);
         if (!principalData.isAuthenticated()) {
-            return "redirect:./";
+            return "redirect:/users/";
         }
 
-        return "redirect:./" + principalData.getID();
+        return "redirect:/users/" + principalData.getID();
     }
 
     /**

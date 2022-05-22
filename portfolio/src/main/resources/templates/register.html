@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <title> Register </title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" th:href="|./styles/css_register.css|" />
+    <link rel="stylesheet" th:href="@{/styles/css_register.css}" />
 </head>
 <body>
 <div class="container">
     <h2 class="title"> Registration Form </h2>
 
-    <form th:action="|./register|" th:object="${user}" method="post">
+    <form th:action="@{/register}" th:object="${user}" method="post">
         <div class="user-info">
             <div class="input-box">
                 <label class="required"> Username </label>

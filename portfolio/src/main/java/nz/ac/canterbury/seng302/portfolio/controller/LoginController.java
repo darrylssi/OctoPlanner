@@ -31,7 +31,7 @@ public class LoginController {
      */
     @GetMapping("/")
     public String home() {
-        return "redirect:./login";
+        return "redirect:/login";
     }
 
     /**
@@ -50,7 +50,7 @@ public class LoginController {
                     .findFirst()
                     .map(ClaimDTO::getValue)
                     .orElse("-1");
-            return "redirect:./users/" + userId;
+            return "redirect:/users/" + userId;
         }
         return "login";
     }
@@ -90,7 +90,7 @@ public class LoginController {
         }
         if (loginReply.getSuccess()) {
             createCookie(request, response, loginReply);
-            return "redirect:./users/" + loginReply.getUserId();
+            return "redirect:/users/" + loginReply.getUserId();
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
         return "login";

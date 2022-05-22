@@ -186,7 +186,7 @@ public class AddSprintController extends PageController {
         sprint.setSprintLabel(labelUtils.nextLabel(id));
 
         sprintService.saveSprint(sprint);
-        return "redirect:../project/" + parentProject.getId();
+        return "redirect:/project/" + parentProject.getId();
     }
 
 }

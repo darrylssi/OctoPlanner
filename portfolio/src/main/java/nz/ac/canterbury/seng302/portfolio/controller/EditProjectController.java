@@ -127,7 +127,7 @@ public class EditProjectController extends PageController {
         projectService.saveProject(newProject);
 
         /* Redirect to details page when done */
-        return "redirect:../project/" + id;
+        return "redirect:/project/" + id;
     }
 
 }
