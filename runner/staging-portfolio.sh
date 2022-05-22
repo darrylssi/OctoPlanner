@@ -7,12 +7,5 @@ java -jar staging-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --grpc.client.identity-provider-grpc-server.enableKeepAlive=true \
     --grpc.client.identity-provider-grpc-server.keepAliveWithoutCalls=true \
     --grpc.client.identity-provider-grpc-server.negotiationType=plaintext \
-    --spring.mvc.servlet.path=/ \
-    --spring.datasource.url=jdbc:mariadb://db2.csse.canterbury.ac.nz/seng302-2022-team800-portfolio-test \
-    --spring.datasource.username=seng302-team800 \
-    --spring.datasource.password=LocallyBlanket3943 \
-    --spring.datasource.driverClassName=org.mariadb.jdbc.Driver \
-    --spring.jpa.hibernate.ddl-auto=update \
-    --spring.jpa.hibernate.dialect=org.hibernate.dialect.MariaDBDialect \
     --base-url=/test/portfolio/
 
