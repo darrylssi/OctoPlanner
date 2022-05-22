@@ -55,9 +55,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // H2 Database
-    implementation 'com.h2database:h2:2.1.210'
-    // MariaDB Database
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.4'
+    runtimeOnly 'com.h2database:h2:2.1.210'
+
 }
 
 configurations {
