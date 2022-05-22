@@ -8,5 +8,6 @@ java -jar staging-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --grpc.client.identity-provider-grpc-server.keepAliveWithoutCalls=true \
     --grpc.client.identity-provider-grpc-server.negotiationType=plaintext \
     --spring.mvc.servlet.path=/ \
+    --spring.profiles.default=test
     --base-url=/test/portfolio/
-    
+
