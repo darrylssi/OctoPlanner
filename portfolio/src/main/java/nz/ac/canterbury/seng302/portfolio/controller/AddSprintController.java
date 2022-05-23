@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Controller for the add sprint details page
@@ -74,7 +75,13 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
-        model.addAttribute("sprintColour", "$ff0000");
+
+        // Generate a random colour, from https://www.codespeedy.com/generate-random-hex-color-code-in-java/
+        Random random = new Random();
+        int colourNum = random.nextInt(0xffffff + 1);
+        String colourCode = String.format("#%06x", colourNum);
+
+        model.addAttribute("sprintColour", colourCode);
 
         // Puts the default sprint start date
         String getSprintStartDate = "";
@@ -119,7 +126,7 @@ public class AddSprintController extends PageController {
         //Check if end date falls outside project dates
         if(sprintNewEndDate.after(project.getProjectEndDate())){
             sprintNewEndDate = project.getProjectEndDate();
-        };
+        }
 
         model.addAttribute("sprintEndDate", utils.toString(sprintNewEndDate));
         model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
