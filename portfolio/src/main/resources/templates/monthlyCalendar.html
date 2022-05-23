@@ -3,10 +3,10 @@
 <head>
     <title>Project Calendar</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link th:href="@{/styles/main.css}" rel="stylesheet" />
-    <link th:href="@{/styles/monthlyCalendar.css}" rel="stylesheet" />
-    <link th:href="@{/webjars/fullcalendar/5.10.2/main.css}" rel="stylesheet">
-    <script th:src="@{/webjars/fullcalendar/5.10.2/main.js}"></script>
+    <link th:href="|../styles/main.css|" rel="stylesheet" />
+    <link th:href="|../styles/monthlyCalendar.css|" rel="stylesheet" />
+    <link th:href="|../webjars/fullcalendar/5.10.2/main.css|" rel="stylesheet">
+    <script th:src="|../webjars/fullcalendar/5.10.2/main.js|"></script>
 
     <script>
         // Getting the project start and end date
@@ -20,7 +20,7 @@
         let sprintColours = "[[${sprintColours}]]";
 
     </script>
-    <script th:src="@{/scripts/monthlyCalendar.js}"></script>
+    <script th:src="|../scripts/monthlyCalendar.js|"></script>
 
 </head>
 <body>

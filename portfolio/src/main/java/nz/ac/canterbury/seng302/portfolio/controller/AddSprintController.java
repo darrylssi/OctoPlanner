@@ -190,7 +190,7 @@ public class AddSprintController extends PageController {
         sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
-        return "redirect:/project/" + parentProject.getId();
+        return "redirect:../project/" + parentProject.getId();
     }
 
 }

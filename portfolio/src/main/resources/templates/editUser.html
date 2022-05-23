@@ -5,10 +5,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Edit Profile</title>
 
-    <link rel="stylesheet" th:href=@{/styles/main.css}>
-    <link rel="stylesheet" th:href=@{/styles/profile.css}>
-    <link rel="stylesheet" th:href=@{/styles/editUser.css}>
-    <link rel="stylesheet" th:href=@{/styles/form.css}>
+    <link rel="stylesheet" th:href="|../../styles/main.css|">
+    <link rel="stylesheet" th:href="|../../styles/profile.css|">
+    <link rel="stylesheet" th:href="|../../styles/editUser.css|">
+    <link rel="stylesheet" th:href="|../../styles/form.css|">
 
 </head>
 
@@ -21,10 +21,10 @@
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div th:text="${dateCreated}"></div>
         <div class="centre-box">
-            <img class="profile-image" th:src=@{/img/default-pfp.jpg}><br/>
+            <img class="profile-image" th:src=@{../../img/default-pfp.jpg}><br/>
             <!--Add a button to edit the profile image here if necessary-->
         </div>
-        <form th:action="@{|/users/${userId}/edit|}"
+        <form th:action="@{./edit}"
             method="post">
             <div class="user-info">
                 <div class="input-box">
@@ -75,13 +75,13 @@
             <br/>
             <div class="centre-box">
                 <button class="form-button cancel" type="button">
-                    <a th:href="@{|/users/${userId}|}">Cancel</a>
+                    <a th:href="|/|">Cancel</a>
                 </button>
                 <button class="form-button save" type="submit">Change Details</button>
             </div>
         </form><br/>
         <hr/>
-        <form th:action="@{|/users/${userId}/edit|}"
+        <form th:action="|./edit|"
             method="post" th:object="${user}">
             <div class="user-info">
             <div class="input-box">

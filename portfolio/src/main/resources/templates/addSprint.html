@@ -3,13 +3,13 @@
 <head>
     <title th:text="${projectName}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link th:href="@{/styles/main.css}" rel="stylesheet" />
-    <link th:href="@{/styles/form.css}" rel="stylesheet" />
+    <link th:href="|../styles/main.css|" rel="stylesheet" />
+    <link th:href="|../styles/form.css|" rel="stylesheet" />
 </head>
 <body>
 <div th:replace="fragments :: header(title=${sprintLabel}, username=${userName})"></div>
 <div class="content">
-    <form th:action="@{/add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
+    <form th:action="@{../add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
         <div>
             <label for="sprintName">Sprint Name</label> <br/>
             <input id="sprintName" th:type="text" th:name="sprintName" th:value="${sprintName}" th:required="required" />
@@ -41,7 +41,7 @@
         <br/>
         <div class="buttons">
             <button class="form-button cancel" type="button">
-                <a th:href="@{/project/${parentProjectId}}">Cancel</a>
+                <a th:href="|../project/${parentProjectId}|">Cancel</a>
             </button>
             <button class="form-button save" type="submit">Save</button>
         </div>
