@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio;
 
 import nz.ac.canterbury.seng302.portfolio.authentication.JwtAuthenticationFilter;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,9 +15,13 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Value("${base-url}")
+    private String baseURL;
+
     @Override
     protected void configure(HttpSecurity security) throws Exception
     {
+
         // Force authentication for all endpoints except /login and /register
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
@@ -32,12 +38,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         security.logout()
                 .permitAll()
                 .invalidateHttpSession(true)
-                .deleteCookies("lens-session-token");
+                .deleteCookies("lens-session-token")
+                .logoutSuccessUrl(baseURL + "login");
 
-        // Disable basic http security and the spring security login form
+        // Disable basic http security
         security
-            .httpBasic().disable()
-            .formLogin().disable();
+            .httpBasic().disable();
+        // Redirect to login if unauthenticated
+        security
+            .formLogin().loginPage(baseURL + "login");
 
         // let the H2 console embed itself in a frame
         security.headers().frameOptions().sameOrigin();
