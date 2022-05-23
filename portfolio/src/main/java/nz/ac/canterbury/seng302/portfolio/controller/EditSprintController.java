@@ -5,8 +5,12 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -38,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * Controller for the edit sprint details page
  */
 @Controller
-public class EditSprintController {
+public class EditSprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -59,7 +63,13 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@PathVariable("id") int id, Model model) throws Exception {
+    public String sprintForm(
+            @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
         sprint.setId(id);
@@ -93,6 +103,7 @@ public class EditSprintController {
      */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             @RequestParam(name = "projectId") int projectId,
             @RequestParam(name = "sprintName") String sprintName,
@@ -103,6 +114,8 @@ public class EditSprintController {
             BindingResult result,
             Model model
     ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         Project parentProject = projectService.getProjectById(projectId);
 
         // Getting sprint list containing all the sprints
@@ -137,7 +150,7 @@ public class EditSprintController {
 
         sprintService.saveSprint(sprint);
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
-        return "redirect:/project/" + projectId;
+        return "redirect:../project/" + projectId;
     }
 
 }
