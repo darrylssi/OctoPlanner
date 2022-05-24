@@ -9,6 +9,10 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.thymeleaf.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,7 +84,13 @@ public class ListUsersController extends PageController {
             // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
+        
+        // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
+        List<UserRole> acceptableRoles = Stream.of(UserRole.values())
+                                    .filter(role -> principalData.hasRoleOfAtLeast(role))
+                                    .toList();
 
+        model.addAttribute("allRoles", acceptableRoles);
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
