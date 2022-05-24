@@ -76,14 +76,13 @@ public class EditProjectController extends PageController {
     }
 
     /**
-     * Post request for editing a project with a given ID.
+     * A post request for editing a project with a given ID.
      * @param id ID of the project to be edited
      * @param projectName (New) name of the project
      * @param projectStartDate (New) project start date
      * @param projectEndDate (New) project end date
      * @param projectDescription (New) project description
      * @return Details page
-     * @throws Exception If the date cannot be parsed
      */
     @PostMapping("/edit-project/{id}")
     public String projectSave(
@@ -99,16 +98,7 @@ public class EditProjectController extends PageController {
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
-
-        //
-        //Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
-        //Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
-        //String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
-
         String dateOutOfRange = validator.validateProjectDates(project);
-
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

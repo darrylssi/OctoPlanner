@@ -54,7 +54,6 @@ public class AddSprintController extends PageController {
      * @param id the id of the project the sprint belongs to
      * @param model the model used to store information to be displayed on the page
      * @return the name of the Thymeleaf .html page to be displayed
-     * @throws Exception
      */
     @GetMapping("/add-sprint/{id}")
     public String getsSprint(
@@ -156,15 +155,9 @@ public class AddSprintController extends PageController {
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
-
-        // Checking the sprint dates validation and returning appropriate error message
-        //Date utilsProjectStartDate = parentProject.getProjectStartDate();
-        //Date utilsProjectEndDate = parentProject.getProjectEndDate();
-        //String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
-
-        String dateOutOfRange = validator.validateSprintDates(sprint);
+        Date start = utils.toDate(sprintStartDate);
+        Date end = utils.toDate(sprintEndDate);
+        String dateOutOfRange = validator.validateSprintDates(sprint.getId(), start, end, parentProject);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

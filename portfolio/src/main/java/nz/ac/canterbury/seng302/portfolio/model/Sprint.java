@@ -1,8 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -19,9 +17,6 @@ import java.util.List;
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    /** The id of this sprint. This id should be unique between all sprints, regardless of which project they
-     * belong to. The id starts at 0 and should automatically increment.
-     */
     private int id;
 
     @Column
@@ -34,7 +29,7 @@ public class Sprint {
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column(nullable = true)
+    @Column
     @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
     private String sprintDescription;
 
@@ -84,9 +79,6 @@ public class Sprint {
 
     
     @Override
-    /**
-     * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
-     */
     public String toString() {
         return String.format(
                 "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s']",
@@ -97,74 +89,38 @@ public class Sprint {
         this.id = id;
     }
 
-    /**
-     * Gets the sprint id
-     * @return sprint's id
-     */
     public int getId(){
         return  id;
     }
 
-    /**
-     * Sets the parent project id
-     * @param id Gets the Project's id
-     */
     public void setParentProjectId(int id) {
         this.parentProjectId = id;
     }
 
-    /**
-     * Gets the parent project id
-     * @return project's id
-     */
     public int getParentProjectId() {
         return parentProjectId;
     }
 
-    /**
-     * Gets the sprint name
-     * @return sprint's name
-     */
     public String getSprintName() {
         return sprintName;
     }
 
-    /**
-     * Sets the sprint name
-     * @param newName Gets the sprint name given by user
-     */
     public void setSprintName(String newName) {
         this.sprintName = newName;
     }
 
-    /**
-     * Gets the sprint label
-     * @return sprint's label
-     */
     public String getSprintLabel() {
         return sprintLabel;
     }
 
-    /**
-     * Gets the sprint description
-     * @return sprint's description
-     */
     public String getSprintDescription(){
         return sprintDescription;
     }
 
-    /**
-     * Sets the sprint Description
-     * @param newDescription Gets the sprint description given by the user
-     */
     public void setSprintDescription(String newDescription) {
         this.sprintDescription = newDescription;
     }
 
-    /**
-     * Gets the sprint start date
-     * @return sprint's start date
-     */
     public Date getSprintStartDate() {
         return sprintStartDate;
     }
@@ -177,10 +133,6 @@ public class Sprint {
         return Project.dateToString(this.sprintStartDate);
     }
 
-    /**
-     * Sets the sprint start date
-     * @param newStartDate Gets the sprint start date given by the user
-     */
     public void setStartDate(Date newStartDate) {
         this.sprintStartDate = newStartDate;
     }
@@ -193,10 +145,6 @@ public class Sprint {
         this.sprintStartDate = Project.stringToDate(date);
     }
 
-    /**
-     * Gets the sprint end date
-     * @return sprint's end date
-     */
     public Date getSprintEndDate() {
         return sprintEndDate;
     }
@@ -209,10 +157,6 @@ public class Sprint {
         return Project.dateToString(this.sprintEndDate);
     }
 
-    /**
-     * Sets the sprint end date
-     * @param newEndDate Gets the sprint end date given by user
-     */
     public void setEndDate(Date newEndDate) {
         this.sprintEndDate = newEndDate;
     }
@@ -225,10 +169,6 @@ public class Sprint {
         this.sprintEndDate = Project.stringToDate(date);
     }
 
-    /**
-     * Sets the sprint label
-     * @param newLabel Gets the sprint label given by the user
-     */
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
 

@@ -92,17 +92,13 @@ public class EditSprintController extends PageController {
     /**
      * Post request for editing a sprint with a given ID.
      *
-     * @param result
      * @param id                ID of the sprint to be edited
-     * @param projectId
+     * @param projectId         ID of the sprint's parent project
      * @param sprintName        (New) name of the sprint
      * @param sprintStartDate   (New) start date of the sprint
      * @param sprintEndDate     (New) end date of the sprint
      * @param sprintDescription (New) description of the sprint
-     * @param sprint
-     * @param model
      * @return Details page
-     * @throws Exception
      */
     @PostMapping("/edit-sprint/{id}")
     public String sprintSave(
@@ -121,17 +117,11 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        Date start = utils.toDate(sprintStartDate);
+        Date end = utils.toDate(sprintEndDate);
+        String dateOutOfRange = validator.validateSprintDates(sprint.getId(), start, end, parentProject);
 
-        //
-        //Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
-        //Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
-        //String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
-
-        String dateOutOfRange = validator.validateSprintDates(sprint);
-
-        // Checking it there are errors in the input, and also doing the valid dates validation
+        // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
