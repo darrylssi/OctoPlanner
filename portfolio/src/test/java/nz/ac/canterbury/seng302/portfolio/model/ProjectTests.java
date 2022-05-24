@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ import static org.assertj.core.api.Assertions.*;
 public class ProjectTests {
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ValidationService validationService;
 
     private static Validator validator;
 
@@ -146,43 +150,47 @@ public class ProjectTests {
 
 
     @Test
-    void checkValidProjectDateRangesForEditProject_getErrorMessage() throws ParseException {
+    void checkValidProjectDateRangesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
         String newProjectStartDate = "2022-02-04";
         String newProjectEndDate = "2022-08-05";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
-
+        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        String errorMessage = validationService.validateProjectDates(baseProject);
+        
+        
         assertEquals("Project dates must not be before or after the sprint dates " + utils.toString(sprint1.getSprintStartDate())
                 + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
     }
 
     @Test
-    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
         String newProjectStartDate = "2022-01-20";
         String newProjectEndDate = "2022-08-20";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        String errorMessage = validationService.validateProjectDates(baseProject);
 
         assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint1.getSprintStartDate())
                 + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
     }
 
     @Test
-    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
         String newProjectStartDate = "2022-01-01";
         String newProjectEndDate = "2022-02-10";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
-
+        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        String errorMessage = validationService.validateProjectDates(baseProject);
+        
         assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint2.getSprintStartDate())
                 + " - " + utils.toString(sprint2.getSprintEndDate()) , errorMessage);
     }

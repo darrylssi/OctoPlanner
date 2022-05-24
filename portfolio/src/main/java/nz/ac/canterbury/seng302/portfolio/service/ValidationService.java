@@ -12,9 +12,6 @@ import java.util.List;
 public class ValidationService {
 
     @Autowired
-    private ProjectService projectService;
-
-    @Autowired
     private SprintService sprintService;
 
     /**
@@ -109,7 +106,6 @@ public class ValidationService {
         if (end.before(other.getSprintStartDate())) { return true; }
             // Sprint is after other sprint
         else return start.after(other.getSprintEndDate());
-
     }
 
 }

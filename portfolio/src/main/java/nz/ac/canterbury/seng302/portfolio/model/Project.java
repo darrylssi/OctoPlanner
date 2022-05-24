@@ -1,14 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.text.ParseException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 @Entity // this is an entity, assumed to be in a table called Project
 @Table (name = "Project")
@@ -45,8 +42,6 @@ public class Project {
     /**
      * Constructor taking dates as String objects. Date strings should be of the format dd/MON/yyyy, where MON is the
      * first three letters of the name of the month, e.g. Jan, Feb, Mar, Apr, etc. Day and year are numbers.
-     * @param projectName
-     * @param projectDescription
      * @param projectStartDate project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
      *                         Must be before the end date.
      * @param projectEndDate project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
@@ -60,9 +55,6 @@ public class Project {
     }
 
     @Override
-    /**
-     * Returns a string listing the attributes of the project in the form "Project[x, x, x, ...]".
-     */
     public String toString() {
         return String.format(
                 "Project[id=%d, projectName='%s', projectStartDate='%s', projectEndDate='%s', projectDescription='%s']",
@@ -94,8 +86,6 @@ public class Project {
     static String dateToString(Date date) {
         return new SimpleDateFormat("dd/MMM/yyyy").format(date);
     }
-
-    /* Getters/Setters */
 
     public int getId() {
         return id;
@@ -153,30 +143,6 @@ public class Project {
 
     public void setEndDateString(String date) {
         this.projectEndDate = Project.stringToDate(date);
-    }
-
-    public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
-        String invalidDateRange = "";
-        DateUtils utils = new DateUtils();
-
-        if (!sprintList.isEmpty()) {
-            for (Sprint eachSprint: sprintList) {
-                Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
-                Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
-                if ((projectStartDate.after(utilsSprintEndDate) || projectEndDate.before(utilsSprintStartDate)) ) {
-                    invalidDateRange += "Project dates must not be before or after the sprint dates " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
-                            utils.toString(eachSprint.getSprintEndDate());
-                    break;
-                } else if (((projectStartDate.after(utilsSprintStartDate)) || (projectEndDate.before(utilsSprintEndDate))) ||
-                        (projectStartDate.after(utilsSprintStartDate) && projectStartDate.before(utilsSprintEndDate)) ||
-                        (projectEndDate.after(utilsSprintStartDate) && projectEndDate.before(utilsSprintEndDate))) {
-                    invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
-                            utils.toString(eachSprint.getSprintEndDate());
-                    break;
-                }
-            }}
-        return invalidDateRange;
-
     }
 
 }

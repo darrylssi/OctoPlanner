@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
-import java.util.Comparator;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -41,7 +40,7 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
-    private ValidationService validator;
+    private ValidationService validationService;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -157,7 +156,7 @@ public class AddSprintController extends PageController {
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
-        String dateOutOfRange = validator.validateSprintDates(sprint.getId(), start, end, parentProject);
+        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end, parentProject);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

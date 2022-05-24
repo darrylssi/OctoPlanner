@@ -10,34 +10,19 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.List;
-import java.util.Date;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the edit sprint details page
@@ -50,14 +35,12 @@ public class EditSprintController extends PageController {
     @Autowired
     private SprintService sprintService;
     @Autowired
-    private ValidationService validator;
+    private ValidationService validationService;
     @Autowired
     private SprintLabelService labelUtils;
 
     @Autowired
     private DateUtils utils;
-
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     /**
      * Show the edit-sprint page.
@@ -90,7 +73,7 @@ public class EditSprintController extends PageController {
     }
 
     /**
-     * Post request for editing a sprint with a given ID.
+     * A post request for editing a sprint with a given ID.
      *
      * @param id                ID of the sprint to be edited
      * @param projectId         ID of the sprint's parent project
@@ -119,7 +102,7 @@ public class EditSprintController extends PageController {
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
-        String dateOutOfRange = validator.validateSprintDates(sprint.getId(), start, end, parentProject);
+        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end, parentProject);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

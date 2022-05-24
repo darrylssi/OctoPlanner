@@ -1,8 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
@@ -26,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Controller for the edit project details page
@@ -37,9 +34,7 @@ public class EditProjectController extends PageController {
     @Autowired
     private ProjectService projectService;
     @Autowired
-    private SprintService sprintService;
-    @Autowired
-    private ValidationService validator;
+    private ValidationService validationService;
     @Autowired
     private UserAccountClientService userAccountClientService;
     @Autowired
@@ -98,7 +93,7 @@ public class EditProjectController extends PageController {
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
-        String dateOutOfRange = validator.validateProjectDates(project);
+        String dateOutOfRange = validationService.validateProjectDates(project);
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
@@ -120,7 +115,7 @@ public class EditProjectController extends PageController {
         newProject.setProjectDescription(projectDescription);
         projectService.saveProject(newProject);
 
-        /* Redirect to details page when done */
+        /* Redirect to the details' page when done */
         return "redirect:../project/" + id;
     }
 
