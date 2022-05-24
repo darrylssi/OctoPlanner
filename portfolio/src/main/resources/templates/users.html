@@ -1,3 +1,13 @@
+<!--/*
+    Note the @{''()} pattern used in this document:
+        @{} is for URL expressions
+        ''  is an empty string, no forward-slash so it's relative to THIS url (won't parse without it)
+        (page=...) adds query parameters [?page=...]
+        Example - th:href="@{''(page=${i})}", if i=1, gets rendered as:
+            href="?page=1"
+        i.e. the current URL, but with a query parameter.
+*/-->
+
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
@@ -5,15 +15,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Users</title>
 
-    <link rel="stylesheet" th:href=@{/styles/main.css}>
-    <link rel="stylesheet" th:href=@{/styles/users.css}>
+    <link rel="stylesheet" th:href="|./styles/main.css|">
+    <link rel="stylesheet" th:href="|./styles/users.css|">
         <!--/*
         JS files are static, and thus don't know anything about the project (i.e. the base URL).
         This code sets a global variable inside this template (which does know the base URL),
         which the imported script can access.
     */-->
-    <script th:inline="javascript">var BASE_URL = /*[[ @{/} ]]*/ "/";</script>
-    <script defer th:src="@{/scripts/editRoles.js}"></script>
+    <script th:inline="javascript">
+        var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ]]*/ "/";
+    </script>
+    <script defer th:src="|./scripts/editRoles.js|"></script>
 
 </head>
 
@@ -25,7 +37,7 @@
         <thead>
             <tr>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='name')}">
+                    <form method="post" th:action="@{''(page=${page}, orderBy='name')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Name
                             <span th:if="${orderBy == 'name'}" th:text="${dir} ? '▼' : '▲'" />
@@ -33,7 +45,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='username')}">
+                    <form method="post" th:action="@{''(page=${page}, orderBy='username')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Username
                             <span th:if="${orderBy == 'username'}" th:text="${dir} ? '▼' : '▲'" />
@@ -41,7 +53,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='nickname')}">
+                    <form method="post" th:action="@{''(page=${page}, orderBy='nickname')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Alias
                             <span th:if="${orderBy == 'nickname'}" th:text="${dir} ? '▼' : '▲'" />
@@ -49,7 +61,7 @@
                     </form>
                 </th>
                 <th>
-                    <form method="post" th:action="@{/users/(page=${page}, orderBy='role')}">
+                    <form method="post" th:action="@{''(page=${page}, orderBy='role')}">
                         <a class="clickable" onclick="this.parentNode.submit()">
                             Role
                             <span th:if="${orderBy == 'role'}" th:text="${dir} ? '▼' : '▲'" />
@@ -89,17 +101,17 @@
     <div class="pagination" th:if="${totalPages > 1}">
 <!--        if not on first page, add link to first page -->
         <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{/users/(page=1)}"> First </a>
+            <a th:href="@{''(page=1)}"> First </a>
         </span>
 <!--        add link to PREV page -->
         <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{/users/(page=${page - 1})}"> Prev </a>
+            <a th:href="@{''(page=${page - 1})}"> Prev </a>
         </span>
 <!--        add link to all pages -->
 <!--        check the total pages is less than or equal to two, then show pages based on it-->
         <th:block th:if="${totalPages <= 2}">
             <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
-                <a th:href="@{/users/(page=${i})}" th:if="${i != page}"
+                <a th:href="@{''(page=${i})}" th:if="${i != page}"
                    class="otherPages">[[${i}]]</a>
                 <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
             </span>
@@ -108,40 +120,40 @@
         <th:block th:if="${totalPages > 2}">
             <th:block th:if="${page <= 2 || page >= totalPages - 1}">
                 <span class="pages" th:each="i: ${#numbers.sequence(1, 2)}">
-                    <a th:href="@{/users/(page=${i})}" th:if="${i != page}"
+                    <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
 
-                <a th:href="@{/users/(page=3)}" class="otherPages" th:if="${totalPages != 4}">...</a>
+                <a th:href="@{''(page=3)}" class="otherPages" th:if="${totalPages != 4}">...</a>
 
                 <span class="pages" th:each="i: ${#numbers.sequence(totalPages - 1, totalPages)}">
-                    <a th:href="@{/users/(page=${i})}" th:if="${i != page}"
+                    <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
             </th:block>
 
             <th:block th:if="${page > 2 && page < totalPages - 1}">
-                <a th:href="@{/users/(page=${page - 2})}" class="otherPages">...</a>
+                <a th:href="@{''(page=${page - 2})}" class="otherPages">...</a>
 
                 <span class="pages" th:each="i: ${#numbers.sequence(page - 1, page + 1)}">
-                    <a th:href="@{/users/(page=${i})}" th:if="${i != page}"
+                    <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
 
-                <a th:href="@{/users/(page=${page + 2})}" class="otherPages">...</a>
+                <a th:href="@{''(page=${page + 2})}" class="otherPages">...</a>
             </th:block>
         </th:block>
 
 <!--        add link to NEXT page -->
         <span class="pages otherPages" th:if="${page < totalPages}">
-            <a th:href="@{/users/(page=${page + 1})}"> Next </a>
+            <a th:href="@{''(page=${page + 1})}"> Next </a>
         </span>
 <!--        add link to LAST page-->
         <span class="pages otherPages" th:if="${page < totalPages}">
-            <a th:href="@{/users/(page=${totalPages})}"> Last </a>
+            <a th:href="@{''(page=${totalPages})}"> Last </a>
         </span>
     </div>
 

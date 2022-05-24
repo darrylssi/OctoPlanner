@@ -155,7 +155,7 @@ public class EditSprintController extends PageController {
 
         sprintService.saveSprint(sprint);
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
-        return "redirect:/project/" + projectId;
+        return "redirect:../project/" + projectId;
     }
 
 }
