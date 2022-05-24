@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -27,7 +28,6 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
-
 /**
  * Controller for the edit project details page
  */
@@ -38,6 +38,8 @@ public class EditProjectController extends PageController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
+    @Autowired
+    private ValidationService validator;
     @Autowired
     private UserAccountClientService userAccountClientService;
     @Autowired
@@ -101,9 +103,11 @@ public class EditProjectController extends PageController {
         List<Sprint> sprintList = sprintService.getAllSprints();
 
         //
-        Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
-        Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
-        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        //Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
+        //Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
+        //String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
+
+        String dateOutOfRange = validator.validateProjectDates(project);
 
 
         /* Return editProject template with user input */

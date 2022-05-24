@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -48,6 +49,8 @@ public class EditSprintController extends PageController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
+    @Autowired
+    private ValidationService validator;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -122,9 +125,11 @@ public class EditSprintController extends PageController {
         List<Sprint> sprintList = sprintService.getAllSprints();
 
         //
-        Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
-        Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
-        String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        //Date utilsProjectStartDate = utils.toDate(utils.toString(parentProject.getProjectStartDate()));
+        //Date utilsProjectEndDate = utils.toDate(utils.toString(parentProject.getProjectEndDate()));
+        //String dateOutOfRange = sprint.validEditSprintDateRanges(sprint.getId(), utils.toDate(sprintStartDate), utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate, sprintList);
+
+        String dateOutOfRange = validator.validateSprintDates(sprint);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

@@ -2,8 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +9,6 @@ import java.util.List;
 
 @Service
 public class ValidationService {
-
-    private static final Logger logger = LoggerFactory.getLogger(ValidationService.class);
 
     @Autowired
     private ProjectService projectService;
@@ -85,10 +81,7 @@ public class ValidationService {
         long projectLength = project.getProjectEndDate().getTime() - project.getProjectStartDate().getTime();
         long lengthInYears = projectLength / (1000L*60*60*24*365);
         if (lengthInYears >= 10) {
-            logger.debug("Project length >= 10 years : " + lengthInYears + " years");
             //TODO Warn the user according to UPi AC3
-        } else { // TODO Remove this else statement (only used for debugging)
-            logger.debug("Project length < 10 years : " + lengthInYears + " years");
         }
 
         // No errors found

@@ -41,9 +41,9 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
-    private SprintLabelService labelUtils;
-    @Autowired
     private ValidationService validator;
+    @Autowired
+    private SprintLabelService labelUtils;
 
     // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
@@ -120,7 +120,7 @@ public class AddSprintController extends PageController {
         //Check if end date falls outside project dates
         if(sprintNewEndDate.after(project.getProjectEndDate())){
             sprintNewEndDate = project.getProjectEndDate();
-        };
+        }
 
         model.addAttribute("sprintEndDate", utils.toString(sprintNewEndDate));
         model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
@@ -160,9 +160,11 @@ public class AddSprintController extends PageController {
         List<Sprint> sprintList = sprintService.getAllSprints();
 
         // Checking the sprint dates validation and returning appropriate error message
-        Date utilsProjectStartDate = parentProject.getProjectStartDate();
-        Date utilsProjectEndDate = parentProject.getProjectEndDate();
-        String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
+        //Date utilsProjectStartDate = parentProject.getProjectStartDate();
+        //Date utilsProjectEndDate = parentProject.getProjectEndDate();
+        //String dateOutOfRange = sprint.validAddSprintDateRanges(utils.toDate(sprintStartDate),utils.toDate(sprintEndDate), utilsProjectStartDate, utilsProjectEndDate,  sprintList);
+
+        String dateOutOfRange = validator.validateSprintDates(sprint);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
