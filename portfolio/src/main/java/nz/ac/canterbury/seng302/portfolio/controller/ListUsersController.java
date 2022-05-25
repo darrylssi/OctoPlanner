@@ -141,7 +141,7 @@ public class ListUsersController extends PageController {
         // Set the cookie
         createPageOrdering(orderBy, isAscending, userId, response);
 
-        return "redirect:../users?page="+page;    // Send them back to the users page
+        return "redirect:users?page="+page;    // Send them back to the users page
     }
 
     /**
