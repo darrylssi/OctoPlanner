@@ -70,16 +70,13 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("userName", user.getUsername());
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-                String roles = "";
-                for (int i = 0; i < user.getRolesCount(); i++) {
-                    String roleString = user.getRoles(i).toString();
-                    roleString = roleString.replace("_", " ");
-                    roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
-                }
-                if (roles.length() > 2) {
-                    roles = roles.substring(0, roles.length() - 2);
-                }
-                model.addAttribute("roles", roles);
+                var roles = user.getRolesList().stream()
+                                .map(role -> role.toString().toLowerCase())                 //  COURSE_ADMIN  -> "course_admin"
+                                .map(sRole -> sRole.replace("_", " "))  // "course_admin" -> "course admin"
+                                .map(sRole -> StringUtils.capitalizeWords(sRole))           // "course admin" -> "Course Admin"
+                                .toList();
+                String sRoles = String.join(", ", roles);
+                model.addAttribute("roles", sRoles);
             } else {
                 errors.add("Invalid ID");
             }
@@ -106,7 +103,7 @@ public class ProfilePageController {
      * @param timestamp The timestamp at which the user's account was created
      * @return A formatted string containing the date the user was created
      */
-    public static String getDateCreated(Timestamp timestamp){
+    public static String getDateCreated(Timestamp timestamp) {
         LocalDateTime dateTime = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos())
                 .atOffset(ZoneOffset.UTC)
                 .toLocalDateTime();
