@@ -84,7 +84,11 @@ public class ListUsersController extends PageController {
                                     .filter(role -> principalData.hasRoleOfAtLeast(role))
                                     .toList();
 
-        model.addAttribute("allRoles", acceptableRoles);
+        model.addAttribute("acceptableRoles", acceptableRoles);
+        
+        // Only teachers or above can edit roles
+        model.addAttribute("canEdit", principalData.hasRoleOfAtLeast(UserRole.TEACHER));
+
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);

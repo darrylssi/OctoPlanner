@@ -1,11 +1,7 @@
 
 
 function toggleMenu() {
-    if(document.getElementById("userMenu").className == "dropdown-content") {
-        document.getElementById("userMenu").className = "dropdown-content show";
-    } else {
-        document.getElementById("userMenu").className = "dropdown-content";
-    }
+    document.getElementById("userMenu").classList.toggle('show');
 }
 
 // Close the dropdown if the user clicks outside of it
