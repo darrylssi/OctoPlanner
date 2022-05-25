@@ -136,14 +136,20 @@ public class AddSprintController extends PageController {
         return "addSprint";
     }
 
-
     /**
      * Adds a sprint to the project
+     * @param principal The principal used for authentication (role checking)
+     * @param id The id of the project to add a sprint to, taken from the URL
      * @param sprintName Gets the given name of the new sprint
      * @param sprintStartDate Gets the given sprint start date
      * @param sprintEndDate Gets the given sprint end date
      * @param sprintDescription Gets the given sprint description
+     * @param sprintColour Gets the given sprint colour string
+     * @param sprint The new sprint to be added
+     * @param result The result object that allows for input validation
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
+     * @throws Exception if project not found or a date cannot be parsed
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(

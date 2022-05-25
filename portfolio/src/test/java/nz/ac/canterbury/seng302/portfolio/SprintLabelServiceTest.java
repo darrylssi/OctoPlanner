@@ -20,6 +20,10 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
+/**
+ * This class tests the SprintLabelService, which is responsible for assigning labels to Sprint objects such that
+ * each sprint has a label like "Sprint 1", "Sprint 2" etc., in order of starting date.
+ */
 @SpringBootTest
 public class SprintLabelServiceTest {
     @Autowired
@@ -62,6 +66,10 @@ public class SprintLabelServiceTest {
     // also, refreshAllLabels just calls other methods, so it isn't checked for adding/deleting sprints etc.
     // as there are other tests for that
 
+    /**
+     * This test covers sprints across two projects being correctly assigned labels when refreshing all labels.
+     * @throws ParseException if strings cannot be parsed as dates
+     */
     @Test
     void refreshAllLabels_labelsAssignedProperlyAndNextLabel() throws ParseException {
         sprint3.setParentProjectId(PROJECT_ID_2);
@@ -84,6 +92,9 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_2));
     }
 
+    /**
+     * Checks that labels are refreshed correctly with just one sprint, and nextLabel() returns correctly.
+     */
     @Test
     void refreshLabelsOneSprint_labelAssignedProperly() {
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
@@ -93,6 +104,9 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 
+    /**
+     * Checks that refreshing works using a project id (integer).
+     */
     @Test
     void refreshLabelsWithID_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
@@ -100,6 +114,10 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
         Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
     }
+
+    /**
+     * Checks that refreshing works using a project object.
+     */
     @Test
     void refreshLabelsWithProject_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(testProject1);
