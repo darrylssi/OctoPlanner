@@ -24,7 +24,7 @@
 
 </head>
 <body>
-    <div th:replace="fragments :: header(title='Monthly Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
     <div class="content">
         <div id='calendar'></div>
     </div>

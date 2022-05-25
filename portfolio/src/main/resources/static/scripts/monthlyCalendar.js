@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
             start: projectStartDate,
             end: projectEndDate
         },
+        buttonText: {
+            today: "Today"
+        },
         // Used to show all the sprints on the calendar
         events: sprints
     });
