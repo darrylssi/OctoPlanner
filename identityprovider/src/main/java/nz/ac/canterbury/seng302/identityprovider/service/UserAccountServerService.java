@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 
 import io.grpc.Status;
@@ -8,12 +9,20 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.FileUploadStatus;
+import nz.ac.canterbury.seng302.shared.util.FileUploadStatusResponse;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +36,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
+    private static final Path SERVER_BASE_PATH = Paths.get("src/main/resources");
+
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
     @Autowired
@@ -37,6 +48,87 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     @Autowired
     private ValidationService validator;
+
+    /**
+     * I no idea what I'm doing. This is for user profile photos, following these tutorials:
+     * https://www.vinsguru.com/grpc-file-upload-client-streaming/ so far it's just copied from this one
+     * https://www.vinsguru.com/grpc-bidirectional-streaming/
+     *
+     * @param responseObserver
+     * @return
+     */
+    public StreamObserver<UploadUserProfilePhotoRequest> upload(StreamObserver<FileUploadStatusResponse> responseObserver) {
+        return new StreamObserver<UploadUserProfilePhotoRequest>() {
+            // upload context variables
+            OutputStream writer;
+            FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // this is different to the tutorial
+
+            @Override
+            public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
+                try {
+                    if(userProfilePhotoUploadRequest.hasMetaData()) {
+                        writer = getFilePath(userProfilePhotoUploadRequest);
+                    } else {
+                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
+                    }
+                } catch (IOException e) {
+                    this.onError(e);
+                }
+
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                status = FileUploadStatus.FAILED;
+                this.onCompleted();
+            }
+
+            @Override
+            public void onCompleted() {
+                closeFile(writer);
+                status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
+                FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
+                        .setStatus(status)
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    /**
+     * Copied from tutorial; see above.
+     * @param request
+     * @return
+     * @throws IOException
+     */
+    private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
+        var fileName = request.getMetaData().getUserId() + "_photo." + request.getMetaData().getFileType();
+        return Files.newOutputStream(SERVER_BASE_PATH.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+
+    /**
+     * Copied from tutorial; see above.
+     * @param writer
+     * @param content
+     * @throws IOException
+     */
+    private void writeFile(OutputStream writer, ByteString content) throws IOException {
+        writer.write(content.toByteArray());
+        writer.flush();
+    }
+
+    /**
+     * Copied from tutorial; see above.
+     * @param writer
+     */
+    private void closeFile(OutputStream writer) {
+        try {
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Adds a user to the database and returns a UserRegisterResponse to the portfolio
