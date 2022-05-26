@@ -23,7 +23,7 @@ import java.util.List;
 
 
 /**
- * Controller for the display project details page
+ * Controller for the display project details on the monthly calendar
  */
 @Controller
 public class MonthlyCalendarController {
@@ -64,6 +64,7 @@ public class MonthlyCalendarController {
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
+        model.addAttribute("invalidDateRangeError", "Sprint must not overlap");
 
         sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
@@ -93,7 +94,7 @@ public class MonthlyCalendarController {
         String sprintStartDates = "";           // Initiating the sprint start dates list
         String sprintEndDates = "";             // Initiating the sprint end dates list
 
-
+        // For loop to add each sprint names, start date and end date to the respective strings
         for (Sprint eachSprint: sprintList) {
             sprintNames += eachSprint.getSprintName() + ",";
             sprintStartDates += eachSprint.getSprintStartDate().toString().substring(0, 10) + ",";

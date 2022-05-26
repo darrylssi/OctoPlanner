@@ -12,21 +12,25 @@
         let projectStartDate = "[[${projectStartDate}]]";
         let projectEndDate = "[[${projectEndDate}]]";
 
-        // Getting all sprint's string names, start date and end date
+        // Getting all sprint's string list which contains names, start date and end date
         let sprintNames = "[[${sprintNames}]]";
         let sprintStartDates = "[[${sprintStartDates}]]";
         let sprintEndDates = "[[${sprintEndDates}]]";
 
-        let sprintsEditable = "[[${sprintsEditable}]]"
-
+        let sprintsEditable = "[[${sprintsEditable}]]";
     </script>
     <script th:src="|../scripts/monthlyCalendar.js|"></script>
 
 </head>
 <body>
-    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString}
+    + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
     <div class="content">
         <div id='calendar'></div>
+    </div>
+    <div>
+        <!-- Sprint overlap error message -->
+        <p id="invalidDateRangeError" th:text="${invalidDateRangeError}" th:hidden="true" th:class="error"></p>
     </div>
 </body>
 </html>

@@ -3,7 +3,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let calendarEl = document.getElementById('calendar');
 
-
     // Converting the given sprint's string names, start date and end date to list
     let sprintNamesList = sprintNames.split(",");
     let sprintStartDatesList = sprintStartDates.split(",");
@@ -18,10 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let selectedSprint = null;
 
-
+    // console.log("sprint is editable: " +  sprintsEditable);
     let calendar = new FullCalendar.Calendar(calendarEl, {
-        eventResizableFromStart:true, // when resizing sprints, can be done from start as well as end
-        eventDurationEditable: false, // sprints can't be edited by default
+        editable: (sprintsEditable === "true"),                // make sprints editable if role is at least Teacher
+        eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
+        // eventDurationEditable: false,                       // sprints can't be edited by default
         timeZone: 'UTC',
         initialView: 'dayGridMonth',
         // Restricts the calendar dates based on the given project dates
@@ -32,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonText: {
             today: "Today"
         },
+        eventOverlap: function () {
+            // shows the sprint overlap error message
+            document.getElementById("invalidDateRangeError").hidden = false;
+        },
         eventClick: function(info) {
             if(sprintsEditable === "true") {
                 // if the user clicks on a sprint, update the selected sprint
@@ -40,9 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectedSprint.setProp('durationEditable', false);
                 }
                 selectedSprint = info.event;
+
                 // allow editing on new selected sprint
                 selectedSprint.setProp('durationEditable', true);
+
+                // hides the sprint overlap error message
+                document.getElementById("invalidDateRangeError").hidden = true;
             }
+
         },
         // Used to show all the sprints on the calendar
         events: sprints
