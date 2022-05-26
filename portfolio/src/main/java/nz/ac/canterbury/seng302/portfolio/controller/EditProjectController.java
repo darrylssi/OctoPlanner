@@ -100,7 +100,7 @@ public class EditProjectController extends PageController {
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
 
-        //
+        /* Convert to date types, then check if in valid range */
         Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
         Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
         String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);

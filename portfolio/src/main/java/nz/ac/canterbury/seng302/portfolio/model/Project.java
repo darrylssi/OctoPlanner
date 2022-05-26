@@ -33,6 +33,10 @@ public class Project {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date projectEndDate;
 
+    @Column (nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date projectCreationDate;
+
     protected Project() {}
 
     public Project(String projectName, String projectDescription, Date projectStartDate, Date projectEndDate) {
@@ -40,6 +44,7 @@ public class Project {
         this.projectDescription = projectDescription;
         this.projectStartDate = projectStartDate;
         this.projectEndDate = projectEndDate;
+        this.projectCreationDate = new Date();
     }
 
     /**
@@ -53,10 +58,9 @@ public class Project {
      *                       Must be after the start date.
      */
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
-        this.projectName = projectName;
-        this.projectDescription = projectDescription;
-        this.projectStartDate = Project.stringToDate(projectStartDate);
-        this.projectEndDate = Project.stringToDate(projectEndDate);
+        startDate = Project.stringToDate(projectStartDate);
+        endDate = Project.stringToDate(projectEndDate);
+        Project(projectName, projectDescription, startDate, endDate);
     }
 
     @Override
@@ -155,9 +159,19 @@ public class Project {
         this.projectEndDate = Project.stringToDate(date);
     }
 
+    public Date getProjectCreationDate() {
+        return projectCreationDate;
+    }
+
     public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
         DateUtils utils = new DateUtils();
+
+        Date earliestStart = projectCreationDate;
+        earliestStart = DateUtils.addYears(earliestStart, int quantity = -1);
+        if (projectStartDate.before(earliestStart)) {
+            invalidDateRange += "Project cannot be set to start more than a year before it was created (cannot start before " + utils.toString(earliestStart) + ") - ";
+        }
 
         if (!sprintList.isEmpty()) {
             for (Sprint eachSprint: sprintList) {
