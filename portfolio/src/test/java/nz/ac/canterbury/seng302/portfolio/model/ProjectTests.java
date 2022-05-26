@@ -1,11 +1,17 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,12 +35,16 @@ import static org.assertj.core.api.Assertions.*;
  * being saved to the database.
  */
 @SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectTests {
     @Autowired
     private ProjectService projectService;
 
-    @Autowired
-    private ValidationService validationService;
+    @Mock
+    SprintService sprintService;
+
+    @InjectMocks
+    ValidationService validationService = Mockito.spy(ValidationService.class);
 
     private static Validator validator;
 
@@ -54,7 +64,7 @@ public class ProjectTests {
 
     private Sprint sprint1;
     private Sprint sprint2;
-    private List<Sprint> sprintList = new ArrayList<>();
+    private final List<Sprint> sprintList = new ArrayList<>();
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -148,52 +158,52 @@ public class ProjectTests {
         }
     }
 
-
     @Test
-    void checkValidProjectDateRangesForEditProject_getErrorMessage() {
+    void checkValidProjectDateRangesForEditProject_getErrorMessage() throws ParseException {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
+        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        String newProjectStartDate = "2022-02-04";
-        String newProjectEndDate = "2022-08-05";
-        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        baseProject.setProjectStartDate(utils.toDate("2022-02-04"));
+        baseProject.setProjectEndDate(utils.toDate("2022-08-05"));
         String errorMessage = validationService.validateProjectDates(baseProject);
-        
-        
-        assertEquals("Project dates must not be before or after the sprint dates " + utils.toString(sprint1.getSprintStartDate())
-                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+
+        assertEquals("The sprint with dates: " +
+                sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
+                " is outside the project dates" , errorMessage);
     }
 
     @Test
-    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() {
+    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
+        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        String newProjectStartDate = "2022-01-20";
-        String newProjectEndDate = "2022-08-20";
-        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        baseProject.setProjectStartDate(utils.toDate("2022-01-20"));
+        baseProject.setProjectEndDate(utils.toDate("2022-08-20"));
         String errorMessage = validationService.validateProjectDates(baseProject);
 
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint1.getSprintStartDate())
-                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+        assertEquals("The sprint with dates: " +
+                sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
+                " is outside the project dates" , errorMessage);
     }
 
     @Test
-    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() {
+    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
+        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        String newProjectStartDate = "2022-01-01";
-        String newProjectEndDate = "2022-02-10";
-        //String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate), utils.toDate(newProjectEndDate), sprintList);
+        baseProject.setProjectStartDate(utils.toDate("2022-01-01"));
+        baseProject.setProjectEndDate(utils.toDate("2022-02-10"));
         String errorMessage = validationService.validateProjectDates(baseProject);
-        
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint2.getSprintStartDate())
-                + " - " + utils.toString(sprint2.getSprintEndDate()) , errorMessage);
-    }
 
+        assertEquals("The sprint with dates: " +
+                sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
+                " is outside the project dates" , errorMessage);
+    }
 }
 
