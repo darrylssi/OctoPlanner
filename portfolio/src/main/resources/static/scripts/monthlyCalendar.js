@@ -33,14 +33,16 @@ document.addEventListener('DOMContentLoaded', function() {
             today: "Today"
         },
         eventClick: function(info) {
-            // if the user clicks on a sprint, update the selected sprint
-            if (selectedSprint != null) {
-                // remove editing from current sprint
-                selectedSprint.setProp('durationEditable', false);
+            if(sprintsEditable === "true") {
+                // if the user clicks on a sprint, update the selected sprint
+                if (selectedSprint != null) {
+                    // remove editing from current sprint
+                    selectedSprint.setProp('durationEditable', false);
+                }
+                selectedSprint = info.event;
+                // allow editing on new selected sprint
+                selectedSprint.setProp('durationEditable', true);
             }
-            selectedSprint = info.event;
-            // allow editing on new selected sprint
-            selectedSprint.setProp('durationEditable', true);
         },
         // Used to show all the sprints on the calendar
         events: sprints
