@@ -38,8 +38,17 @@ public class Project {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date projectCreationDate;
 
-    protected Project() {}
+    protected Project() {
+        this.projectCreationDate = new Date();
+    }
 
+    /**
+     * Constructor taking dates as Date objects directly
+     * @param projectName
+     * @param projectDescription
+     * @param projectStartDate {Date} project start date. Must be before the end date.
+     * @param projectEndDate {Date} project end date. Must be after the start date.
+     */
     public Project(String projectName, String projectDescription, Date projectStartDate, Date projectEndDate) {
         this.projectName = projectName;
         this.projectDescription = projectDescription;
@@ -53,9 +62,9 @@ public class Project {
      * first three letters of the name of the month, e.g. Jan, Feb, Mar, Apr, etc. Day and year are numbers.
      * @param projectName
      * @param projectDescription
-     * @param projectStartDate project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
+     * @param projectStartDate {String} project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
      *                         Must be before the end date.
-     * @param projectEndDate project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
+     * @param projectEndDate {String} project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
      *                       Must be after the start date.
      */
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
@@ -166,6 +175,19 @@ public class Project {
         return projectCreationDate;
     }
 
+    /**
+     * Validates the given project start and end dates to check that they match the following criteria:
+     * <ul>
+     *  <li>The start date is not more than a year before the date the project was created</li>
+     *  <li>The project dates still fit around the sprints (i.e. no sprint or part of a sprint would
+     *      lie outside these project dates)</li>
+     * </ul>
+     *
+     * @param projectStartDate {Date} the project start date being checked
+     * @param projectEndDate {Date} the project end date being checked
+     * @param projectCreationDate {Date} the date of creation of the project being edited
+     * @param sprintList {List<Sprint>} the sprints within the project being edited
+     */
     public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate,
             Date projectCreationDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
