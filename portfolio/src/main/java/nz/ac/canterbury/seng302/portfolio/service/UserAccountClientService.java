@@ -1,8 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
+import com.google.protobuf.ByteString;
+import io.grpc.Metadata;
+import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.FileUploadStatusResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +14,20 @@ import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @Service
 public class UserAccountClientService {
 
     @GrpcClient("identity-provider-grpc-server")
     private UserAccountServiceGrpc.UserAccountServiceBlockingStub userAccountStub;
+
+    @GrpcClient("identity-provider-grpc-server")
+    private UserAccountServiceGrpc.UserAccountServiceStub userAccountServiceStub;
 
     /**
      * Sends a UserRegisterRequest to the identity provider
@@ -67,8 +80,8 @@ public class UserAccountClientService {
 
     /**
      * Gets a paginated list of users from the identity provider
-     * @param pageNumber What "page" of the users you want. Affected by the ordering and page size
-     * @param pageSize How many items you want from 
+     * @param offset What "page" of the users you want. Affected by the ordering and page size
+     * @param limit How many items you want from
      * @param orderBy How the list is ordered.
      *                Your options are:
      *                  <ul>
@@ -211,4 +224,36 @@ public class UserAccountClientService {
         String username = PrincipalData.from(principal).getUsername();
         return username;
     }
+
+    public void uploadUserProfilePhoto(int userId, String fileType) throws IOException {
+
+        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
+        Path path = Paths.get("src/main/resources/static/img/test.jpg");
+
+        UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
+                .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
+                        .setUserId(userId)
+                        .setFileType(fileType)
+                        .build())
+                .build();
+        streamObserver.onNext(metadata);
+
+        // upload file as chunk
+        InputStream inputStream = Files.newInputStream(path);
+        byte[] bytes = new byte[4096];
+        int size;
+        while ((size = inputStream.read(bytes)) > 0){
+            UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
+                    .setFileContent(ByteString.copyFrom(bytes, 0 , size))
+                    .build();
+            streamObserver.onNext(uploadRequest);
+        }
+
+        // close the stream
+        inputStream.close();
+        streamObserver.onCompleted();
+    }
+
+
+
 }

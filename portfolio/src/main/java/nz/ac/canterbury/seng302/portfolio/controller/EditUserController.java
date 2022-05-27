@@ -18,6 +18,8 @@ import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
 import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
 
+import java.io.IOException;
+
 @Controller
 public class EditUserController {
 
@@ -149,4 +151,15 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
+
+    @PostMapping(value = "/users/{id}/test", params = {"fileType"})
+    public String uploadPhoto(
+            @PathVariable int id,
+            @RequestParam(name="fileType") String fileType,
+            Model model
+    ) throws IOException {
+        userAccountClientService.uploadUserProfilePhoto(id, "jpg");
+        return "editUser";
+    }
+
 }

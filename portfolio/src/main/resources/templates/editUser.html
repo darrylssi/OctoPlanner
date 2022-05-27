@@ -10,6 +10,8 @@
     <link rel="stylesheet" th:href="|../../styles/editUser.css|">
     <link rel="stylesheet" th:href="|../../styles/form.css|">
 
+    <script th:src="|../../scripts/editUser.js|"></script>
+
 </head>
 
 <body>
@@ -115,11 +117,15 @@
         </form>
         <hr/>
         <br/>
-        <form>
+        <form th:action="|./test|"
+              method="post">
             <div class="user-info">
                 <div class="input-box">
                     <label> Profile Photo </label>
-                    <input type="file" accept="image/*">
+                    <input id="inputFile" type="file" name="fileType" onChange="getFileNameWithExt(event)"><br>
+                    Output Filename <input id="outputFile" type="text" name="fileType"><br>
+                    Extension <input id="extension" type="text" name="extension">
+<!--                    <button onclick="myFunction()">click</button>-->
                 </div>
             </div>
             <div class="centre-box">

@@ -57,7 +57,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @param responseObserver
      * @return
      */
-    public StreamObserver<UploadUserProfilePhotoRequest> upload(StreamObserver<FileUploadStatusResponse> responseObserver) {
+    @Override
+    public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
         return new StreamObserver<UploadUserProfilePhotoRequest>() {
             // upload context variables
             OutputStream writer;
