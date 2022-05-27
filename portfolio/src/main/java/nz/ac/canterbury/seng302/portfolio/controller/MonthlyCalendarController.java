@@ -52,8 +52,6 @@ public class MonthlyCalendarController {
         // Get the current project id
         Project project = projectService.getProjectById(id);
 
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
