@@ -9,31 +9,32 @@ import java.util.Date;
 import java.util.List;
 
 
-
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
  */
 @Entity
 public class Sprint {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+
     /** The id of this sprint. This id should be unique between all sprints, regardless of which project they
      * belong to. The id starts at 0 and should automatically increment.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @Column
     private int parentProjectId;
 
-    @Column
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
+    @Column(nullable = false)
+    @Size(min=2, max=32, message="The character length must in range 2 and 32.")
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
+    @Column (nullable = false)
+    @Size(max=200, message="The character length must not exceed 200.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
@@ -46,7 +47,7 @@ public class Sprint {
     private Date sprintEndDate;
 
     @Column (nullable = false)
-    @Size(max=10)
+    @Size(min=7, max=7)
     private String sprintColour;
 
     public Sprint() {}
@@ -88,13 +89,10 @@ public class Sprint {
     }
 
 
-    /**
-     * Returns the Sprint object as a string
-     * @return
-     */
     @Override
     /**
      * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
+     * @return said string
      */
     public String toString() {
         return String.format(

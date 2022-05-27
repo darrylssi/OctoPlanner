@@ -1,27 +1,21 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 /**
@@ -36,27 +30,21 @@ public class SprintTests {
     @Autowired
     private DateUtils utils;
 
-    private static Validator validator;
-
-    @BeforeAll
-    public static void setUpValidator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
-
-    @MockBean
+    @Autowired
     private SprintRepository sprintRepository;
 
     private List<Sprint> sprintList = new ArrayList<>();
     private Sprint baseSprint;
 
-
     @BeforeEach
     public void setUp() {
+        int parentProjId = 5;
+        sprintRepository.deleteAll();
         baseSprint = new Sprint();
+        baseSprint.setSprintLabel("Sprint 1");
         baseSprint.setSprintName("Sprint 1");
         baseSprint.setSprintDescription("The first.");
-        baseSprint.setParentProjectId(5);
+        baseSprint.setParentProjectId(parentProjId);
         baseSprint.setStartDateString("05/FEB/2022");
         baseSprint.setEndDateString("24/MAR/2022");
         baseSprint.setSprintColour("#abcdef");
@@ -66,103 +54,101 @@ public class SprintTests {
     @Test
     public void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
-        when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintByName(nameToSearch)).isEqualTo(List.of(baseSprint));
+        sprintService.saveSprint(baseSprint);
+        List<Sprint> foundSprints = sprintService.getSprintByName(nameToSearch);
+        Sprint foundSprint = foundSprints.get(0);
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
     }
 
     @Test
     public void searchById_getSprint() throws Exception {
-        when(sprintRepository.findSprintById(baseSprint.getId())).thenReturn(baseSprint);
-        assertThat(sprintService.getSprintById(baseSprint.getId())).isEqualTo(baseSprint);
+        sprintService.saveSprint(baseSprint);
+        Sprint foundSprint = sprintService.getSprintById(baseSprint.getId());
+        // TODO fix the date functions in Project and DateUtils so I don't have to write stuff like this
+        // this is needed because dates are in a different format, so they need to be reset
+        // see https://stackoverflow.com/questions/24620064/comparing-of-date-objects-in-java
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
+        // toString used as they're different objects but have the same values
     }
 
     @Test
     public void searchByParentProjectId_getSprint() {
-        int parentProjectIdToSearch = 5;
-        baseSprint.setParentProjectId(parentProjectIdToSearch);
-        when(sprintRepository.findByParentProjectId(parentProjectIdToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintByParentProjectId(parentProjectIdToSearch)).isEqualTo(List.of(baseSprint));
+        sprintService.saveSprint(baseSprint);
+        List<Sprint> foundSprints = sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId());
+        Sprint foundSprint = foundSprints.get(0);
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
+        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
     }
 
     @Test
     void saveNullSprint_getException() {
-        try { // this is how to get at nested exceptions
+        assertThrows(DataIntegrityViolationException.class, () -> {
             sprintRepository.save(new Sprint());
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullNameSprint_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseSprint.setSprintName(null);
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveEmptyNameSprint_getException() {
-        try {
+        assertThrows(TransactionSystemException.class, () -> {
             baseSprint.setSprintName("");
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullDescriptionSprint_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseSprint.setSprintDescription(null);
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullStartDateSprint_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseSprint.setStartDate(null);
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullEndDateSprint_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseSprint.setEndDate(null);
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
 
     @Test
     void saveEmptyColourSprint_getException() {
-        try {
+        assertThrows(TransactionSystemException.class, () -> {
             baseSprint.setSprintColour("");
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
 
     @Test
     void saveNullColourSprint_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseSprint.setSprintColour(null);
             sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test

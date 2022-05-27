@@ -7,18 +7,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Holds unit tests for the Project class.
@@ -40,7 +43,7 @@ public class ProjectTests {
         validator = factory.getValidator();
     }
 
-    @MockBean
+    @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
@@ -54,12 +57,12 @@ public class ProjectTests {
 
     @BeforeEach
     public void setUp() throws ParseException {
+        projectRepository.deleteAll();
         baseProject = new Project();
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
         baseProject.setStartDateString("01/JAN/2022");
         baseProject.setEndDateString("01/OCT/2022");
-        baseProject.setId(1);
 
         sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"), "#aabbcc");
         sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"), "#112233");
@@ -80,68 +83,59 @@ public class ProjectTests {
 
     @Test
     public void searchById_getProject() throws Exception {
-        projectRepository.save(baseProject);
-        when(projectRepository.findProjectById(baseProject.getId())).thenReturn(baseProject);
-        assertThat(projectService.getProjectById(baseProject.getId())).isEqualTo(baseProject);
+        projectService.saveProject(baseProject);
+        Project foundProject = projectService.getProjectById(baseProject.getId());
+        foundProject.setStartDateString(Project.dateToString(foundProject.getProjectStartDate()));
+        foundProject.setEndDateString(Project.dateToString(foundProject.getProjectEndDate()));
+        assertThat(foundProject.toString()).isEqualTo(foundProject.toString());
+        assertEquals(foundProject.toString(), baseProject.toString());
     }
 
     @Test
     void saveNullProject_getException() {
-        try { // this is how to get at nested exceptions
+        assertThrows(TransactionSystemException.class, () -> {
             projectRepository.save(new Project());
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullNameProject_getException() {
-        try {
+        assertThrows(TransactionSystemException.class, () -> {
             baseProject.setProjectName(null);
             projectRepository.save(baseProject);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveEmptyNameProject_getException() {
-        try {
+        assertThrows(TransactionSystemException.class, () -> {
             baseProject.setProjectName("");
             projectRepository.save(baseProject);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullDescriptionProject_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseProject.setProjectDescription(null);
             projectRepository.save(baseProject);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullStartDateProject_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseProject.setProjectStartDate(null);
             projectRepository.save(baseProject);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
     @Test
     void saveNullEndDateProject_getException() {
-        try {
+        assertThrows(DataIntegrityViolationException.class, () -> {
             baseProject.setProjectEndDate(null);
             projectRepository.save(baseProject);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        });
     }
 
 
