@@ -86,8 +86,8 @@ public class ProjectTests {
         // Artificially set for validation here so that tests aren't dependent on when they are run
         creationDate = utils.toDate("2022-05-27");
 
-        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"));
-        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"));
+        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"), "#aabbcc");
+        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"), "#112233");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
     }
