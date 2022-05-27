@@ -19,9 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // console.log("sprint is editable: " +  sprintsEditable);
     let calendar = new FullCalendar.Calendar(calendarEl, {
-        editable: (sprintsEditable === "true"),                // make sprints editable if role is at least Teacher
         eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
-        // eventDurationEditable: false,                       // sprints can't be edited by default
+        eventDurationEditable: false,                       // sprints can't be edited by default
         timeZone: 'UTC',
         initialView: 'dayGridMonth',
         // Restricts the calendar dates based on the given project dates

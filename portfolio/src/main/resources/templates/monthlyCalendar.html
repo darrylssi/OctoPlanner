@@ -26,11 +26,12 @@
     <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString}
     + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
     <div class="content">
+        <br>
+        <div>
+            <!-- Sprint overlap error message -->
+            <p id="invalidDateRangeError" th:text="${invalidDateRangeError}" th:hidden="true" th:class="error"></p>
+        </div>
         <div id='calendar'></div>
-    </div>
-    <div>
-        <!-- Sprint overlap error message -->
-        <p id="invalidDateRangeError" th:text="${invalidDateRangeError}" th:hidden="true" th:class="error"></p>
     </div>
 </body>
 </html>
