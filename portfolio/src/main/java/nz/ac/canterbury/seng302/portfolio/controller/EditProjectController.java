@@ -100,10 +100,13 @@ public class EditProjectController extends PageController {
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
 
+        Project newProject = projectService.getProjectById(id);
+
         /* Convert to date types, then check if in valid range */
         Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
         Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
-        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate,
+                newProject.getProjectCreationDate(), sprintList);
 
 
         /* Return editProject template with user input */
@@ -119,7 +122,6 @@ public class EditProjectController extends PageController {
         }
 
         /* Set (new) project details to the corresponding project */
-        Project newProject = projectService.getProjectById(id);
         newProject.setProjectName(projectName);
         newProject.setProjectStartDate(projectStartDate);
         newProject.setProjectEndDate(projectEndDate);

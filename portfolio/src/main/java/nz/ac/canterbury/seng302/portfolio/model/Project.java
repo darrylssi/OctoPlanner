@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -58,9 +59,11 @@ public class Project {
      *                       Must be after the start date.
      */
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
-        startDate = Project.stringToDate(projectStartDate);
-        endDate = Project.stringToDate(projectEndDate);
-        Project(projectName, projectDescription, startDate, endDate);
+        this.projectName = projectName;
+        this.projectDescription = projectDescription;
+        this.projectStartDate = Project.stringToDate(projectStartDate);
+        this.projectEndDate = Project.stringToDate(projectEndDate);
+        this.projectCreationDate = new Date();
     }
 
     @Override
@@ -163,16 +166,21 @@ public class Project {
         return projectCreationDate;
     }
 
-    public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate, List<Sprint> sprintList) throws ParseException {
+    public String validEditProjectDateRanges(Date projectStartDate, Date projectEndDate,
+            Date projectCreationDate, List<Sprint> sprintList) throws ParseException {
         String invalidDateRange = "";
         DateUtils utils = new DateUtils();
 
-        Date earliestStart = projectCreationDate;
-        earliestStart = DateUtils.addYears(earliestStart, int quantity = -1);
+        /* Calculate earliest possible start date and check that start is not before this */
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(projectCreationDate);
+        startCal.add(Calendar.YEAR, -1);
+        Date earliestStart = startCal.getTime();
         if (projectStartDate.before(earliestStart)) {
-            invalidDateRange += "Project cannot be set to start more than a year before it was created (cannot start before " + utils.toString(earliestStart) + ") - ";
+            invalidDateRange += "Project cannot be set to start more than a year before it was created (cannot start before " + utils.toString(earliestStart) + ")\n";
         }
 
+        /* Check that the project dates still fit around the sprints */
         if (!sprintList.isEmpty()) {
             for (Sprint eachSprint: sprintList) {
                 Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
