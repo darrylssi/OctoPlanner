@@ -4,17 +4,18 @@
  */
 
 if (BASE_URL === undefined) {
-    throw new ReferenceError(
-`Can't load editRoles.js because I can't see any BASE_URL global variable.
-Elsewhere in this webpage, put the script tag:
-<script th:inline="javascript">
-        var BASE_URL = /*[[ \${@environment.getProperty('base-url')} ]] */ "/";
-</script>`
+    alert(
+`Failed loading editRoles.js - couldn't find BASE_URL variable.
+
+If you're a dev, see how it's done in the /users/ HTML file.
+If you're not a dev, politely tell us thanks.`
     )
 }
 
 /**
  * Toggles the visibility of the line's associated add-role dropdown
+ * 
+ * Note these should be gotten rid of when Bootstrap comes along.
  * @param {HTMLElement} elem The button being clicked
  * @param {PointerEvent} event The event (needed to prevent the global onclick from firing)
  */
@@ -58,7 +59,8 @@ function onclickRemoveRole(elem) {
     const userID = elem.getAttribute('data-userid');
     const role = elem.getAttribute('data-role');
     if (userID === undefined || role === undefined) {
-        throw new ReferenceError("The provided element needs a 'data-userid' AND 'data-role' attribute");
+        // The provided element needs 'data-userid' AND 'data-role' attributes
+        throw new ReferenceError("Developer error: Put an onclick on the wrong element.");
     }
     removeRole(userID, role);
 }

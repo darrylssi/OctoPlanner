@@ -70,13 +70,7 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("userName", user.getUsername());
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-                var roles = user.getRolesList().stream()
-                                .map(role -> role.toString().toLowerCase())                 //  COURSE_ADMIN  -> "course_admin"
-                                .map(sRole -> sRole.replace("_", " "))  // "course_admin" -> "course admin"
-                                .map(sRole -> StringUtils.capitalizeWords(sRole))           // "course admin" -> "Course Admin"
-                                .toList();
-                String sRoles = String.join(", ", roles);
-                model.addAttribute("roles", sRoles);
+                model.addAttribute("roles", user.getRolesList());
             } else {
                 errors.add("Invalid ID");
             }

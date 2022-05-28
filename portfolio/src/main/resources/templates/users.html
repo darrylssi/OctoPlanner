@@ -109,7 +109,7 @@
                         <!--/* That long text call turns `COURSE_ADMINISTRATOR` into `Course Administrator` */-->
                         <a th:each="role: ${acceptableRoles}"
                           th:if="${!#arrays.contains(user.getRolesList, role)}"
-                            th:text="${#strings.capitalizeWords(#strings.replace(role, '_', ' ').toLowerCase)}"
+                            th:text="${#roles.toName(role)}"
                             onclick="alert('Add role endpoint not implemented')"></a>
                     </div> 
                 </div>
