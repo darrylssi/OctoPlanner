@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Controller for the add sprint details page
@@ -75,6 +76,13 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
+
+        // Generate a random colour, from https://www.codespeedy.com/generate-random-hex-color-code-in-java/
+        Random random = new Random();
+        int colourNum = random.nextInt(0xffffff + 1);
+        String colourCode = String.format("#%06x", colourNum);
+
+        model.addAttribute("sprintColour", colourCode);
 
         // Puts the default sprint start date
         String getSprintStartDate = "";
@@ -128,14 +136,20 @@ public class AddSprintController extends PageController {
         return "addSprint";
     }
 
-
     /**
      * Adds a sprint to the project
+     * @param principal The principal used for authentication (role checking)
+     * @param id The id of the project to add a sprint to, taken from the URL
      * @param sprintName Gets the given name of the new sprint
      * @param sprintStartDate Gets the given sprint start date
      * @param sprintEndDate Gets the given sprint end date
      * @param sprintDescription Gets the given sprint description
+     * @param sprintColour Gets the given sprint colour string
+     * @param sprint The new sprint to be added
+     * @param result The result object that allows for input validation
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
+     * @throws Exception if project not found or a date cannot be parsed
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
@@ -145,6 +159,7 @@ public class AddSprintController extends PageController {
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
+            @RequestParam(name="sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -170,6 +185,7 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("sprintColour", sprintColour);
             return "addSprint";
         }
 
@@ -180,6 +196,7 @@ public class AddSprintController extends PageController {
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel(labelUtils.nextLabel(id));
+        sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
         return "redirect:../project/" + parentProject.getId();

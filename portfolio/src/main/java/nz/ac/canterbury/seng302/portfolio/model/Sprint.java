@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -39,6 +40,9 @@ public class Sprint {
     @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
 
+    @Column (nullable = false)
+    @Size(max=10)
+    private String sprintColour;
 
     public Sprint() {}
 
@@ -49,37 +53,41 @@ public class Sprint {
      * @param sprintDescription Gets the sprint description given by the user
      * @param sprintStartDate Gets the sprint start date as a Date object
      * @param sprintEndDate Gets the sprint end date as a Date object
+     * @param sprintColour Gets the sprint colour given by the user
      */
-    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate, String sprintColour) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = sprintStartDate;
         this.sprintEndDate = sprintEndDate;
+        this.sprintColour = sprintColour;
     }
 
     /**
      * A constructor which set the given user data to the specified variables
      * @param parentProjectId Gets the project id
-     * @param sprintName Gets the sprint name given by user
+     * @param sprintName Gets the sprint name given by the user
      * @param sprintDescription Gets the sprint description given by the user
      * @param sprintStartDate Gets the sprint start date as a string
      * @param sprintEndDate Gets the sprint end date as a string
+     * @param sprintColour Gets the sprint colour given by the user
      */
-    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate, String sprintColour) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = Project.stringToDate(sprintStartDate);
         this.sprintEndDate = Project.stringToDate(sprintEndDate);
+        this.sprintColour = sprintColour;
     }
 
-    
+
     @Override
     public String toString() {
         return String.format(
-                "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s']",
-                id, parentProjectId, sprintName, sprintLabel, sprintStartDate, sprintEndDate, sprintDescription);
+                "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s', sprintColour='%s']",
+                id, parentProjectId, sprintName, sprintLabel, sprintStartDate, sprintEndDate, sprintDescription, sprintColour);
     }
 
     public void setId(int id) {
@@ -168,4 +176,6 @@ public class Sprint {
 
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
+    public String getSprintColour() { return this.sprintColour;  }
+    public void setSprintColour(String sprintColour) { this.sprintColour = sprintColour; }
 }

@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
@@ -62,9 +66,27 @@ public class ProjectTests {
 
     private Project baseProject;
 
+    private Date creationDate;
+
     private Sprint sprint1;
     private Sprint sprint2;
     private final List<Sprint> sprintList = new ArrayList<>();
+
+    /**
+     * This exists to check that dates are equivalent for the purposes of these tests. It checks
+     * that the dates are on the same day, and disregards the time.
+     *
+     * @param expectedDate {Date} a date with the expected date value
+     * @param givenDate {Date} the given/actual date value
+     */
+    private void assertDatesEqual(Date expectedDate, Date givenDate) throws AssertionError {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        String expectedDateString = formatter.format(expectedDate);
+        String givenDateString = formatter.format(givenDate);
+
+        assertEquals(expectedDateString, givenDateString);
+    }
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -75,8 +97,11 @@ public class ProjectTests {
         baseProject.setEndDateString("01/OCT/2022");
         baseProject.setId(1);
 
-        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"));
-        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"));
+        // Artificially set for validation here so that tests aren't dependent on when they are run
+        creationDate = utils.toDate("2022-05-27");
+
+        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"), "#aabbcc");
+        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"), "#112233");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
     }
@@ -204,6 +229,64 @@ public class ProjectTests {
         assertEquals("The sprint with dates: " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
                 " is outside the project dates" , errorMessage);
+    }
+
+    @Test
+    void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() throws ParseException {
+        // Project start date cannot be more than a year before the artifically set creation date
+
+        /* Given: setup() has been run */
+        /* When: these (valid) dates are validated */
+        String newProjectStartDate = "2021-05-27";
+        String newProjectEndDate = "2022-10-01";
+        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
+                utils.toDate(newProjectEndDate), creationDate, sprintList);
+
+        /* Then: the validation should return a success */
+        assertEquals("" , errorMessage);
+    }
+
+    @Test
+    void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() throws ParseException {
+        /* Given: setup() has been run */
+        /* When: these (invalid) dates are validated */
+        String newProjectStartDate = "2021-05-26";
+        String newProjectEndDate = "2022-10-01";
+        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
+                utils.toDate(newProjectEndDate), creationDate, sprintList);
+
+        /* Then: the validator should catch that the start date is too early */
+        assertEquals("Project cannot be set to start more than a year before it was created " +
+                     "(cannot start before 2021-05-27)\n" , errorMessage);
+    }
+
+    @Test
+    void checkProjectCreationDateRecordedCorrectly_getSuccess() throws ParseException {
+        /* Given: setup() has been run */
+        /* When: the creation date is fetched */
+        Date recordedCreation = baseProject.getProjectCreationDate();
+
+        /* Then: the current date should match the creation date (unless it has just crossed over
+         * midnight, in which case it could match yesterday) */
+        Date currentDate = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        String currentTime = formatter.format(currentDate);
+        if (!currentTime.equals("00:00")) {
+            assertDatesEqual(currentDate, recordedCreation);
+        } else {
+            /* Check if the date matches today; otherwise check if it was yesterday */
+            try {
+                assertDatesEqual(currentDate, recordedCreation);
+            } catch (AssertionError err) {
+                /* Convert to calculate yesterday */
+                Calendar conversionCal = Calendar.getInstance();
+                conversionCal.setTime(currentDate);
+                conversionCal.add(Calendar.DATE, -1);
+                Date yesterday = conversionCal.getTime();
+
+                assertDatesEqual(yesterday, recordedCreation);
+            }
+        }
     }
 }
 
