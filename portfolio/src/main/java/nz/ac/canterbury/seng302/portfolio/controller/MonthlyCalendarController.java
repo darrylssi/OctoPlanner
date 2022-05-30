@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.portfolio.controller.PageController.requiresRoleOfAtLeast;
+
 
 /**
  * Controller for the display project details on the monthly calendar
@@ -64,17 +66,54 @@ public class MonthlyCalendarController {
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
+        model.addAttribute("sprintId", "");
+        model.addAttribute("sprintStartDate", "");
+        model.addAttribute("sprintEndDate", "");
+        model.addAttribute("invalidDateRangeError", "");
 
         sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
             // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
             ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintService.getSprintsOfProjectById(id));
 
-            model.addAttribute("sprintNames", getSprintsArrayList.get(0));
-            model.addAttribute("sprintStartDates", getSprintsArrayList.get(1));
-            model.addAttribute("sprintEndDates", getSprintsArrayList.get(2));
+            model.addAttribute("sprintIds", getSprintsArrayList.get(0));
+            model.addAttribute("sprintNames", getSprintsArrayList.get(1));
+            model.addAttribute("sprintStartDates", getSprintsArrayList.get(2));
+            model.addAttribute("sprintEndDates", getSprintsArrayList.get(3));
         }
 
+        return "monthlyCalendar";
+    }
+
+
+    @PostMapping("/monthlyCalendar/{id}")
+    public String updateMonthlyCalendar(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="id") int id,
+            @RequestParam(name="sprintId") String sprintId,
+            @RequestParam(name="sprintStartDate") String sprintStartDate,
+            @RequestParam(name="sprintEndDate") String sprintEndDate,
+            Model model
+    ) throws Exception  {
+        // checks ...
+        int currSprintId = Integer.parseInt(sprintId);
+        System.out.println("back id:  " + currSprintId);
+        if (currSprintId != (int)currSprintId) {
+            getMonthlyCalendar(principal, id, model);
+        }
+
+        // update the given sprint dates data
+        Sprint getSprintAtId = sprintService.getSprintById(currSprintId);
+        getSprintAtId.setStartDate(utils.toDate(sprintStartDate));
+        getSprintAtId.setEndDate(utils.toDate(sprintEndDate));
+
+        System.out.println("id:  " + currSprintId);
+        System.out.println("start:  " + utils.toDate(sprintStartDate));
+        System.out.println("end:  " + utils.toDate(sprintEndDate));
+
+
+
+        sprintService.saveSprint(getSprintAtId);
         return "monthlyCalendar";
     }
 
@@ -89,23 +128,27 @@ public class MonthlyCalendarController {
         // Initializing the array list
         ArrayList<String> sprintsDetailsList = new ArrayList<String>();
 
+        String sprintIds = "";                  // Initiating the sprint ids list
         String sprintNames = "";                // Initiating the sprint names list
         String sprintStartDates = "";           // Initiating the sprint start dates list
         String sprintEndDates = "";             // Initiating the sprint end dates list
 
         // For loop to add each sprint names, start date and end date to the respective strings
         for (Sprint eachSprint: sprintList) {
+            sprintIds += eachSprint.getId() + ",";
             sprintNames += eachSprint.getSprintName() + ",";
             sprintStartDates += eachSprint.getSprintStartDate().toString().substring(0, 10) + ",";
             sprintEndDates += addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",";
         }
 
         // Removing the string's last character, which is ","
+        sprintIds = sprintIds.substring(0, sprintIds.length()-1);
         sprintNames = sprintNames.substring(0 , sprintNames.length()-1);
         sprintStartDates = sprintStartDates.substring(0, sprintStartDates.length()-1);
         sprintEndDates = sprintEndDates.substring(0, sprintEndDates.length()-1);
 
         // Adding to the sprintsDetailsList
+        sprintsDetailsList.add(sprintIds);
         sprintsDetailsList.add(sprintNames);
         sprintsDetailsList.add(sprintStartDates);
         sprintsDetailsList.add(sprintEndDates);

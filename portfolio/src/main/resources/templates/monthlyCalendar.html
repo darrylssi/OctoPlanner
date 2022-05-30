@@ -13,11 +13,17 @@
         let projectEndDate = "[[${projectEndDate}]]";
 
         // Getting all sprint's string list which contains names, start date and end date
+        let sprintIds = "[[${sprintIds}]]";
         let sprintNames = "[[${sprintNames}]]";
         let sprintStartDates = "[[${sprintStartDates}]]";
         let sprintEndDates = "[[${sprintEndDates}]]";
 
         let sprintsEditable = "[[${sprintsEditable}]]";
+
+        // // initializing the dates for the event dates that will be updated when resizing
+        // let updatedCurrSprintId = "";
+        // let updatedCurrSprintStartDate = "";
+        // let updatedCurrSprintEndDate = "";
     </script>
     <script th:src="|../scripts/monthlyCalendar.js|"></script>
 
@@ -29,9 +35,14 @@
         <br>
         <div>
             <!-- Sprint overlap error message -->
-            <p id="invalidDateRangeError" th:hidden="true" th:class="error"></p>
+            <p id="invalidDateRangeError" th:text="${invalidDateRangeError}" th:hidden="true" th:class="error"></p>
         </div>
         <div id='calendar'></div>
+        <div>
+            <input id="sprintId" th:name="sprintId" th:field="*{sprintId}" />
+            <input id="sprintStartDate" th:name="sprintStartDate" th:field="*{sprintStartDate}" />
+            <input id="sprintEndDate" th:name="sprintEndDate" th:field="*{sprintEndDate}" />
+        </div>
     </div>
 </body>
 </html>
