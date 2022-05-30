@@ -221,9 +221,16 @@ public class UserAccountClientService {
         return username;
     }
 
+    /**
+     * Sends an UploadUserProfilePhotoRequest to the identity provider.
+     * @param userId ID of the user to upload the profile photo to
+     * @param file Image file to be uploaded
+     * @throws IOException When there is an error with reading file
+     */
     public void uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
 
         StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
+
         String filetype = file.getContentType().split("/")[1];
 
         UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()

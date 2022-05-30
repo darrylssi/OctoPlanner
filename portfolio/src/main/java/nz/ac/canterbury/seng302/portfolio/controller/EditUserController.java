@@ -152,6 +152,14 @@ public class EditUserController {
         return "editUser";
     }
 
+    /**
+     * Post request for uploading a selected image file.
+     * @param id ID of the user to be edited
+     * @param file Image file to be uploaded
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Profile page of the user
+     * @throws IOException When there is an error uploading the photo
+     */
     @PostMapping(value = "/users/{id}/upload")
     public String uploadPhoto(
             @PathVariable int id,
