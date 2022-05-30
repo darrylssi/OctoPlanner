@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,7 +62,7 @@ public class ProjectTests {
     @MockBean
     private ProjectRepository projectRepository;
 
-    @Autowired
+    @Spy
     private DateUtils utils;
 
     private Project baseProject;
@@ -107,7 +108,7 @@ public class ProjectTests {
     }
 
     @Test
-    public void setNullName_getViolation() {
+    void setNullName_getViolation() {
         baseProject.setProjectName(null);
         Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
@@ -118,7 +119,7 @@ public class ProjectTests {
     }
 
     @Test
-    public void searchById_getProject() throws Exception {
+    void searchById_getProject() throws Exception {
         projectRepository.save(baseProject);
         when(projectRepository.findProjectById(baseProject.getId())).thenReturn(baseProject);
         assertThat(projectService.getProjectById(baseProject.getId())).isEqualTo(baseProject);
@@ -190,9 +191,9 @@ public class ProjectTests {
         // Sprint 2:  2022-02-06 -- 2022-03-04
         Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        baseProject.setProjectStartDate(utils.toDate("2022-02-04"));
-        baseProject.setProjectEndDate(utils.toDate("2022-08-05"));
-        String errorMessage = validationService.validateProjectDates(baseProject);
+        Date start = utils.toDate("2022-02-04");
+        Date end = utils.toDate("2022-08-05");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         assertEquals("The sprint with dates: " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -206,9 +207,9 @@ public class ProjectTests {
         // Sprint 2:  2022-02-06 -- 2022-03-04
         Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        baseProject.setProjectStartDate(utils.toDate("2022-01-20"));
-        baseProject.setProjectEndDate(utils.toDate("2022-08-20"));
-        String errorMessage = validationService.validateProjectDates(baseProject);
+        Date start = utils.toDate("2022-01-20");
+        Date end = utils.toDate("2022-01-20");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         assertEquals("The sprint with dates: " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -222,9 +223,9 @@ public class ProjectTests {
         // Sprint 2:  2022-02-06 -- 2022-03-04
         Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
-        baseProject.setProjectStartDate(utils.toDate("2022-01-01"));
-        baseProject.setProjectEndDate(utils.toDate("2022-02-10"));
-        String errorMessage = validationService.validateProjectDates(baseProject);
+        Date start = utils.toDate("2022-01-01");
+        Date end = utils.toDate("2022-02-10");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         assertEquals("The sprint with dates: " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
@@ -233,14 +234,13 @@ public class ProjectTests {
 
     @Test
     void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() throws ParseException {
-        // Project start date cannot be more than a year before the artifically set creation date
+        // Project start date cannot be more than a year before the artificially set creation date
 
         /* Given: setup() has been run */
         /* When: these (valid) dates are validated */
-        String newProjectStartDate = "2021-05-27";
-        String newProjectEndDate = "2022-10-01";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
+        Date start = utils.toDate("2021-05-27");
+        Date end = utils.toDate("2022-10-01");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         /* Then: the validation should return a success */
         assertEquals("" , errorMessage);
@@ -250,18 +250,17 @@ public class ProjectTests {
     void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() throws ParseException {
         /* Given: setup() has been run */
         /* When: these (invalid) dates are validated */
-        String newProjectStartDate = "2021-05-26";
-        String newProjectEndDate = "2022-10-01";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
+        Date start = utils.toDate("2021-05-26");
+        Date end = utils.toDate("2022-10-01");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before 2021-05-27)\n" , errorMessage);
+                     "(cannot start before 2021-05-27)" , errorMessage);
     }
 
     @Test
-    void checkProjectCreationDateRecordedCorrectly_getSuccess() throws ParseException {
+    void checkProjectCreationDateRecordedCorrectly_getSuccess() {
         /* Given: setup() has been run */
         /* When: the creation date is fetched */
         Date recordedCreation = baseProject.getProjectCreationDate();

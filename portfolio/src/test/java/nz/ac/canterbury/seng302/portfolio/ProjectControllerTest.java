@@ -20,7 +20,7 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockPrincipal(TEACHER)
-public class ProjectControllerTest {
+class ProjectControllerTest {
 
     final Logger logger = LoggerFactory.getLogger(ProjectControllerTest.class);
 
@@ -28,28 +28,28 @@ public class ProjectControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getProjectMissingId_throw404() throws Exception {
+    void getProjectMissingId_throw404() throws Exception {
         this.mockMvc.perform(get("/edit-project/-1"))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason(containsString("Project not found")));
     }
 
     @Test
-    public void getProjectValidId() throws Exception {
+    void getProjectValidId() throws Exception {
         this.mockMvc.perform(get("/edit-project/0"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    public void getProjectEditPage_AccessDenied() throws Exception {
+    void getProjectEditPage_AccessDenied() throws Exception {
         this.mockMvc.perform(get("/edit-project/0"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    public void editProjectAsStudent_AccessDenied() throws Exception {
+    void editProjectAsStudent_AccessDenied() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                 .param("projectName", "TEST")
                 .param("projectStartDate",  "2021-03-04")
@@ -70,7 +70,7 @@ public class ProjectControllerTest {
     // }
 
     @Test
-    public void postProjectWithNoName_thenShowError() throws Exception {
+    void postProjectWithNoName_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                 .param("projectName", "")
                 .param("projectDescription", "desc")
@@ -81,7 +81,7 @@ public class ProjectControllerTest {
     }
 
     @Test
-    public void postProjectWitLongName_thenShowError() throws Exception {
+    void postProjectWitLongName_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                         .param("projectName", "blah".repeat(1000))
                         .param("projectDescription", "desc")
@@ -92,7 +92,7 @@ public class ProjectControllerTest {
     }
 
     @Test
-    public void postProjectWithInvalidDesc_thenShowError() throws Exception {
+    void postProjectWithInvalidDesc_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                         .param("projectName", "")
                         .param("projectDescription", "Lorem ipsum dolor sit amet, consectetur adipisicing " +
@@ -105,7 +105,7 @@ public class ProjectControllerTest {
     }
 
     @Test
-    public void postProjectWithEarlyStart_thenShowError() throws Exception {
+    void postProjectWithEarlyStart_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                 .param("projectName", "")
                 .param("projectDescription", "desc")

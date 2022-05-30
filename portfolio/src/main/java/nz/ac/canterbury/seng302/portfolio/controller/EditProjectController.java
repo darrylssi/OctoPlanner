@@ -24,8 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.List;
-
 
 /**
  * Controller for the edit project details page
@@ -96,18 +94,9 @@ public class EditProjectController extends PageController {
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
-        String dateOutOfRange = validationService.validateProjectDates(project);
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
-
         Project newProject = projectService.getProjectById(id);
 
-        /* Convert to date types, then check if in valid range */
-        Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
-        Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
-        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate,
-                newProject.getProjectCreationDate(), sprintList);
-
+        String dateOutOfRange = validationService.validateProjectDates(projectStartDate, projectEndDate, newProject.getProjectCreationDate());
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
