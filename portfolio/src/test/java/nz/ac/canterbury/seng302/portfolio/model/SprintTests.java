@@ -59,6 +59,7 @@ public class SprintTests {
         baseSprint.setParentProjectId(5);
         baseSprint.setStartDateString("05/FEB/2022");
         baseSprint.setEndDateString("24/MAR/2022");
+        baseSprint.setSprintColour("#abcdef");
         sprintList.add(baseSprint);
     }
 
@@ -136,6 +137,28 @@ public class SprintTests {
     void saveNullEndDateSprint_getException() {
         try {
             baseSprint.setEndDate(null);
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+
+    @Test
+    void saveEmptyColourSprint_getException() {
+        try {
+            baseSprint.setSprintColour("");
+            sprintRepository.save(baseSprint);
+        } catch (TransactionSystemException e) {
+            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
+        }
+    }
+
+
+    @Test
+    void saveNullColourSprint_getException() {
+        try {
+            baseSprint.setSprintColour(null);
             sprintRepository.save(baseSprint);
         } catch (TransactionSystemException e) {
             assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
