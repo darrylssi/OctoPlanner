@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let selectedSprint = null;
 
-    // console.log("sprint is editable: " +  sprintsEditable);
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
         eventDurationEditable: false,                       // sprints can't be edited by default
@@ -31,9 +30,13 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonText: {
             today: "Today"
         },
-        eventOverlap: function () {
+        eventOverlap: function (stillEvent, movingEvent) {
             // shows the sprint overlap error message
             document.getElementById("invalidDateRangeError").hidden = false;
+
+            // sets the sprint overlap error message based on the selected sprint
+            document.getElementById("invalidDateRangeError").innerText = "Error: " + movingEvent.title.toString()
+            + " must not overlap with " + stillEvent.title.toString();
         },
         eventClick: function(info) {
             if(sprintsEditable === "true") {

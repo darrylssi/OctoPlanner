@@ -64,7 +64,6 @@ public class MonthlyCalendarController {
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
-        model.addAttribute("invalidDateRangeError", "Sprint must not overlap");
 
         sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
