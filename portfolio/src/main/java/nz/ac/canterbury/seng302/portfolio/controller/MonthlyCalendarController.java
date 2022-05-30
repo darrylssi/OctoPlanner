@@ -73,6 +73,7 @@ public class MonthlyCalendarController {
             model.addAttribute("sprintNames", getSprintsArrayList.get(0));
             model.addAttribute("sprintStartDates", getSprintsArrayList.get(1));
             model.addAttribute("sprintEndDates", getSprintsArrayList.get(2));
+            model.addAttribute("sprintColours", getSprintsArrayList.get(3));
         }
 
         return "monthlyCalendar";
@@ -92,23 +93,27 @@ public class MonthlyCalendarController {
         String sprintNames = "";                // Initiating the sprint names list
         String sprintStartDates = "";           // Initiating the sprint start dates list
         String sprintEndDates = "";             // Initiating the sprint end dates list
+        String sprintColours = "";             // Initiating the sprint colours list
 
 
         for (Sprint eachSprint: sprintList) {
             sprintNames += eachSprint.getSprintName() + ",";
             sprintStartDates += eachSprint.getSprintStartDate().toString().substring(0, 10) + ",";
             sprintEndDates += addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",";
+            sprintColours += eachSprint.getSprintColour() + ",";
         }
 
         // Removing the string's last character, which is ","
         sprintNames = sprintNames.substring(0 , sprintNames.length()-1);
         sprintStartDates = sprintStartDates.substring(0, sprintStartDates.length()-1);
         sprintEndDates = sprintEndDates.substring(0, sprintEndDates.length()-1);
+        sprintColours = sprintColours.substring(0, sprintColours.length()-1);
 
         // Adding to the sprintsDetailsList
         sprintsDetailsList.add(sprintNames);
         sprintsDetailsList.add(sprintStartDates);
         sprintsDetailsList.add(sprintEndDates);
+        sprintsDetailsList.add(sprintColours);
 
         return sprintsDetailsList;
     }
