@@ -32,15 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let selectedSprint = null;
 
-let mouseoverSprint = false;
-document.addEventListener('mousedown', () => {
-    if(!mouseoverSprint){
-        if (selectedSprint != null) {
-            // deselect sprint
-            selectedSprint.setProp('durationEditable', false);
-            selectedSprint = null;
+    let mouseoverSprint = false;
+    document.addEventListener('mousedown', () => {
+        if(!mouseoverSprint){
+            if (selectedSprint != null) {
+                // deselect sprint
+                selectedSprint.setProp('durationEditable', false);
+                selectedSprint = null;
+            }
         }
-    }})
+    })
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventResizableFromStart:true, // when resizing sprints, can be done from start as well as end
