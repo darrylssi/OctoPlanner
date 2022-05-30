@@ -16,7 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
-import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -152,14 +152,15 @@ public class EditUserController {
         return "editUser";
     }
 
-    @PostMapping(value = "/users/{id}/test", params = {"fileType"})
+    @PostMapping(value = "/users/{id}/upload")
     public String uploadPhoto(
             @PathVariable int id,
-            @RequestParam(name="fileType") String fileType,
+            @RequestParam("file") MultipartFile file,
             Model model
     ) throws IOException {
-        userAccountClientService.uploadUserProfilePhoto(id, "jpg");
-        return "editUser";
+        model.addAttribute("file", file);
+        userAccountClientService.uploadUserProfilePhoto(id, file);
+        return "redirect:../" + id;
     }
 
 }

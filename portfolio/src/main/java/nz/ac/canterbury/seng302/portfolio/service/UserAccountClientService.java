@@ -1,24 +1,20 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
 import com.google.protobuf.ByteString;
-import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
-import nz.ac.canterbury.seng302.shared.util.FileUploadStatusResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 public class UserAccountClientService {
@@ -225,21 +221,21 @@ public class UserAccountClientService {
         return username;
     }
 
-    public void uploadUserProfilePhoto(int userId, String fileType) throws IOException {
+    public void uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
 
         StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
-        Path path = Paths.get("src/main/resources/static/img/test.jpg");
+        String filetype = file.getContentType().split("/")[1];
 
         UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
                 .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
                         .setUserId(userId)
-                        .setFileType(fileType)
+                        .setFileType(filetype)
                         .build())
                 .build();
         streamObserver.onNext(metadata);
 
         // upload file as chunk
-        InputStream inputStream = Files.newInputStream(path);
+        InputStream inputStream = file.getInputStream();
         byte[] bytes = new byte[4096];
         int size;
         while ((size = inputStream.read(bytes)) > 0){
