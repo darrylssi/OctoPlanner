@@ -1,4 +1,17 @@
 
+// Will return black or white based on the provided colour string
+// so that text shows up
+// based on https://www.w3.org/TR/AERT/#color-contrast
+// and https://stackoverflow.com/questions/11867545/change-text-color-based-on-brightness-of-the-covered-background-area
+// (Alex Ball's answer)
+function getTextColour(hexColourString) {
+    let r = parseInt(hexColourString.slice(1, 3), 16);
+    let g = parseInt(hexColourString.slice(3, 5), 16);
+    let b = parseInt(hexColourString.slice(5, 7), 16);
+
+    let brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+    return (brightness > 125) ? 'black' : 'white';
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     let calendarEl = document.getElementById('calendar');
@@ -8,13 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let sprintNamesList = sprintNames.split(",");
     let sprintStartDatesList = sprintStartDates.split(",");
     let sprintEndDatesList = sprintEndDates.split(",");
+    let sprintColoursList = sprintColours.split(",");
+
 
     // Creating one list for calendar sprints
     let sprints = [];
-    let colours = ["cornflowerblue", "firebrick", "forestgreen", "blueviolet", "tomato", "darkslategrey", "darkorchid"];
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i], backgroundColor: colours[i % colours.length]} )
+            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i])})
     }
 
 
@@ -25,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
         validRange: {
             start: projectStartDate,
             end: projectEndDate
+        },
+        buttonText: {
+            today: "Today"
         },
         // Used to show all the sprints on the calendar
         events: sprints
