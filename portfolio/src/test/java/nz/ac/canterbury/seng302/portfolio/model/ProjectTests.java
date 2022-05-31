@@ -62,7 +62,7 @@ public class ProjectTests {
 
     private Sprint sprint1;
     private Sprint sprint2;
-    private List<Sprint> sprintList = new ArrayList<>();
+    private List<Sprint> sprintList;
 
     /**
      * This exists to check that dates are equivalent for the purposes of these tests. It checks
@@ -82,6 +82,7 @@ public class ProjectTests {
 
     @BeforeEach
     public void setUp() throws ParseException {
+        sprintList = new ArrayList<>();
         projectRepository.deleteAll();
         baseProject = new Project();
         baseProject.setProjectName("Project 1");
@@ -99,71 +100,59 @@ public class ProjectTests {
     }
 
     @Test
-    public void setNullName_getViolation() {
+    void setNullName_getViolation() {
         baseProject.setProjectName(null);
         Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
-                "Project name is required", // this should match the (message = "asdf") part of the annotation
+                "Project name is required", // this should match the (message = "test") part of the annotation
                 constraintViolations.iterator().next().getMessage()
         );
     }
 
     @Test
-    public void searchById_getProject() throws Exception {
+    void searchById_getProject() throws Exception {
         projectService.saveProject(baseProject);
         Project foundProject = projectService.getProjectById(baseProject.getId());
         foundProject.setStartDateString(Project.dateToString(foundProject.getProjectStartDate()));
         foundProject.setEndDateString(Project.dateToString(foundProject.getProjectEndDate()));
-        assertThat(foundProject.toString()).isEqualTo(foundProject.toString());
         assertEquals(foundProject.toString(), baseProject.toString());
     }
 
     @Test
     void saveNullProject_getException() {
-        assertThrows(TransactionSystemException.class, () -> {
-            projectRepository.save(new Project());
-        });
+        Project nullProject = new Project();
+        assertThrows(TransactionSystemException.class, () -> projectRepository.save(nullProject));
     }
 
     @Test
     void saveNullNameProject_getException() {
-        assertThrows(TransactionSystemException.class, () -> {
-            baseProject.setProjectName(null);
-            projectRepository.save(baseProject);
-        });
+        baseProject.setProjectName(null);
+        assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveEmptyNameProject_getException() {
-        assertThrows(TransactionSystemException.class, () -> {
-            baseProject.setProjectName("");
-            projectRepository.save(baseProject);
-        });
+        baseProject.setProjectName("");
+        assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullDescriptionProject_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseProject.setProjectDescription(null);
-            projectRepository.save(baseProject);
-        });
+        baseProject.setProjectDescription(null);
+        assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullStartDateProject_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseProject.setProjectStartDate(null);
-            projectRepository.save(baseProject);
-        });
+        baseProject.setProjectStartDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullEndDateProject_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseProject.setProjectEndDate(null);
-            projectRepository.save(baseProject);
-        });
+        baseProject.setProjectEndDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
 

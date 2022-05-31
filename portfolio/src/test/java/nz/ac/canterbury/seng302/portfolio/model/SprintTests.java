@@ -14,8 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * These tests (should) make sure that the JPA annotations (e.g. @NotEmpty) work correctly.
  */
 @SpringBootTest
-public class SprintTests {
+class SprintTests {
     @Autowired
     private SprintService sprintService;
 
@@ -33,11 +32,12 @@ public class SprintTests {
     @Autowired
     private SprintRepository sprintRepository;
 
-    private List<Sprint> sprintList = new ArrayList<>();
+    private List<Sprint> sprintList;
     private Sprint baseSprint;
 
     @BeforeEach
     public void setUp() {
+        sprintList = new ArrayList<>();
         int parentProjId = 5;
         sprintRepository.deleteAll();
         baseSprint = new Sprint();
@@ -52,18 +52,18 @@ public class SprintTests {
     }
 
     @Test
-    public void searchByName_getSprint() {
+    void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
         sprintService.saveSprint(baseSprint);
         List<Sprint> foundSprints = sprintService.getSprintByName(nameToSearch);
         Sprint foundSprint = foundSprints.get(0);
         foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
         foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
     }
 
     @Test
-    public void searchById_getSprint() throws Exception {
+    void searchById_getSprint() throws Exception {
         sprintService.saveSprint(baseSprint);
         Sprint foundSprint = sprintService.getSprintById(baseSprint.getId());
         // TODO fix the date functions in Project and DateUtils so I don't have to write stuff like this
@@ -71,84 +71,69 @@ public class SprintTests {
         // see https://stackoverflow.com/questions/24620064/comparing-of-date-objects-in-java
         foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
         foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
         // toString used as they're different objects but have the same values
     }
 
     @Test
-    public void searchByParentProjectId_getSprint() {
+    void searchByParentProjectId_getSprint() {
         sprintService.saveSprint(baseSprint);
         List<Sprint> foundSprints = sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId());
         Sprint foundSprint = foundSprints.get(0);
         foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
         foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
-        assertThat(foundSprint.toString()).isEqualTo(baseSprint.toString());
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
     }
 
     @Test
     void saveNullSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            sprintRepository.save(new Sprint());
-        });
+        Sprint nullSprint = new Sprint();
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(nullSprint));
     }
 
     @Test
     void saveNullNameSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseSprint.setSprintName(null);
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setSprintName(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveEmptyNameSprint_getException() {
-        assertThrows(TransactionSystemException.class, () -> {
-            baseSprint.setSprintName("");
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setSprintName("");
+        assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullDescriptionSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseSprint.setSprintDescription(null);
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setSprintDescription(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullStartDateSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseSprint.setStartDate(null);
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setStartDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullEndDateSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseSprint.setEndDate(null);
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setEndDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
 
     @Test
     void saveEmptyColourSprint_getException() {
-        assertThrows(TransactionSystemException.class, () -> {
-            baseSprint.setSprintColour("");
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setSprintColour("");
+        assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
     }
 
 
     @Test
     void saveNullColourSprint_getException() {
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            baseSprint.setSprintColour(null);
-            sprintRepository.save(baseSprint);
-        });
+        baseSprint.setSprintColour(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
