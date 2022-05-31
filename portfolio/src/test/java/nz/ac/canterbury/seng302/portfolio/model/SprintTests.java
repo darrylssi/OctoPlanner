@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.TransactionSystemException;
 
 import javax.validation.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
  * These tests (should) make sure that the JPA annotations (e.g. @NotEmpty) work correctly.
  */
 @SpringBootTest
-public class SprintTests {
+class SprintTests {
     @Autowired
     private SprintService sprintService;
 
@@ -67,20 +68,20 @@ public class SprintTests {
     }
 
     @Test
-    public void searchByName_getSprint() {
+    void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
         when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
         assertThat(sprintService.getSprintByName(nameToSearch)).isEqualTo(List.of(baseSprint));
     }
 
     @Test
-    public void searchById_getSprint() throws Exception {
+    void searchById_getSprint() throws Exception {
         when(sprintRepository.findSprintById(baseSprint.getId())).thenReturn(baseSprint);
         assertThat(sprintService.getSprintById(baseSprint.getId())).isEqualTo(baseSprint);
     }
 
     @Test
-    public void searchByParentProjectId_getSprint() {
+    void searchByParentProjectId_getSprint() {
         int parentProjectIdToSearch = 5;
         baseSprint.setParentProjectId(parentProjectIdToSearch);
         when(sprintRepository.findByParentProjectId(parentProjectIdToSearch)).thenReturn(List.of(baseSprint));
@@ -169,7 +170,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkGivenDatesAreValidForAddSprints_getStringMessage() throws Exception {
+    void checkGivenDatesAreValidForAddSprints_getStringMessage() {
         Date sprintStartDate = utils.toDate("2022-01-02");
         Date sprintEndDate = utils.toDate("2022-02-02");
 
@@ -182,7 +183,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintStartDateOverlapsProjectStartDateForAddSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsProjectStartDateForAddSprints_getStringMessage() {
         String sprintStartDate = "2021-12-31";
         String sprintEndDate = " 2022-02-02";
 
@@ -195,7 +196,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintEndDateOverlapsProjectEndDateForAddSprints_getStringMessage() throws Exception {
+    void checkSprintEndDateOverlapsProjectEndDateForAddSprints_getStringMessage() {
         String sprintStartDate = "2022-11-02";
         String sprintEndDate = "2023-01-02";
 
@@ -208,7 +209,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintStartDateOverlapsSprintEndDateForAddSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsSprintEndDateForAddSprints_getStringMessage() {
         String sprintStartDate = "2022-01-10";
         String sprintEndDate = "2022-01-08";
 
@@ -220,7 +221,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForAddSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForAddSprints_getStringMessage() {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String sprintStartDate = "2022-02-05";
         String sprintEndDate = "2022-03-24";
@@ -236,7 +237,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkCurrentSprintDatesOverlapsSprintListDatesForAddSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesOverlapsSprintListDatesForAddSprints_getStringMessage() {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String sprintStartDate = "2022-02-25";
         String sprintEndDate = "2022-04-02";
@@ -253,7 +254,7 @@ public class SprintTests {
 
     //
     @Test
-    void checkSprintStartDateOverlapsProjectStartDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsProjectStartDateForEditSprints_getStringMessage() {
         String sprintStartDate = "2021-12-31";
         String sprintEndDate = "2022-02-02";
 
@@ -266,7 +267,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintEndDateOverlapsProjectEndDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintEndDateOverlapsProjectEndDateForEditSprints_getStringMessage() {
         String sprintStartDate = "2022-11-02";
         String sprintEndDate = "2023-01-02";
 
@@ -279,7 +280,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkSprintStartDateOverlapsSprintEndDateForEditSprints_getStringMessage() throws Exception {
+    void checkSprintStartDateOverlapsSprintEndDateForEditSprints_getStringMessage() {
         String sprintStartDate = "2022-01-10";
         String sprintEndDate = "2022-01-08";
 
@@ -291,7 +292,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForEditSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesHasSameDateAsOneSprintListDatesForEditSprints_getStringMessage() {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String sprintStartDate = "2022-02-05";
         String sprintEndDate = "2022-03-24";
@@ -307,7 +308,7 @@ public class SprintTests {
     }
 
     @Test
-    void checkCurrentSprintDatesOverlapsSprintListDatesForEditSprints_getStringMessage() throws Exception {
+    void checkCurrentSprintDatesOverlapsSprintListDatesForEditSprints_getStringMessage() {
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         String sprintStartDate = "2022-02-25";
         String sprintEndDate = "2022-04-02";

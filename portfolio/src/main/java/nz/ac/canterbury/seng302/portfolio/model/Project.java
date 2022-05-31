@@ -1,15 +1,18 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
-import java.text.SimpleDateFormat;
 
 @Entity // this is an entity, assumed to be in a table called Project
 @Table (name = "Project")
 public class Project {
+    @Transient
+    private final DateUtils utils = new DateUtils();
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -40,8 +43,8 @@ public class Project {
 
     /**
      * Constructor taking dates as Date objects directly
-     * @param projectName
-     * @param projectDescription
+     * @param projectName {String}The name of the project
+     * @param projectDescription {String} The project description
      * @param projectStartDate {Date} project start date. Must be before the end date.
      * @param projectEndDate {Date} project end date. Must be after the start date.
      */
@@ -56,8 +59,8 @@ public class Project {
     /**
      * Constructor taking dates as String objects. Date strings should be of the format dd/MON/yyyy, where MON is the
      * first three letters of the name of the month, e.g. Jan, Feb, Mar, Apr, etc. Day and year are numbers.
-     * @param projectName The name of the project
-     * @param projectDescription The project description
+     * @param projectName {String} The name of the project
+     * @param projectDescription {String} The project description
      * @param projectStartDate {String} project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
      *                         Must be before the end date.
      * @param projectEndDate {String} project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
@@ -66,8 +69,8 @@ public class Project {
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
         this.projectName = projectName;
         this.projectDescription = projectDescription;
-        this.projectStartDate = Project.stringToDate(projectStartDate);
-        this.projectEndDate = Project.stringToDate(projectEndDate);
+        this.projectStartDate = utils.toDate(projectStartDate);
+        this.projectEndDate = utils.toDate(projectEndDate);
         this.projectCreationDate = new Date();
     }
 
@@ -76,32 +79,6 @@ public class Project {
         return String.format(
                 "Project[id=%d, projectName='%s', projectStartDate='%s', projectEndDate='%s', projectDescription='%s']",
                 id, projectName, projectStartDate, projectEndDate, projectDescription);
-    }
-
-    /**
-     * Gets the date form of the given date string
-     *
-     * @param dateString the string to read as a date in format 01/Jan/2000
-     * @return the given date, as a date object
-     */
-    public static Date stringToDate(String dateString) {
-        Date date = null;
-        try {
-            date = new SimpleDateFormat("dd/MMM/yyyy").parse(dateString);
-        } catch (Exception e) {
-            System.err.println("Error parsing date: " + e.getMessage());
-        }
-        return date;
-    }
-
-    /**
-     * Gets the string form of the given date in
-     *
-     * @param date the date to convert
-     * @return the given date, as a string in format 01/Jan/2000
-     */
-    static String dateToString(Date date) {
-        return new SimpleDateFormat("dd/MMM/yyyy").format(date);
     }
 
     public int getId() {
@@ -147,19 +124,19 @@ public class Project {
     /* Dates have string get/set methods to interact with view */
 
     public String getStartDateString() {
-        return Project.dateToString(this.projectStartDate);
+        return utils.toString(this.projectStartDate);
     }
 
     public void setStartDateString(String date) {
-        this.projectStartDate = Project.stringToDate(date);
+        this.projectStartDate = utils.toDate(date);
     }
 
     public String getEndDateString() {
-        return Project.dateToString(this.projectEndDate);
+        return utils.toString(this.projectEndDate);
     }
 
     public void setEndDateString(String date) {
-        this.projectEndDate = Project.stringToDate(date);
+        this.projectEndDate = utils.toDate(date);
     }
 
     public void setProjectCreationDate(Date projectCreationDate) {

@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -13,6 +15,7 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
     /**
      * Converts a Date type object to String with yyyy-MM-dd format.
      * @param date Date to be converted
@@ -26,9 +29,13 @@ public class DateUtils {
      * Converts a String in yyyy-MM-dd format to a Date object.
      * @param date String to be converted to Date
      * @return Date object
-     * @throws ParseException If the String date is of unexpected format
      */
-    public Date toDate(String date) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+    public Date toDate(String date) {
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date: %s", e.getMessage()));
+        }
+        return null;
     }
 }

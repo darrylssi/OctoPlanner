@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -13,6 +14,9 @@ import java.util.Date;
  */
 @Entity
 public class Sprint {
+    @Transient
+    private final DateUtils utils = new DateUtils();
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -77,8 +81,8 @@ public class Sprint {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
-        this.sprintStartDate = Project.stringToDate(sprintStartDate);
-        this.sprintEndDate = Project.stringToDate(sprintEndDate);
+        this.sprintStartDate = utils.toDate(sprintStartDate);
+        this.sprintEndDate = utils.toDate(sprintEndDate);
         this.sprintColour = sprintColour;
     }
 
@@ -134,9 +138,7 @@ public class Sprint {
      * Gets the string format of the sprint start date
      * @return sprint's start date as a string
      */
-    public String getStartDateString() {
-        return Project.dateToString(this.sprintStartDate);
-    }
+    public String getStartDateString() {return utils.toString(this.sprintStartDate);}
 
     public void setStartDate(Date newStartDate) {
         this.sprintStartDate = newStartDate;
@@ -147,7 +149,7 @@ public class Sprint {
      * @param date Gets the sprint start date as a string given by the user
      */
     public void setStartDateString(String date) {
-        this.sprintStartDate = Project.stringToDate(date);
+        this.sprintStartDate = utils.toDate(date);
     }
 
     public Date getSprintEndDate() {
@@ -159,7 +161,7 @@ public class Sprint {
      * @return sprint's end date as a string
      */
     public String getEndDateString() {
-        return Project.dateToString(this.sprintEndDate);
+        return utils.toString(this.sprintEndDate);
     }
 
     public void setEndDate(Date newEndDate) {
@@ -171,7 +173,7 @@ public class Sprint {
      * @param date Gets the sprint start date as a string given by the user
      */
     public void setEndDateString(String date) {
-        this.sprintEndDate = Project.stringToDate(date);
+        this.sprintEndDate = utils.toDate(date);
     }
 
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
