@@ -61,7 +61,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         return new StreamObserver<UploadUserProfilePhotoRequest>() {
             // upload context variables
             OutputStream writer;
-            FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // this is different to the tutorial
+            FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
             String fileName;
             String fileExtension;
 
