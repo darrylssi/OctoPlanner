@@ -36,7 +36,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
-    private static final Path SERVER_BASE_PATH = Paths.get("src/main/resources");
+    private static final Path SERVER_BASE_PATH = Paths.get("data/photos"); // was src/main/resources
     private static final String USER_PHOTO_SUFFIX = "_photo.";
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
@@ -95,7 +95,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         .setStatus(status)
                         .build();
 
-                // convert PNG to JPG
+                // convert PNG to JPG if the file was successfully uploaded
                 if (status == FileUploadStatus.SUCCESS && fileExtension.equalsIgnoreCase("png")) {
                     Path source = SERVER_BASE_PATH.resolve(fileName + "png");
                     Path target = SERVER_BASE_PATH.resolve(fileName + "jpg");
@@ -120,21 +120,23 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @throws IOException When there is an error in creating the output stream
      */
     private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
-        var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + request.getMetaData().getFileType();
+        // convert .jpeg into .jpg, else you'd get two separate files
+        String extension = request.getMetaData().getFileType();
+        var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
 
-        // TODO should this check if the file already exists and then delete it if so?
-        // will try this
-
-        // check if the file already exists, and delete it if so
-        // only works for files of the same type (e.g. .jpg and .jpeg are replaced, but .png won't replace a .jpg)
-        // this makes sure that the image reaches the server, then we can convert it once it is uploaded fully
+        // delete the file if it already exists
         Files.deleteIfExists(SERVER_BASE_PATH.resolve(fileName));
 
         return Files.newOutputStream(SERVER_BASE_PATH.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
-    // source must lead to a .png file
-    // target must lead to a .jpg file
+    /**
+     * Takes a .png file existing in the SERVER_BASE_PATH folder and replaces it with (converts it to) a .jpg file.
+     * Code pretty much copied from https://mkyong.com/java/convert-png-to-jpeg-image-file-in-java/
+     * @param source a Path to the source (input) file, which must be a .png (so the path ends in .png)
+     * @param target a Path to the target (output) file, which must be a .jpg (so the path ends in .jpg)
+     * @throws IOException if an error occurs when trying to read the source file
+     */
     private void convertPngToJpg(Path source, Path target) throws IOException {
 
         BufferedImage originalImage = ImageIO.read(source.toFile());
@@ -189,7 +191,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
         List<ValidationError> errors = validator.validateRegisterRequest(request);
 
-        if(errors.size() > 0) { // If there are errors in the request
+        if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
                 logger.error(String.format("Register user %s : %s - %s",
