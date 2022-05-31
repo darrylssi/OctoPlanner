@@ -30,9 +30,23 @@ document.addEventListener('DOMContentLoaded', function() {
         sprints.push( {title: sprintNamesList[i], start: sprintStartDatesList[i],
             end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i])})
     }
+    let selectedSprint = null;
 
+    let mouseoverSprint = false;
+    // de-select sprint when mouse is clicked if mouse not over a sprint
+    document.addEventListener('mousedown', () => {
+        if(!mouseoverSprint){
+            if (selectedSprint != null) {
+                // de-select sprint
+                selectedSprint.setProp('durationEditable', false);
+                selectedSprint = null;
+            }
+        }
+    })
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
+        eventResizableFromStart:true, // when resizing sprints, can be done from start as well as end
+        eventDurationEditable: false, // sprints can't be edited by default
         timeZone: 'UTC',
         initialView: 'dayGridMonth',
         // Restricts the calendar dates based on the given project dates
@@ -43,6 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonText: {
             today: "Today"
         },
+        eventClick: function(info) {
+            if(sprintsEditable === "true") {
+                // if the user clicks on a sprint, update the selected sprint
+                if (selectedSprint != null) {
+                    // remove editing from current sprint
+                    selectedSprint.setProp('durationEditable', false);
+                }
+                selectedSprint = info.event;
+                // allow editing on new selected sprint
+                selectedSprint.setProp('durationEditable', true);
+            }
+        },
+        // detect when mouse is over a sprint to deselect sprints when clicking outside them
+        eventMouseEnter: function () {mouseoverSprint = true},
+        eventMouseLeave: function() {mouseoverSprint = false},
         // Used to show all the sprints on the calendar
         events: sprints
     });
