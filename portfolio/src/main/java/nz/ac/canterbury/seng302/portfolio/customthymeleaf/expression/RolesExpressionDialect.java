@@ -10,6 +10,9 @@ import org.thymeleaf.expression.IExpressionObjectFactory;
 
 import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 
+/**
+ * Dialect class for adding #roles.<...> methods to the Thymeleaf template.
+ */
 public class RolesExpressionDialect extends AbstractDialect implements IExpressionObjectDialect {
 
     static final String DIALECT_NAME = "roles";
@@ -23,11 +26,15 @@ public class RolesExpressionDialect extends AbstractDialect implements IExpressi
     public IExpressionObjectFactory getExpressionObjectFactory() {
         return new IExpressionObjectFactory() {
 
+            // Sets the thymeleaf expression name(s) (e.g. #strings, #roles, #lists)
             @Override
             public Set<String> getAllExpressionObjectNames() {
                 return Collections.singleton(DIALECT_NAME);
             }
 
+            // If the expression name is the dialect name, return the object.
+            // I don't know why they ask us again when we've already provided the
+            // name above, but whatever.
             @Override
             public Object buildObject(IExpressionContext context, String expressionObjectName) {
                 if (expressionObjectName.equals(DIALECT_NAME)) {
