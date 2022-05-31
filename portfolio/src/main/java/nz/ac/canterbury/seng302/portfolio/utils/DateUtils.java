@@ -16,8 +16,9 @@ import java.util.Date;
 public class DateUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
     /**
-     * Converts a Date type object to String with yyyy-MM-dd format.
+     * Converts a Date type object to String with dd/MMM/yyyy format.
      * @param date Date to be converted
      * @return Date as a String
      */
@@ -38,4 +39,5 @@ public class DateUtils {
         }
         return null;
     }
+
 }

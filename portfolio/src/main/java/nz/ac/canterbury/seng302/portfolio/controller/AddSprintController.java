@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
+import java.util.Calendar;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -85,50 +86,31 @@ public class AddSprintController extends PageController {
         model.addAttribute("sprintColour", colourCode);
 
         // Puts the default sprint start date
-        String getSprintStartDate = "";
+        Date sprintStart;
+        Date sprintEnd;
+        Calendar c = Calendar.getInstance();
         if (sprintList.size() == 0) {
-            getSprintStartDate += utils.toString(project.getProjectStartDate());
+            sprintStart = project.getProjectStartDate();
+            c.setTime(sprintStart);
         } else {
-            String getLocalSprintStartDate = utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate());
+            Date lastSprintEnd = sprintList.get(sprintList.size()-1).getSprintEndDate();
+            //String getLocalSprintStartDate = utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate());
 
-            // Creating default start date for the new sprint
-            // Converting the date to LocalDate, so we can add the three weeks of default end date
-            String newDate = utils.toString(new SimpleDateFormat("yyyy-MM-dd").parse(getLocalSprintStartDate));
-
-            // Converting date to LocalDate
-            Instant instant = utils.toDate(newDate).toInstant();
-            ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
-            LocalDate sprintOldStartDate = zdt.toLocalDate();
-
-            // Adding 3 weeks (21 days) of default sprint end date
-            LocalDate sprintLocalStartDate = sprintOldStartDate.plusDays(1);
-
-            // Converting the new sprint end date of LocalDate object to Date object
-            getSprintStartDate += utils.toString(Date.from(sprintLocalStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            c.setTime(lastSprintEnd);
+            c.add(Calendar.DAY_OF_MONTH, 1);
+            sprintStart = c.getTime();
         }
-        model.addAttribute("sprintStartDate", getSprintStartDate);
+        model.addAttribute("sprintStartDate", sprintStart);
 
-        // Creating default end date for the new sprint
-        // Converting the date to LocalDate, so we can add the three weeks of default end date
-        String newDate = utils.toString(new SimpleDateFormat("yyyy-MM-dd").parse(getSprintStartDate));
+        c.add(Calendar.DAY_OF_MONTH, 21);
+        sprintEnd = c.getTime();
 
-        // Converting date to LocalDate
-        Instant instant = utils.toDate(newDate).toInstant();
-        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
-        LocalDate sprintOldEndDate = zdt.toLocalDate();
-
-        // Adding 3 weeks (21 days) of default sprint end date
-        LocalDate sprintLocalEndDate = sprintOldEndDate.plusDays(21);
-
-        // Converting the new sprint end date of LocalDate object to Date object
-        Date sprintNewEndDate = Date.from(sprintLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-        //Check if end date falls outside project dates
-        if(sprintNewEndDate.after(project.getProjectEndDate())){
-            sprintNewEndDate = project.getProjectEndDate();
+        if (!validationService.sprintsOutsideProject(sprintStart, sprintEnd,
+                project.getProjectStartDate(), project.getProjectEndDate())){
+            sprintEnd = project.getProjectEndDate();
         }
 
-        model.addAttribute("sprintEndDate", utils.toString(sprintNewEndDate));
+        model.addAttribute("sprintEndDate", utils.toString(sprintEnd));
         model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
         model.addAttribute("maxDate", utils.toString(project.getProjectEndDate()));
 

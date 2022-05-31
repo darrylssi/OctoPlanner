@@ -37,11 +37,11 @@ public class Sprint {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date sprintStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date sprintEndDate;
 
     @Column (nullable = false)
