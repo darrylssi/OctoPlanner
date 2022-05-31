@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.customthymeleaf.expression;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.stereotype.Component;
 import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.dialect.AbstractDialect;
 import org.thymeleaf.dialect.IExpressionObjectDialect;
@@ -13,6 +14,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 /**
  * Dialect class for adding #roles.<...> methods to the Thymeleaf template.
  */
+@Component
 public class RolesExpressionDialect extends AbstractDialect implements IExpressionObjectDialect {
 
     static final String DIALECT_NAME = "roles";
