@@ -19,30 +19,31 @@
         let sprintEndDates = "[[${sprintEndDates}]]";
 
         let sprintsEditable = "[[${sprintsEditable}]]";
-
-        // // initializing the dates for the event dates that will be updated when resizing
-        // let updatedCurrSprintId = "";
-        // let updatedCurrSprintStartDate = "";
-        // let updatedCurrSprintEndDate = "";
     </script>
     <script th:src="|../scripts/monthlyCalendar.js|"></script>
 
 </head>
 <body>
-    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString}
-    + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+<!--    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString}-->
+<!--    + ' - ' + ${project.getEndDateString}, username=${userName})"></div>-->
+    <div th:replace="fragments :: header(title=${project.getProjectName.toString()}, subtitle=${project.getStartDateString.toString()}
+    + ' - ' + ${project.getEndDateString.toString()}, username=${userName})"></div>
+
     <div class="content">
         <br>
         <div>
             <!-- Sprint overlap error message -->
             <p id="invalidDateRangeError" th:text="${invalidDateRangeError}" th:hidden="true" th:class="error"></p>
+
+<!--            <form th:action="@{../add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">-->
+            <form th:action="@{../monthlyCalendar/{id}(id = ${project.getId})}" method="post" id="sprintForm">
+                <input id="sprintId" type="hidden" th:name="sprintId" onchange='saveSprint()' />
+                <input id="sprintStartDate" type="hidden" th:name="sprintStartDate"  />
+                <input id="sprintEndDate" type="hidden" th:name="sprintEndDate"  />
+            </form>
         </div>
         <div id='calendar'></div>
-        <div>
-            <input id="sprintId" th:name="sprintId" th:field="*{sprintId}" />
-            <input id="sprintStartDate" th:name="sprintStartDate" th:field="*{sprintStartDate}" />
-            <input id="sprintEndDate" th:name="sprintEndDate" th:field="*{sprintEndDate}" />
-        </div>
+
     </div>
 </body>
 </html>

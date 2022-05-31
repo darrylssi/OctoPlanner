@@ -66,10 +66,6 @@ public class MonthlyCalendarController {
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
-        model.addAttribute("sprintId", "");
-        model.addAttribute("sprintStartDate", "");
-        model.addAttribute("sprintEndDate", "");
-        model.addAttribute("invalidDateRangeError", "");
 
         sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
@@ -90,30 +86,24 @@ public class MonthlyCalendarController {
     public String updateMonthlyCalendar(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="id") int id,
-            @RequestParam(name="sprintId") String sprintId,
-            @RequestParam(name="sprintStartDate") String sprintStartDate,
-            @RequestParam(name="sprintEndDate") String sprintEndDate,
+            @RequestParam(name="sprintId", required = false) Integer sprintId,
+            @RequestParam(name="sprintStartDate", required = false) Date sprintStartDate,
+            @RequestParam(name="sprintEndDate", required = false) Date sprintEndDate,
             Model model
     ) throws Exception  {
         // checks ...
-        int currSprintId = Integer.parseInt(sprintId);
-        System.out.println("back id:  " + currSprintId);
-        if (currSprintId != (int)currSprintId) {
+        if (sprintId == null) {
             getMonthlyCalendar(principal, id, model);
         }
 
-        // update the given sprint dates data
-        Sprint getSprintAtId = sprintService.getSprintById(currSprintId);
-        getSprintAtId.setStartDate(utils.toDate(sprintStartDate));
-        getSprintAtId.setEndDate(utils.toDate(sprintEndDate));
-
-        System.out.println("id:  " + currSprintId);
-        System.out.println("start:  " + utils.toDate(sprintStartDate));
-        System.out.println("end:  " + utils.toDate(sprintEndDate));
-
-
-
+        // update the given sprint dates
+        Sprint getSprintAtId = sprintService.getSprintById(sprintId);
+        getSprintAtId.setStartDate(sprintStartDate);
+        getSprintAtId.setEndDate(sprintEndDate);
         sprintService.saveSprint(getSprintAtId);
+
+        getMonthlyCalendar(principal, id, model);
+
         return "monthlyCalendar";
     }
 

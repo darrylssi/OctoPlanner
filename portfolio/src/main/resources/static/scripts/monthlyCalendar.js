@@ -43,11 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         eventClick: function(info) {
             if (sprintsEditable === "true") {
-                // setting the select sprint data to empty string
-                document.getElementById("sprintId").value = "";
-                document.getElementById("sprintStartDate").value = "";
-                document.getElementById("sprintEndDate").value = "";
-
                 // if the user clicks on a sprint, update the selected sprint
                 if (selectedSprint != null) {
                     // remove editing from current sprint
@@ -67,9 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // if the user clicks on a sprint, update the selected sprint
             if (sprintsEditable === "true") {
                 // update the selected sprint dates
-                document.getElementById("sprintId").value = info.event.id.toString();
-                document.getElementById("sprintStartDate").value = info.event.start.toString();
-                document.getElementById("sprintEndDate").value = info.event.end.toString();
+                document.getElementById("sprintId").value = new Number(info.event.id);
+                document.getElementById("sprintStartDate").value = new Date(info.event.start);
+                document.getElementById("sprintEndDate").value = new Date(info.event.end);
+                saveSprint();
                 return
             }
         },
@@ -82,3 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar.render();
 
 });
+
+function saveSprint() {
+    const form  = document.getElementById('sprintForm');
+    form.submit();
+}
