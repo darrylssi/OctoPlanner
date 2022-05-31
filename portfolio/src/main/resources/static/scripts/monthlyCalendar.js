@@ -33,10 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedSprint = null;
 
 let mouseoverSprint = false;
+// de-select sprint when mouse is clicked if mouse not over a sprint
 document.addEventListener('mousedown', () => {
     if(!mouseoverSprint){
         if (selectedSprint != null) {
-            // deselect sprint
+            // de-select sprint
             selectedSprint.setProp('durationEditable', false);
             selectedSprint = null;
         }
@@ -67,6 +68,7 @@ document.addEventListener('mousedown', () => {
                 selectedSprint.setProp('durationEditable', true);
             }
         },
+        // detect when mouse is over a sprint to deselect sprints when clicking outside them
         eventMouseEnter: function () {mouseoverSprint = true},
         eventMouseLeave: function() {mouseoverSprint = false},
         // Used to show all the sprints on the calendar
