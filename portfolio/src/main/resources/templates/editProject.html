@@ -5,13 +5,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="|../styles/main.css|" rel="stylesheet" />
     <link th:href="|../styles/form.css|" rel="stylesheet" />
+    <link th:href="|../styles/modals.css|" rel="stylesheet" />
     <script th:src="|../scripts/editProject.js|"></script>
 </head>
 <body>
+<div id="longProjectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title"></div>
+        <br/>
+        <button onclick="hideModal()" class="modal-button cancel">Cancel</button>
+        <button id="confirmButton" class="modal-button delete">Confirm</button>
+    </div>
+</div>
 <div th:replace="fragments :: header(title='Edit Project', username=${userName})"></div>
 <div class="content">
     <form th:action="@{../edit-project/{id}(id = ${id})}"
-          method="post" th:object="${project}">
+          method="post" th:object="${project}" id="project">
         <label for="projectName" class="required">Project Name</label> <br/>
         <input id="projectName" type="text" th:field="*{projectName}">
         <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
@@ -43,7 +52,9 @@
             Cancel
         </button>
     </a>
-    <button class="form-button save" type="submit">Save</button>
+    <button class="form-button save" type="button" th:onclick="showLongProjectModal()">
+        Save
+    </button>
 </div>
 </form>
 
