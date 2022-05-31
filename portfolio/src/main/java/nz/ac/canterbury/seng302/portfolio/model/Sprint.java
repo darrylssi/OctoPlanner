@@ -27,14 +27,14 @@ public class Sprint {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.")
+    @Size(min=2, max=32, message="The sprint name must be between 2 and 32 characters.")
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
     @Column (nullable = false)
-    @Size(max=200, message="The character length must not exceed 200.")
+    @Size(max=200, message="The sprint description must not exceed 200 characters.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
