@@ -29,8 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-
-
 @GrpcService
 public class UserAccountServerService extends UserAccountServiceGrpc.UserAccountServiceImplBase {
 
@@ -50,12 +48,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private ValidationService validator;
 
     /**
-     * I no idea what I'm doing. This is for user profile photos, following these tutorials:
+     * Creates a request to upload a profile photo for a user, following these tutorials:
      * https://www.vinsguru.com/grpc-file-upload-client-streaming/ so far it's just copied from this one
-     * https://www.vinsguru.com/grpc-bidirectional-streaming/
-     *
-     * @param responseObserver
-     * @return
+     * @param responseObserver Observable stream of messages
+     * @return FileUploadStatusResponse with the status of the upload
      */
     @Override
     public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
@@ -98,10 +94,11 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
+     * Sets the path of the file to be uploaded to resources/USERID_photo.FILETYPE
      * Copied from tutorial; see above.
-     * @param request
-     * @return
-     * @throws IOException
+     * @param request A request object containing the user ID and the file type
+     * @return Output stream
+     * @throws IOException When there is an error in creating the output stream
      */
     private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
         var fileName = request.getMetaData().getUserId() + "_photo." + request.getMetaData().getFileType();
@@ -109,10 +106,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Copied from tutorial; see above.
-     * @param writer
-     * @param content
-     * @throws IOException
+     * Writes the file content. Copied from tutorial; see above.
+     * @param writer Output stream
+     * @param content File content
+     * @throws IOException When there is an error writing the content to the output stream
      */
     private void writeFile(OutputStream writer, ByteString content) throws IOException {
         writer.write(content.toByteArray());
@@ -120,8 +117,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Copied from tutorial; see above.
-     * @param writer
+     * Closes the output stream. Copied from tutorial; see above.
+     * @param writer Output stream
      */
     private void closeFile(OutputStream writer) {
         try {

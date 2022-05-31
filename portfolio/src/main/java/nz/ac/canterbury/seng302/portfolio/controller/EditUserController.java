@@ -16,7 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
-import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -152,14 +152,23 @@ public class EditUserController {
         return "editUser";
     }
 
-    @PostMapping(value = "/users/{id}/test", params = {"fileType"})
+    /**
+     * Post request for uploading a selected image file.
+     * @param id ID of the user to be edited
+     * @param file Image file to be uploaded
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Profile page of the user
+     * @throws IOException When there is an error uploading the photo
+     */
+    @PostMapping(value = "/users/{id}/upload")
     public String uploadPhoto(
             @PathVariable int id,
-            @RequestParam(name="fileType") String fileType,
+            @RequestParam("file") MultipartFile file,
             Model model
     ) throws IOException {
-        userAccountClientService.uploadUserProfilePhoto(id, "jpg");
-        return "editUser";
+        model.addAttribute("file", file);
+        userAccountClientService.uploadUserProfilePhoto(id, file);
+        return "redirect:../" + id;
     }
 
 }

@@ -115,17 +115,14 @@
                 <button class="form-button save" type="submit">Change Password</button>
             </div>
         </form>
+        <br/>
         <hr/>
         <br/>
-        <form th:action="|./test|"
-              method="post">
+        <form th:action="|./upload|" method="post" enctype="multipart/form-data">
             <div class="user-info">
                 <div class="input-box">
                     <label> Profile Photo </label>
-                    <input id="inputFile" type="file" name="fileType" onChange="getFileNameWithExt(event)"><br>
-                    Output Filename <input id="outputFile" type="text" name="fileType"><br>
-                    Extension <input id="extension" type="text" name="extension">
-<!--                    <button onclick="myFunction()">click</button>-->
+                    <input id="inputFile" type="file" name="file">
                 </div>
             </div>
             <div class="centre-box">

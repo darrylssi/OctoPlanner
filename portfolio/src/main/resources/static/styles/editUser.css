@@ -58,3 +58,7 @@ form .user-info .input-box {
 #error {
     color: red;
 }
+
+#inputFile {
+    background-color: white;
+}
