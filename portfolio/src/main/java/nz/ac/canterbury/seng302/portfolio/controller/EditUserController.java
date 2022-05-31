@@ -3,19 +3,17 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.EditUserResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.ChangePasswordResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -167,8 +165,21 @@ public class EditUserController {
             Model model
     ) throws IOException {
         model.addAttribute("file", file);
-        userAccountClientService.uploadUserProfilePhoto(id, file);
+        if (isValidImageFile(file)) {
+            userAccountClientService.uploadUserProfilePhoto(id, file);
+        }
         return "redirect:../" + id;
+    }
+
+    /**
+     * Checks whether the provided MultipartFile has a content type of image/jpeg or image/png.
+     * @param file the MultipartFile in question
+     * @return true or false
+     */
+    private static boolean isValidImageFile(MultipartFile file) {
+        String mimeType = file.getContentType();
+        return (mimeType != null && (mimeType.equalsIgnoreCase("image/jpeg") ||
+                mimeType.equalsIgnoreCase("image/png")));
     }
 
 }
