@@ -25,3 +25,34 @@ if (mm < 10) {
 }
 today = yyyy + '-' + mm + '-' + dd;
 document.getElementById('projectStartDate').setAttribute('min', today);
+
+// To hide the modal when the transaction is cancelled
+function hideModal() {
+    const modal = document.getElementById("longProjectModal");
+    modal.style.display = "none";
+}
+
+// Checks whether the project is longer than 10 years
+// If it is, the confirmation modal is shown
+function showLongProjectModal() {
+    const startDate = new Date(document.getElementById('projectStartDate').value);
+    const startString = startDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).replace(/ /g, '/');;
+    const endDate = new Date(document.getElementById('projectEndDate').value);
+    const endString = endDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).replace(/ /g, '/');;
+    const modal = document.getElementById("longProjectModal");
+    const title = document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you " +
+            "want to create a project from " + startString + " to " + endString + "?";
+    if ((endDate.getFullYear() - startDate.getFullYear()) > 10) {
+        const confirmButton = document.getElementById("confirmButton");
+        confirmButton.onclick = () => {saveProject()}
+        modal.style.display = "block";
+    } else {
+        saveProject();
+    }
+}
+
+// Submits the form
+function saveProject() {
+    const form  = document.getElementById('project');
+    form.submit();
+}
