@@ -247,16 +247,21 @@ public class ProjectTests {
     }
 
     @Test
-    void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() {
         /* Given: setup() has been run */
         /* When: these (invalid) dates are validated */
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(creationDate);
+        startCal.add(Calendar.YEAR, -1);
+        Date earliestStart = startCal.getTime();
+
         Date start = utils.toDate("2021-05-26");
         Date end = utils.toDate("2022-10-01");
         String errorMessage = validationService.validateProjectDates(start, end, creationDate);
 
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before 2021-05-27)" , errorMessage);
+                     "(cannot start before " + utils.toString(earliestStart) + ")" , errorMessage);
     }
 
     @Test

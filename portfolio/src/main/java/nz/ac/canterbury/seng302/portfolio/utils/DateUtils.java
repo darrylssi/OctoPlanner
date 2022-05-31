@@ -22,7 +22,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public String toString(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+        return new SimpleDateFormat("dd/MMM/yyyy").format(date);
     }
 
     /**

@@ -53,8 +53,8 @@ class SprintTests {
         baseSprint.setSprintName("Sprint 1");
         baseSprint.setSprintDescription("The first.");
         baseSprint.setParentProjectId(5);
-        baseSprint.setStartDateString("05/FEB/2022");
-        baseSprint.setEndDateString("24/MAR/2022");
+        baseSprint.setStartDateString("2022-02-05");
+        baseSprint.setEndDateString("2022-03-24");
         baseSprint.setSprintColour("#abcdef");
         sprintList.add(baseSprint);
 
@@ -62,8 +62,8 @@ class SprintTests {
         baseProject.setId(5);
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
-        baseProject.setStartDateString("01/JAN/2022");
-        baseProject.setEndDateString("01/OCT/2022");
+        baseProject.setStartDateString("2022-01-01");
+        baseProject.setEndDateString("2022-10-01");
         baseProject.setId(1);
     }
 
