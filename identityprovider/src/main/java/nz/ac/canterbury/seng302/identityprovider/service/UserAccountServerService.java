@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -17,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -35,6 +37,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
     private static final Path SERVER_BASE_PATH = Paths.get("src/main/resources");
+    private static final String USER_PHOTO_SUFFIX = "_photo.";
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
@@ -59,12 +62,16 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             // upload context variables
             OutputStream writer;
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // this is different to the tutorial
+            String fileName;
+            String fileExtension;
 
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
                 try {
                     if(userProfilePhotoUploadRequest.hasMetaData()) {
                         writer = getFilePath(userProfilePhotoUploadRequest);
+                        fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
+                        fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
                     } else {
                         writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
                     }
@@ -87,6 +94,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
                         .setStatus(status)
                         .build();
+
+                // convert PNG to JPG
+                if (status == FileUploadStatus.SUCCESS && fileExtension.equalsIgnoreCase("png")) {
+                    Path source = SERVER_BASE_PATH.resolve(fileName + "png");
+                    Path target = SERVER_BASE_PATH.resolve(fileName + "jpg");
+                    try {
+                        convertPngToJpg(source, target);
+                    } catch (IOException e) {
+                        e.printStackTrace(); // TODO
+                    }
+                }
+
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
@@ -101,8 +120,40 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @throws IOException When there is an error in creating the output stream
      */
     private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
-        var fileName = request.getMetaData().getUserId() + "_photo." + request.getMetaData().getFileType();
+        var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + request.getMetaData().getFileType();
+
+        // TODO should this check if the file already exists and then delete it if so?
+        // will try this
+
+        // check if the file already exists, and delete it if so
+        // only works for files of the same type (e.g. .jpg and .jpeg are replaced, but .png won't replace a .jpg)
+        // this makes sure that the image reaches the server, then we can convert it once it is uploaded fully
+        Files.deleteIfExists(SERVER_BASE_PATH.resolve(fileName));
+
         return Files.newOutputStream(SERVER_BASE_PATH.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+
+    // source must lead to a .png file
+    // target must lead to a .jpg file
+    private void convertPngToJpg(Path source, Path target) throws IOException {
+
+        BufferedImage originalImage = ImageIO.read(source.toFile());
+
+        BufferedImage newImage = new BufferedImage(
+            originalImage.getWidth(),
+            originalImage.getHeight(),
+            BufferedImage.TYPE_INT_RGB
+        );
+
+        newImage.createGraphics()
+                .drawImage(originalImage,
+                        0,
+                        0,
+                        Color.WHITE,
+                        null);
+
+        ImageIO.write(newImage, "jpg", target.toFile());
+        Files.deleteIfExists(source);
     }
 
     /**
