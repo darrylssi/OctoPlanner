@@ -5,6 +5,8 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ public class UserAccountClientService {
 
     @GrpcClient("identity-provider-grpc-server")
     private UserAccountServiceGrpc.UserAccountServiceStub userAccountServiceStub;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserAccountClientService.class);
 
     /**
      * Sends a UserRegisterRequest to the identity provider
@@ -217,8 +221,7 @@ public class UserAccountClientService {
         //         .orElse("NOT FOUND");
 
         // String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        String username = PrincipalData.from(principal).getUsername();
-        return username;
+        return PrincipalData.from(principal).getUsername();
     }
 
     /**
@@ -231,8 +234,12 @@ public class UserAccountClientService {
 
         StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
 
-        String filetype = file.getContentType().split("/")[1];
+        String filetype = file.getContentType();
+        if (filetype != null) {
+            filetype = filetype.split("/")[1];
+        }
 
+        logger.info("Uploading profile photo with filetype: {} ", filetype);
         UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
                 .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
                         .setUserId(userId)
