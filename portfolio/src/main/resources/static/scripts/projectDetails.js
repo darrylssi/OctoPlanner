@@ -16,7 +16,7 @@ function hideModal() {
 
 /** sends a http request to delete the sprint with the given id */
 function deleteSprint(sprintId) {
-    const url = "/delete-sprint/" + sprintId;
+    const url = BASE_URL + "delete-sprint/" + sprintId;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {

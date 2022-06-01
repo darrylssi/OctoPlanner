@@ -185,7 +185,6 @@ public class ListUsersController extends PageController {
         // Give each user on this machine a different sorting cookie (AC6)
         String cookieName = COOKIE_NAME_PREFIX + userId;
         Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
-        cookie.setPath("/users");
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
         response.addCookie(cookie);
     }

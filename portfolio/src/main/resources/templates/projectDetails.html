@@ -5,6 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link th:href="|../styles/main.css|" rel="stylesheet" />
     <link th:href="|../styles/modals.css|" rel="stylesheet" />
+    <!--/*
+        JS files are static, and thus don't know anything about the project (i.e. the base URL).
+        This code sets a global variable inside this template (which does know the base URL),
+        which the imported script can access.
+    */-->
+    <script th:inline="javascript">
+        var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ]]*/ "/";
+    </script>
     <script th:src="|../scripts/projectDetails.js|"></script>
 </head>
 <body>
@@ -57,7 +65,7 @@
             </div>
         </div>
     </div>
-    <!-- /* If the sprint has no projects */ -->
+    <!-- /* If the project has no sprints */ -->
     <div th:if="${#arrays.isEmpty(sprints)}" style="text-align:center">
         <b>[ This project has no sprints ]</b>
     </div>

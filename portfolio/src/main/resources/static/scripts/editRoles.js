@@ -10,7 +10,7 @@ function addRole(userId, role) {
 }
 
 function removeRole(userId, role) {
-    const url = BASE_URL + "/users/" + userId + "/remove-role/" + role;
+    const url = BASE_URL + "users/" + userId + "/remove-role/" + role;
     const patchRequest = new XMLHttpRequest();
     patchRequest.open("PATCH", url, true);
     patchRequest.onload = () => {
