@@ -1,8 +1,7 @@
-package nz.ac.canterbury.seng302.portfolio;
+package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.controller.ListUsersController;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = ListUsersController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class RoleEditingTest {
+class ListUsersControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,7 +33,7 @@ class RoleEditingTest {
 
     /**
      * Mock the userAccountClientService such that it responds as if
-     * the given user does has the given role
+     * the given user has the given role
      * @param id the id of the user being mocked
      * @param role the role the user is mocked to have
      * @throws StatusException userAccountClientService throws a status exception if the user doesn't exist
