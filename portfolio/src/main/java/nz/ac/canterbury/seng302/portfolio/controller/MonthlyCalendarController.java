@@ -7,7 +7,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -42,7 +41,6 @@ public class MonthlyCalendarController {
      * @param id Current project id
      * @param model Used to display the current attributes being passed to the html page
      * @return The monthly calendar page
-     * @throws Exception
      */
     @GetMapping("/monthlyCalendar/{id}")
     public String getMonthlyCalendar(
@@ -81,7 +79,7 @@ public class MonthlyCalendarController {
      */
     private ArrayList<String> getSprintsStringList(List<Sprint> sprintList) {
         // Initializing the array list
-        ArrayList<String> sprintsDetailsList = new ArrayList<String>();
+        ArrayList<String> sprintsDetailsList = new ArrayList<>();
 
         String sprintNames = "";                // Initiating the sprint names list
         String sprintStartDates = "";           // Initiating the sprint start dates list
@@ -127,8 +125,7 @@ public class MonthlyCalendarController {
         LocalDate newLocalEndDate = localEndDate.plusDays(1);
 
         // Converting the new project/sprint LocalDate object to Date object
-        String newEndDate = utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
-        return newEndDate;
+        return utils.toDisplayString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 }

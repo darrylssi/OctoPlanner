@@ -81,7 +81,7 @@ public class ValidationService {
         Date earliestStart = startCal.getTime();
         if (start.before(earliestStart)) {
             return "Project cannot be set to start more than a year before it was " +
-                    "created (cannot start before " + utils.toString(earliestStart) + ")";
+                    "created (cannot start before " + utils.toDisplayString(earliestStart) + ")";
         }
 
         // After all other checks, check whether project length is more than 10 years

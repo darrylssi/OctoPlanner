@@ -25,14 +25,14 @@ public class Sprint {
     private int parentProjectId;
 
     @Column
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
+    @Size(min=2, max=32, message="The character length must in range 2 and 32.")
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
     @Column
-    @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
+    @Size(max=200, message="The character length must not exceed 200.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
@@ -138,7 +138,7 @@ public class Sprint {
      * Gets the string format of the sprint start date
      * @return sprint's start date as a string
      */
-    public String getStartDateString() {return utils.toString(this.sprintStartDate);}
+    public String getStartDateString() {return utils.toDisplayString(this.sprintStartDate);}
 
     public void setStartDate(Date newStartDate) {
         this.sprintStartDate = newStartDate;
@@ -161,7 +161,7 @@ public class Sprint {
      * @return sprint's end date as a string
      */
     public String getEndDateString() {
-        return utils.toString(this.sprintEndDate);
+        return utils.toDisplayString(this.sprintEndDate);
     }
 
     public void setEndDate(Date newEndDate) {

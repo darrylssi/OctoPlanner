@@ -23,11 +23,6 @@ import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
 import java.util.Calendar;
 import java.util.Date;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -85,31 +80,31 @@ public class AddSprintController extends PageController {
 
         model.addAttribute("sprintColour", colourCode);
 
-        // Puts the default sprint start date
+        // Calculate the default sprint start date
         Date sprintStart;
-        Date sprintEnd;
         Calendar c = Calendar.getInstance();
-        if (sprintList.size() == 0) {
+        if (sprintList.isEmpty()) { // Use project start date when there are no sprints
             sprintStart = project.getProjectStartDate();
             c.setTime(sprintStart);
         } else {
             Date lastSprintEnd = sprintList.get(sprintList.size()-1).getSprintEndDate();
-            //String getLocalSprintStartDate = utils.toString(sprintList.get(sprintList.size()-1).getSprintEndDate());
-
             c.setTime(lastSprintEnd);
-            c.add(Calendar.DAY_OF_MONTH, 1);
+            c.add(Calendar.DAY_OF_MONTH, 1);    // Day after last sprint ends
             sprintStart = c.getTime();
         }
-        model.addAttribute("sprintStartDate", sprintStart);
+        model.addAttribute("sprintStartDate", utils.toString(sprintStart));
 
-        c.add(Calendar.DAY_OF_MONTH, 21);
-        sprintEnd = c.getTime();
+        // Calculate the default sprint end date
+        Date sprintEnd;
+        c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
 
-        if (!validationService.sprintsOutsideProject(sprintStart, sprintEnd,
+        // Checks that the default end date is within the project dates
+        if (validationService.sprintsOutsideProject(sprintStart, c.getTime(),
                 project.getProjectStartDate(), project.getProjectEndDate())){
-            sprintEnd = project.getProjectEndDate();
+            sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
+        } else {
+            sprintEnd = c.getTime();
         }
-
         model.addAttribute("sprintEndDate", utils.toString(sprintEnd));
         model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
         model.addAttribute("maxDate", utils.toString(project.getProjectEndDate()));

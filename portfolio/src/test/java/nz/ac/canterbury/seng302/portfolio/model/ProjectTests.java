@@ -261,7 +261,7 @@ public class ProjectTests {
 
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before " + utils.toString(earliestStart) + ")" , errorMessage);
+                     "(cannot start before " + utils.toDisplayString(earliestStart) + ")" , errorMessage);
     }
 
     @Test

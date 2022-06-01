@@ -15,29 +15,41 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
+    private final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     /**
-     * Converts a Date type object to String with dd/MMM/yyyy format.
+     * Converts a Date object to a String with dd/MMM/yyyy format.
      * @param date Date to be converted
      * @return Date as a String
      */
-    public String toString(Date date) {
-        return new SimpleDateFormat("dd/MMM/yyyy").format(date);
+    public String toDisplayString(Date date) {
+        return displayDateFormat.format(date);
     }
 
     /**
-     * Converts a String in yyyy-MM-dd format to a Date object.
+     * Converts a String to a Date in yyyy-MM-dd format.
      * @param date String to be converted to Date
      * @return Date object
      */
     public Date toDate(String date) {
         try {
-            return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            return backendDateFormat.parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }
         return null;
+    }
+
+    /**
+     * Converts a Date object to a String with yyyy-MM-dd format.
+     * @param date String to be converted to Date
+     * @return Date object
+     */
+    public String toString(Date date) {
+        return backendDateFormat.format(date);
     }
 
 }

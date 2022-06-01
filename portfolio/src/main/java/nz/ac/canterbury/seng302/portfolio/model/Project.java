@@ -124,7 +124,7 @@ public class Project {
     /* Dates have string get/set methods to interact with view */
 
     public String getStartDateString() {
-        return utils.toString(this.projectStartDate);
+        return utils.toDisplayString(this.projectStartDate);
     }
 
     public void setStartDateString(String date) {
@@ -132,7 +132,7 @@ public class Project {
     }
 
     public String getEndDateString() {
-        return utils.toString(this.projectEndDate);
+        return utils.toDisplayString(this.projectEndDate);
     }
 
     public void setEndDateString(String date) {
