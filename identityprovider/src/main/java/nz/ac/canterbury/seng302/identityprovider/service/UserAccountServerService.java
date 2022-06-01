@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     @Override
     public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
-        return new StreamObserver<UploadUserProfilePhotoRequest>() {
+        return new StreamObserver<>() {
             // upload context variables
             OutputStream writer;
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
@@ -72,7 +71,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
                 try {
-                    if(userProfilePhotoUploadRequest.hasMetaData()) {
+                    if (userProfilePhotoUploadRequest.hasMetaData()) {
                         writer = getFilePath(userProfilePhotoUploadRequest);
                         fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
@@ -100,13 +99,24 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         .build();
 
                 // convert PNG to JPG if the file was successfully uploaded
-                if (status == FileUploadStatus.SUCCESS && fileExtension.equalsIgnoreCase("png")) {
-                    Path source = profileImageFolder.resolve(fileName + "png");
-                    Path target = profileImageFolder.resolve(fileName + "jpg");
-                    try {
-                        convertPngToJpg(source, target);
-                    } catch (IOException e) {
-                        e.printStackTrace(); // TODO
+                if (status == FileUploadStatus.SUCCESS) {
+                    if (fileExtension.equalsIgnoreCase("png")) {
+                        Path source = profileImageFolder.resolve(fileName + "png");
+                        Path target = profileImageFolder.resolve(fileName + "jpg");
+                        try {
+                            convertPngToJpg(source, target);
+                        } catch (IOException e) {
+                            e.printStackTrace(); // TODO
+                        }
+                    } else if (!fileExtension.equalsIgnoreCase("jpeg") && fileName != null) {
+                        // delete the file if it is not a jpg at this point
+                        // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
+                        logger.info("Detected a profile photo upload of invalid type: \"{}{}\". Deleting file.", fileName, fileExtension);
+                        try {
+                            Files.deleteIfExists(profileImageFolder.resolve(fileName + fileExtension));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
@@ -311,7 +321,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @return A list of users from that "page"
      */
     private List<User> paginatedUsersOrderedByRole(int page, int limit, boolean isAscending) {
-        ArrayList<User> users = new ArrayList<User>(userService.getAllUsers());
+        ArrayList<User> users = new ArrayList<>(userService.getAllUsers());
         if (isAscending)
             users.sort((a, b) -> a.highestRole().getNumber() - b.highestRole().getNumber());
         else
@@ -401,7 +411,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         List<ValidationError> errors = validator.validateEditUserRequest(request, user);
 
-        if(errors.size() > 0) { // If there are errors in the request
+        if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
                 logger.error(String.format("Edit user %s : %s - %s", request.getUserId(), error.getFieldName(), error.getErrorText()));
@@ -447,7 +457,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         List<ValidationError> errors = validator.validateChangePasswordRequest(request, user);
 
-        if(errors.size() > 0) { // If there are errors in the request
+        if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
                 logger.error(String.format("Change password of user %s : %s - %s", request.getUserId(),
@@ -484,7 +494,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @return A gRPC-ready response object with the user's fields copied in.
      */
     private static UserResponse buildUserResponse(User user) {
-        ArrayList<UserRole> sortedRoles = new ArrayList<UserRole>(user.getRoles());
+        ArrayList<UserRole> sortedRoles = new ArrayList<>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());
 
         UserResponse.Builder userResponse = UserResponse
