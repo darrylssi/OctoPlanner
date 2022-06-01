@@ -22,6 +22,7 @@ public class Project {
     @NotBlank (message = "Project name is required")
     private String projectName;
 
+    @Column (nullable = false)
     @Size (max = 200, message = "Description cannot be more than 200 characters.")
     private String projectDescription;
 
@@ -74,6 +75,9 @@ public class Project {
         this.projectCreationDate = new Date();
     }
 
+    /**
+     * Returns a string listing the attributes of the project in the form "Project[x, x, x, ...]".
+     */
     @Override
     public String toString() {
         return String.format(

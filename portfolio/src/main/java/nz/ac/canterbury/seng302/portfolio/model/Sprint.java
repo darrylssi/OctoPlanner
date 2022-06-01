@@ -2,11 +2,9 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
-
 
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
@@ -24,15 +22,15 @@ public class Sprint {
     @Column
     private int parentProjectId;
 
-    @Column
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.")
+    @Column(nullable = false)
+    @Size(min=2, max=32, message="The sprint name must be between 2 and 32 characters.")
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column
-    @Size(max=200, message="The character length must not exceed 200.")
+    @Column (nullable = false)
+    @Size(max=200, message="The sprint description must not exceed 200 characters.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
@@ -45,7 +43,7 @@ public class Sprint {
     private Date sprintEndDate;
 
     @Column (nullable = false)
-    @Size(max=10)
+    @Size(min=7, max=7)
     private String sprintColour;
 
     public Sprint() {}
@@ -88,6 +86,10 @@ public class Sprint {
 
 
     @Override
+    /**
+     * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
+     * @return said string
+     */
     public String toString() {
         return String.format(
                 "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s', sprintColour='%s']",
