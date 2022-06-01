@@ -118,11 +118,12 @@
         <br/>
         <hr/>
         <br/>
-        <form th:action="|./upload|" method="post" enctype="multipart/form-data">
+        <form th:action="|./edit|" method="post" enctype="multipart/form-data">
             <div class="user-info">
                 <div class="input-box">
                     <label> Profile Photo </label>
-                    <input id="inputFile" type="file" name="file" accept=".png,.jpg,.jpeg">
+                    <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
+                    <span th:class="error" th:text="${error_InvalidPhoto}"></span>
                 </div>
             </div>
             <div class="centre-box">

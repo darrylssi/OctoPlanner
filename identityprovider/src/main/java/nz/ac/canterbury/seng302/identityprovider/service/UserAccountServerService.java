@@ -14,6 +14,7 @@ import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.imageio.ImageIO;
@@ -36,10 +37,13 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
-    private static final Path SERVER_BASE_PATH = Paths.get("data/photos"); // was src/main/resources
+    
     private static final String USER_PHOTO_SUFFIX = "_photo.";
-
+    
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
+    
+    @Value("${profile-image-folder}")
+    private Path profileImageFolder;
 
     @Autowired
     private UserRepository repository;
@@ -97,8 +101,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
                 // convert PNG to JPG if the file was successfully uploaded
                 if (status == FileUploadStatus.SUCCESS && fileExtension.equalsIgnoreCase("png")) {
-                    Path source = SERVER_BASE_PATH.resolve(fileName + "png");
-                    Path target = SERVER_BASE_PATH.resolve(fileName + "jpg");
+                    Path source = profileImageFolder.resolve(fileName + "png");
+                    Path target = profileImageFolder.resolve(fileName + "jpg");
                     try {
                         convertPngToJpg(source, target);
                     } catch (IOException e) {
@@ -125,9 +129,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
 
         // delete the file if it already exists
-        Files.deleteIfExists(SERVER_BASE_PATH.resolve(fileName));
+        Files.deleteIfExists(profileImageFolder.resolve(fileName));
 
-        return Files.newOutputStream(SERVER_BASE_PATH.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        return Files.newOutputStream(profileImageFolder.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
     /**
