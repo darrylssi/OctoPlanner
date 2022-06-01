@@ -33,16 +33,37 @@ class RoleEditingTest {
     @MockBean // @MockBean is used over @Mock as for mockmvc tests we require Spring context
     UserAccountClientService userAccountClientService;
 
+    /**
+     * Mock the userAccountClientService such that it responds as if
+     * the given user does has the given role
+     * @param id the id of the user being mocked
+     * @param role the role the user is mocked to have
+     * @throws StatusException userAccountClientService throws a status exception if the user doesn't exist
+     */
     void mockUserWithRole(int id, UserRole role) throws StatusException {
         Mockito.when(userAccountClientService.addRoleToUser(id, role)).thenReturn(false);
         Mockito.when(userAccountClientService.removeRoleFromUser(id, role)).thenReturn(true);
     }
 
+    /**
+     * Mock the userAccountClientService such that it responds as if
+     * the given user does not have the given role
+     * @param id the id of the user being mocked
+     * @param role the role the user is mocked to not have
+     * @throws StatusException userAccountClientService throws a status exception if the user doesn't exist
+     */
     void mockUserWithoutRole(int id, UserRole role) throws StatusException {
         Mockito.when(userAccountClientService.addRoleToUser(id, role)).thenReturn(true);
         Mockito.when(userAccountClientService.removeRoleFromUser(id, role)).thenReturn(false);
     }
 
+    /**
+     * Mock userAccountClientService such that when adding or deleting roles from a given user,
+     * it will respond as if the user does not exist, by throwing an exception
+     * @param id the id that will point to a nonexistent user
+     * @param role the role the user is mocked to have
+     * @throws StatusException thrown when a user does not exist
+     */
     void mockNonexistentUser(int id, UserRole role) throws StatusException {
         Mockito.when(userAccountClientService.addRoleToUser(id, role)).thenThrow(new StatusException(Status.NOT_FOUND));
         Mockito.when(userAccountClientService.removeRoleFromUser(id, role)).thenThrow(new StatusException(Status.NOT_FOUND));
