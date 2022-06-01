@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import io.grpc.Status;
 import io.grpc.StatusException;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -20,16 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +55,7 @@ public class ListUsersController extends PageController {
      * Displays a list of users with their name, username, nickname and roles
      */
     @GetMapping("/users")
-    public String GetListOfUsers(
+    public String getListOfUsers(
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(name="page", defaultValue="1") int page,
             Model model,
@@ -90,7 +86,7 @@ public class ListUsersController extends PageController {
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
         model.addAttribute("dir", isAscending);
-        List<UserRole> allRoles = new ArrayList<UserRole>();
+        List<UserRole> allRoles = new ArrayList<>();
         allRoles.add(UserRole.TEACHER);
         allRoles.add(UserRole.STUDENT);
         allRoles.add(UserRole.COURSE_ADMINISTRATOR);
@@ -235,17 +231,21 @@ public class ListUsersController extends PageController {
         if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Add the role to the user
-                var response = userAccountClientService.addRoleToUser(id, role);
-                return new ResponseEntity<>(String.valueOf(response), HttpStatus.OK);
+                boolean roleAdded = userAccountClientService.addRoleToUser(id, role);
+                if(roleAdded) {
+                    return new ResponseEntity<>("Role " + role.name() + " added", HttpStatus.OK);
+                } else {
+                    return  new ResponseEntity<>("Role not added", HttpStatus.BAD_REQUEST);
+                }
             } catch (StatusException e) {
                 if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
-                    return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Invalid User Id", HttpStatus.NOT_FOUND);
                 } else {
-                    throw new RuntimeException(e);
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         }
-        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("User not authorised to edit roles", HttpStatus.UNAUTHORIZED);
     }
 
     @PatchMapping("/users/{id}/remove-role/{role}")
@@ -259,17 +259,21 @@ public class ListUsersController extends PageController {
         if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Remove role from user
-                var response = userAccountClientService.removeRoleFromUser(id, role);
-                return new ResponseEntity<>(String.valueOf(response), HttpStatus.OK);
+                boolean roleRemoved = userAccountClientService.removeRoleFromUser(id, role);
+                if(roleRemoved) {
+                    return new ResponseEntity<>("Role " + role.name() + " removed", HttpStatus.OK);
+                } else {
+                    return  new ResponseEntity<>("Role not removed", HttpStatus.BAD_REQUEST);
+                }
             } catch (StatusException e) {
                 if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
-                    return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Invalid User Id", HttpStatus.NOT_FOUND);
                 } else {
-                    throw new RuntimeException(e);
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
         }
-        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("User not authorised to edit roles", HttpStatus.UNAUTHORIZED);
     }
 
 }
