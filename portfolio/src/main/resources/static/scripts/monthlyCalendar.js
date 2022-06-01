@@ -61,12 +61,16 @@ document.addEventListener('DOMContentLoaded', function() {
         eventResize: function(info) {
             // if the user clicks on a sprint, update the selected sprint
             if (sprintsEditable === "true") {
+                // getting the form element by its id
+                const form  = document.getElementById('sprintForm');
+
                 // update the selected sprint dates
-                document.getElementById("sprintId").value = new Number(info.event.id);
-                document.getElementById("sprintStartDate").value = new Date(info.event.start);
-                document.getElementById("sprintEndDate").value = new Date(info.event.end);
-                saveSprint();
-                return
+                document.getElementById("sprintId").value = info.event.id;
+                document.getElementById("sprintStartDate").value = info.event.start;
+                document.getElementById("sprintEndDate").value = info.event.end;
+
+                // submitting the form
+                form.submit();
             }
         },
         // Used to show all the sprints on the calendar
@@ -78,8 +82,3 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar.render();
 
 });
-
-function saveSprint() {
-    const form  = document.getElementById('sprintForm');
-    form.submit();
-}
