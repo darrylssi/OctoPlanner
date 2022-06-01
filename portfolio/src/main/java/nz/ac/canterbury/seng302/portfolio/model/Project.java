@@ -23,6 +23,7 @@ public class Project {
     @NotBlank (message = "Project name is required")
     private String projectName;
 
+    @Column (nullable = false)
     @Size (max = 200, message = "Description cannot be more than 200 characters.")
     private String projectDescription;
 
@@ -60,8 +61,8 @@ public class Project {
     /**
      * Constructor taking dates as String objects. Date strings should be of the format dd/MON/yyyy, where MON is the
      * first three letters of the name of the month, e.g. Jan, Feb, Mar, Apr, etc. Day and year are numbers.
-     * @param projectName
-     * @param projectDescription
+     * @param projectName the name of the project, as a string
+     * @param projectDescription a description for the project, as a string
      * @param projectStartDate {String} project start date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
      *                         Must be before the end date.
      * @param projectEndDate {String} project end date in format dd/MON/yyyy, where MON is Jan, Feb, Mar, etc.
@@ -75,10 +76,10 @@ public class Project {
         this.projectCreationDate = new Date();
     }
 
-    @Override
     /**
      * Returns a string listing the attributes of the project in the form "Project[x, x, x, ...]".
      */
+    @Override
     public String toString() {
         return String.format(
                 "Project[id=%d, projectName='%s', projectStartDate='%s', projectEndDate='%s', projectDescription='%s']",
