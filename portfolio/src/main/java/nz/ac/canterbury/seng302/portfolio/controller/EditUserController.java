@@ -6,14 +6,12 @@ import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,6 +21,9 @@ public class EditUserController {
 
     @Autowired
     private UserAccountClientService userAccountClientService;
+
+    private static final String EDIT_USER = "editUser";
+    private static final String REDIRECT = "redirect:../";
 
     private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
@@ -63,7 +64,7 @@ public class EditUserController {
             Model model
     ) {
         editHandler(model, id, principal);
-        return "editUser";
+        return EDIT_USER;
     }
 
     @PostMapping("/users/{id}/edit")
@@ -86,7 +87,7 @@ public class EditUserController {
         /* Set (new) user details to the corresponding user */
         EditUserResponse editReply;
         if (result.hasErrors()) {
-            return "editUser";
+            return EDIT_USER;
         }
         try {
             editReply = userAccountClientService.editUser(id, firstName, middleName,
@@ -94,18 +95,18 @@ public class EditUserController {
 
             if (editReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:../" + id;
+                return REDIRECT + id;
             } else {
                 ValidationError err = editReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("editErrorMessage", "Unknown error updating details");
-            return "editUser";
+            return EDIT_USER;
         }
 
         model.addAttribute("editMessage", editReply.getMessage());
-        return "editUser";
+        return EDIT_USER;
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
@@ -125,50 +126,60 @@ public class EditUserController {
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
-            return "editUser";
+            return EDIT_USER;
         }
         if(!newPassword.equals(confirmPassword)) {
             model.addAttribute("error_PasswordsEqual", "New and confirm passwords do not match");
-            return "editUser";
+            return EDIT_USER;
         }
         try {
             changeReply = userAccountClientService.changeUserPassword(id, oldPassword, newPassword);
 
             if (changeReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:../" + id;
+                return REDIRECT + id;
             } else {
                 ValidationError err = changeReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("pwErrorMessage", "Unknown error changing password");
-            return "editUser";
+            return EDIT_USER;
         }
 
         model.addAttribute("pwMessage", changeReply.getMessage());
-        return "editUser";
+        return EDIT_USER;
     }
 
     /**
      * Post request for uploading a selected image file.
+     * @param user User object to be edited
      * @param id ID of the user to be edited
+     * @param principal Authenticated user
+     * @param result Holds the validation result
      * @param file Image file to be uploaded
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @return Profile page of the user
+     * @return Profile page of the user if photo is valid, otherwise, edit user page
      * @throws IOException When there is an error uploading the photo
      */
-    @PostMapping(value = "/users/{id}/upload")
+    @PostMapping(value = "/users/{id}/edit", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadPhoto(
+            User user,
             @PathVariable int id,
-            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal AuthState principal,
+            BindingResult result,
+            @RequestPart(name="file") MultipartFile file,
             Model model
     ) throws IOException {
+        editHandler(model, id, principal);
         model.addAttribute("file", file);
-        if (isValidImageFile(file)) {
+        if (isValidImageFile(file) && file.getSize() > 0) {
             userAccountClientService.uploadUserProfilePhoto(id, file);
+            return REDIRECT + id;
+        } else {
+            model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type jpg/png.");
+            return EDIT_USER;
         }
-        return "redirect:../" + id;
     }
 
     /**
