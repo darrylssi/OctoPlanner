@@ -3,7 +3,7 @@
 function showDeleteModal(sprintId, sprintName) {
     const modal = document.getElementById("deleteSprintModal");
     const deleteButton = document.getElementById("deleteButton");
-    const title = document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
     deleteButton.onclick = () => {deleteSprint(sprintId)}
     modal.style.display = "block";
 }
