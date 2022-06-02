@@ -15,6 +15,10 @@
             <input id="sprintName" th:type="text" th:name="sprintName" th:value="${sprintName}" th:required="required" />
             <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         </div><br/>
+        <div>
+            <label for="colourPicker">Pick a colour:</label>
+            <input type="color" id="colourPicker" value="#000000" th:name="sprintColour" th:value="${sprintColour}">
+        </div>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate">Sprint Start Date</label> <br/>

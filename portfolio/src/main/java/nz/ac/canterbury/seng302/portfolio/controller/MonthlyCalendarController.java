@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -39,7 +38,6 @@ public class MonthlyCalendarController {
     @Autowired
     private DateUtils utils;
 
-    private List<Sprint> sprintList;
     /**
      *
      * @param principal Current authentication state
@@ -67,7 +65,7 @@ public class MonthlyCalendarController {
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
 
-        sprintList = sprintService.getSprintsOfProjectById(id);
+        List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
             // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
             ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintService.getSprintsOfProjectById(id));
@@ -76,6 +74,7 @@ public class MonthlyCalendarController {
             model.addAttribute("sprintNames", getSprintsArrayList.get(1));
             model.addAttribute("sprintStartDates", getSprintsArrayList.get(2));
             model.addAttribute("sprintEndDates", getSprintsArrayList.get(3));
+            model.addAttribute("sprintColours", getSprintsArrayList.get(4));
         }
 
         return "monthlyCalendar";
@@ -116,32 +115,29 @@ public class MonthlyCalendarController {
      */
     private ArrayList<String> getSprintsStringList(List<Sprint> sprintList) {
         // Initializing the array list
-        ArrayList<String> sprintsDetailsList = new ArrayList<String>();
+        ArrayList<String> sprintsDetailsList = new ArrayList<>();
 
-        String sprintIds = "";                  // Initiating the sprint ids list
-        String sprintNames = "";                // Initiating the sprint names list
-        String sprintStartDates = "";           // Initiating the sprint start dates list
-        String sprintEndDates = "";             // Initiating the sprint end dates list
+        StringBuilder sprintIds = new StringBuilder();
+        StringBuilder sprintNames = new StringBuilder();                // Initiating the sprint names list
+        StringBuilder sprintStartDates = new StringBuilder();           // Initiating the sprint start dates list
+        StringBuilder sprintEndDates = new StringBuilder();             // Initiating the sprint end dates list
+        StringBuilder sprintColours = new StringBuilder();             // Initiating the sprint colours list
 
         // For loop to add each sprint names, start date and end date to the respective strings
         for (Sprint eachSprint: sprintList) {
-            sprintIds += eachSprint.getId() + ",";
-            sprintNames += eachSprint.getSprintName() + ",";
-            sprintStartDates += eachSprint.getSprintStartDate().toString().substring(0, 10) + ",";
-            sprintEndDates += addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",";
+            sprintIds.append(eachSprint.getId() + ",");
+            sprintNames.append(eachSprint.getSprintName() + ",");
+            sprintStartDates.append(eachSprint.getSprintStartDate().toString().substring(0, 10) + ",");
+            sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",");
+            sprintColours.append(eachSprint.getSprintColour() + ",");
         }
 
-        // Removing the string's last character, which is ","
-        sprintIds = sprintIds.substring(0, sprintIds.length()-1);
-        sprintNames = sprintNames.substring(0 , sprintNames.length()-1);
-        sprintStartDates = sprintStartDates.substring(0, sprintStartDates.length()-1);
-        sprintEndDates = sprintEndDates.substring(0, sprintEndDates.length()-1);
-
-        // Adding to the sprintsDetailsList
-        sprintsDetailsList.add(sprintIds);
-        sprintsDetailsList.add(sprintNames);
-        sprintsDetailsList.add(sprintStartDates);
-        sprintsDetailsList.add(sprintEndDates);
+        // Removing the string's last character, which is "," and adding to the sprintsDetailsList
+        sprintsDetailsList.add(sprintIds.substring(0 , sprintIds.length()-1));
+        sprintsDetailsList.add(sprintNames.substring(0 , sprintNames.length()-1));
+        sprintsDetailsList.add(sprintStartDates.substring(0, sprintStartDates.length()-1));
+        sprintsDetailsList.add(sprintEndDates.substring(0, sprintEndDates.length()-1));
+        sprintsDetailsList.add(sprintColours.substring(0, sprintColours.length()-1));
 
         return sprintsDetailsList;
     }
@@ -162,8 +158,6 @@ public class MonthlyCalendarController {
         LocalDate newLocalEndDate = localEndDate.plusDays(1);
 
         // Converting the new project/sprint LocalDate object to Date object
-        String newEndDate = utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
-        return newEndDate;
+        return utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 }

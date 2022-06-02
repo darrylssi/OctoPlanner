@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Used by Project and Pprint to convert dates to yyyy-MM-dd format and vice versa
+ * Used by Project and Sprint to convert dates to yyyy-MM-dd format and vice versa
  * that is required by the date type input field.
  */
 @Component
