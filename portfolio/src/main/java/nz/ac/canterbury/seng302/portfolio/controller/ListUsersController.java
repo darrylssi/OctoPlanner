@@ -6,6 +6,9 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +31,9 @@ import org.springframework.web.bind.annotation.PostMapping;
  */
 @Controller
 public class ListUsersController extends PageController {
+
+    @Value("${base-url}")
+    private String baseURL;
 
     private static final Logger logger = LoggerFactory.getLogger(ListUsersController.class);
 
@@ -70,6 +76,16 @@ public class ListUsersController extends PageController {
             // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
+
+        // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
+        List<UserRole> acceptableRoles = Stream.of(UserRole.values())
+                                    .filter(role -> principalData.hasRoleOfAtLeast(role))
+                                    .toList();
+
+        model.addAttribute("acceptableRoles", acceptableRoles);
+
+        // Only teachers or above can edit roles
+        model.addAttribute("canEdit", principalData.hasRoleOfAtLeast(UserRole.TEACHER));
 
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
@@ -184,6 +200,7 @@ public class ListUsersController extends PageController {
         String cookieName = COOKIE_NAME_PREFIX + userId;
         Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
+        cookie.setPath(baseURL + "users");
         response.addCookie(cookie);
     }
 
