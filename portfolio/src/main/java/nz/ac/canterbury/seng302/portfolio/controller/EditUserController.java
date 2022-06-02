@@ -177,7 +177,7 @@ public class EditUserController {
             userAccountClientService.uploadUserProfilePhoto(id, file);
             return REDIRECT + id;
         } else {
-            model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type jpg/png.");
+            model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type .jpeg, .jpg, or .png, and must not be empty.");
             return EDIT_USER;
         }
     }
