@@ -48,7 +48,7 @@ public class ProfilePageController {
      * @author Andrew Hall <amh284@uclive.ac.nz>
      */
     @GetMapping("/users/{id}")
-    public String GetProfile(
+    public String getProfile(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
@@ -61,8 +61,9 @@ public class ProfilePageController {
 
         boolean isCurrentUser = principalData.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
-
-            if (user != null) {
+        
+        if (user != null) {
+                model.addAttribute("profileImageURL", user.getProfileImagePath());
                 model.addAttribute("profileInfo", user);
                 model.addAttribute("userExists", true);
                 model.addAttribute("fullName", getFullName(
