@@ -43,7 +43,7 @@ public class MonthlyCalendarController {
      * @param id Current project id
      * @param model Used to display the current attributes being passed to the html page
      * @return The monthly calendar page
-     * @throws Exception
+     * @throws Exception if the project id is invalid
      */
     @GetMapping("/monthlyCalendar/{id}")
     public String getMonthlyCalendar(
@@ -66,7 +66,7 @@ public class MonthlyCalendarController {
 
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
-            // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
+            // Gets the sprint string list containing five strings which are sprintIds, sprintNames, sprintStartDates, sprintEndDates and sprintColours
             ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintList);
 
             model.addAttribute("sprintIds", getSprintsArrayList.get(0));
@@ -79,36 +79,53 @@ public class MonthlyCalendarController {
         return "monthlyCalendar";
     }
 
-
+    /**
+     * Post Mapping for when a sprint date is updated in the monthly calendar. Saves the changed sprint dates.
+     * @param principal Current authentication state
+     * @param id the id of the project the sprint belongs to
+     * @param sprintId the id of the sprint being updated
+     * @param sprintStartDate the new sprint start date
+     * @param sprintEndDate the new sprint end date (will be one day after the actual endDate because of the way
+     *                      that FullCalendar works
+     * @return a redirect to the monthly calendar page
+     */
     @PostMapping("/monthlyCalendar/{id}")
     public String updateMonthlyCalendar(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="id") int id,
             @RequestParam(name="sprintId", required = false) Integer sprintId,
             @RequestParam(name="sprintStartDate", required = false) Date sprintStartDate,
-            @RequestParam(name="sprintEndDate", required = false) Date sprintEndDate,
-            Model model
-    ) throws Exception  {
-        // checks ...
-        if (sprintId == null) {
-            return "redirect:../monthlyCalendar/" + id;
+            @RequestParam(name="sprintEndDate", required = false) Date sprintEndDate
+    ) {
+        String redirectUrl = "redirect:../monthlyCalendar/" + id;
+
+        // If the user is at least a teacher, sprint dates will be updated
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            // checks that the sprint id is not null
+            if (sprintId == null) {
+                return redirectUrl;
+            }
+            try {
+                Sprint sprintToUpdate = sprintService.getSprintById(sprintId);
+                sprintToUpdate.setStartDate(sprintStartDate);
+                sprintToUpdate.setEndDate(removeOneDayFromEndDate(sprintEndDate));
+                sprintService.saveSprint(sprintToUpdate);
+            } catch (Exception e) {
+                // sprint does not exist
+                return redirectUrl;
+            }
         }
 
-        // updating the sprint dates at the given sprint id
-        Sprint getSprintAtId = sprintService.getSprintById(sprintId);
-        getSprintAtId.setStartDate(sprintStartDate);
-        getSprintAtId.setEndDate(removeOneDayFromEndDate(sprintEndDate));
-        sprintService.saveSprint(getSprintAtId);
-
-        return "redirect:../monthlyCalendar/" + id;
+        return redirectUrl;
     }
 
 
     /**
-     * The list to containing three strings, which are sprint names, sprint start dates, and sprint end dates,
-     * respectively. These are to be used for displaying sprints on the Monthly Calendar.
+     * The list to containing five strings, which are sprint ids, sprint names, sprint start dates, sprint end dates,
+     * and sprint colours respectively. These are to be used for displaying sprints on the Monthly Calendar.
      * @param sprintList The list containing all the sprints in the current project
-     * @return The string array list of sprint names, start dates and end dates
+     * @return The string array list of sprint ids, names, start dates, end dates, and colours
      */
     private ArrayList<String> getSprintsStringList(List<Sprint> sprintList) {
         // Initializing the array list
@@ -120,7 +137,7 @@ public class MonthlyCalendarController {
         StringBuilder sprintEndDates = new StringBuilder();             // Initiating the sprint end dates list
         StringBuilder sprintColours = new StringBuilder();             // Initiating the sprint colours list
 
-        // For loop to add each sprint names, start date and end date to the respective strings
+        // For loop to add each sprint ids, names, start date, end date and colours to the respective strings
         for (Sprint eachSprint: sprintList) {
             sprintIds.append(eachSprint.getId() + ",");
             sprintNames.append(eachSprint.getSprintName() + ",");
@@ -141,9 +158,10 @@ public class MonthlyCalendarController {
 
 
      /**
-     * Gets the new project or sprint end date which is updated by adding a day to it.
+      * FullCalendar displays events with an end date exclusive format. This function adds a day to
+      * the end date of a sprint so that the date can be used to display the sprint correctly in the calendar.
      * @param endDate The project or sprint end date
-     * @return The updated new end date
+     * @return The updated new end date as a string to be passed to FullCalendar
      */
     private String addOneDayToEndDate(Date endDate) {
         // Converting date to LocalDate
@@ -159,9 +177,10 @@ public class MonthlyCalendarController {
     }
 
     /**
-     * Gets the new project or sprint end date which is updated by removing a day from it.
+     * FullCalendar displays events with an end date exclusive format. This function removes a day from
+     * the end date given by FullCalendar so that the correct date can be saved to the database.
      * @param endDate The project or sprint end date
-     * @return The updated new end date
+     * @return The updated new end date as a date to be saved
      */
     private Date removeOneDayFromEndDate(Date endDate) {
         // Converting date to LocalDate
