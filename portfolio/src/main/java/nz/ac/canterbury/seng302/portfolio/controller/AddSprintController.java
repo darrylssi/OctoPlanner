@@ -92,6 +92,13 @@ public class AddSprintController extends PageController {
             c.add(Calendar.DAY_OF_MONTH, 1);    // Day after last sprint ends
             sprintStart = c.getTime();
         }
+
+        // This only happens when the last sprint finishes on the same day as the project
+        if (sprintStart.after(project.getProjectEndDate())) {
+            model.addAttribute("invalidDateRange",
+                    "There is no room for more sprints in this project");
+        }
+
         model.addAttribute("sprintStartDate", utils.toString(sprintStart));
 
         // Calculate the default sprint end date
