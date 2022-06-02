@@ -98,25 +98,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         .setStatus(status)
                         .build();
 
-                // convert PNG to JPG if the file was successfully uploaded
+                // convert from PNG to JPG is necessary
                 if (status == FileUploadStatus.SUCCESS) {
                     if (fileExtension.equalsIgnoreCase("png")) {
-                        Path source = profileImageFolder.resolve(fileName + "png");
-                        Path target = profileImageFolder.resolve(fileName + "jpg");
-                        try {
-                            convertPngToJpg(source, target);
-                        } catch (IOException e) {
-                            e.printStackTrace(); // TODO
-                        }
-                    } else if (!fileExtension.equalsIgnoreCase("jpeg") && fileName != null) {
-                        // delete the file if it is not a jpg at this point
+                        convertPngToJpg(fileName);
+                    } else if (!fileExtension.equalsIgnoreCase("jpeg")) {
+                        // delete the file if its extension is invalid
                         // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
-                        logger.info("Detected a profile photo upload of invalid type: \"{}{}\". Deleting file.", fileName, fileExtension);
-                        try {
-                            Files.deleteIfExists(profileImageFolder.resolve(fileName + fileExtension));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        deleteInvalidFile(fileName + fileExtension);
                     }
                 }
 
@@ -127,7 +116,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Sets the path of the file to be uploaded to resources/USERID_photo.FILETYPE
+     * Sets the path of the file to be uploaded to data/photos/USERID_photo.FILETYPE
      * Copied from tutorial; see above.
      * @param request A request object containing the user ID and the file type
      * @return Output stream
@@ -145,31 +134,50 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Takes a .png file existing in the SERVER_BASE_PATH folder and replaces it with (converts it to) a .jpg file.
+     * Takes a .png file existing in the profileImageFolder folder and replaces it with (converts it to) a .jpg file.
      * Code pretty much copied from https://mkyong.com/java/convert-png-to-jpeg-image-file-in-java/
-     * @param source a Path to the source (input) file, which must be a .png (so the path ends in .png)
-     * @param target a Path to the target (output) file, which must be a .jpg (so the path ends in .jpg)
-     * @throws IOException if an error occurs when trying to read the source file
+     * @param fileName a String of the input and output file. File assumed to be a png.
      */
-    private void convertPngToJpg(Path source, Path target) throws IOException {
+    private void convertPngToJpg(String fileName) {
+        try {
+            Path source = profileImageFolder.resolve(fileName + "png");
+            Path target = profileImageFolder.resolve(fileName + "jpg");
+            BufferedImage originalImage = ImageIO.read(source.toFile());
 
-        BufferedImage originalImage = ImageIO.read(source.toFile());
+            BufferedImage newImage = new BufferedImage(
+                    originalImage.getWidth(),
+                    originalImage.getHeight(),
+                    BufferedImage.TYPE_INT_RGB
+            );
 
-        BufferedImage newImage = new BufferedImage(
-            originalImage.getWidth(),
-            originalImage.getHeight(),
-            BufferedImage.TYPE_INT_RGB
-        );
+            newImage.createGraphics()
+                    .drawImage(originalImage,
+                            0,
+                            0,
+                            Color.WHITE,
+                            null);
 
-        newImage.createGraphics()
-                .drawImage(originalImage,
-                        0,
-                        0,
-                        Color.WHITE,
-                        null);
+            ImageIO.write(newImage, "jpg", target.toFile());
+            Files.deleteIfExists(source);
+        } catch (IOException e) {
+            logger.info("Error converting \"{}\" from PNG to JPG: {}", fileName + ".png", e.getMessage());
+        }
+    }
 
-        ImageIO.write(newImage, "jpg", target.toFile());
-        Files.deleteIfExists(source);
+    /**
+     * Deletes the specified file from the profileImageFolder if it exists.
+     * This method shouldn't really be called, because files can only get here through the Portfolio module and
+     * the controller for the edit profile page, which should reject everything that isn't a JPG or PNG.
+     * Still, this provides a fail-safe in the event a file gets through that shouldn't.
+     * @param fileNameAndExtension a String of the filename and its extension, e.g. "totally-a-photo.zip"
+     */
+    private void deleteInvalidFile(String fileNameAndExtension) {
+        logger.info("Detected a profile photo upload of invalid type: \"{}\". Deleting file.", fileNameAndExtension);
+        try {
+            Files.deleteIfExists(profileImageFolder.resolve(fileNameAndExtension));
+        } catch (IOException e) {
+            logger.info("Error deleting invalid file \"{}\": {}", fileNameAndExtension, e.getMessage());
+        }
     }
 
     /**
@@ -208,8 +216,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                logger.error(String.format("Register user %s : %s - %s",
-                        request.getUsername(), error.getFieldName(), error.getErrorText()));
+                String logOutput = String.format("Register user %s : %s - %s",
+                        request.getUsername(), error.getFieldName(), error.getErrorText());
+                logger.error(logOutput);
             }
 
             reply
@@ -414,7 +423,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                logger.error(String.format("Edit user %s : %s - %s", request.getUserId(), error.getFieldName(), error.getErrorText()));
+                String logOutput = String.format("Edit user %s : %s - %s", request.getUserId(), error.getFieldName(), error.getErrorText());
+                logger.error(logOutput);
             }
 
             reply
@@ -460,8 +470,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                logger.error(String.format("Change password of user %s : %s - %s", request.getUserId(),
-                        error.getFieldName(), error.getErrorText()));
+                String logOutput = String.format("Change password of user %s : %s - %s", request.getUserId(),
+                        error.getFieldName(), error.getErrorText());
+                logger.error(logOutput);
             }
 
             reply
