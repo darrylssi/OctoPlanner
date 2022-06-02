@@ -264,6 +264,15 @@ public class UserAccountClientService {
         streamObserver.onCompleted();
     }
 
-
-
+    /**
+     * Sends a DeleteUserProfilePhoto request to the identity provider
+     * @param userId The id of the user to remove the photo from
+     * @return A DeleteUserProfilePhotoResponse containing the success (or failure message) of the request
+     */
+    public DeleteUserProfilePhotoResponse deleteUserProfilePhoto(final int userId) {
+        DeleteUserProfilePhotoRequest deletePhotoRequest = DeleteUserProfilePhotoRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+        return userAccountStub.deleteUserProfilePhoto(deletePhotoRequest);
+    }
 }

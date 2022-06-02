@@ -25,6 +25,9 @@ public class EditUserController {
     private static final String EDIT_USER = "editUser";
     private static final String REDIRECT = "redirect:../";
 
+    /**
+     * Check that the current user has sufficient permissions, then populate the page accordingly
+     */
     private void editHandler(Model model, int id, AuthState principal) {
         UserResponse userResponse = userAccountClientService.getUserAccountById(id);
 
@@ -191,6 +194,34 @@ public class EditUserController {
         String mimeType = file.getContentType();
         return (mimeType != null && (mimeType.equalsIgnoreCase("image/jpeg") ||
                 mimeType.equalsIgnoreCase("image/png")));
+    }
+
+    @PostMapping(value = "/users/{id}/delete-profile-photo")
+    public String removeUpload(
+            User user,
+            @PathVariable int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) {
+        DeleteUserProfilePhotoResponse deleteReply;
+
+        /** Check the user is authorised, then send a request to the UserAccountCLientService */
+        editHandler(model, id, principal);
+
+        try {
+            deleteReply = userAccountClientService.deleteUserProfilePhoto(id);
+
+            if (deleteReply.getIsSuccess()) {
+                /* Redirect to profile page when done */
+                return REDIRECT + id;
+            } else {
+                model.addAttribute("error_photo", deleteReply.getMessage());
+            }
+        } catch (StatusRuntimeException e){
+            model.addAttribute("photoErrorMessage", "Unknown error deleting profile photo");
+        }
+
+        return EDIT_USER;
     }
 
 }

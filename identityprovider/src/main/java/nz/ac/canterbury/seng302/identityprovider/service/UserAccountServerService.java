@@ -116,6 +116,37 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
+     * Unlinks the user from their profile photo and deletes it from storage.
+     */
+    @Override
+    public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {
+        logger.info("Received request to delete profile photo");
+        DeleteUserProfilePhotoResponse.Builder reply = DeleteUserProfilePhotoResponse.newBuilder();
+        String filename = request.getUserId() + USER_PHOTO_SUFFIX;
+
+        try {
+            if (Files.exists(profileImageFolder.resolve(filename + "jpg"))) {
+                // Left as a deleteIfExists in case of two nearly simultaneous requests
+                Files.deleteIfExists(profileImageFolder.resolve(filename + "jpg"));
+                reply
+                        .setIsSuccess(true)
+                        .setMessage("User photo deleted successfully");
+            } else {
+                reply
+                        .setIsSuccess(false)
+                        .setMessage("User does not have a profile photo uploaded");
+            }
+        } catch (IOException err) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("Unable to delete user photo: " + err.getMessage());
+        }
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
      * Sets the path of the file to be uploaded to data/photos/USERID_photo.FILETYPE
      * Copied from tutorial; see above.
      * @param request A request object containing the user ID and the file type
