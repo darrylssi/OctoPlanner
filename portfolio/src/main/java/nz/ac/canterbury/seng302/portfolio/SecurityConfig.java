@@ -39,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .invalidateHttpSession(true)
                 .deleteCookies("lens-session-token")
-                .logoutSuccessUrl("login");
+                .logoutSuccessUrl("/login");
 
         // Disable basic http security
         security
