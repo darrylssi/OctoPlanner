@@ -130,6 +130,17 @@
                 <button class="form-button save" type="submit">Save Photo</button>
             </div>
         </form>
+        <br/>
+        <hr/>
+        <br/>
+        <form th:action="|./delete-profile-photo|" method="post">
+            <div class="centre-box">
+                <span th:class="error" th:text="${error_DeletePhoto}"></span>
+            </div>
+            <div class="centre-box">
+                <button class="form-button save" type="submit">Delete Profile Photo</button>
+            </div>
+        </form>
     </div>
     </div>
 

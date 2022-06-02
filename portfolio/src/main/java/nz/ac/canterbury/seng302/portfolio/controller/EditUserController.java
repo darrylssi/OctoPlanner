@@ -215,10 +215,10 @@ public class EditUserController {
                 /* Redirect to profile page when done */
                 return REDIRECT + id;
             } else {
-                model.addAttribute("error_photo", deleteReply.getMessage());
+                model.addAttribute("error_DeletePhoto", deleteReply.getMessage());
             }
         } catch (StatusRuntimeException e){
-            model.addAttribute("photoErrorMessage", "Unknown error deleting profile photo");
+            model.addAttribute("error_DeletePhoto", "Unknown error deleting profile photo");
         }
 
         return EDIT_USER;
