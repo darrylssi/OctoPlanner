@@ -2,6 +2,12 @@ package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+/**
+ * <p>Utility class for dealing with roles.</p>
+ * 
+ * These methods are available inside Thymeleaf, using
+ * <code>${#roles.[method](args)}</code>
+ */
 public class RoleUtils {
     
     // Using a singleton pattern, because SonarLint doesn't like it when a static
@@ -19,9 +25,6 @@ public class RoleUtils {
     /**
      * <p>Gets the cleaner human-readable name of each role</p>
      * e.g. <code>COURSE_ADMINISTRATOR -> "Course Admin"</code>
-     * 
-     * @param role
-     * @return
      */
     public static String toName(UserRole role) {
         return switch (role) {
