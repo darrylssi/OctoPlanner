@@ -1,13 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import io.grpc.Status;
-import io.grpc.StatusException;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -16,19 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller class for the list of users page.
@@ -55,7 +46,7 @@ public class ListUsersController extends PageController {
      * Displays a list of users with their name, username, nickname and roles
      */
     @GetMapping("/users")
-    public String GetListOfUsers(
+    public String getListOfUsers(
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(name="page", defaultValue="1") int page,
             Model model,
@@ -90,8 +81,6 @@ public class ListUsersController extends PageController {
         /* Total number of pages */
         int totalPages = (users.getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
         model.addAttribute("totalPages", totalPages);
-
-
 
         return "users";
     }
@@ -185,7 +174,6 @@ public class ListUsersController extends PageController {
         // Give each user on this machine a different sorting cookie (AC6)
         String cookieName = COOKIE_NAME_PREFIX + userId;
         Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
-        cookie.setPath("/users");
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
         response.addCookie(cookie);
     }

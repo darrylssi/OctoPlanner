@@ -1,4 +1,4 @@
-
+/** Request to add a given role to a user */
 function addRole(userId, role) {
     const url = BASE_URL + "users/" + userId + "/add-role/" + role;
     const patchRequest = new XMLHttpRequest();
@@ -9,8 +9,9 @@ function addRole(userId, role) {
     patchRequest.send();
 }
 
+/** Request to remove a given role from a user */
 function removeRole(userId, role) {
-    const url = BASE_URL + "/users/" + userId + "/remove-role/" + role;
+    const url = BASE_URL + "users/" + userId + "/remove-role/" + role;
     const patchRequest = new XMLHttpRequest();
     patchRequest.open("PATCH", url, true);
     patchRequest.onload = () => {
