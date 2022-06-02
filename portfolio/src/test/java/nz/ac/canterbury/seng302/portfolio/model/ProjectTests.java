@@ -15,13 +15,11 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +46,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectTests {
-    @Autowired
+    @Mock
     private ProjectService projectService;
 
     @Mock
-    SprintService sprintService;
+    private SprintService sprintService;
 
     @InjectMocks
-    ValidationService validationService = Mockito.spy(ValidationService.class);
+    private ValidationService validationService = Mockito.spy(ValidationService.class);
 
     private static Validator validator;
 
@@ -65,7 +63,7 @@ public class ProjectTests {
         validator = factory.getValidator();
     }
 
-    @MockBean
+    @Mock
     private ProjectRepository projectRepository;
 
     @Spy
@@ -96,12 +94,12 @@ public class ProjectTests {
     }
 
     @BeforeEach
-    public void setUp() throws ParseException {
+    public void setUp() {
         baseProject = new Project();
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
-        baseProject.setStartDateString("01/JAN/2022");
-        baseProject.setEndDateString("01/OCT/2022");
+        baseProject.setStartDateString("2022-01-01");
+        baseProject.setEndDateString("2022-10-01");
         baseProject.setId(1);
 
         // Artificially set for validation here so that tests aren't dependent on when they are run
@@ -126,51 +124,58 @@ public class ProjectTests {
 
     @Test
     void searchById_getProject() throws Exception {
-        projectService.saveProject(baseProject);
+        Mockito.when(projectService.getProjectById(baseProject.getId())).thenReturn(baseProject);
+
         Project foundProject = projectService.getProjectById(baseProject.getId());
-        foundProject.setStartDateString(Project.dateToString(foundProject.getProjectStartDate()));
-        foundProject.setEndDateString(Project.dateToString(foundProject.getProjectEndDate()));
+        foundProject.setStartDateString(utils.toString(foundProject.getProjectStartDate()));
+        foundProject.setEndDateString(utils.toString(foundProject.getProjectEndDate()));
         assertEquals(foundProject.toString(), baseProject.toString());
     }
 
     @Test
     void saveNullProject_getException() {
         Project nullProject = new Project();
+        when(projectRepository.save(nullProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(nullProject));
     }
 
     @Test
     void saveNullNameProject_getException() {
         baseProject.setProjectName(null);
+        when(projectRepository.save(baseProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveEmptyNameProject_getException() {
         baseProject.setProjectName("");
+        when(projectRepository.save(baseProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullDescriptionProject_getException() {
         baseProject.setProjectDescription(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullStartDateProject_getException() {
         baseProject.setProjectStartDate(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullEndDateProject_getException() {
         baseProject.setProjectEndDate(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
-    void checkValidProjectDateRangesForEditProject_getErrorMessage() throws ParseException {
+    void checkValidProjectDateRangesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
@@ -186,7 +191,7 @@ public class ProjectTests {
     }
 
     @Test
-    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
@@ -202,7 +207,7 @@ public class ProjectTests {
     }
 
     @Test
-    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
@@ -218,7 +223,7 @@ public class ProjectTests {
     }
 
     @Test
-    void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() throws ParseException {
+    void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() {
         // Project start date cannot be more than a year before the artificially set creation date
 
         /* Given: setup() has been run */

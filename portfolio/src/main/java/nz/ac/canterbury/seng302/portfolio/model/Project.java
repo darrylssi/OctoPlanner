@@ -147,5 +147,7 @@ public class Project {
         this.projectCreationDate = projectCreationDate;
     }
 
-    public Date getProjectCreationDate() {return projectCreationDate;}
+    public Date getProjectCreationDate() {
+        return projectCreationDate;
+    }
 }

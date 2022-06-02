@@ -7,7 +7,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,7 +24,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-
+import static org.mockito.Mockito.when;
 
 /**
  * Holds unit tests for the Sprint class.
@@ -29,30 +32,28 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 class SprintTests {
-    @Autowired
+    @Mock
     private SprintService sprintService;
 
-    @Autowired
+    @InjectMocks
     private ValidationService validationService;
 
-    @Autowired
+    @Spy
     private DateUtils utils;
 
-    @Autowired
+    @Mock
     private SprintRepository sprintRepository;
 
-    private List<Sprint> sprintList;
+    private final List<Sprint> sprintList = new ArrayList<>();
     private Sprint baseSprint;
 
     private Project baseProject;
     private final int SPRINT_ID = 2;
-    private final int parentProjId = 5;
 
     @BeforeEach
     public void setUp() {
-        sprintList = new ArrayList<>();
+        int parentProjId = 5;
 
-        sprintRepository.deleteAll();
         baseSprint = new Sprint();
         baseSprint.setSprintLabel("Sprint 1");
         baseSprint.setSprintName("Sprint 1");
@@ -75,71 +76,66 @@ class SprintTests {
     @Test
     void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
-        sprintService.saveSprint(baseSprint);
+        when(sprintService.getSprintByName(nameToSearch)).thenReturn(sprintList);
         List<Sprint> foundSprints = sprintService.getSprintByName(nameToSearch);
         Sprint foundSprint = foundSprints.get(0);
-        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
-        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
+        assertEquals(baseSprint, foundSprint);
     }
 
     @Test
     void searchById_getSprint() throws Exception {
-        sprintService.saveSprint(baseSprint);
+        when(sprintService.getSprintById(baseSprint.getId())).thenReturn(baseSprint);
         Sprint foundSprint = sprintService.getSprintById(baseSprint.getId());
-        // TODO fix the date functions in Project and DateUtils so I don't have to write stuff like this
-        // this is needed because dates are in a different format, so they need to be reset
-        // see https://stackoverflow.com/questions/24620064/comparing-of-date-objects-in-java
-        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
-        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
-        // toString used as they're different objects but have the same values
+        assertEquals(baseSprint, foundSprint);
     }
 
     @Test
     void searchByParentProjectId_getSprint() {
-        sprintService.saveSprint(baseSprint);
+        when(sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId())).thenReturn(sprintList);
         List<Sprint> foundSprints = sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId());
         Sprint foundSprint = foundSprints.get(0);
-        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
-        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
-        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
-        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
+        assertEquals(baseSprint, foundSprint);
     }
 
     @Test
     void saveNullSprint_getException() {
         Sprint nullSprint = new Sprint();
+        when(sprintRepository.save(nullSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(nullSprint));
     }
 
     @Test
     void saveNullNameSprint_getException() {
         baseSprint.setSprintName(null);
+        when(sprintRepository.save(baseSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveEmptyNameSprint_getException() {
         baseSprint.setSprintName("");
+        when(sprintRepository.save(baseSprint)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullDescriptionSprint_getException() {
         baseSprint.setSprintDescription(null);
+        when(sprintRepository.save(baseSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullStartDateSprint_getException() {
         baseSprint.setStartDate(null);
+        when(sprintRepository.save(baseSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullEndDateSprint_getException() {
         baseSprint.setEndDate(null);
+        when(sprintRepository.save(baseSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
@@ -147,6 +143,7 @@ class SprintTests {
     @Test
     void saveEmptyColourSprint_getException() {
         baseSprint.setSprintColour("");
+        when(sprintRepository.save(baseSprint)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
     }
 
@@ -154,6 +151,7 @@ class SprintTests {
     @Test
     void saveNullColourSprint_getException() {
         baseSprint.setSprintColour(null);
+        when(sprintRepository.save(baseSprint)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
@@ -214,7 +212,7 @@ class SprintTests {
         String sprintStartDate = "2022-02-05";
         String sprintEndDate = "2022-03-24";
 
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
+        when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
@@ -230,7 +228,7 @@ class SprintTests {
         String sprintStartDate = "2022-02-25";
         String sprintEndDate = "2022-04-02";
 
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
+        when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
@@ -285,7 +283,7 @@ class SprintTests {
         String sprintStartDate = "2022-02-05";
         String sprintEndDate = "2022-03-24";
 
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
+        when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
@@ -301,7 +299,7 @@ class SprintTests {
         String sprintStartDate = "2022-02-25";
         String sprintEndDate = "2022-04-02";
 
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
+        when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate(sprintStartDate);
         Date end = utils.toDate(sprintEndDate);
