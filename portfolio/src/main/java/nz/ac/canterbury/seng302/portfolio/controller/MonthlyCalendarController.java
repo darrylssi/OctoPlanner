@@ -14,6 +14,8 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 import static nz.ac.canterbury.seng302.portfolio.controller.PageController.requiresRoleOfAtLeast;
-
 
 /**
  * Controller for the display project details on the monthly calendar
@@ -36,7 +37,7 @@ public class MonthlyCalendarController {
     @Autowired
     private UserAccountClientService userAccountClientService;
     @Autowired
-    private DateUtils utils;
+    private DateUtils utils;                                    // initializing the date utils
 
     /**
      *
@@ -68,7 +69,7 @@ public class MonthlyCalendarController {
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         if (!sprintList.isEmpty()) {
             // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
-            ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintService.getSprintsOfProjectById(id));
+            ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintList, true);
 
             model.addAttribute("sprintIds", getSprintsArrayList.get(0));
             model.addAttribute("sprintNames", getSprintsArrayList.get(1));
@@ -95,13 +96,36 @@ public class MonthlyCalendarController {
             getMonthlyCalendar(principal, id, model);
         }
 
-        // update the given sprint dates
+        // updating the sprint dates at the given sprint id
         Sprint getSprintAtId = sprintService.getSprintById(sprintId);
         getSprintAtId.setStartDate(sprintStartDate);
         getSprintAtId.setEndDate(sprintEndDate);
         sprintService.saveSprint(getSprintAtId);
 
-        getMonthlyCalendar(principal, id, model);
+        // Get the current project id
+        Project project = projectService.getProjectById(id);
+
+        // If the user is at least a teacher, sprint durations will be editable
+        PrincipalData principalData = PrincipalData.from(principal);
+        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        model.addAttribute("sprintsEditable", hasEditPermissions);
+
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
+        model.addAttribute("project", project);
+        model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
+        model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
+
+        sprintList = sprintService.getSprintsOfProjectById(id);
+        if (!sprintList.isEmpty()) {
+            // Gets the sprint string list containing three strings which are sprintNames, sprintStartDates and sprintEndDate
+            ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintList, false);
+
+            model.addAttribute("sprintIds", getSprintsArrayList.get(0));
+            model.addAttribute("sprintNames", getSprintsArrayList.get(1));
+            model.addAttribute("sprintStartDates", getSprintsArrayList.get(2));
+            model.addAttribute("sprintEndDates", getSprintsArrayList.get(3));
+        }
 
         return "monthlyCalendar";
     }
@@ -113,7 +137,7 @@ public class MonthlyCalendarController {
      * @param sprintList The list containing all the sprints in the current project
      * @return The string array list of sprint names, start dates and end dates
      */
-    private ArrayList<String> getSprintsStringList(List<Sprint> sprintList) {
+    private ArrayList<String> getSprintsStringList(List<Sprint> sprintList, boolean isEndDateChanged) {
         // Initializing the array list
         ArrayList<String> sprintsDetailsList = new ArrayList<>();
 
@@ -130,6 +154,13 @@ public class MonthlyCalendarController {
             sprintStartDates.append(eachSprint.getSprintStartDate().toString().substring(0, 10) + ",");
             sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",");
             sprintColours.append(eachSprint.getSprintColour() + ",");
+
+            // checks if the end date has been updated, based on that it adds one day to it or not
+            if (isEndDateChanged) {
+                sprintEndDates += addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",";
+            } else {
+                sprintEndDates += eachSprint.getSprintEndDate().toString().substring(0, 10) + ",";
+            }
         }
 
         // Removing the string's last character, which is "," and adding to the sprintsDetailsList
@@ -160,4 +191,5 @@ public class MonthlyCalendarController {
         // Converting the new project/sprint LocalDate object to Date object
         return utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
+
 }
