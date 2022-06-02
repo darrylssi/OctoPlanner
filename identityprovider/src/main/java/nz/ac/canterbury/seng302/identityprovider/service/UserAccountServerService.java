@@ -51,6 +51,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private UserService userService;
 
     @Autowired
+    private ProfilePhotoService profilePhotoService;
+
+    @Autowired
     private ValidationService validator;
 
     /**
@@ -290,12 +293,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         List<User> paginatedUsers;
         try {
-            if (orderBy.equals("role")) { // Ordering by "role" means order by highest role ({STUDENT, COURSE_ADMIN} =>
-                                          // highest is COURSE_ADMIN).
-                                          // JPA allows ordering by joined tables, HOWEVER it generates SQL incompatible
-                                          // with H2. So, we have
-                                          // to bring the entire table into memory & sort here until that's migrated.
-                                          // TODO Andrew: Once we're on MariaDB, remove this function.
+            if (orderBy.equals("role")) {
+                    // Ordering by "role" means order by highest role ({STUDENT, COURSE_ADMIN} =>
+                    // highest is COURSE_ADMIN).
+                    // JPA allows ordering by joined tables, HOWEVER it generates SQL incompatible
+                    // with H2. So, we have
+                    // to bring the entire table into memory & sort here until that's migrated.
+                    // Update: MariaDB is used on the VMs yeah, but we still use H2 when developing
+                    // on our machines. So this stays.
                 paginatedUsers = paginatedUsersOrderedByRole(offset, limit, isAscending);
             } else {
                 paginatedUsers = userService.getUsersPaginated(offset, limit, orderBy, isAscending);
@@ -306,7 +311,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             return;
         }
 
-        List<UserResponse> userResponses = paginatedUsers.stream().map(UserAccountServerService::buildUserResponse).toList();
+        List<UserResponse> userResponses = paginatedUsers.stream().map(this::buildUserResponse).toList();
         int numUsersInDatabase = (int) repository.count();
         reply
             .addAllUsers(userResponses)
@@ -504,13 +509,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @param user The user object to extract fields from
      * @return A gRPC-ready response object with the user's fields copied in.
      */
-    private static UserResponse buildUserResponse(User user) {
+    private UserResponse buildUserResponse(User user) {
+        int id = user.getID();
         ArrayList<UserRole> sortedRoles = new ArrayList<>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());
 
         UserResponse.Builder userResponse = UserResponse
             .newBuilder()
-                .setId(user.getID())
+                .setId(id)
                 .setUsername(user.getUsername())
                 .setFirstName(user.getFirstName())
                 .setMiddleName(user.getMiddleName())
@@ -519,7 +525,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setBio(user.getBio())
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
-                .setProfileImagePath("/") // TODO Path to users profile image once implemented
+                .setProfileImagePath(profilePhotoService.getUserProfileImageUrl(id))
                 .addAllRoles(user.getRoles())
                 .setId(user.getID())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
