@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -17,7 +16,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,11 +97,6 @@ public class ListUsersController extends PageController {
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
         model.addAttribute("dir", isAscending);
-        List<UserRole> allRoles = new ArrayList<>();
-        allRoles.add(UserRole.TEACHER);
-        allRoles.add(UserRole.STUDENT);
-        allRoles.add(UserRole.COURSE_ADMINISTRATOR);
-        model.addAttribute("allRoles", allRoles);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);

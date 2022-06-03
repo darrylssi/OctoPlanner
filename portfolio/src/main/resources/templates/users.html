@@ -111,26 +111,11 @@
                     <div th:id='|roleList${user.getId()}|' class="dropdown-content">
                         <button th:each="role: ${acceptableRoles}"
                                 th:if="${!#arrays.contains(user.getRolesList, role)}"
-                                th:text="${#roles.toName(role)}" th:user-id="${user.getId()}" th:role="${role}" th:onclick="addRole(this.getAttribute('user-id'), this.getAttribute('role'))"></button>
+                                th:text="${#roles.toName(role)}"
+                                th:data-userid="${user.getId()}" th:data-role="${role}"
+                                th:onclick="onclickAddRole(this)"></button>
                     </div>
                 </div>
-
-<!--                &lt;!&ndash;/* "Add roles" button. Only visible to teachers or above */&ndash;&gt;-->
-<!--                <div class="dropdown" th:if="${canEdit}">-->
-<!--                    <button onclick="addRoleFunction(this, event)" class="add-role-button" th:data-userid="${user.getId()}">-->
-<!--                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 20 14">-->
-<!--                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>-->
-<!--                        </svg>-->
-<!--                    </button>-->
-<!--                    <div th:id="|myDropdown-${user.getId()}|" class="dropdown-content">-->
-<!--                        &lt;!&ndash;/* Only show roles the user doesn't have, and have permission to add*/&ndash;&gt;-->
-<!--                        &lt;!&ndash;/* That long text call turns `COURSE_ADMINISTRATOR` into `Course Administrator` */&ndash;&gt;-->
-<!--                        <a th:each="role: ${acceptableRoles}"-->
-<!--                          th:if="${!#arrays.contains(user.getRolesList, role)}"-->
-<!--                            th:text="${#roles.toName(role)}"-->
-<!--                            onclick="alert('Add role endpoint not implemented')"></a>-->
-<!--                    </div>-->
-<!--                </div>-->
 
             </td>
         </tr>
