@@ -70,7 +70,8 @@ public class EditUserController {
         return EDIT_USER;
     }
 
-    @PostMapping("/users/{id}/edit")
+    @PostMapping(value = "/users/{id}/edit", params = {"firstName", "middleName", "lastName",
+            "nickname", "bio", "personalPronouns", "email"})
     public String edit(
             User user,
             @AuthenticationPrincipal AuthState principal,
@@ -196,7 +197,7 @@ public class EditUserController {
                 mimeType.equalsIgnoreCase("image/png")));
     }
 
-    @PostMapping(value = "/users/{id}/delete-profile-photo")
+    @PostMapping(value = "/users/{id}/edit")
     public String removeUpload(
             User user,
             @PathVariable int id,
