@@ -1,10 +1,18 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 
+import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -33,35 +41,98 @@ public class MonthlyCalendarControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    MonthlyCalendarController monthlyCalendarController;
+    private ProjectService projectService;
+    @MockBean
+    private SprintService sprintService;
+    @MockBean
+    private UserAccountClientService userAccountClientService;
+    @MockBean
+    private DateUtils utils;
 
-    /**
-     * Helper function to create a valid AuthState given an ID
-     * @param id - The ID of the user specified by this AuthState
-     * @return the valid AuthState
-     */
-    private AuthState createValidAuthStateWithId(String id) {
-        return AuthState.newBuilder()
-                .setIsAuthenticated(true)
-                .setNameClaimType("name")
-                .setRoleClaimType("role")
-                .addClaims(ClaimDTO.newBuilder().setType("role").setValue("COURSE_ADMINISTRATOR").build())
-                .addClaims(ClaimDTO.newBuilder().setType("nameid").setValue(id).build())
-                .build();
+    @Test
+    @WithMockPrincipal(UserRole.COURSE_ADMINISTRATOR)
+    void adminGetMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
+        Mockito.when(projectService.getProjectById(-1)).thenThrow(new Exception("Project not found"));
+        try{
+            mockMvc.perform(get("/monthlyCalendar/-1"));
+        } catch (Exception e) {
+            Assertions.assertEquals("Request processing failed; nested exception is java.lang.Exception: Project not found", e.getMessage());
+        }
     }
 
     @Test
-    void getMonthlyCalendar_whenGivenInvalidId_returnNotFoundErrorMessage() throws Exception {
-        AuthState authState = createValidAuthStateWithId("-1");
-        SecurityContext mockedSecurityContext = Mockito.mock(SecurityContext.class);
-        when(mockedSecurityContext.getAuthentication())
-                .thenReturn(new PreAuthenticatedAuthenticationToken(authState, ""));
-        SecurityContextHolder.setContext(mockedSecurityContext);
-
-        mockMvc.perform(get("/monthlyCalendar/-1"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString("Project not found")));
+    @WithMockPrincipal(UserRole.TEACHER)
+    void teacherGetMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
+        Mockito.when(projectService.getProjectById(-1)).thenThrow(new Exception("Project not found"));
+        try{
+            mockMvc.perform(get("/monthlyCalendar/-1"));
+        } catch (Exception e) {
+            Assertions.assertEquals("Request processing failed; nested exception is java.lang.Exception: Project not found", e.getMessage());
+        }
     }
 
+    @Test
+    @WithMockPrincipal(UserRole.STUDENT)
+    void studentGetMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
+        Mockito.when(projectService.getProjectById(-1)).thenThrow(new Exception("Project not found"));
+        try{
+            mockMvc.perform(get("/monthlyCalendar/-1"));
+        } catch (Exception e) {
+            Assertions.assertEquals("Request processing failed; nested exception is java.lang.Exception: Project not found", e.getMessage());
+        }
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.COURSE_ADMINISTRATOR)
+    void adminGetMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
+        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+        Mockito.when(projectService.getProjectById(0)).thenReturn(project);
+        mockMvc.perform(get("/monthlyCalendar/0"));
+        Assertions.assertEquals(project, projectService.getProjectById(0));
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
+    void teacherGetMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
+        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+        Mockito.when(projectService.getProjectById(0)).thenReturn(project);
+        mockMvc.perform(get("/monthlyCalendar/0"));
+        Assertions.assertEquals(project, projectService.getProjectById(0));
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.STUDENT)
+    void studentGetMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
+        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+        Mockito.when(projectService.getProjectById(0)).thenReturn(project);
+        mockMvc.perform(get("/monthlyCalendar/0"));
+        Assertions.assertEquals(project, projectService.getProjectById(0));
+    }
+
+
+//    @Test
+//    @WithMockPrincipal(UserRole.TEACHER)
+//    void teacherGetMonthlyCalendar_whenGivenPostMapping_returnUpdatedSprint() throws Exception {
+//        // initializing project object and mocking it
+//        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+//        Mockito.when(projectService.getProjectById(0)).thenReturn(project);
+//
+//        // initializing sprint object and mocking it
+//        Sprint sprint = new Sprint(0, "Sprint 1", "This is sprint 1", "02/JAN/2022", "10/JAN/2022", "#3ea832");
+//        Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint);
+//
+//        mockMvc.perform(
+//                    MockMvcRequestBuilders.post("/monthlyCalendar/0")
+//                            .contentType(MediaType.APPLICATION_JSON)
+//                            .param("sprintId", "1")
+//                            .param("sprintStartDate", "utils.toDate('05/JAN/2022')")
+//                            .param("sprintEndDate", "utils.toDate('15/JAN/2022')")
+//                )
+//                .andExpect(status().is3xxRedirection());
+//
+//        // mocking the updated sprint
+//        System.out.println(sprint.getSprintStartDate() + " - " + sprint.getSprintEndDate());
+//        Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint);
+//    }
 
 }
