@@ -1,5 +1,9 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import java.util.Collection;
+import java.util.List;
+
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 /**
@@ -33,6 +37,36 @@ public class RoleUtils {
             case COURSE_ADMINISTRATOR -> "Course Admin";
             case UNRECOGNIZED -> "Unrecognized (!!! this shouldn't be here !!!)";
         };
+    }
+
+    /**
+     * <p>Checks if this list has a role of equal or greater "importance" than the given role.</p>
+     * 
+     * Remember: Role order is <code>[Student < Teacher < CourseAdmin]</code>
+     * 
+     * @param userRoles The collection of roles the current user has.
+     * @param targetRole The role barrier we need to pass
+     * @return <code>true</code> if anything in the role list is equal or greater importance than <code>targetRole</code>
+     */
+    public static boolean hasRoleOfAtLeast(Collection<UserRole> userRoles, UserRole targetRole) {
+        // No one can have an unrecognised role, plus it breaks otherwise
+        if (targetRole == UserRole.UNRECOGNIZED)
+            return false;
+        return userRoles.stream()
+            .anyMatch(role -> role.getNumber() >= targetRole.getNumber());
+    }
+    /**
+     * <p>Checks if this user has a role of equal or greater "importance" than the given role.</p>
+     * 
+     * Remember: Role order is <code>[Student < Teacher < CourseAdmin]</code>
+     * 
+     * @param user The user you want to compare.
+     * @param targetRole The role barrier we need to pass
+     * @return <code>true</code> if the user has a role of equal or greater importance than <code>targetRole</code>
+     */
+    public static boolean hasRoleOfAtLeast(UserResponse user, UserRole targetRole) {
+        Collection<UserRole> userRoles = user.getRolesList();
+        return hasRoleOfAtLeast(userRoles, targetRole);
     }
 
     

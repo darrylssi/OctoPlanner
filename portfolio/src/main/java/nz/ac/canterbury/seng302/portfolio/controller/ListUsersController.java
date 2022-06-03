@@ -3,8 +3,10 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.util.List;
@@ -61,10 +63,11 @@ public class ListUsersController extends PageController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        String userId = principalData.getID().toString();
+        int thisUserID = PrincipalData.from(principal).getID();
+        String sThisUserID = String.valueOf(thisUserID);
+        UserResponse thisUser = userAccountClientService.getUserAccountById(thisUserID);
         // Get sort column & direction from cookie
-        Pair<String, Boolean> ordering = getPageOrdering(request, userId);
+        Pair<String, Boolean> ordering = getPageOrdering(request, sThisUserID);
         String orderBy = ordering.getFirst();
         boolean isAscending = ordering.getSecond();
 
@@ -74,20 +77,20 @@ public class ListUsersController extends PageController {
             users = userAccountClientService.getPaginatedUsers(page - 1, PAGE_SIZE, orderBy, isAscending);
         } catch (IllegalArgumentException e) {
             // The orderBy column in the cookie is invalid, delete it
-            clearPageOrdering(userId, response);
+            clearPageOrdering(sThisUserID, response);
             // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
         
         // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
         List<UserRole> acceptableRoles = Stream.of(UserRole.values())
-                                    .filter(principalData::hasRoleOfAtLeast)
+                                    .filter(role -> RoleUtils.hasRoleOfAtLeast(thisUser, role))
                                     .toList();
 
         model.addAttribute("acceptableRoles", acceptableRoles);
         
         // Only teachers or above can edit roles
-        model.addAttribute("canEdit", principalData.hasRoleOfAtLeast(UserRole.TEACHER));
+        model.addAttribute("canEdit", RoleUtils.hasRoleOfAtLeast(thisUser, UserRole.TEACHER));
 
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
@@ -120,7 +123,7 @@ public class ListUsersController extends PageController {
         HttpServletResponse response
     ) {
         PrincipalData principalData = PrincipalData.from(principal);
-        String userId = principalData.getID().toString();
+        String userId = String.valueOf(principalData.getID());
         // Get the user's existing ordering
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String savedOrderBy = ordering.getFirst();
