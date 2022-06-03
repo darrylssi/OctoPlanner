@@ -1,17 +1,14 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,9 +53,6 @@ public class ProjectTests {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Spy
-    private DateUtils utils;
-
     private Project baseProject;
 
     private Date creationDate;
@@ -93,10 +87,10 @@ public class ProjectTests {
         baseProject.setId(1);
 
         // Artificially set for validation here so that tests aren't dependent on when they are run
-        creationDate = utils.toDate("2022-05-27");
+        creationDate = DateUtils.toDate("2022-05-27");
 
-        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"), "#aabbcc");
-        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"), "#112233");
+        sprint1 = new Sprint(1, "Sprint 1", "This is S1", DateUtils.toDate("2022-01-01"), DateUtils.toDate("2022-02-02"), "#aabbcc");
+        sprint2 = new Sprint(1, "Sprint 2", "This is S2", DateUtils.toDate("2022-02-06"), DateUtils.toDate("2022-03-04"), "#112233");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
     }
@@ -117,8 +111,8 @@ public class ProjectTests {
         Mockito.when(projectService.getProjectById(baseProject.getId())).thenReturn(baseProject);
 
         Project foundProject = projectService.getProjectById(baseProject.getId());
-        foundProject.setStartDateString(utils.toString(foundProject.getProjectStartDate()));
-        foundProject.setEndDateString(utils.toString(foundProject.getProjectEndDate()));
+        foundProject.setStartDateString(DateUtils.toString(foundProject.getProjectStartDate()));
+        foundProject.setEndDateString(DateUtils.toString(foundProject.getProjectEndDate()));
         assertEquals(foundProject.toString(), baseProject.toString());
     }
 
@@ -170,8 +164,8 @@ public class ProjectTests {
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        Date start = utils.toDate("2022-02-04");
-        Date end = utils.toDate("2022-08-05");
+        Date start = DateUtils.toDate("2022-02-04");
+        Date end = DateUtils.toDate("2022-08-05");
         String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
@@ -185,8 +179,8 @@ public class ProjectTests {
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        Date start = utils.toDate("2022-01-20");
-        Date end = utils.toDate("2022-01-20");
+        Date start = DateUtils.toDate("2022-01-20");
+        Date end = DateUtils.toDate("2022-01-20");
         String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
@@ -200,8 +194,8 @@ public class ProjectTests {
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        Date start = utils.toDate("2022-01-01");
-        Date end = utils.toDate("2022-02-10");
+        Date start = DateUtils.toDate("2022-01-01");
+        Date end = DateUtils.toDate("2022-02-10");
         String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
@@ -238,7 +232,7 @@ public class ProjectTests {
 
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before " + utils.toDisplayString(earliestStart) + ")" , errorMessage);
+                     "(cannot start before " + DateUtils.toDisplayString(earliestStart) + ")" , errorMessage);
     }
 
     @Test

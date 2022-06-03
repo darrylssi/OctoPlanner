@@ -42,8 +42,7 @@ public class EditProjectController extends PageController {
     private ValidationService validationService;
     @Autowired
     private UserAccountClientService userAccountClientService;
-    @Autowired
-    private DateUtils utils;
+
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -64,8 +63,8 @@ public class EditProjectController extends PageController {
             model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
-            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
-            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", project.getProjectDescription());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
@@ -110,8 +109,8 @@ public class EditProjectController extends PageController {
             // Get current user's username for the header
             model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
-            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
-            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", projectDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
             return "editProject";

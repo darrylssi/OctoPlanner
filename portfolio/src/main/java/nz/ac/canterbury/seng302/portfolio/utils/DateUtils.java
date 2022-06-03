@@ -15,10 +15,6 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
-    private DateUtils() {
-        throw new IllegalStateException("Utility class");
-    }
-
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
 

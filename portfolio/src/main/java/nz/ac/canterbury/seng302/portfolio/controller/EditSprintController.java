@@ -40,9 +40,6 @@ public class EditSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    @Autowired
-    private DateUtils utils;
-
     /**
      * Show the edit-sprint page.
      * @param id ID of the sprint to be edited
@@ -65,8 +62,8 @@ public class EditSprintController extends PageController {
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
         model.addAttribute("sprintName", sprint.getSprintName());
-        model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
-        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
+        model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
         model.addAttribute("sprintDescription", sprint.getSprintDescription());
         model.addAttribute("sprintColour", sprint.getSprintColour());
 
@@ -127,8 +124,8 @@ public class EditSprintController extends PageController {
         // Adding the new sprint object
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
-        sprint.setStartDate(utils.toDate(sprintStartDate));
-        sprint.setEndDate(utils.toDate(sprintEndDate));
+        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
+        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
         sprint.setSprintColour(sprintColour);

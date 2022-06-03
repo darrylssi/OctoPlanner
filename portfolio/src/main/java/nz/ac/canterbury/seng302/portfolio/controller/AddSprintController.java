@@ -41,10 +41,6 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    // Initializes the DateUtils object to be used for converting date to string and string to date
-    @Autowired
-    private DateUtils utils;
-
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
      * @param id the id of the project the sprint belongs to
@@ -99,7 +95,7 @@ public class AddSprintController extends PageController {
                     "There is no room for more sprints in this project");
         }
 
-        model.addAttribute("sprintStartDate", utils.toString(sprintStart));
+        model.addAttribute("sprintStartDate", DateUtils.toString(sprintStart));
 
         // Calculate the default sprint end date
         Date sprintEnd;
@@ -112,9 +108,9 @@ public class AddSprintController extends PageController {
         } else {
             sprintEnd = c.getTime();
         }
-        model.addAttribute("sprintEndDate", utils.toString(sprintEnd));
-        model.addAttribute("minDate", utils.toString(project.getProjectStartDate()));
-        model.addAttribute("maxDate", utils.toString(project.getProjectEndDate()));
+        model.addAttribute("sprintEndDate", DateUtils.toString(sprintEnd));
+        model.addAttribute("minDate", DateUtils.toString(project.getProjectStartDate()));
+        model.addAttribute("maxDate", DateUtils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
         return "addSprint";
@@ -164,8 +160,8 @@ public class AddSprintController extends PageController {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
-            model.addAttribute("minDate", utils.toString(parentProject.getProjectStartDate()));
-            model.addAttribute("maxDate", utils.toString(parentProject.getProjectEndDate()));
+            model.addAttribute("minDate", DateUtils.toString(parentProject.getProjectStartDate()));
+            model.addAttribute("maxDate", DateUtils.toString(parentProject.getProjectEndDate()));
             model.addAttribute("sprintName", sprintName);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
@@ -178,8 +174,8 @@ public class AddSprintController extends PageController {
         // Adding the new sprint object
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
-        sprint.setStartDate(utils.toDate(sprintStartDate));
-        sprint.setEndDate(utils.toDate(sprintEndDate));
+        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
+        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel(labelUtils.nextLabel(id));
         sprint.setSprintColour(sprintColour);

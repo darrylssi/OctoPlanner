@@ -10,9 +10,6 @@ import java.util.Date;
 @Entity // this is an entity, assumed to be in a table called Project
 @Table (name = "Project")
 public class Project {
-    @Transient
-    private final DateUtils utils = new DateUtils();
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -70,8 +67,8 @@ public class Project {
     public Project(String projectName, String projectDescription, String projectStartDate, String projectEndDate) {
         this.projectName = projectName;
         this.projectDescription = projectDescription;
-        this.projectStartDate = utils.toDate(projectStartDate);
-        this.projectEndDate = utils.toDate(projectEndDate);
+        this.projectStartDate = DateUtils.toDate(projectStartDate);
+        this.projectEndDate = DateUtils.toDate(projectEndDate);
         this.projectCreationDate = new Date();
     }
 
@@ -128,19 +125,19 @@ public class Project {
     /* Dates have string get/set methods to interact with view */
 
     public String getStartDateString() {
-        return utils.toDisplayString(this.projectStartDate);
+        return DateUtils.toDisplayString(this.projectStartDate);
     }
 
     public void setStartDateString(String date) {
-        this.projectStartDate = utils.toDate(date);
+        this.projectStartDate = DateUtils.toDate(date);
     }
 
     public String getEndDateString() {
-        return utils.toDisplayString(this.projectEndDate);
+        return DateUtils.toDisplayString(this.projectEndDate);
     }
 
     public void setEndDateString(String date) {
-        this.projectEndDate = utils.toDate(date);
+        this.projectEndDate = DateUtils.toDate(date);
     }
 
     public void setProjectCreationDate(Date projectCreationDate) {

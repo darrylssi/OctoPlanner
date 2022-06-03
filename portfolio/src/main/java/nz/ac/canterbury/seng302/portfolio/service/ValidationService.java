@@ -15,8 +15,6 @@ public class ValidationService {
 
     @Autowired
     private SprintService sprintService;
-    @Autowired
-    private DateUtils utils;
 
     /**
      * Validates that a sprint's start and end dates are valid
