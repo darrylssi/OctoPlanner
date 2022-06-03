@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.portfolio;
+package nz.ac.canterbury.seng302.portfolio.controller;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
