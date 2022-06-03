@@ -18,8 +18,10 @@ public class ValidationService {
 
     /**
      * Validates that a sprint's start and end dates are valid
+     * @param id the id of the sprint to be validated, as an integer
      * @param start The sprint's start date to validate
      * @param end The sprint's end date to validate
+     * @param parentProject the project that the sprint belongs to
      * @return An error message if invalid, otherwise returns an empty string
      */
     public String validateSprintDates(int id, Date start, Date end,
