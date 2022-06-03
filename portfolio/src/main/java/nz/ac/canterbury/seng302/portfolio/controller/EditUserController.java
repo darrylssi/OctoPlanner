@@ -44,6 +44,8 @@ public class EditUserController {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
+            // Gets the current user's username
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
