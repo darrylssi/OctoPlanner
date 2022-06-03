@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -41,11 +42,8 @@ public class ProjectTests {
     @Mock
     private ProjectService projectService;
 
-    @Mock
-    private SprintService sprintService;
-
-    @InjectMocks
-    private ValidationService validationService = Mockito.spy(ValidationService.class);
+    @Autowired
+    private ValidationService validationService;
 
     private static Validator validator;
 
@@ -171,11 +169,10 @@ public class ProjectTests {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate("2022-02-04");
         Date end = utils.toDate("2022-08-05");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -187,11 +184,10 @@ public class ProjectTests {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate("2022-01-20");
         Date end = utils.toDate("2022-01-20");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -203,11 +199,10 @@ public class ProjectTests {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
-        Mockito.when(sprintService.getAllSprints()).thenReturn(sprintList);
 
         Date start = utils.toDate("2022-01-01");
         Date end = utils.toDate("2022-02-10");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         assertEquals("The sprint with dates: " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
@@ -220,9 +215,9 @@ public class ProjectTests {
 
         /* Given: setup() has been run */
         /* When: these (valid) dates are validated */
-        Date start = utils.toDate("2021-05-27");
-        Date end = utils.toDate("2022-10-01");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
+        Date start = DateUtils.toDate("2021-05-27");
+        Date end = DateUtils.toDate("2022-10-01");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         /* Then: the validation should return a success */
         assertEquals("" , errorMessage);
@@ -237,9 +232,9 @@ public class ProjectTests {
         startCal.add(Calendar.YEAR, -1);
         Date earliestStart = startCal.getTime();
 
-        Date start = utils.toDate("2021-05-26");
-        Date end = utils.toDate("2022-10-01");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate);
+        Date start = DateUtils.toDate("2021-05-26");
+        Date end = DateUtils.toDate("2022-10-01");
+        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
 
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +

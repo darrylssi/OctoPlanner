@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Controller for the edit sprint details page
@@ -102,9 +103,11 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        Date start = utils.toDate(sprintStartDate);
-        Date end = utils.toDate(sprintEndDate);
-        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end, parentProject);
+        Date start = DateUtils.toDate(sprintStartDate);
+        Date end = DateUtils.toDate(sprintEndDate);
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end,
+                parentProject, sprintList);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

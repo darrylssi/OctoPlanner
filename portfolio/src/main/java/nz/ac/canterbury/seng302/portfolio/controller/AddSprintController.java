@@ -153,9 +153,11 @@ public class AddSprintController extends PageController {
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
-        Date start = utils.toDate(sprintStartDate);
-        Date end = utils.toDate(sprintEndDate);
-        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end, parentProject);
+        Date start = DateUtils.toDate(sprintStartDate);
+        Date end = DateUtils.toDate(sprintEndDate);
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end,
+                parentProject, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {

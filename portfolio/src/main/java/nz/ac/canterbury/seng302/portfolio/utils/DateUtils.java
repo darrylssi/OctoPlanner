@@ -15,8 +15,12 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
-    private final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+    private DateUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -25,7 +29,7 @@ public class DateUtils {
      * @param date Date to be converted
      * @return Date as a String
      */
-    public String toDisplayString(Date date) {
+    public static String toDisplayString(Date date) {
         return displayDateFormat.format(date);
     }
 
@@ -34,7 +38,7 @@ public class DateUtils {
      * @param date String to be converted to Date
      * @return Date object
      */
-    public Date toDate(String date) {
+    public static Date toDate(String date) {
         try {
             return backendDateFormat.parse(date);
         } catch (ParseException e) {
@@ -48,7 +52,7 @@ public class DateUtils {
      * @param date String to be converted to Date
      * @return Date object
      */
-    public String toString(Date date) {
+    public static String toString(Date date) {
         return backendDateFormat.format(date);
     }
 

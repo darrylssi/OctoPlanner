@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Controller for the edit project details page
@@ -33,6 +36,8 @@ public class EditProjectController extends PageController {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private SprintService sprintService;
     @Autowired
     private ValidationService validationService;
     @Autowired
@@ -96,7 +101,9 @@ public class EditProjectController extends PageController {
 
         Project newProject = projectService.getProjectById(id);
 
-        String dateOutOfRange = validationService.validateProjectDates(projectStartDate, projectEndDate, newProject.getProjectCreationDate());
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = validationService.validateProjectDates(projectStartDate, projectEndDate,
+                newProject.getProjectCreationDate(), sprintList);
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
