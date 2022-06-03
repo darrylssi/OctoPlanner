@@ -3,23 +3,63 @@
 <head>
     <title>Log In</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" th:href="|./styles/login.css|" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--    <link rel="stylesheet" th:href="|./styles/login.css|" />-->
+<!--    <link rel="stylesheet" th:href="|./styles/main.css|" />-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 
-    <div id="loginform">
-        <form action="login" method="post">
-            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">
-            <br>
-            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">
-            <br>
-            <p id="error" th:text="${loginMessage}" />
-            <button type="submit" class="inputs">Log In</button>
-        </form>
-        <a href="register">
-            <button type="submit" class="inputs"> Register </button>
-        </a>
+<!--    <div id="loginform">-->
+<!--        <form action="login" method="post">-->
+<!--            <input class="inputs" type="text" th:name="username" th:value="*{username}" required placeholder="Username">-->
+<!--            <br>-->
+<!--            <input class="inputs" type="password" th:name="password" th:value="*{password}" required placeholder="Password">-->
+<!--            <br>-->
+<!--            <p id="error" th:text="${loginMessage}" />-->
+<!--            <button type="submit" class="inputs">Log In</button>-->
+<!--        </form>-->
+<!--        <a href="register">-->
+<!--            <button type="submit" class="inputs"> Register </button>-->
+<!--        </a>-->
+<!--    </div>-->
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card my-5">
+                    <h1 class="card-header text-center">
+                        LOGIN
+                    </h1>
+                    <form class="card-body cardbody-color p-lg-5" method="post" action="login">
+
+                        <div class="mb-3">
+                            <label for="username"> Username </label>
+                            <input type="text" class="form-control" id="username" placeholder="Username"
+                                   th:name="username" th:value="*{username}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password"> Password </label>
+                            <input type="password" class="form-control" id="password" placeholder="Password"
+                                   th:name="password" th:value="*{password}" required>
+                        </div>
+                        <div class="text-center"><button type="submit" class="btn btn-primary mb-4 w-50">Login</button></div>
+                        <div class="form-text text-center
+                         text-dark">Not Registered?
+                            <a href="register" class="text-dark fw-bold"> Create an Account</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </div>
-    
+
 </body>
+<style>
+    .red {
+        background-color: red;
+    }
+</style>
 </html>
