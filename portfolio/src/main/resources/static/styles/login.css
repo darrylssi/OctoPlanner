@@ -1,17 +1,10 @@
-#loginform {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    padding: 30px;
-    text-align: center;
+body {
+    background-color: #f0e6e5;
 }
-.inputs {
-    width: 20em;
-    height: 2em;
-    margin: 2px;
+.card-header {
+    background-color: #b70f0a;
+    color: white;
 }
-
-#error {
-    color: red;
+.btn-primary {
+    background-color: #5e0202;
 }
