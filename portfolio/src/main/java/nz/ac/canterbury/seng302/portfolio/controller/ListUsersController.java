@@ -54,7 +54,7 @@ public class ListUsersController extends PageController {
      * Displays a list of users with their name, username, nickname and roles
      */
     @GetMapping("/users")
-    public String GetListOfUsers(
+    public String getListOfUsers(
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(name="page", defaultValue="1") int page,
             Model model,
@@ -81,7 +81,7 @@ public class ListUsersController extends PageController {
         
         // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
         List<UserRole> acceptableRoles = Stream.of(UserRole.values())
-                                    .filter(role -> principalData.hasRoleOfAtLeast(role))
+                                    .filter(principalData::hasRoleOfAtLeast)
                                     .toList();
 
         model.addAttribute("acceptableRoles", acceptableRoles);

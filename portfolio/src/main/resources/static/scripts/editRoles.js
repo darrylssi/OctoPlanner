@@ -65,6 +65,7 @@ function onclickRemoveRole(elem) {
     removeRole(userID, role);
 }
 
+/** Request to remove a given role from a user */
 function removeRole(userId, role) {
     const url = `${BASE_URL}users/${userId}/remove-role/${role}`;
     const patchRequest = new XMLHttpRequest();
