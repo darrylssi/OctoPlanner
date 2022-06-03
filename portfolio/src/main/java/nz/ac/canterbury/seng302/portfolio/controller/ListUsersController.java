@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +85,7 @@ public class ListUsersController extends PageController {
 
         // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
         List<UserRole> acceptableRoles = Stream.of(UserRole.values())
-                                    .filter(role -> principalData.hasRoleOfAtLeast(role))
+                                    .filter(principalData::hasRoleOfAtLeast)
                                     .toList();
 
         model.addAttribute("acceptableRoles", acceptableRoles);

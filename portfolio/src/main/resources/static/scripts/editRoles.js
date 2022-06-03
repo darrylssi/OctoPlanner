@@ -1,3 +1,4 @@
+/**
 /** Request to add a given role to a user */
 function addRole(userId, role) {
     const url = `${BASE_URL}users/${userId}/add-role/${role}`;
@@ -8,7 +9,6 @@ function addRole(userId, role) {
     }
     patchRequest.send();
 }
-/**
  * Note: This code will ONLY work if a BASE_URL variable is globally defined
  * on the webpage this code is linked into.
  */
@@ -46,8 +46,8 @@ If you're not a dev, politely tell us thanks.`
 
 /**
  * Removes the role from a user. Provided to each button.
- *
- * @param {HTMLElement} elem
+ * 
+ * @param {HTMLElement} elem 
  */
 function onclickRemoveRole(elem) {
     const userID = elem.getAttribute('data-userid');
