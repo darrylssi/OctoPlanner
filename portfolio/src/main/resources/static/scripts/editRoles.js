@@ -1,19 +1,20 @@
 /** Request to add a given role to a user */
 function addRole(userId, role) {
-    const url = BASE_URL + "users/" + userId + "/add-role/" + role;
+    const url = `${BASE_URL}users/${userId}/add-role/${role}`;
     const patchRequest = new XMLHttpRequest();
     patchRequest.open("PATCH", url, true);
     patchRequest.onload = () => {
         window.location.reload();
+    }
+    patchRequest.send();
+}
 /**
  * Note: This code will ONLY work if a BASE_URL variable is globally defined
  * on the webpage this code is linked into.
  */
 
 if (BASE_URL === undefined) {
-    alert(
-`Failed loading editRoles.js - couldn't find BASE_URL variable.
-
+    alert(`Failed loading editRoles.js - couldn't find BASE_URL variable.
 If you're a dev, see how it's done in the /users/ HTML file.
 If you're not a dev, politely tell us thanks.`
     )
@@ -26,26 +27,12 @@ If you're not a dev, politely tell us thanks.`
  * @param {HTMLElement} elem The button being clicked
  * @param {PointerEvent} event The event (needed to prevent the global onclick from firing)
  */
-function addRoleFunction(elem, event) {
-    // Prevent the window.onclick below from firing
-    event.stopPropagation();
-    const userID = elem.getAttribute("data-userid");
-    document.getElementById("myDropdown-" + userID).classList.toggle("show");
-}
-
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-    if (!event.target.matches('.add-role-button')) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-                openDropdown.classList.remove('show');
-            }
-        }
-    }
-}
+//function addRoleFunction(elem, event) {
+//    // Prevent the window.onclick below from firing
+//    event.stopPropagation();
+//    const userID = elem.getAttribute("data-userid");
+//    document.getElementById("myDropdown-" + userID).classList.toggle("show");
+//}
 
 // function addRole(userId, role) {
 //     const url = BASE_URL + "users/" + userId + "/add-role/" + role;
@@ -74,7 +61,6 @@ function onclickRemoveRole(elem) {
 
 /** Request to remove a given role from a user */
 function removeRole(userId, role) {
-    const url = BASE_URL + "users/" + userId + "/remove-role/" + role;
     const url = `${BASE_URL}users/${userId}/remove-role/${role}`;
     const patchRequest = new XMLHttpRequest();
     patchRequest.open("PATCH", url, true);
@@ -86,9 +72,5 @@ function removeRole(userId, role) {
 
 
 function toggleRoleList(elementId) {
-    if(document.getElementById(elementId).className == "dropdown-content") {
-        document.getElementById(elementId).className = "dropdown-content show";
-    } else {
-        document.getElementById(elementId).className = "dropdown-content";
-    }
+    document.getElementById(elementId).classList.toggle("show");
 }
