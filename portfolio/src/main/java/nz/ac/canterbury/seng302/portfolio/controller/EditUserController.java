@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
@@ -17,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Controller
-public class EditUserController {
+public class EditUserController extends PageController{
 
     @Autowired
     private UserAccountClientService userAccountClientService;
@@ -41,12 +42,10 @@ public class EditUserController {
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
 
-        if(!userResponse.hasCreated()) {
-            //TODO: send to error page
-            model.addAttribute("editErrorMessage", "Invalid id");
+        if(userResponse == null) {
+            configureError(model, ErrorType.NOT_FOUND, "/users" + id + EDIT_USER);
         } else if(!isCurrentUser) {
-            //TODO: send to error page
-            model.addAttribute("editErrorMessage", "You may not edit other users");
+            configureError(model, ErrorType.ACCESS_DENIED, "/users" + id + EDIT_USER);
         } else {
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
@@ -197,6 +196,14 @@ public class EditUserController {
                 mimeType.equalsIgnoreCase("image/png")));
     }
 
+    /**
+     * Post request for removing an uploaded image file.
+     * @param user User object to be edited
+     * @param id ID of the user to be edited
+     * @param principal Authenticated user
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Profile page of the user if photo is successfully removed, otherwise, edit user page
+     */
     @PostMapping(value = "/users/{id}/edit")
     public String removeUpload(
             User user,

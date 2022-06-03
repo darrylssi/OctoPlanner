@@ -32,6 +32,11 @@ public abstract class PageController {
 
         /* Handle various types of error */
         switch(err) {
+            case NOT_FOUND:
+                model.addAttribute("error", "Page not found");
+                model.addAttribute("status", "404");
+                model.addAttribute("message", "The page you attempted to access does not exist");
+                break;
             case ACCESS_DENIED:
                 model.addAttribute("error", "Access Denied");
                 model.addAttribute("status", "403");
