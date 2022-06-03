@@ -10,7 +10,7 @@
 
     <script>
         // Getting the project start and end date
-        let projectStartDate = "[[${projectStartDate}]]";
+        let projectStartDate =  "[[${projectStartDate}]]";
         let projectEndDate = "[[${projectEndDate}]]";
 
         // Getting all sprint's string list which contains names, start date, end dates, and colours
@@ -38,8 +38,8 @@
             <!-- setting hidden inputs to store the values of the sprint dates changed-->
             <form th:action="@{../monthlyCalendar/{id}(id = ${project.getId})}" method="post" id="sprintForm">
                 <input type="hidden" id="sprintId" th:name="sprintId" />
-                <input type="hidden" id="sprintStartDate" th:name="sprintStartDate"  />
-                <input type="hidden" id="sprintEndDate" th:name="sprintEndDate"  />
+                <input type="hidden" id="sprintStartDate" th:name="sprintStartDate" />
+                <input type="hidden" id="sprintEndDate" th:name="sprintEndDate" />
             </form>
         </div>
         <div id='calendar'></div>
