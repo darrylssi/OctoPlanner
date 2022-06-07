@@ -1,20 +1,28 @@
 package nz.ac.canterbury.seng302.portfolio;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.builder.MockUserResponseBuilder;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
@@ -26,6 +34,26 @@ public class ProjectControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private UserAccountClientService mockedGrpcUserAccount;
+
+    /**
+     * Authentication is done by getting the user ID from the AuthState,
+     * then checking it against the gRPC. This mocks the gRPC check.
+     * @param testInfo Gives us info about the test that's running next.
+     */
+    @BeforeEach
+    public void before(TestInfo testInfo) {
+        // Might as well reuse that WithMockPrincipal annotation I made
+        UserResponse user = MockUserResponseBuilder.buildUserResponseFromMockPrincipalAnnotatedTest(testInfo);
+        int annotatedUserId = user.getId();
+
+        // When a controller checks the user's role, return what they expect.
+        when(mockedGrpcUserAccount.getUserAccountById(annotatedUserId))
+            .thenReturn(user);
+    }
+
 
     @Test
     public void getProjectMissingId_throw404() throws Exception {
