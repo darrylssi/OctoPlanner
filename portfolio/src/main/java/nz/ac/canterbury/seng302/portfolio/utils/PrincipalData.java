@@ -107,6 +107,8 @@ public class PrincipalData {
      * @return <code>true</code> if this user has a role of equal or greater importance than <code>targetRole</code>
      */
     public boolean hasRoleOfAtLeast(UserRole targetRole) {
+        // No one can have an unrecognised role
+        if (targetRole == UserRole.UNRECOGNIZED) return false;
         return roles.stream()
             .anyMatch(role -> role.getNumber() >= targetRole.getNumber());
     }

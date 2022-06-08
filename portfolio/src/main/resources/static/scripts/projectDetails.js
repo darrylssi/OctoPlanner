@@ -3,7 +3,7 @@
 function showDeleteModal(sprintId, sprintName) {
     const modal = document.getElementById("deleteSprintModal");
     const deleteButton = document.getElementById("deleteButton");
-    const title = document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
     deleteButton.onclick = () => {deleteSprint(sprintId)}
     modal.style.display = "block";
 }
@@ -16,7 +16,7 @@ function hideModal() {
 
 /** sends a http request to delete the sprint with the given id */
 function deleteSprint(sprintId) {
-    const url = "/delete-sprint/" + sprintId;
+    const url = BASE_URL + "delete-sprint/" + sprintId;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {

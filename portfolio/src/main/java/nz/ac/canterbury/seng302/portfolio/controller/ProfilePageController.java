@@ -69,16 +69,7 @@ public class ProfilePageController {
                         user.getFirstName(), user.getMiddleName(), user.getLastName()));
                 model.addAttribute("id", id);
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-                String roles = "";
-                for (int i = 0; i < user.getRolesCount(); i++) {
-                    String roleString = user.getRoles(i).toString();
-                    roleString = roleString.replace("_", " ");
-                    roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
-                }
-                if (roles.length() > 2) {
-                    roles = roles.substring(0, roles.length() - 2);
-                }
-                model.addAttribute("roles", roles);
+                model.addAttribute("roles", user.getRolesList());
             } else {
                 errors.add("Invalid ID");
             }
@@ -105,7 +96,7 @@ public class ProfilePageController {
      * @param timestamp The timestamp at which the user's account was created
      * @return A formatted string containing the date the user was created
      */
-    public static String getDateCreated(Timestamp timestamp){
+    public static String getDateCreated(Timestamp timestamp) {
         LocalDateTime dateTime = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos())
                 .atOffset(ZoneOffset.UTC)
                 .toLocalDateTime();
