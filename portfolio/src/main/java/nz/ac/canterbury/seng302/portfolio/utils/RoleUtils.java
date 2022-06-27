@@ -68,6 +68,5 @@ public class RoleUtils {
         Collection<UserRole> userRoles = user.getRolesList();
         return hasRoleOfAtLeast(userRoles, targetRole);
     }
-
     
 }

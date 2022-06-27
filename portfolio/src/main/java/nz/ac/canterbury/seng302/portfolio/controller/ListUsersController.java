@@ -3,10 +3,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.authentication.CookieUtil;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.util.List;
@@ -63,9 +61,8 @@ public class ListUsersController extends PageController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        int thisUserID = PrincipalData.from(principal).getID();
-        String sThisUserID = String.valueOf(thisUserID);
-        UserResponse thisUser = userAccountClientService.getUserAccountById(thisUserID);
+        PrincipalData thisUser = PrincipalData.from(principal);
+        String sThisUserID = String.valueOf(thisUser.getID());
         // Get sort column & direction from cookie
         Pair<String, Boolean> ordering = getPageOrdering(request, sThisUserID);
         String orderBy = ordering.getFirst();
@@ -84,13 +81,13 @@ public class ListUsersController extends PageController {
         
         // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
         List<UserRole> acceptableRoles = Stream.of(UserRole.values())
-                                    .filter(role -> RoleUtils.hasRoleOfAtLeast(thisUser, role))
+                                    .filter(thisUser::hasRoleOfAtLeast)
                                     .toList();
 
         model.addAttribute("acceptableRoles", acceptableRoles);
         
         // Only teachers or above can edit roles
-        model.addAttribute("canEdit", RoleUtils.hasRoleOfAtLeast(thisUser, UserRole.TEACHER));
+        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
 
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));

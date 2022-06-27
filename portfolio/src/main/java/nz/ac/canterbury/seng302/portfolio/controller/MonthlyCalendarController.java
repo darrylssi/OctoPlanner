@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.time.LocalDate;
@@ -56,9 +54,8 @@ public class MonthlyCalendarController {
         Project project = projectService.getProjectById(id);
 
         // If the user is at least a teacher, sprint durations will be editable
-        int userID = PrincipalData.from(principal).getID();
-        UserResponse thisUser = userAccountClientService.getUserAccountById(userID);
-        boolean hasEditPermissions = RoleUtils.hasRoleOfAtLeast(thisUser, UserRole.TEACHER);
+        PrincipalData thisUser = PrincipalData.from(principal);
+        boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("sprintsEditable", hasEditPermissions);
 
         // Get current user's username for the header

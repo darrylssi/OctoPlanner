@@ -1,17 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.server.ResponseStatusException;
 
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.text.SimpleDateFormat;
@@ -23,9 +19,6 @@ import java.util.Date;
 @Controller
 public abstract class PageController {
 
-    @Autowired
-    private UserAccountClientService userAccountClientService;
-    
     /**
      * Adds error information to the model
      *
@@ -62,10 +55,8 @@ public abstract class PageController {
      * @throws ResponseStatusException If the user doesn't have permission, throws a 403 forbidden error
      */
     public void requiresRoleOfAtLeast(UserRole minimumRole, AuthState principal) throws ResponseStatusException {
-        int userID = PrincipalData.from(principal).getID();
-        UserResponse user = userAccountClientService.getUserAccountById(userID);
-
-        boolean hasPermissions = RoleUtils.hasRoleOfAtLeast(user, minimumRole);
+        PrincipalData user = PrincipalData.from(principal);
+        boolean hasPermissions = user.hasRoleOfAtLeast(minimumRole);
         if (!hasPermissions) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this endpoint");
         }

@@ -1,37 +1,32 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 
-/*
- * Note for anyone trying to extend this in future:
- * The IdP DOES put information about the current user in the token
- * (specifically the username, ID, roles, and full name).
- * HOWEVER, this token is generated *on login*, and *never* updated.
- * "fullname" and "roles" are mutable, so if you want their values,
- * ask the IdP directly, as the JWT information could get out-of-sync.
-*/
-
-/**
- * Class for extracting information out of an AuthState principal.
- */
 public class PrincipalData {
     
     private boolean authenticated;
-    private int id;
+    private Integer id;
     private String username;
+    private String fullname;
+    private List<UserRole> roles;
 
     private static final String CLAIM_ID_TYPE = "nameid";
     private static final String CLAIM_USERNAME_TYPE = "unique_name";
 
 
-    protected PrincipalData(int id, String username) {
+    protected PrincipalData(int id, String username, String fullName, List<UserRole> roles) {
         this.authenticated = true;
         this.id = id;
         this.username = username;
+        this.fullname = fullName;
+        this.roles = roles;
     }
 
     /**
@@ -40,11 +35,14 @@ public class PrincipalData {
     protected PrincipalData() {
         this.authenticated = false;
         this.id = -1;
+        this.roles = List.of();
     }
 
     public boolean isAuthenticated() { return authenticated; }
-    public int getID()               { return id; }
+    public Integer getID()           { return id; }
     public String getUsername()      { return username; }
+    public String getFullName()      { return fullname; }
+    public List<UserRole> getRoles() { return roles; }
 
     /* There are no setters, this is just a parser class */
 
@@ -65,10 +63,39 @@ public class PrincipalData {
             .stream()
             .collect(Collectors.toMap(ClaimDTO::getType, ClaimDTO::getValue));
         
-        // And, get the only immutable values we have any use for.
+        // AuthState contains the DTO names for fullname & roles, for some reason
+        String claimFullnameType = principal.getNameClaimType();
+        String claimRoleType = principal.getRoleClaimType();
+
         int id = Integer.parseInt(principalValues.get(CLAIM_ID_TYPE));
         String username = principalValues.get(CLAIM_USERNAME_TYPE);
+        String fullname = principalValues.get(claimFullnameType);
+        String stringRoles = principalValues.get(claimRoleType);
+        // It's saved as a lower-case comma-separated list, let's fix that.
+        List<UserRole> roles = List.of(stringRoles.split(","))
+            .stream()
+            .map(role -> UserRole.valueOf(role.toUpperCase(Locale.ROOT)))
+            .toList();
         
-        return new PrincipalData(id, username);
+        return new PrincipalData(id, username, fullname, roles);
     }
+
+
+
+    /**
+     * Checks if this user has a role of equal or greater "importance" than the given role.
+     * <br/>
+     * Remember: Role order is <code>[Student < Teacher < CourseAdmin]</code>
+     * <p><b>Note: </b>if the user isn't authenticated, it will always return false</p>
+     * 
+     * @param targetRole The role barrier we need to pass
+     * @return <code>true</code> if this user has a role of equal or greater importance than <code>targetRole</code>
+     */
+    public boolean hasRoleOfAtLeast(UserRole targetRole) {
+        // No one can have an unrecognised role
+        if (targetRole == UserRole.UNRECOGNIZED) return false;
+        return roles.stream()
+            .anyMatch(role -> role.getNumber() >= targetRole.getNumber());
+    }
+
 }
