@@ -47,6 +47,8 @@ public class EditUserController extends PageController{
         } else if(!isCurrentUser) {
             configureError(model, ErrorType.ACCESS_DENIED, "/users" + id + EDIT_USER);
         } else {
+            // Gets the current user's username
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(

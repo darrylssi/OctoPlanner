@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="|../styles/main.css|">
     <link rel="stylesheet" th:href="|../styles/profile.css|">
     <link rel="stylesheet" th:href="|../styles/form.css|">
+    <link rel="stylesheet" th:href="|../styles/users.css|">
 
 </head>
 
@@ -29,17 +30,15 @@
                     <br/>
                     <div class="sprint-description" th:text="|Username: *{getUsername()}|" />
                     <div class="sprint-description">Email: <a th:href="|mailto:*{getEmail()}|" th:text="*{getEmail()}"/></div>
-                    <div class="sprint-description" th:text="|Role: ${roles}|"></div>
+                    <div class="sprint-description">Role:
+                        <span class="role" th:each="role: ${roles}" th:text="${#roles.toName(role)}" />
+                    </div>
                 </div>
             </div>
         </div>
         <div th:if="*{getBio()} != ''" class="detail-block">
             <div class="sprint-description" th:text="*{getBio()}"/>
 
-            <!--
-            /* This broke when changing the way fields are added and I don't really know what it does so I'm not going to fix it just yet */
-            <p th:if="*{getBio()}" class="bio" th:utext="*{| &lt;hr&gt; ${#strings.replace(#strings.escapeXml(getBio()), '&#10', '&lt;br&gt;')} |}" />
-            -->
     </div>
         <div  style="justify-content:space-between" class="sprint-block">
             <div th:text="${dateCreated}"></div>
