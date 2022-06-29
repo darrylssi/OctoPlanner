@@ -4,10 +4,10 @@ Feature: The project's dates are changed
     Given The project has the following sprints with dates
       | 2022-01-01  | 2022-02-02  |
       | 2022-02-06  | 2022-03-04  |
-    And The projects creation dates is "2022-01-01"
+    And The projects creation date is "2022-01-01"
     When I set the project start date to <StartDate>
     And I set the project end date to <EndDate>
-    Then <Outcome> message should be displayed
+    Then Project <Outcome> message should be displayed
 
     Examples:
       | StartDate  | EndDate    | Outcome |

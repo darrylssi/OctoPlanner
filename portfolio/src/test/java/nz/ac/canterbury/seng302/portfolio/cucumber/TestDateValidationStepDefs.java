@@ -9,43 +9,35 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @CucumberContextConfiguration
-public class StepDefinitions_ProjectValidation extends RunCucumberTest {
+public class TestDateValidationStepDefs extends RunCucumberTest {
 
     @Autowired
     private ValidationService validationService;
 
     private Project project;
+    private Sprint sprint;
     private List<Sprint> sprintList;
 
     @Before
     public void setUp(){
         sprintList = new ArrayList<>();
-        project = new Project("testName", "test description",
+        project = new Project("testProject", "test description",
                 "2022-01-01", "2022-10-01" );
+        sprint = new Sprint(1, "testSprint", "test description",
+                "2022-04-01", "2022-05-01", "#aaaaaa");
+        sprint.setId(3);
     }
 
     @Given("The project has the following sprints with dates")
@@ -60,8 +52,8 @@ public class StepDefinitions_ProjectValidation extends RunCucumberTest {
         }
     }
 
-    @And("The projects creation dates is {string}")
-    public void theProjectsCreationDatesIs(String creation) {
+    @And("The projects creation date is {string}")
+    public void theProjectsCreationDateIs(String creation) {
         project.setProjectCreationDate(DateUtils.toDate(creation));
     }
 
@@ -74,13 +66,24 @@ public class StepDefinitions_ProjectValidation extends RunCucumberTest {
     public void i_set_the_project_end_date_to(String end) {
         project.setEndDateString(end);
     }
-    @Then("{string} message should be displayed")
-    public void message_should_be_displayed(String expected) {
+    @Then("Project {string} message should be displayed")
+    public void project_message_should_be_displayed(String expected) {
         String actual = validationService.validateProjectDates(project.getProjectStartDate(),
                 project.getProjectEndDate(), project.getProjectCreationDate(), sprintList);
 
         assertEquals(expected, actual);
     }
 
+    @When("I set a sprint's start date to {string}")
+    public void iSetASprintSStartDateToStartDate(String start) { sprint.setStartDateString(start); }
+    @And("I set a sprint's end date to {string}")
+    public void iSetASprintSEndDateToEndDate(String end) { sprint.setEndDateString(end); }
+    @Then("Sprint {string} message should be displayed")
+    public void sprint_message_should_be_displayed(String expected) {
+        sprintList.add(sprint);
+        String actual = validationService.validateSprintDates(3, sprint.getSprintStartDate(),
+                sprint.getSprintEndDate(), project, sprintList);
 
+        assertEquals(expected, actual);
+    }
 }

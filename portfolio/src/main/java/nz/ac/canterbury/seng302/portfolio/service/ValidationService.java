@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -12,9 +11,6 @@ import java.util.List;
 
 @Service
 public class ValidationService {
-
-    @Autowired
-    private SprintService sprintService;
 
     /**
      * Validates that a sprint's start and end dates are valid
@@ -93,7 +89,6 @@ public class ValidationService {
         // No errors found
         return "";
     }
-
 
     /**
      * Checks whether a sprint's dates are within a projects dates

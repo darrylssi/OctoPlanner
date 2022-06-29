@@ -3,30 +3,22 @@ package nz.ac.canterbury.seng302.portfolio.model;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.*;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 /**
@@ -156,12 +148,13 @@ class SprintTests {
     }
 
     @Test
-    void checkGivenDatesAreValidForAddSprints_getStringMessage() {
-        Date sprintStartDate = DateUtils.toDate("2022-01-02");
-        Date sprintEndDate = DateUtils.toDate("2022-02-02");
+    void checkGivenDatesAreValid_getStringMessage() {
+        Date start = DateUtils.toDate("2022-01-02");
+        Date end = DateUtils.toDate("2022-02-02");
 
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, sprintStartDate,
-                sprintEndDate, baseProject, sprintList);
+        assert start != null;
+        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start,
+                end, baseProject, sprintList);
 
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         // Since our selected dates are 01/01/2022 -- 02/02/2022, this should return the error message as "", which tells
@@ -176,6 +169,7 @@ class SprintTests {
         // Project dates are 2022-01-01 -- 2022-10-01
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
+        assert start != null;
         String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
 
@@ -196,6 +190,7 @@ class SprintTests {
 
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
+        assert start != null;
         String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end, baseProject, sprintList);
 
         assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with "
@@ -203,25 +198,13 @@ class SprintTests {
     }
 
     @Test
-    void checkSprintStartDateOverlapsSprintEndDateForAddSprints_getStringMessage() {
+    void checkSprintStartDateOverlapsSprintEndDate_getStringMessage() {
         String sprintStartDate = "2022-01-10";
         String sprintEndDate = "2022-01-08";
 
         Date start = DateUtils.toDate(sprintStartDate);
         Date end = DateUtils.toDate(sprintEndDate);
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end,
-                baseProject, sprintList);
-
-        assertEquals("Start date must always be before end date", errorMessage);
-    }
-
-    @Test
-    void checkSprintStartDateOverlapsSprintEndDateForEditSprints_getStringMessage() {
-        String sprintStartDate = "2022-01-10";
-        String sprintEndDate = "2022-01-08";
-
-        Date start = DateUtils.toDate(sprintStartDate);
-        Date end = DateUtils.toDate(sprintEndDate);
+        assert start != null;
         String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
 
