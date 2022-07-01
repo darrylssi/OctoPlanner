@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import java.util.Collection;
-import java.util.List;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
