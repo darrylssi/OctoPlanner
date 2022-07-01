@@ -91,8 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // update the selected sprint dates
                 document.getElementById("sprintId").value = info.event.id;
-                document.getElementById("sprintStartDate").value = info.event.start;
-                document.getElementById("sprintEndDate").value = info.event.end;
+                document.getElementById("sprintStartDate").value = info.event.startStr;
+                document.getElementById("sprintEndDate").value = info.event.endStr;
 
                 // submitting the form
                 form.submit();

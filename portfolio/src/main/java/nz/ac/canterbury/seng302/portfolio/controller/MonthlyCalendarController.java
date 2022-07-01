@@ -14,7 +14,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -26,16 +26,16 @@ import java.util.List;
  * Controller for the display project details on the monthly calendar
  */
 @Controller
-public class MonthlyCalendarController {
+public class MonthlyCalendarController extends PageController {
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectService projectService;                      // initializing the ProjectService
     @Autowired
-    private SprintService sprintService;
+    private SprintService sprintService;                        // initializing the SprintService
     @Autowired
-    private UserAccountClientService userAccountClientService;
+    private UserAccountClientService userAccountClientService;  // initializing the UserAccountClientService
     @Autowired
-    private DateUtils utils;                                    // initializing the date utils
+    private DateUtils utils;                                    // initializing the DateUtils
 
     /**
      *
@@ -94,27 +94,25 @@ public class MonthlyCalendarController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="id") int id,
             @RequestParam(name="sprintId", required = false) Integer sprintId,
-            @RequestParam(name="sprintStartDate", required = false) Date sprintStartDate,
-            @RequestParam(name="sprintEndDate", required = false) Date sprintEndDate
-    ) {
+            @RequestParam(name="sprintStartDate", required = false) String sprintStartDate,
+            @RequestParam(name="sprintEndDate", required = false) String sprintEndDate
+    ) throws ParseException {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         String redirectUrl = "redirect:../monthlyCalendar/" + id;
 
-        // If the user is at least a teacher, sprint dates will be updated
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            // checks that the sprint id is not null
-            if (sprintId == null) {
-                return redirectUrl;
-            }
-            try {
-                Sprint sprintToUpdate = sprintService.getSprintById(sprintId);
-                sprintToUpdate.setStartDate(sprintStartDate);
-                sprintToUpdate.setEndDate(removeOneDayFromEndDate(sprintEndDate));
-                sprintService.saveSprint(sprintToUpdate);
-            } catch (Exception e) {
-                // sprint does not exist
-                return redirectUrl;
-            }
+        // checks that the sprint id is not null
+        if (sprintId == null) {
+            return redirectUrl;
+        }
+        try {
+            Sprint sprintToUpdate = sprintService.getSprintById(sprintId);
+            sprintToUpdate.setStartDate(utils.toDate(sprintStartDate));
+            sprintToUpdate.setEndDate(removeOneDayFromEndDate(utils.toDate(sprintEndDate)));
+            sprintService.saveSprint(sprintToUpdate);
+        } catch (Exception e) {
+            // sprint does not exist
+            return redirectUrl;
         }
 
         return redirectUrl;
