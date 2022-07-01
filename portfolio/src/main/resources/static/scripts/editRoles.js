@@ -11,7 +11,7 @@ If you're not a dev, politely tell us thanks.`
 }
 
 /**
- * Removes the role from a user. Provided to each button in the dropdown
+ * Adds a role to a user. Provided to each button in the dropdown
  *
  * @param {HTMLElement} elem The button being clicked
  */

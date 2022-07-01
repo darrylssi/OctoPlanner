@@ -252,6 +252,13 @@ public class ListUsersController extends PageController {
         return new ResponseEntity<>("User not authorised to edit roles", HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Removes a role from a user
+     * @param principal used to check if the user sending the request is authorised to remove roles
+     * @param id the id of the user being edited
+     * @param role the role to be removed
+     * @return an HttpResponse describing the result
+     */
     @PatchMapping("/users/{id}/remove-role/{role}")
     @ResponseBody
     public ResponseEntity<String> removeRoleFromUser(
