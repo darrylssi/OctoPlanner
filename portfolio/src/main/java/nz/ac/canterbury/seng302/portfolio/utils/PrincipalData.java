@@ -5,6 +5,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
@@ -38,11 +40,11 @@ public class PrincipalData {
         this.roles = List.of();
     }
 
-    public boolean isAuthenticated() { return authenticated; }
-    public Integer getID()           { return id; }
-    public String getUsername()      { return username; }
-    public String getFullName()      { return fullname; }
-    public List<UserRole> getRoles() { return roles; }
+    public boolean isAuthenticated()            { return authenticated; }
+    public Integer getID()                      { return id; }
+    @Nullable public String getUsername()       { return username; }
+    @Nullable public String getFullName()       { return fullname; }
+    @Nullable public List<UserRole> getRoles()  { return roles; }
 
     /* There are no setters, this is just a parser class */
 
@@ -50,9 +52,13 @@ public class PrincipalData {
      * Parses relevant data from a AuthState's DTOs
      * 
      * @param principal The authentication principal you want to makes sense of.
-     * @return A PrincipalData class, containing relevant data from the 
+     * @return A PrincipalData class, containing relevant data from the principal,
+     *          or an unauthenticated user.
+     * @throws NullPointerException If the provided AuthState is null.
      */
-    public static PrincipalData from(AuthState principal) {
+    public static PrincipalData from(AuthState principal) throws NullPointerException {
+        if (principal == null)
+            throw new NullPointerException("principal is null");
         // Return an empty class if unauthenticated
         if (!principal.getIsAuthenticated()) {
             return new PrincipalData();
@@ -80,6 +86,15 @@ public class PrincipalData {
         return new PrincipalData(id, username, fullname, roles);
     }
 
+    /**
+     * Generates an unauthenticated principal.
+     * 
+     * @return PrincipalData object with the fields unset,
+     * where isAuthenticated is <code>true</code>
+     */
+    public static PrincipalData unauthenticated() {
+        return new PrincipalData();
+    }
 
 
     /**

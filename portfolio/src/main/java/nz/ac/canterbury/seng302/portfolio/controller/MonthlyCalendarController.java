@@ -59,7 +59,6 @@ public class MonthlyCalendarController {
         model.addAttribute("sprintsEditable", hasEditPermissions);
 
         // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));

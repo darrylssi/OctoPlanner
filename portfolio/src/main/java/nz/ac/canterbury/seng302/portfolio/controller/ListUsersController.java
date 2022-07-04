@@ -89,8 +89,6 @@ public class ListUsersController extends PageController {
         // Only teachers or above can edit roles
         model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
 
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());

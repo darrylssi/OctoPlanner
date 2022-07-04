@@ -50,8 +50,6 @@ public class DetailsController extends PageController {
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
         labelUtils.refreshProjectSprintLabels(id);
 

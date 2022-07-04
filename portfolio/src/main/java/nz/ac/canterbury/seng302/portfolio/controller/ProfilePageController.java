@@ -68,7 +68,6 @@ public class ProfilePageController {
                 model.addAttribute("fullName", getFullName(
                         user.getFirstName(), user.getMiddleName(), user.getLastName()));
                 model.addAttribute("id", id);
-                model.addAttribute("userName", user.getUsername());
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
             } else {
