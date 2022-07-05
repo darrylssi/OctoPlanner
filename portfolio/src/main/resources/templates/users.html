@@ -35,6 +35,10 @@
 <div class="users">
     <table>
         <!--/* Table header */-->
+        <col style="width:30%">
+        <col style="width:15%">
+        <col style="width:15%">
+        <col style="width:40%">
         <thead>
             <tr>
                 <th>
@@ -80,6 +84,7 @@
             <td><span th:text="${user.getUsername()}"> Username </span></td>
             <td><span th:text="${user.getNickname()}"> Alias </span></td>
             <td style="display: flex; justify-content: space-between">
+
                 <div class="roles-list">
                 <div class="role" th:each="role: ${user.getRolesList()}">
                     <span th:text="${#strings.capitalizeWords(#strings.replace(role, '_', ' ').toLowerCase)}"></span>
@@ -97,22 +102,21 @@
                     </button>
                 </div>
                 </div>
-                <!--/* "Add roles" button. Only visible to teachers or above */-->
+
                 <div class="dropdown" th:if="${canEdit}">
-                    <button onclick="addRoleFunction(this, event)" class="add-role-button" th:data-userid="${user.getId()}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 20 14">
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                        </svg>
-                    </button>
-                    <div th:id="|myDropdown-${user.getId()}|" class="dropdown-content">
-                        <!--/* Only show roles the user doesn't have, and have permission to add*/-->
-                        <!--/* That long text call turns `COURSE_ADMINISTRATOR` into `Course Administrator` */-->
-                        <a th:each="role: ${acceptableRoles}"
-                          th:if="${!#arrays.contains(user.getRolesList, role)}"
-                            th:text="${#roles.toName(role)}"
-                            onclick="alert('Add role endpoint not implemented')"></a>
-                    </div> 
+                    <button id="add-role-button" class="add-role-button" th:onclick='|toggleRoleList("roleList${user.getId()}")|'>
+                        <svg id="add-role-button" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                            <path id="add-role-button" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg></button>
+                    <div th:id='|roleList${user.getId()}|' class="dropdown-content">
+                        <button th:each="role: ${acceptableRoles}"
+                                th:if="${!#arrays.contains(user.getRolesList, role)}"
+                                th:text="${#roles.toName(role)}"
+                                th:data-userid="${user.getId()}" th:data-role="${role}"
+                                th:onclick="onclickAddRole(this)"></button>
+                    </div>
                 </div>
+
             </td>
         </tr>
         </tbody>
