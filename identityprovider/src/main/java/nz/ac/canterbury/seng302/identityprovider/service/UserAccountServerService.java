@@ -165,7 +165,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     private List<User> paginatedUsersOrderedByRole(int page, int limit, boolean isAscending) {
         ArrayList<User> users = new ArrayList<User>(userService.getAllUsers());
-        if (isAscending)
+        if (!isAscending)
             users.sort((a, b) -> a.highestRole().getNumber() - b.highestRole().getNumber());
         else
             users.sort((a, b) -> b.highestRole().getNumber() - a.highestRole().getNumber());
