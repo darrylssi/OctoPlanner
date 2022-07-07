@@ -92,9 +92,9 @@ deploy-production-identityprovider:
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/production-identityprovider/ || true
     - mkdir /home/gitlab-runner/production-identityprovider/
-    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-identityprovider/.env
     - cp -r ./build/libs /home/gitlab-runner/production-identityprovider
     - cp ../runner/production-identityprovider.sh /home/gitlab-runner/production-identityprovider.sh
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-identityprovider/test.txt
     - chmod u+x /home/gitlab-runner/production-identityprovider.sh
     - sudo systemctl restart production-identityprovider
   artifacts:
