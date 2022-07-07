@@ -43,7 +43,7 @@ class SprintLabelServiceTest {
     private final String BASE = SprintLabelService.SPRINT_LABEL_BASE; // to type it more easily
 
     @BeforeEach
-    void setUp() throws ParseException {
+    void setUp() {
         testProject1 = new Project("Name1", "desc1", DateUtils.toDate("2022-01-01"), DateUtils.toDate("2022-12-30"));
         testProject1.setId(PROJECT_ID_1);
         testProject2 = new Project("Name2", "desc2", DateUtils.toDate("2023-01-01"), DateUtils.toDate("2023-12-30"));
@@ -66,10 +66,9 @@ class SprintLabelServiceTest {
 
     /**
      * This test covers sprints across two projects being correctly assigned labels when refreshing all labels.
-     * @throws ParseException if strings cannot be parsed as dates
      */
     @Test
-    void refreshAllLabels_labelsAssignedProperlyAndNextLabel() throws ParseException {
+    void refreshAllLabels_labelsAssignedProperlyAndNextLabel() {
         sprint3.setParentProjectId(PROJECT_ID_2);
         sprint3.setStartDate(DateUtils.toDate("2023-04-02"));
         sprint3.setEndDate(DateUtils.toDate("2022-05-01"));
@@ -99,7 +98,7 @@ class SprintLabelServiceTest {
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
 
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
-        Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_1));
+        Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(testProject1));
     }
 
     /**
@@ -153,7 +152,7 @@ class SprintLabelServiceTest {
     }
 
     @Test
-    void addSprint_labelsAndNextLabelAdjust() throws ParseException {
+    void addSprint_labelsAndNextLabelAdjust() {
         // assign base labels & verify
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
