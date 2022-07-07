@@ -17,7 +17,7 @@
 
     <link rel="stylesheet" th:href="|./styles/main.css|">
     <link rel="stylesheet" th:href="|./styles/users.css|">
-        <!--/*
+    <!--/*
         JS files are static, and thus don't know anything about the project (i.e. the base URL).
         This code sets a global variable inside this template (which does know the base URL),
         which the imported script can access.
@@ -25,15 +25,20 @@
     <script th:inline="javascript">
         var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ]]*/ "/";
     </script>
-    <script defer th:src="|./scripts/editRoles.js|"></script>
+    <script defer th:src="|../scripts/editRoles.js|"></script>
 
 </head>
 
 <body>
 <div th:replace="fragments :: header(title='Users')"></div>
 <br>
-<div class="users" >
+<div class="users">
     <table>
+        <!--/* Table header */-->
+        <col style="width:30%">
+        <col style="width:15%">
+        <col style="width:15%">
+        <col style="width:40%">
         <thead>
             <tr>
                 <th>
@@ -78,21 +83,40 @@
             <td><span th:text="${user.getFirstName() +' '+ user.getMiddleName() + ' ' + user.getLastName()}"> Name </span></td>
             <td><span th:text="${user.getUsername()}"> Username </span></td>
             <td><span th:text="${user.getNickname()}"> Alias </span></td>
-            <td style="display: flex; justify-content: space-between"><span style="display:none" th:text="${user.getRolesList()}"> Roles </span>
+            <td style="display: flex; justify-content: space-between">
+
                 <div class="roles-list">
                 <div class="role" th:each="role: ${user.getRolesList()}">
-                    <div th:text="${role}"></div>
-                    <button th:if="${user.getRolesList().size() > 1}" class="remove-role-button" th:data-parameter1="${user.getId()}" th:data-parameter2="${role}" th:onclick="removeRole(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'))">
+                    <span th:text="${#strings.capitalizeWords(#strings.replace(role, '_', ' ').toLowerCase)}"></span>
+                    <!--/* Only show the 'delete role' button if:
+                            1. It's not their only role
+                            2. The client has PERMISSION to edit
+                            3. The role isn't higher than the client's highest
+                    */-->
+                    <button th:if="${user.getRolesList().size() > 1 && canEdit && #arrays.contains(acceptableRoles, role)}"
+                            class="remove-role-button" onclick="onclickRemoveRole(this)"
+                            th:data-userid="${user.getId()}" th:data-role="${role}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                             <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                         </svg>
                     </button>
                 </div>
                 </div>
-                <button class="add-role-button" th:data-parameter="${user.getId()}" th:onclick="addRole(this.getAttribute('data-parameter'), 'COURSE_ADMINISTRATOR')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg></button>
+
+                <div class="dropdown" th:if="${canEdit}">
+                    <button id="add-role-button" class="add-role-button" th:onclick='|toggleRoleList("roleList${user.getId()}")|'>
+                        <svg id="add-role-button" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                            <path id="add-role-button" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg></button>
+                    <div th:id='|roleList${user.getId()}|' class="dropdown-content">
+                        <button th:each="role: ${acceptableRoles}"
+                                th:if="${!#arrays.contains(user.getRolesList, role)}"
+                                th:text="${#roles.toName(role)}"
+                                th:data-userid="${user.getId()}" th:data-role="${role}"
+                                th:onclick="onclickAddRole(this)"></button>
+                    </div>
+                </div>
+
             </td>
         </tr>
         </tbody>

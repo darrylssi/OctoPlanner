@@ -9,6 +9,9 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.PaginatedUsersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,19 +19,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller class for the list of users page.
@@ -37,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class ListUsersController extends PageController {
+
+    @Value("${base-url}")
+    private String baseURL;
 
     private static final Logger logger = LoggerFactory.getLogger(ListUsersController.class);
 
@@ -55,7 +56,7 @@ public class ListUsersController extends PageController {
      * Displays a list of users with their name, username, nickname and roles
      */
     @GetMapping("/users")
-    public String GetListOfUsers(
+    public String getListOfUsers(
             @AuthenticationPrincipal AuthState principal,
             @RequestParam(name="page", defaultValue="1") int page,
             Model model,
@@ -80,6 +81,16 @@ public class ListUsersController extends PageController {
             throw e;
         }
 
+        // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
+        List<UserRole> acceptableRoles = Stream.of(UserRole.values())
+                                    .filter(principalData::hasRoleOfAtLeast)
+                                    .toList();
+
+        model.addAttribute("acceptableRoles", acceptableRoles);
+
+        // Only teachers or above can edit roles
+        model.addAttribute("canEdit", principalData.hasRoleOfAtLeast(UserRole.TEACHER));
+
         // Get current user's username for the header
         model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
@@ -87,11 +98,13 @@ public class ListUsersController extends PageController {
         model.addAttribute("users", users.getUsersList());
         model.addAttribute("dir", isAscending);
 
+        // If the user is at least a teacher, the template will render delete/edit buttons
+        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        model.addAttribute("canEdit", hasEditPermissions);
+
         /* Total number of pages */
         int totalPages = (users.getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
         model.addAttribute("totalPages", totalPages);
-
-
 
         return "users";
     }
@@ -185,8 +198,8 @@ public class ListUsersController extends PageController {
         // Give each user on this machine a different sorting cookie (AC6)
         String cookieName = COOKIE_NAME_PREFIX + userId;
         Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
-        cookie.setPath("/users");
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
+        cookie.setPath(baseURL + "users");
         response.addCookie(cookie);
     }
 
@@ -201,4 +214,77 @@ public class ListUsersController extends PageController {
     void clearPageOrdering(String userId, HttpServletResponse response) {
         CookieUtil.clear(response, COOKIE_NAME_PREFIX+userId);
     }
+
+
+    /**
+     * Adds a role to a user
+     * @param principal used to check if the user sending the request is authorised to add roles
+     * @param id the id of the user being edited
+     * @param role the role to be added
+     * @return an HttpResponse describing the result
+     */
+    @PatchMapping("/users/{id}/add-role/{role}")
+    @ResponseBody
+    public ResponseEntity<String> addRoleToUser(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            @PathVariable("role") UserRole role
+    ) {
+        // Check if the user is authorised to add roles
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            try {
+                // Add the role to the user
+                boolean roleAdded = userAccountClientService.addRoleToUser(id, role);
+                if(roleAdded) {
+                    return new ResponseEntity<>("Role " + role.name() + " added", HttpStatus.OK);
+                } else {
+                    return  new ResponseEntity<>("Role not added", HttpStatus.BAD_REQUEST);
+                }
+            } catch (StatusException e) {
+                if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
+                    return new ResponseEntity<>("Invalid User Id", HttpStatus.NOT_FOUND);
+                } else {
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+        return new ResponseEntity<>("User not authorised to edit roles", HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Removes a role from a user
+     * @param principal used to check if the user sending the request is authorised to remove roles
+     * @param id the id of the user being edited
+     * @param role the role to be removed
+     * @return an HttpResponse describing the result
+     */
+    @PatchMapping("/users/{id}/remove-role/{role}")
+    @ResponseBody
+    public ResponseEntity<String> removeRoleFromUser(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            @PathVariable("role") UserRole role
+    ) {
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            try {
+                // Remove role from user
+                boolean roleRemoved = userAccountClientService.removeRoleFromUser(id, role);
+                if(roleRemoved) {
+                    return new ResponseEntity<>("Role " + role.name() + " removed", HttpStatus.OK);
+                } else {
+                    return  new ResponseEntity<>("Role not removed", HttpStatus.BAD_REQUEST);
+                }
+            } catch (StatusException e) {
+                if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
+                    return new ResponseEntity<>("Invalid User Id", HttpStatus.NOT_FOUND);
+                } else {
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+        return new ResponseEntity<>("User not authorised to edit roles", HttpStatus.UNAUTHORIZED);
+    }
+
 }
