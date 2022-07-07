@@ -10,24 +10,38 @@
 
     <script>
         // Getting the project start and end date
-        let projectStartDate = "[[${projectStartDate}]]";
+        let projectStartDate =  "[[${projectStartDate}]]";
         let projectEndDate = "[[${projectEndDate}]]";
 
-        // Getting all sprints' string names, start dates, end dates, and colours
+        // Getting all sprint's string list which contains names, start date, end dates, and colours
+        let sprintIds = "[[${sprintIds}]]";
         let sprintNames = "[[${sprintNames}]]";
         let sprintStartDates = "[[${sprintStartDates}]]";
         let sprintEndDates = "[[${sprintEndDates}]]";
         let sprintColours = "[[${sprintColours}]]";
 
-        let sprintsEditable = "[[${sprintsEditable}]]"
-
+        let sprintsEditable = "[[${sprintsEditable}]]";
     </script>
     <script th:src="|../scripts/monthlyCalendar.js|"></script>
 
 </head>
 <body>
-    <div th:replace="fragments :: header(title=${project.getProjectName} + ' - Calendar', subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+    <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString}
+    + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+
     <div class="content">
+        <br>
+        <div>
+            <!-- Sprint overlap error message -->
+            <p id="invalidDateRangeError" th:hidden="true" th:class="error"></p>
+
+            <!-- setting hidden inputs to store the values of the sprint dates changed-->
+            <form th:action="@{../monthlyCalendar/{id}(id = ${project.getId})}" method="post" id="sprintForm">
+                <input type="hidden" id="sprintId" th:name="sprintId" />
+                <input type="hidden" id="sprintStartDate" th:name="sprintStartDate" />
+                <input type="hidden" id="sprintEndDate" th:name="sprintEndDate" />
+            </form>
+        </div>
         <div id='calendar'></div>
     </div>
 </body>
