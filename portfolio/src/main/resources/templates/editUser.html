@@ -9,8 +9,10 @@
     <link rel="stylesheet" th:href="|../../styles/profile.css|">
     <link rel="stylesheet" th:href="|../../styles/editUser.css|">
     <link rel="stylesheet" th:href="|../../styles/form.css|">
+    <link rel="stylesheet" th:href="|../../styles/croppie.css|">
 
-    <script th:src="|../../scripts/editUser.js|"></script>
+    <script th:src="|../../scripts/editUser.js|" type="module"></script>
+    <script th:src="|../../scripts/croppie.js|" type="module"></script>
 
 </head>
 
@@ -123,11 +125,16 @@
                 <div class="input-box">
                     <label> Profile Photo </label>
                     <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
+                    <input id="newinputFile" type="file" th:name="newfile" accept=".png,.jpg,.jpeg"> <br>
                     <span th:class="error" th:text="${error_InvalidPhoto}"></span>
                 </div>
+
+                <div id="croppie-test"></div>
             </div>
             <div class="centre-box">
-                <button class="form-button save" type="submit">Save Photo</button>
+                <p id="testlink">ARGARGARGRAGARGARGAR ME BOY></p>
+                <img src="" id="image-preview"/>
+                <button class="form-button save" type="submit" id="photo-upload-submit-button">Save Photo</button>
             </div>
         </form>
         <br/>

@@ -41,7 +41,7 @@ public class EditUserController {
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
 
-        if(!userResponse.hasCreated()) {
+        if(userResponse == null) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
         } else if(!isCurrentUser) {
