@@ -120,6 +120,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     /**
      * Unlinks the user from their profile photo and deletes it from storage.
+     * @param request A request object containing the user ID
      */
     @Override
     public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {

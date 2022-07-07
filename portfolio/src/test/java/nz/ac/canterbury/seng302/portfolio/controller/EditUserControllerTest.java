@@ -1,16 +1,23 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.DeleteUserProfilePhotoResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,18 +37,61 @@ public class EditUserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    public void deletePhotoWhenNonePresent_thenShowError() throws Exception {
-        this.mockMvc.perform(post(CONTROLLER_URL))
-            .andExpect(status().isOk())
-            .andExpect(content().string(containsString("User does not have a profile photo uploaded")));
+    @MockBean
+    private UserAccountClientService service;
+
+    @BeforeEach
+    private void setup() {
+        // Define the user for the tests; this is done to provide access to the edit page
+        UserResponse testUser = UserResponse.newBuilder()
+                .setUsername("test_user")
+                .setFirstName("Testy")
+                .setMiddleName("")
+                .setLastName("McUserFace")
+                .setNickname("Test")
+                .setBio("")
+                .setPersonalPronouns("they/them")
+                .setEmail("test@user.site")
+                .setProfileImagePath("")
+                .setId(1)
+                .build();
+        when(service.getUserAccountById(1)).thenReturn(testUser);
     }
 
-    // @Test
-    // public void deleteExistingPhoto_getSuccess() throws Exception {
-    //     // TODO: mock the response to be valid or (possibly) add a photo through the service.
-    //     this.mockMvc.perform(post(CONTROLLER_URL))
-    //         .andExpect(status().isOk())
-    //         .andExpect(redirectedUrl("/users/1"));
-    // }
+    @Test
+    public void deletePhotoServiceGivesFailure_thenShowMessage() throws Exception {
+        /* Given: The delete service returns a failure */
+        DeleteUserProfilePhotoResponse noPhotoResponse = DeleteUserProfilePhotoResponse.newBuilder()
+                .setIsSuccess(false)
+                .setMessage("No profile photo uploaded")
+                .build();
+        when(service.deleteUserProfilePhoto(1)).thenReturn(noPhotoResponse);
+
+        /**
+         * When: The controller attempts to delete a photo
+         * Then: The page displays the message from the service
+         */
+        this.mockMvc.perform(post(CONTROLLER_URL))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("No profile photo uploaded")));
+        verify(service).deleteUserProfilePhoto(1);
+    }
+
+    @Test
+    public void deleteExistingPhoto_getRedirected() throws Exception {
+        /* Given: The delete service returns a success */
+        DeleteUserProfilePhotoResponse successResponse = DeleteUserProfilePhotoResponse.newBuilder()
+                .setIsSuccess(true)
+                .build();
+        when(service.deleteUserProfilePhoto(1)).thenReturn(successResponse);
+
+        /**
+         * When: The controller attempts to delete a photo
+         * Then: The user is redirected to their profile
+         */
+        this.mockMvc.perform(post(CONTROLLER_URL))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("../1"));
+        verify(service).deleteUserProfilePhoto(1);
+    }
 }
