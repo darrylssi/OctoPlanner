@@ -33,8 +33,6 @@ public class MonthlyCalendarController {
     private SprintService sprintService;
     @Autowired
     private UserAccountClientService userAccountClientService;
-    @Autowired
-    private DateUtils utils;
 
     /**
      *
@@ -125,6 +123,6 @@ public class MonthlyCalendarController {
         LocalDate newLocalEndDate = localEndDate.plusDays(1);
 
         // Converting the new project/sprint LocalDate object to Date object
-        return utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return DateUtils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 }

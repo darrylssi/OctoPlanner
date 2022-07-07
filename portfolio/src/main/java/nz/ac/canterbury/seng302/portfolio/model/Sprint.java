@@ -12,9 +12,6 @@ import java.util.Date;
  */
 @Entity
 public class Sprint {
-    @Transient
-    private final DateUtils utils = new DateUtils();
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -79,8 +76,8 @@ public class Sprint {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
-        this.sprintStartDate = utils.toDate(sprintStartDate);
-        this.sprintEndDate = utils.toDate(sprintEndDate);
+        this.sprintStartDate = DateUtils.toDate(sprintStartDate);
+        this.sprintEndDate = DateUtils.toDate(sprintEndDate);
         this.sprintColour = sprintColour;
     }
 
@@ -140,7 +137,7 @@ public class Sprint {
      * Gets the string format of the sprint start date
      * @return sprint's start date as a string
      */
-    public String getStartDateString() {return utils.toDisplayString(this.sprintStartDate);}
+    public String getStartDateString() {return DateUtils.toDisplayString(this.sprintStartDate);}
 
     public void setStartDate(Date newStartDate) {
         this.sprintStartDate = newStartDate;
@@ -151,7 +148,7 @@ public class Sprint {
      * @param date Gets the sprint start date as a string given by the user
      */
     public void setStartDateString(String date) {
-        this.sprintStartDate = utils.toDate(date);
+        this.sprintStartDate = DateUtils.toDate(date);
     }
 
     public Date getSprintEndDate() {
@@ -163,7 +160,7 @@ public class Sprint {
      * @return sprint's end date as a string
      */
     public String getEndDateString() {
-        return utils.toDisplayString(this.sprintEndDate);
+        return DateUtils.toDisplayString(this.sprintEndDate);
     }
 
     public void setEndDate(Date newEndDate) {
@@ -175,7 +172,7 @@ public class Sprint {
      * @param date Gets the sprint start date as a string given by the user
      */
     public void setEndDateString(String date) {
-        this.sprintEndDate = utils.toDate(date);
+        this.sprintEndDate = DateUtils.toDate(date);
     }
 
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }

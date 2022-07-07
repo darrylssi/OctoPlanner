@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -13,11 +12,6 @@ import java.util.List;
 @Service
 public class ValidationService {
 
-    @Autowired
-    private SprintService sprintService;
-    @Autowired
-    private DateUtils utils;
-
     /**
      * Validates that a sprint's start and end dates are valid
      * @param id the id of the sprint to be validated, as an integer
@@ -26,7 +20,8 @@ public class ValidationService {
      * @param parentProject the project that the sprint belongs to
      * @return An error message if invalid, otherwise returns an empty string
      */
-    public String validateSprintDates(int id, Date start, Date end, Project parentProject) {
+    public String validateSprintDates(int id, Date start, Date end,
+                                      Project parentProject, List<Sprint> sprintList) {
         // Checks if the sprint's start date is after the sprint's end date
         // Does this first so that future checks can assume this is true
         if (start.after(end)) {
@@ -40,8 +35,7 @@ public class ValidationService {
                     parentProject.getStartDateString() + " - " + parentProject.getEndDateString();
         }
 
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        // Checking against other sprint dates
         for (Sprint other : sprintList) {
             if (!compareSprintDates(start, end, other) // Sprint dates overlap
                     && (other.getId() != id)){        // Sprint isn't checking against itself
@@ -61,14 +55,13 @@ public class ValidationService {
      * @param creation The project's creation date
      * @return An error message if invalid, otherwise returns an empty string
      */
-    public String validateProjectDates(Date start, Date end, Date creation) {
+    public String validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
         // Checks if the project's start date is after the project's end date
         if (start.after(end)) {
             return "Start date must always be before end date";
         }
 
-        // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        // Checking against sprint dates
         for (Sprint sprint : sprintList) {
             if (sprintsOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
                 return "The sprint with dates: " +
@@ -83,7 +76,7 @@ public class ValidationService {
         Date earliestStart = startCal.getTime();
         if (start.before(earliestStart)) {
             return "Project cannot be set to start more than a year before it was " +
-                    "created (cannot start before " + utils.toDisplayString(earliestStart) + ")";
+                    "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")";
         }
 
         // After all other checks, check whether project length is more than 10 years
@@ -96,7 +89,6 @@ public class ValidationService {
         // No errors found
         return "";
     }
-
 
     /**
      * Checks whether a sprint's dates are within a projects dates

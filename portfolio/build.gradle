@@ -50,6 +50,8 @@ dependencies {
 
     testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
 
+    testImplementation "io.cucumber:cucumber-spring:${cucumberVersion}"
+
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

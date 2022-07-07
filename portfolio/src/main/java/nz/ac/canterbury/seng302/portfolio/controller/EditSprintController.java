@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Controller for the edit sprint details page
@@ -38,9 +39,6 @@ public class EditSprintController extends PageController {
     private ValidationService validationService;
     @Autowired
     private SprintLabelService labelUtils;
-
-    @Autowired
-    private DateUtils utils;
 
     /**
      * Show the edit-sprint page.
@@ -64,8 +62,8 @@ public class EditSprintController extends PageController {
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
         model.addAttribute("sprintName", sprint.getSprintName());
-        model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
-        model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
+        model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
+        model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
         model.addAttribute("sprintDescription", sprint.getSprintDescription());
         model.addAttribute("sprintColour", sprint.getSprintColour());
 
@@ -102,9 +100,11 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        Date start = utils.toDate(sprintStartDate);
-        Date end = utils.toDate(sprintEndDate);
-        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end, parentProject);
+        Date start = DateUtils.toDate(sprintStartDate);
+        Date end = DateUtils.toDate(sprintEndDate);
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end,
+                parentProject, sprintList);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
@@ -124,8 +124,8 @@ public class EditSprintController extends PageController {
         // Adding the new sprint object
         sprint.setParentProjectId(parentProject.getId());
         sprint.setSprintName(sprintName);
-        sprint.setStartDate(utils.toDate(sprintStartDate));
-        sprint.setEndDate(utils.toDate(sprintEndDate));
+        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
+        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
         sprint.setSprintColour(sprintColour);

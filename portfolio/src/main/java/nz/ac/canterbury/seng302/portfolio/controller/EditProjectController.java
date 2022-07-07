@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Controller for the edit project details page
@@ -34,11 +37,12 @@ public class EditProjectController extends PageController {
     @Autowired
     private ProjectService projectService;
     @Autowired
+    private SprintService sprintService;
+    @Autowired
     private ValidationService validationService;
     @Autowired
     private UserAccountClientService userAccountClientService;
-    @Autowired
-    private DateUtils utils;
+
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -59,8 +63,8 @@ public class EditProjectController extends PageController {
             model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
-            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
-            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", project.getProjectDescription());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
@@ -96,15 +100,17 @@ public class EditProjectController extends PageController {
 
         Project newProject = projectService.getProjectById(id);
 
-        String dateOutOfRange = validationService.validateProjectDates(projectStartDate, projectEndDate, newProject.getProjectCreationDate());
+        List<Sprint> sprintList = sprintService.getAllSprints();
+        String dateOutOfRange = validationService.validateProjectDates(projectStartDate, projectEndDate,
+                newProject.getProjectCreationDate(), sprintList);
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
             // Get current user's username for the header
             model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
-            model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
-            model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
+            model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
+            model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", projectDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
             return "editProject";
