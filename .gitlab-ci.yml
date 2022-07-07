@@ -94,7 +94,7 @@ deploy-production-identityprovider:
     - mkdir /home/gitlab-runner/production-identityprovider/
     - cp -r ./build/libs /home/gitlab-runner/production-identityprovider
     - cp ../runner/production-identityprovider.sh /home/gitlab-runner/production-identityprovider.sh
-    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-identityprovider/test.txt
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-identityprovider/.env
     - chmod u+x /home/gitlab-runner/production-identityprovider.sh
     - sudo systemctl restart production-identityprovider
   artifacts:
