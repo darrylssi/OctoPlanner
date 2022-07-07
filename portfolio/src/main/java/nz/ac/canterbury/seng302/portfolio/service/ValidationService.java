@@ -13,7 +13,12 @@ import java.util.List;
 public class ValidationService {
 
     /**
-     * Validates that a sprint's start and end dates are valid
+     * Validates that a sprint's start and end dates are valid. The checks are:
+     * <ul>
+     *     <li>Sprint start date is before end date</li>
+     *     <li>Sprint dates are within project dates</li>
+     *     <li>Sprint dates do not overlap with other sprints</li>
+     * </ul>
      * @param id the id of the sprint to be validated, as an integer
      * @param start The sprint's start date to validate
      * @param end The sprint's end date to validate
@@ -49,7 +54,13 @@ public class ValidationService {
     }
 
     /**
-     * Validates that a project's start and end dates are valid
+     * Validates that a project's start and end dates are valid. The checks are:
+     * <ul>
+     *     <li>Project start date is before the end date</li>
+     *     <li>Project dates contain all sprints</li>
+     *     <li>Project start date is not more than 1 year before creation date</li>
+     *     <li>Project length is not more than 10 years; TODO: gives a warning</li>
+     * </ul>
      * @param start The project's start date
      * @param end The project's end date
      * @param creation The project's creation date
