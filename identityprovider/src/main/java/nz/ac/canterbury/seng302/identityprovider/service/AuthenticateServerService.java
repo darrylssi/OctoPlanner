@@ -42,12 +42,12 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
         if (user == null) {
             reply
-            .setMessage("Username not registered.")
+            .setMessage("Username or password is incorrect.")
             .setSuccess(false)
             .setToken("");
         } else if (!encoder.matches(request.getPassword(), user.getPassword())) {
             reply
-            .setMessage("Incorrect password!")
+            .setMessage("Username or password is incorrect.")
             .setSuccess(false)
             .setToken("");
         } else if (request.getUsername().equals(user.getUsername())) {
