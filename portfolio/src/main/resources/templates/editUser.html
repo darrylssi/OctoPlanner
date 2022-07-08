@@ -119,19 +119,19 @@
         <br/>
         <hr/>
         <br/>
-        <form th:action="|./edit|" method="post" enctype="multipart/form-data">
+            <form th:action="|./edit|" method="post">
             <div class="user-info">
                 <div class="input-box">
                     <label> Profile Photo </label>
                     <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
-                    <input id="newinputFile" type="file" th:name="newfile" accept=".png,.jpg,.jpeg"> <br>
+                    <input id="imageString" type="hidden" th:name="imageString">
                     <span th:class="error" th:text="${error_InvalidPhoto}"></span>
                 </div>
 
                 <div id="croppie-test"></div>
             </div>
             <div class="centre-box">
-                <p id="testlink">ARGARGARGRAGARGARGAR ME BOY></p>
+                <p id="testlink">test link></p>
                 <img src="" id="image-preview"/>
                 <button class="form-button save" type="submit" id="photo-upload-submit-button">Save Photo</button>
             </div>

@@ -157,6 +157,33 @@ public class EditUserController extends PageController{
     }
 
     /**
+     * This is just getting a string representing the cropped image from a hidden form input
+     * TODO Still need to figure out how to convert it to a MultipartFile object that can be passed to the idp
+     * https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
+     * is the closest thing I found to an answer but it doesn't work, so I'm stuck
+     * @param user
+     * @param id
+     * @param principal
+     * @param result
+     * @param base64ImageString
+     * @param model
+     * @return
+     */
+    @PostMapping(value = "/users/{id}/edit", params = {"imageString"})
+    public String editImage(
+            User user,
+            @PathVariable int id,
+            @AuthenticationPrincipal AuthState principal,
+            BindingResult result,
+            @RequestParam(name="imageString") String base64ImageString,
+            Model model
+    ) {
+        editHandler(model, id, principal);
+//        System.out.println("b64 str: " + base64ImageString);
+        return EDIT_USER;
+    }
+
+    /**
      * Post request for uploading a selected image file.
      * @param user User object to be edited
      * @param id ID of the user to be edited

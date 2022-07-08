@@ -16,6 +16,7 @@ document.querySelector('#photo-upload-submit-button').addEventListener('change',
     getResult();
 });
 
+//TODO tidy this up so it doesn't look like code vomit
 document.getElementById('croppie-test').addEventListener('update', function(ev) {
     var cropData = ev.detail;
     console.log("update")
@@ -25,7 +26,31 @@ document.getElementById('croppie-test').addEventListener('update', function(ev) 
        format: "jpeg",
        circle: false
     });
-    console.log(imageResult);
+    console.log("imageresult" + imageResult);
+
+
+    vanilla.result({
+        type: 'blob',
+       format: "jpeg",
+        circle: false
+    }).then(function (blob) {
+        let url = URL.createObjectURL(blob);
+        console.log(url);
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function () {
+            var base64String = reader.result;
+            console.log('Base64 String - ', base64String);
+
+            // Simply Print the Base64 Encoded String,
+            // without additional data: Attributes.
+            // doesn't work!
+            console.log('Base64 String without Tags- ', base64String.substr(base64String.indexOf(', ') + 1));
+            let input = document.getElementById("imageString");
+            input.value = base64String;
+        }
+    });
+
 });
 
 
@@ -40,10 +65,40 @@ document.querySelector('#testlink').addEventListener('click', function (ev) {
 //        const img = document.getElementById('image-preview');
 //        img.src = url;
         console.log(url);
-        let input = document.getElementById("newinputFile");
-        input.value = url;
     });
 });
+
+//const blobToBase64 = blob => {
+//  const reader = new FileReader();
+//  reader.readAsDataURL(blob);
+//  return new Promise(resolve => {
+//    reader.onloadend = () => {
+//      resolve(reader.result);
+//    };
+//  });
+//};
+
+// https://www.geeksforgeeks.org/how-to-convert-blob-to-base64-encoding-using-javascript/
+function blobToBase64(blob) {
+    var result;
+    var reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = function () {
+        var base64String = reader.result;
+        console.log('Base64 String - ', base64String);
+
+        // Simply Print the Base64 Encoded String,
+        // without additional data: Attributes.
+        // doesn't work!
+        console.log('Base64 String without Tags- ',
+        base64String.substr(base64String.indexOf(', ') + 1));
+        result = base64String;
+        let input = document.getElementById("imageString");
+        input.value = base64String;
+        return base64String;
+    }
+    return result;
+}
 
 function getResult() {
     var imageResult = vanilla.result({
