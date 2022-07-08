@@ -1,4 +1,7 @@
 fuser -k 10500/tcp || true
+set -o allexport
+source production-identityprovider/env
+set +o allexport
 java -jar production-identityprovider/libs/identityprovider-0.0.1-SNAPSHOT.jar \
     --spring.application.name=identity-provider \
     --grpc.server.port=10500 \
