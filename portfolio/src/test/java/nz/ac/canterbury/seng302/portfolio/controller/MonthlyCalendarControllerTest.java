@@ -41,7 +41,7 @@ public class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
-    void studentGetMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
+    void getMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
         Mockito.when(projectService.getProjectById(-1)).thenThrow(new Exception("Project not found"));
         try{
             mockMvc.perform(get("/monthlyCalendar/-1"));
@@ -63,7 +63,7 @@ public class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void teacherGetMonthlyCalendar_whenGivenPostMapping_returnUpdatedSprint() throws Exception {
+    void getMonthlyCalendar_whenGivenPostMapping_returnUpdatedSprint() throws Exception {
         // initializing project object and mocking it
         Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
         Mockito.when(projectService.getProjectById(0)).thenReturn(project);
@@ -78,7 +78,7 @@ public class MonthlyCalendarControllerTest {
                             .param("sprintStartDate", "2022-01-05")
                             .param("sprintEndDate", "2022-01-15")
                 )
-                .andExpect(status().is3xxRedirection());
+            .andExpect(status().is3xxRedirection());
     }
 
 }
