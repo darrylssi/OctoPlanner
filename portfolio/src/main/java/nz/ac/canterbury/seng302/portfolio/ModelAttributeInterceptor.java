@@ -1,7 +1,5 @@
 package nz.ac.canterbury.seng302.portfolio;
 
-import java.security.Principal;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,7 +54,7 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
      */
     private static PrincipalData extractPrincipalDataFromRequest(HttpServletRequest request) {
         // For some reason, getUserPrincipal() gets the whole token.
-        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken)(Object) request.getUserPrincipal();
+        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) request.getUserPrincipal();
         if (token == null) {
             return PrincipalData.unauthenticated();
         }
