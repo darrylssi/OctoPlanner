@@ -1,5 +1,8 @@
 fuser -k 9501/tcp || true
 
+set -o allexport
+source staging-portfolio/env
+set +o allexport
 java -jar staging-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --server.port=9501 \
     --spring.application.name=portfolio \

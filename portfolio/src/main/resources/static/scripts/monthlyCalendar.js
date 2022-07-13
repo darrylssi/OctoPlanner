@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
         eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
         eventDurationEditable: false,                       // sprints can't be edited by default
         timeZone: 'UTC',
+        themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
         // Restricts the calendar dates based on the given project dates
         validRange: {
@@ -56,7 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
             end: projectEndDate
         },
         buttonText: {
-            today: "Today"
+            today: "Today",
+            prev: "<",
+            next: ">"
         },
         eventOverlap: function (stillEvent, movingEvent) {
             // shows the sprint overlap error message

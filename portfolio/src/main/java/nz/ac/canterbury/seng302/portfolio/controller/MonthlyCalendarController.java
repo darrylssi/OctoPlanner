@@ -7,9 +7,13 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -93,29 +97,23 @@ public class MonthlyCalendarController extends PageController {
     public String updateMonthlyCalendar(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="id") int id,
-            @RequestParam(name="sprintId", required = false) Integer sprintId,
-            @RequestParam(name="sprintStartDate", required = false) String sprintStartDate,
-            @RequestParam(name="sprintEndDate", required = false) String sprintEndDate
+            @RequestParam(name="sprintId") Integer sprintId,
+            @RequestParam(name="sprintStartDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date sprintStartDate,
+            @RequestParam(name="sprintEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date sprintEndDate
     ) throws ParseException {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-
-        String redirectUrl = "redirect:../monthlyCalendar/" + id;
-
-        // checks that the sprint id is not null
-        if (sprintId == null) {
-            return redirectUrl;
-        }
+        Sprint sprintToUpdate;
         try {
-            Sprint sprintToUpdate = sprintService.getSprintById(sprintId);
-            sprintToUpdate.setStartDate(utils.toDate(sprintStartDate));
-            sprintToUpdate.setEndDate(removeOneDayFromEndDate(utils.toDate(sprintEndDate)));
-            sprintService.saveSprint(sprintToUpdate);
+            sprintToUpdate = sprintService.getSprintById(sprintId);
         } catch (Exception e) {
             // sprint does not exist
-            return redirectUrl;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint " + sprintId + " does not exist");
         }
+        sprintToUpdate.setStartDate(sprintStartDate);
+        sprintToUpdate.setEndDate(removeOneDayFromEndDate(sprintEndDate));
+        sprintService.saveSprint(sprintToUpdate);
 
-        return redirectUrl;
+        return "redirect:../monthlyCalendar/" + id;
     }
 
 
