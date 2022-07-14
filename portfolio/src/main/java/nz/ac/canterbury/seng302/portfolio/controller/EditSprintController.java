@@ -1,13 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * Controller for the edit sprint details page
  */
 @Controller
-public class EditSprintController {
+public class EditSprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -50,10 +50,11 @@ public class EditSprintController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
+
     @Autowired
     private DateUtils utils;
+
+    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
 
     /**
      * Show the edit-sprint page.
@@ -62,11 +63,12 @@ public class EditSprintController {
      * @return Edit-sprint page
      */
     @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(@AuthenticationPrincipal AuthState principal,
-                             @PathVariable("id") int id, Model model) throws Exception {
-        // Get current user's username for the header
-        String getUsername = getUsernameById(principal);
-        model.addAttribute("userName", getUsername);
+    public String sprintForm(
+            @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Add sprint details to the model */
         Sprint sprint = sprintService.getSprintById(id);
@@ -75,11 +77,11 @@ public class EditSprintController {
         model.addAttribute("sprint", sprint);
         model.addAttribute("projectId", sprint.getParentProjectId());
         model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintLabel", " Edit Sprint - " + labelUtils.nextLabel(id) );
         model.addAttribute("sprintName", sprint.getSprintName());
         model.addAttribute("sprintStartDate", utils.toString(sprint.getSprintStartDate()));
         model.addAttribute("sprintEndDate", utils.toString(sprint.getSprintEndDate()));
         model.addAttribute("sprintDescription", sprint.getSprintDescription());
+        model.addAttribute("sprintColour", sprint.getSprintColour());
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
@@ -109,10 +111,13 @@ public class EditSprintController {
             @RequestParam(name = "sprintStartDate") String sprintStartDate,
             @RequestParam(name = "sprintEndDate") String sprintEndDate,
             @RequestParam(name = "sprintDescription") String sprintDescription,
+            @RequestParam(name = "sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
     ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         Project parentProject = projectService.getProjectById(projectId);
 
         // Getting sprint list containing all the sprints
@@ -125,20 +130,16 @@ public class EditSprintController {
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Get current user's username for the header
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
             model.addAttribute("sprintId", id);
-            model.addAttribute("sprintLabel", "Edit Sprint - " + labelUtils.nextLabel(id));
             model.addAttribute("sprintName", sprintName);
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("sprintColour", sprintColour);
             return "editSprint";
         }
 
@@ -148,21 +149,12 @@ public class EditSprintController {
         sprint.setStartDate(utils.toDate(sprintStartDate));
         sprint.setEndDate(utils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+        sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
-        return "redirect:/project/" + projectId;
-    }
-
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
+        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
+        return "redirect:../project/" + projectId;
     }
 
 }

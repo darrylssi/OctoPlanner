@@ -1,11 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio;
 
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,10 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
+/**
+ * This class tests the SprintLabelService, which is responsible for assigning labels to Sprint objects such that
+ * each sprint has a label like "Sprint 1", "Sprint 2" etc., in order of starting date.
+ */
 @SpringBootTest
 public class SprintLabelServiceTest {
     @Autowired
@@ -46,9 +51,9 @@ public class SprintLabelServiceTest {
         testProject2 = new Project("Name2", "desc2", utils.toDate("2023-01-01"), utils.toDate("2023-12-30"));
         testProject2.setId(PROJECT_ID_2);
 
-        sprint1 = new Sprint(PROJECT_ID_1, "Sprint 1", "desc", utils.toDate("2022-01-01"), utils.toDate("2022-02-01"));
-        sprint2 = new Sprint(PROJECT_ID_1, "Sprint 2", "desc", utils.toDate("2022-02-02"), utils.toDate("2022-03-01"));
-        sprint3 = new Sprint(PROJECT_ID_1, "Sprint 3", "desc", utils.toDate("2022-04-02"), utils.toDate("2022-05-01"));
+        sprint1 = new Sprint(PROJECT_ID_1, "Sprint 1", "desc", utils.toDate("2022-01-01"), utils.toDate("2022-02-01"), "#aabbcc");
+        sprint2 = new Sprint(PROJECT_ID_1, "Sprint 2", "desc", utils.toDate("2022-02-02"), utils.toDate("2022-03-01"), "#884477");
+        sprint3 = new Sprint(PROJECT_ID_1, "Sprint 3", "desc", utils.toDate("2022-04-02"), utils.toDate("2022-05-01"), "#aa0055");
         List<Sprint> sprintList = Arrays.asList(sprint1, sprint2, sprint3);
 
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(sprintList);
@@ -61,6 +66,10 @@ public class SprintLabelServiceTest {
     // also, refreshAllLabels just calls other methods, so it isn't checked for adding/deleting sprints etc.
     // as there are other tests for that
 
+    /**
+     * This test covers sprints across two projects being correctly assigned labels when refreshing all labels.
+     * @throws ParseException if strings cannot be parsed as dates
+     */
     @Test
     void refreshAllLabels_labelsAssignedProperlyAndNextLabel() throws ParseException {
         sprint3.setParentProjectId(PROJECT_ID_2);
@@ -83,6 +92,9 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_2));
     }
 
+    /**
+     * Checks that labels are refreshed correctly with just one sprint, and nextLabel() returns correctly.
+     */
     @Test
     void refreshLabelsOneSprint_labelAssignedProperly() {
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
@@ -92,6 +104,9 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprintLabelService.nextLabel(PROJECT_ID_1));
     }
 
+    /**
+     * Checks that refreshing works using a project id (integer).
+     */
     @Test
     void refreshLabelsWithID_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
@@ -99,6 +114,10 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
         Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
     }
+
+    /**
+     * Checks that refreshing works using a project object.
+     */
     @Test
     void refreshLabelsWithProject_labelsAssignedProperly() {
         sprintLabelService.refreshProjectSprintLabels(testProject1);
@@ -144,7 +163,7 @@ public class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
 
         // "add" a sprint, and expect that the labels adjust, including nextLabel()
-        Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "desc", utils.toDate("2022-03-02"), utils.toDate("2022-04-01"));
+        Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "desc", utils.toDate("2022-03-02"), utils.toDate("2022-04-01"), "#987654");
         when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2, sprint3, sprint4));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());

@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,7 +32,7 @@ import java.util.List;
  * Controller for the edit project details page
  */
 @Controller
-public class EditProjectController {
+public class EditProjectController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -41,7 +42,6 @@ public class EditProjectController {
     private UserAccountClientService userAccountClientService;
     @Autowired
     private DateUtils utils;
-
     /**
      * Show the edit-project page.
      * @param id ID of the project to be edited
@@ -50,15 +50,16 @@ public class EditProjectController {
      */
     @GetMapping("/edit-project/{id}")
     public String projectForm(@AuthenticationPrincipal AuthState principal,
-                              @PathVariable("id") int id, Model model) {
+                              @PathVariable("id") int id,
+                              Model model
+    ) {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Add project details to the model */
         try {
-            // Setting username for the header
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
             Project project = projectService.getProjectById(id);
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
@@ -94,21 +95,24 @@ public class EditProjectController {
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
     ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
 
-        //
+        Project newProject = projectService.getProjectById(id);
+
+        /* Convert to date types, then check if in valid range */
         Date utilsProjectStartDate = utils.toDate(utils.toString(projectStartDate));
         Date utilsProjectEndDate = utils.toDate(utils.toString(projectEndDate));
-        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate, sprintList);
+        String dateOutOfRange = project.validEditProjectDateRanges(utilsProjectStartDate, utilsProjectEndDate,
+                newProject.getProjectCreationDate(), sprintList);
 
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Setting username for the header
-            String getUsername = getUsernameById(principal);
-            model.addAttribute("userName", getUsername);
-
+            // Get current user's username for the header
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));
@@ -118,7 +122,6 @@ public class EditProjectController {
         }
 
         /* Set (new) project details to the corresponding project */
-        Project newProject = projectService.getProjectById(id);
         newProject.setProjectName(projectName);
         newProject.setProjectStartDate(projectStartDate);
         newProject.setProjectEndDate(projectEndDate);
@@ -126,18 +129,7 @@ public class EditProjectController {
         projectService.saveProject(newProject);
 
         /* Redirect to details page when done */
-        return "redirect:/project/" + id;
-    }
-
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        return userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
+        return "redirect:../project/" + id;
     }
 
 }

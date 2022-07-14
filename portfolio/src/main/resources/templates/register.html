@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <title> Register </title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" th:href="@{/styles/css_register.css}" />
+    <link rel="stylesheet" th:href="|./styles/css_register.css|" />
 </head>
 <body>
 <div class="container">
     <h2 class="title"> Registration Form </h2>
 
-    <form th:action="@{/register}" th:object="${user}" method="post">
+    <form th:action="|./register|" th:object="${user}" method="post">
         <div class="user-info">
             <div class="input-box">
                 <label class="required"> Username </label>
@@ -49,8 +49,8 @@
                 <span class="error" th:text="${error_PersonalPronouns}"></span>
             </div>
             <div class="input-box">
-                <label class="required"> Password </label>
-                <input type="password" placeholder="Enter your password" th:field="*{password}" th:required="required" /><br>
+                <label class="required"> Password  </label>
+                <input type="password" placeholder="Enter your password (7-20 characters)" th:field="*{password}" th:required="required" /><br>
                 <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="error" />
                 <span class="error" th:text="${error_Password}"></span>
 
@@ -58,7 +58,7 @@
             <div class="input-box">
                 <label class="required"> Confirm Password </label>
                 <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
-                       placeholder="Password" th:field="*{confirmPassword}">
+                       placeholder="Re-enter your password (7-20 characters)" th:field="*{confirmPassword}">
                 <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
                        placeholder="Password" th:field="*{confirmPassword}">
                 <span th:errorclass="error" th:if="${#fields.hasErrors('passwordsEqual')}" th:errors="*{passwordsEqual}"></span>

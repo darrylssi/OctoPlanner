@@ -3,19 +3,23 @@
 <head>
     <title>Edit Sprint</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link th:href="@{/styles/main.css}" rel="stylesheet" />
-    <link th:href="@{/styles/form.css}" rel="stylesheet" />
+    <link th:href="|../styles/main.css|" rel="stylesheet" />
+    <link th:href="|../styles/form.css|" rel="stylesheet" />
 </head>
 <body>
 <div th:replace="fragments :: header(title=${sprintLabel}, username=${userName})"></div>
 <div class="content">
-    <form th:action="@{/edit-sprint/{id}(id = ${sprintId})}" modelAttribute="sprint"
+    <form th:action="@{../edit-sprint/{id}(id = ${sprintId})}" modelAttribute="sprint"
           method="post" th:object="${sprint}">
         <input th:id="projectId" th:name="projectId" th:type="hidden" th:value="${projectId}">
         <label for="sprintName" class="required">Sprint Name</label> <br/>
         <input id="sprintName" type="text" th:name="sprintName" th:field="*{sprintName}">
         <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         <br/>
+        <div>
+            <label for="colourPicker">Pick a colour:</label>
+            <input type="color" id="colourPicker" value="#000000" th:name="sprintColour" th:value="${sprintColour}">
+        </div>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate" class="required">Sprint Start Date</label> <br/>
@@ -36,7 +40,7 @@
         </div>
         <br/>
         <div class="buttons">
-            <a th:href="@{/project/{id}(id = ${projectId})}">
+            <a th:href="|../project/${projectId}|">
                 <button class="form-button cancel" type="button">
                     Cancel
                 </button>

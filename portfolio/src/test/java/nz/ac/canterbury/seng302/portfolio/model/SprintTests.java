@@ -1,27 +1,20 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 
-import javax.validation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
 
 
 /**
@@ -29,117 +22,118 @@ import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
  * These tests (should) make sure that the JPA annotations (e.g. @NotEmpty) work correctly.
  */
 @SpringBootTest
-public class SprintTests {
+class SprintTests {
     @Autowired
     private SprintService sprintService;
 
     @Autowired
     private DateUtils utils;
 
-    private static Validator validator;
-
-    @BeforeAll
-    public static void setUpValidator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
-
-    @MockBean
+    @Autowired
     private SprintRepository sprintRepository;
 
-    private List<Sprint> sprintList = new ArrayList<>();
+    private List<Sprint> sprintList;
     private Sprint baseSprint;
-
 
     @BeforeEach
     public void setUp() {
+        sprintList = new ArrayList<>();
+        int parentProjId = 5;
+        sprintRepository.deleteAll();
         baseSprint = new Sprint();
+        baseSprint.setSprintLabel("Sprint 1");
         baseSprint.setSprintName("Sprint 1");
         baseSprint.setSprintDescription("The first.");
-        baseSprint.setParentProjectId(5);
+        baseSprint.setParentProjectId(parentProjId);
         baseSprint.setStartDateString("05/FEB/2022");
         baseSprint.setEndDateString("24/MAR/2022");
+        baseSprint.setSprintColour("#abcdef");
         sprintList.add(baseSprint);
     }
 
     @Test
-    public void searchByName_getSprint() {
+    void searchByName_getSprint() {
         String nameToSearch = "Sprint 1";
-        when(sprintRepository.findBySprintName(nameToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintByName(nameToSearch)).isEqualTo(List.of(baseSprint));
+        sprintService.saveSprint(baseSprint);
+        List<Sprint> foundSprints = sprintService.getSprintByName(nameToSearch);
+        Sprint foundSprint = foundSprints.get(0);
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
     }
 
     @Test
-    public void searchById_getSprint() throws Exception {
-        when(sprintRepository.findSprintById(baseSprint.getId())).thenReturn(baseSprint);
-        assertThat(sprintService.getSprintById(baseSprint.getId())).isEqualTo(baseSprint);
+    void searchById_getSprint() throws Exception {
+        sprintService.saveSprint(baseSprint);
+        Sprint foundSprint = sprintService.getSprintById(baseSprint.getId());
+        // TODO fix the date functions in Project and DateUtils so I don't have to write stuff like this
+        // this is needed because dates are in a different format, so they need to be reset
+        // see https://stackoverflow.com/questions/24620064/comparing-of-date-objects-in-java
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
+        // toString used as they're different objects but have the same values
     }
 
     @Test
-    public void searchByParentProjectId_getSprint() {
-        int parentProjectIdToSearch = 5;
-        baseSprint.setParentProjectId(parentProjectIdToSearch);
-        when(sprintRepository.findByParentProjectId(parentProjectIdToSearch)).thenReturn(List.of(baseSprint));
-        assertThat(sprintService.getSprintByParentProjectId(parentProjectIdToSearch)).isEqualTo(List.of(baseSprint));
+    void searchByParentProjectId_getSprint() {
+        sprintService.saveSprint(baseSprint);
+        List<Sprint> foundSprints = sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId());
+        Sprint foundSprint = foundSprints.get(0);
+        foundSprint.setStartDateString(Project.dateToString(foundSprint.getSprintStartDate()));
+        foundSprint.setEndDateString(Project.dateToString(foundSprint.getSprintEndDate()));
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
+        assertThat(foundSprint.toString()).hasToString(baseSprint.toString());
     }
 
     @Test
     void saveNullSprint_getException() {
-        try { // this is how to get at nested exceptions
-            sprintRepository.save(new Sprint());
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        Sprint nullSprint = new Sprint();
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(nullSprint));
     }
 
     @Test
     void saveNullNameSprint_getException() {
-        try {
-            baseSprint.setSprintName(null);
-            sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        baseSprint.setSprintName(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveEmptyNameSprint_getException() {
-        try {
-            baseSprint.setSprintName("");
-            sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        baseSprint.setSprintName("");
+        assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullDescriptionSprint_getException() {
-        try {
-            baseSprint.setSprintDescription(null);
-            sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        baseSprint.setSprintDescription(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullStartDateSprint_getException() {
-        try {
-            baseSprint.setStartDate(null);
-            sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        baseSprint.setStartDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
     void saveNullEndDateSprint_getException() {
-        try {
-            baseSprint.setEndDate(null);
-            sprintRepository.save(baseSprint);
-        } catch (TransactionSystemException e) {
-            assertInstanceOf(ConstraintViolationException.class, e.getCause().getCause());
-        }
+        baseSprint.setEndDate(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
+    }
+
+
+    @Test
+    void saveEmptyColourSprint_getException() {
+        baseSprint.setSprintColour("");
+        assertThrows(TransactionSystemException.class, () -> sprintRepository.save(baseSprint));
+    }
+
+
+    @Test
+    void saveNullColourSprint_getException() {
+        baseSprint.setSprintColour(null);
+        assertThrows(DataIntegrityViolationException.class, () -> sprintRepository.save(baseSprint));
     }
 
     @Test
@@ -270,7 +264,7 @@ public class SprintTests {
         String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
-        assertEquals("Dates must not overlap with other sprints & and it must not be same, it is overlapping with " +
+        assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with " +
                 utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
     }
 
@@ -284,7 +278,7 @@ public class SprintTests {
         String errorMessage = baseSprint.validEditSprintDateRanges(2, utils.toDate(sprintStartDate), utils.toDate(sprintEndDate),
                 utils.toDate(projectStartDate), utils.toDate(projectEndDate), sprintList);
 
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " +
+        assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with " +
                 utils.toString(baseSprint.getSprintStartDate()) + " - " + utils.toString(baseSprint.getSprintEndDate()), errorMessage);
     }
 
