@@ -19,15 +19,7 @@ p, #calendarTitle {
 }
 
 .currentEventBorder {
-    border: 2px outset red !important;
-}
-
-.fc-event-start {
-    border-left-width: 10px !important;
-}
-
-.fc-event-end {
-    border-right-width: 10px !important;
+    border: 3px outset black !important;
 }
 
 .fc-resource-area td {
