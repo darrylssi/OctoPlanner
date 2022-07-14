@@ -10,7 +10,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 
 
 /**
- * Represents an event object. Events may be part of a sprint, or may determine colour on their own.
+ * Represents an event object. Event colour should be determined based on what it is being displayed with.
  * Event objects are stored in a table called Event, as it is an @Entity.
  */
 @Entity
@@ -58,7 +58,6 @@ public class Event {
         this.eventDescription = eventDescription;
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
-        this.eventColour = eventColour;
     }
 
     @Override
