@@ -178,14 +178,16 @@ public class Event {
             Sprint checkedSprint = sprints.get(i);
             Date sprintStart = checkedSprint.getSprintStartDate();
 
-            if (checkedSprint.getSprintEndDate().after(eventStartDate)) {
+            /* Sprints are assumed to be active on their end date, so we also check for equality */
+            if (checkedSprint.getSprintEndDate().after(eventStartDate) ||
+                    checkedSprint.getSprintEndDate().equals(eventStartDate)) {
                 /* Sprint covers start of event */
-                if(sprintStart.before(eventStartDate)) {
+                if(sprintStart.before(eventStartDate) || sprintStart.equals(eventStartDate)) {
                     colour = checkedSprint.getSprintColour();
                     break;
                 }
                 /* Otherwise, choose the sprint colour that falls earliest within the event */
-                if(sprintStart.before(overlapStart)) {
+                if(sprintStart.before(overlapStart) || sprintStart.equals(overlapStart)) {
                     colour = checkedSprint.getSprintColour();
                     overlapStart = sprintStart;
                 }
