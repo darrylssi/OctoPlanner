@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
+import nz.ac.canterbury.seng302.portfolio.model.BASE64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
@@ -14,8 +15,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.util.Base64;
 
 @Controller
 public class EditUserController extends PageController{
@@ -177,10 +181,16 @@ public class EditUserController extends PageController{
             BindingResult result,
             @RequestParam(name="imageString") String base64ImageString,
             Model model
-    ) {
+    ) throws IOException {
         editHandler(model, id, principal);
+        String[] splitString = base64ImageString.split(",");
+        byte[] bytes = DatatypeConverter.parseBase64Binary(splitString[1]);
+        System.out.println("Split strings: " + splitString[0] + "\n" + splitString[1]);
+        MultipartFile file = new BASE64DecodedMultipartFile(bytes, splitString[0]);
+        userAccountClientService.uploadUserProfilePhoto(id, file);
+        return REDIRECT + id;
 //        System.out.println("b64 str: " + base64ImageString);
-        return EDIT_USER;
+//        return EDIT_USER;
     }
 
     /**
