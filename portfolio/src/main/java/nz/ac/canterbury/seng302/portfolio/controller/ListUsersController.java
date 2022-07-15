@@ -63,10 +63,10 @@ public class ListUsersController extends PageController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        String userId = principalData.getID().toString();
+        PrincipalData thisUser = PrincipalData.from(principal);
+        String sThisUserID = String.valueOf(thisUser.getID());
         // Get sort column & direction from cookie
-        Pair<String, Boolean> ordering = getPageOrdering(request, userId);
+        Pair<String, Boolean> ordering = getPageOrdering(request, sThisUserID);
         String orderBy = ordering.getFirst();
         boolean isAscending = ordering.getSecond();
 
@@ -76,30 +76,28 @@ public class ListUsersController extends PageController {
             users = userAccountClientService.getPaginatedUsers(page - 1, PAGE_SIZE, orderBy, isAscending);
         } catch (IllegalArgumentException e) {
             // The orderBy column in the cookie is invalid, delete it
-            clearPageOrdering(userId, response);
+            clearPageOrdering(sThisUserID, response);
             // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
 
         // Only allows the user to touch roles they have access to (Teachers can't unassign admins)
         List<UserRole> acceptableRoles = Stream.of(UserRole.values())
-                                    .filter(principalData::hasRoleOfAtLeast)
+                                    .filter(thisUser::hasRoleOfAtLeast)
                                     .toList();
 
         model.addAttribute("acceptableRoles", acceptableRoles);
 
         // Only teachers or above can edit roles
-        model.addAttribute("canEdit", principalData.hasRoleOfAtLeast(UserRole.TEACHER));
+        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
 
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("users", users.getUsersList());
         model.addAttribute("dir", isAscending);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
-        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
 
         /* Total number of pages */
@@ -125,8 +123,8 @@ public class ListUsersController extends PageController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        String userId = principalData.getID().toString();
+        PrincipalData thisUser = PrincipalData.from(principal);
+        String userId = String.valueOf(thisUser.getID());
         // Get the user's existing ordering
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String savedOrderBy = ordering.getFirst();
@@ -231,8 +229,8 @@ public class ListUsersController extends PageController {
             @PathVariable("role") UserRole role
     ) {
         // Check if the user is authorised to add roles
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Add the role to the user
                 boolean roleAdded = userAccountClientService.addRoleToUser(id, role);
@@ -266,8 +264,8 @@ public class ListUsersController extends PageController {
             @PathVariable("id") int id,
             @PathVariable("role") UserRole role
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Remove role from user
                 boolean roleRemoved = userAccountClientService.removeRoleFromUser(id, role);
