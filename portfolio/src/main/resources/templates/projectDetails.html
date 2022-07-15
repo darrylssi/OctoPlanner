@@ -31,7 +31,7 @@
     </div>
 </div>
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
-<div class="content">
+<div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
         <button class="edit-button" th:if="${canEdit}">
@@ -75,7 +75,8 @@
     <div th:if="${#arrays.isEmpty(sprints)}" style="text-align:center">
         <b>[ This project has no sprints ]</b>
     </div>
-    <div>
+    <div class="row">
+        <div class="col">
         <a th:href="|../add-sprint/${project.getId}|">
         <button class="add-sprint" th:if="${canEdit}">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
@@ -84,6 +85,8 @@
             Add Sprint
         </button>
     </a>
+        </div>
+        <div class="col">
     <button class="add-sprint" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
             <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
@@ -91,15 +94,50 @@
         </svg>
         Add Event
     </button>
+        </div>
     </div>
-    <div class="container collapse" id="addEventForm">
+    <div class="collapse" id="addEventForm">
         <div class="card">
             <div class="card-header">
                 New Event
             </div>
             <div class="card-body">
-                Add a new event
+                <form class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="eventNameInput" placeholder="Name">
+                                <label for="eventNameInput">Name</label>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="eventDescriptionInput" placeholder="Description">
+                                <label for="eventDescriptionInput">Description</label>
+                            </div>
 
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="datetime-local" class="form-control" id="eventStartTime">
+                                <label for="eventStartTime">Start Time</label>
+                            </div>
+
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="datetime-local" class="form-control" id="eventEndTime">
+                                <label for="eventEndTime">End Time</label>
+                            </div>
+
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-primary btn-lg">Save</button>
+                        </div>
+                    </div>
+                </form>
             </div>
 
         </div>
