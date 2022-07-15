@@ -2,8 +2,8 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,13 +31,12 @@ public class ProfilePageController {
     @GetMapping("/users/current")
     public String profileRedirect(@AuthenticationPrincipal AuthState principal) {
 
-        String id = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("0");
+        PrincipalData principalData = PrincipalData.from(principal);
+        if (!principalData.isAuthenticated()) {
+            return "redirect:./";
+        }
 
-        return "redirect:/users/" + id;
+        return "redirect:./" + principalData.getID();
     }
 
     /**
@@ -54,38 +53,27 @@ public class ProfilePageController {
             @PathVariable("id") int id,
             Model model
     ) {
+        PrincipalData principalData = PrincipalData.from(principal);
         UserResponse user = userAccountClientService.getUserAccountById(id);
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
 
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-        model.addAttribute("isCurrentUser", (currentUserId.equals(Integer.toString(id)) && !currentUserId.equals("NOT FOUND")));
-        if(user.hasCreated()) {
-            model.addAttribute("profileInfo", user);
-            model.addAttribute("userExists", true);
-            model.addAttribute("fullName", getFullName(
-                    user.getFirstName(), user.getMiddleName(),  user.getLastName()));
-            model.addAttribute("id", id);
-            model.addAttribute("userName", user.getUsername());
-            model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-            String roles = "";
-            for (int i = 0; i < user.getRolesCount(); i++) {
-                String roleString = user.getRoles(i).toString();
-                roleString = roleString.replace("_", " ");
-                roles += roleString.substring(0, 1).toUpperCase() + roleString.substring(1).toLowerCase() + ", ";
+        boolean isCurrentUser = principalData.getID() == id; // User's logged in, and this page is about them
+        model.addAttribute("isCurrentUser", isCurrentUser);
+
+            if (user != null) {
+                model.addAttribute("profileInfo", user);
+                model.addAttribute("userExists", true);
+                model.addAttribute("fullName", getFullName(
+                        user.getFirstName(), user.getMiddleName(), user.getLastName()));
+                model.addAttribute("id", id);
+                model.addAttribute("userName", user.getUsername());
+                model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
+                model.addAttribute("roles", user.getRolesList());
+            } else {
+                errors.add("Invalid ID");
             }
-            if (roles.length() > 2) {
-                roles = roles.substring(0, roles.length() - 2);
-            }
-            model.addAttribute("roles", roles);
-        } else {
-            errors.add("Invalid ID");
-        }
         return "profile";
     }
 
@@ -109,7 +97,7 @@ public class ProfilePageController {
      * @param timestamp The timestamp at which the user's account was created
      * @return A formatted string containing the date the user was created
      */
-    public static String getDateCreated(Timestamp timestamp){
+    public static String getDateCreated(Timestamp timestamp) {
         LocalDateTime dateTime = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos())
                 .atOffset(ZoneOffset.UTC)
                 .toLocalDateTime();
@@ -150,5 +138,6 @@ public class ProfilePageController {
 
         return String.format("Member since: %s %s %s %s", date.getDayOfMonth(), month, date.getYear(), timeAgo);
     }
+
 
 }

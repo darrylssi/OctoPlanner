@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 
+import nz.ac.canterbury.seng302.portfolio.controller.ProfilePageController;
+
 @Controller
 public class EditUserController {
 
@@ -34,7 +36,7 @@ public class EditUserController {
         boolean isCurrentUser = (currentUserId.equals(Integer.toString(id)) &&
                 !currentUserId.equals("NOT FOUND"));
         model.addAttribute("isCurrentUser", isCurrentUser);
-        
+
         if(!userResponse.hasCreated()) {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "Invalid id");
@@ -42,9 +44,8 @@ public class EditUserController {
             //TODO: send to error page
             model.addAttribute("editErrorMessage", "You may not edit other users");
         } else {
-            String getUsername = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-            model.addAttribute("userName", getUsername);
-
+            // Gets the current user's username
+            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -69,6 +70,7 @@ public class EditUserController {
 
     @PostMapping("/users/{id}/edit")
     public String edit(
+            User user,
             @AuthenticationPrincipal AuthState principal,
             @PathVariable int id,
             BindingResult result,
@@ -94,7 +96,7 @@ public class EditUserController {
 
             if (editReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:/users/" + id;
+                return "redirect:../" + id;
             } else {
                 ValidationError err = editReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
@@ -109,8 +111,9 @@ public class EditUserController {
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
-                                               "confirmPassword"})
+            "confirmPassword"})
     public String changePassword(
+            User user,
             @PathVariable int id,
             @AuthenticationPrincipal AuthState principal,
             BindingResult result,
@@ -120,7 +123,7 @@ public class EditUserController {
             Model model
     ) {
         editHandler(model, id, principal);
-        
+
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
@@ -135,7 +138,7 @@ public class EditUserController {
 
             if (changeReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return "redirect:/users/" + id;
+                return "redirect:../" + id;
             } else {
                 ValidationError err = changeReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
@@ -148,5 +151,4 @@ public class EditUserController {
         model.addAttribute("pwMessage", changeReply.getMessage());
         return "editUser";
     }
-
 }

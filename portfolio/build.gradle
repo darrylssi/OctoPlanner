@@ -35,6 +35,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.webjars:fullcalendar:5.10.2'
+
+
 
     implementation 'net.devh:grpc-client-spring-boot-starter:2.13.1.RELEASE' // GRPC client dependencies
     implementation 'nz.ac.canterbury.seng302:shared:1.0' // Local package containing .proto files
@@ -43,10 +46,12 @@ dependencies {
 
     // H2 database
     implementation 'com.h2database:h2:2.1.210'
+    // MariaDB Database
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.4'
     // Java Persistence API
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.4'
 
-    //Cucumber dependencies
+    // Cucumber dependencies
     testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
 
     testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
@@ -54,6 +59,8 @@ dependencies {
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test:5.6.3'
+
 }
 
 configurations {

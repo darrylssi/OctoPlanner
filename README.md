@@ -96,11 +96,10 @@ gradlew bootRun
 
 By default, the Portfolio will run on local port 9000 (`http://localhost:9000`)
 
+## User Manual
+The production version of the application should be available at https://csse-s302g8.canterbury.ac.nz/prod/portfolio. If it is not currently running there, it has likely encountered an error and you will need to follow the instructions above to run it locally if you wish to test it.
 
-## Todo (Sprint 2)
-
-- Update team name into `build.gradle`
-- Set up Gitlab CI server (refer to the student guide on learn)
+The home of the application (or any page that requires you to be logged in) will redirect you to the login page, where you can sign in or register an account. Registering will automatically log you in, and you will be taken to your profile page. From there, the tabs in the navigation bar can be used to access the various parts of the application, and editing aspects can be dealt with from the relevant area (such as editing your information from a link on your profile page). To return to your profile or to logout, click on the profile photo icon in the top right.
 
 ## Contributors
 

@@ -1,10 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.controller.EditSprintController;
-import nz.ac.canterbury.seng302.portfolio.model.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -13,35 +9,32 @@ import java.util.Date;
 import java.util.List;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
  */
 @Entity
 public class Sprint {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+
     /** The id of this sprint. This id should be unique between all sprints, regardless of which project they
      * belong to. The id starts at 0 and should automatically increment.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @Column
     private int parentProjectId;
 
-    @Column
-    @Size(min=2, max=32, message="The character length must in range 2 and 32.") //TODO testing values
+    @Column(nullable = false)
+    @Size(min=2, max=32, message="The sprint name must be between 2 and 32 characters.")
     private String sprintName;
 
     @Column(nullable = false)
     private String sprintLabel;
 
-    @Column(nullable = true)
-    @Size(max=200, message="The character length must not exceed 200.") //TODO testing values
+    @Column (nullable = false)
+    @Size(max=200, message="The sprint description must not exceed 200 characters.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
@@ -53,7 +46,9 @@ public class Sprint {
     @DateTimeFormat(pattern="dd/MMM/yyyy")
     private Date sprintEndDate;
 
-    private static final Logger logger = LoggerFactory.getLogger(EditSprintController.class);
+    @Column (nullable = false)
+    @Size(min=7, max=7)
+    private String sprintColour;
 
     public Sprint() {}
 
@@ -64,44 +59,45 @@ public class Sprint {
      * @param sprintDescription Gets the sprint description given by the user
      * @param sprintStartDate Gets the sprint start date as a Date object
      * @param sprintEndDate Gets the sprint end date as a Date object
+     * @param sprintColour Gets the sprint colour given by the user
      */
-    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, Date sprintStartDate, Date sprintEndDate, String sprintColour) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = sprintStartDate;
         this.sprintEndDate = sprintEndDate;
+        this.sprintColour = sprintColour;
     }
 
     /**
      * A constructor which set the given user data to the specified variables
      * @param parentProjectId Gets the project id
-     * @param sprintName Gets the sprint name given by user
+     * @param sprintName Gets the sprint name given by the user
      * @param sprintDescription Gets the sprint description given by the user
      * @param sprintStartDate Gets the sprint start date as a string
      * @param sprintEndDate Gets the sprint end date as a string
+     * @param sprintColour Gets the sprint colour given by the user
      */
-    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate) {
+    public Sprint(int parentProjectId, String sprintName,  String sprintDescription, String sprintStartDate, String sprintEndDate, String sprintColour) {
         this.parentProjectId = parentProjectId;
         this.sprintName = sprintName;
         this.sprintDescription = sprintDescription;
         this.sprintStartDate = Project.stringToDate(sprintStartDate);
         this.sprintEndDate = Project.stringToDate(sprintEndDate);
+        this.sprintColour = sprintColour;
     }
 
 
-    /**
-     * Returns the Sprint object as a string
-     * @return
-     */
     @Override
     /**
      * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
+     * @return said string
      */
     public String toString() {
         return String.format(
-                "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s']",
-                id, parentProjectId, sprintName, sprintLabel, sprintStartDate, sprintEndDate, sprintDescription);
+                "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s', sprintColour='%s']",
+                id, parentProjectId, sprintName, sprintLabel, sprintStartDate, sprintEndDate, sprintDescription, sprintColour);
     }
 
     public void setId(int id) {
@@ -242,6 +238,8 @@ public class Sprint {
      */
     public void setSprintLabel(String newLabel) { this.sprintLabel = newLabel; }
 
+    public String getSprintColour() { return this.sprintColour;  }
+    public void setSprintColour(String sprintColour) { this.sprintColour = sprintColour; }
 
     /**
      * This function check for the validation for add/edit sprints page. Here, first it checks if the start date is after
@@ -309,13 +307,16 @@ public class Sprint {
                     Date utilsSprintStartDate = utils.toDate(utils.toString(eachSprint.getSprintStartDate()));
                     Date utilsSprintEndDate = utils.toDate(utils.toString(eachSprint.getSprintEndDate()));
                     if (utilsSprintStartDate.equals(sprintStartDate) || utilsSprintStartDate.equals(sprintEndDate) || utilsSprintEndDate.equals(sprintStartDate) || utilsSprintEndDate.equals(sprintEndDate)) {
-                        invalidDateRange += "Dates must not overlap with other sprints & and it must not be same, it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+                        invalidDateRange += "Sprint dates must not overlap with other sprints. Dates are overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
-                    } else if (((sprintStartDate.after(utilsSprintStartDate)) && (sprintEndDate.before(utilsSprintEndDate))) ||
-                                (sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate)) ||
-                                (sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate))) {
-                        invalidDateRange += "Dates must not overlap with other sprints & it is overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
+
+                    } else if (
+                            sprintStartDate.after(utilsSprintStartDate) && sprintStartDate.before(utilsSprintEndDate) ||
+                                    sprintEndDate.after(utilsSprintStartDate) && sprintEndDate.before(utilsSprintEndDate) ||
+                                    sprintStartDate.before(utilsSprintStartDate) && sprintEndDate.after(utilsSprintEndDate)
+                    ) {
+                        invalidDateRange += "Sprint dates must not overlap with other sprints. Dates are overlapping with " + utils.toString(eachSprint.getSprintStartDate()) + " - " +
                                 utils.toString(eachSprint.getSprintEndDate());
                         break;
                     }

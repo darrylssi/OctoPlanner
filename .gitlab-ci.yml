@@ -64,6 +64,7 @@ deploy-staging-identityprovider:
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-identityprovider/ || true
     - mkdir /home/gitlab-runner/staging-identityprovider/
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/staging-identityprovider/env
     - cp -r ./build/libs /home/gitlab-runner/staging-identityprovider
     - cp ../runner/staging-identityprovider.sh /home/gitlab-runner/staging-identityprovider.sh
     - chmod u+x /home/gitlab-runner/staging-identityprovider.sh
@@ -81,6 +82,7 @@ deploy-staging-portfolio:
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-portfolio/ || true
     - mkdir /home/gitlab-runner/staging-portfolio/
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/staging-portfolio/env
     - cp -r ./build/libs /home/gitlab-runner/staging-portfolio
     - cp ../runner/staging-portfolio.sh /home/gitlab-runner/staging-portfolio.sh
     - chmod u+x /home/gitlab-runner/staging-portfolio.sh
@@ -100,6 +102,7 @@ deploy-production-identityprovider:
     - mkdir /home/gitlab-runner/production-identityprovider/
     - cp -r ./build/libs /home/gitlab-runner/production-identityprovider
     - cp ../runner/production-identityprovider.sh /home/gitlab-runner/production-identityprovider.sh
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-identityprovider/env
     - chmod u+x /home/gitlab-runner/production-identityprovider.sh
     - sudo systemctl restart production-identityprovider
   artifacts:
@@ -116,6 +119,7 @@ deploy-production-portfolio:
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/production-portfolio/ || true
     - mkdir /home/gitlab-runner/production-portfolio/
+    - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/production-portfolio/env
     - cp -r ./build/libs /home/gitlab-runner/production-portfolio
     - cp ../runner/production-portfolio.sh /home/gitlab-runner/production-portfolio.sh
     - chmod u+x /home/gitlab-runner/production-portfolio.sh

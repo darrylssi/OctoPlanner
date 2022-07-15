@@ -1,9 +1,9 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
  * Controller for the display project details page
  */
 @Controller
-public class DetailsController {
+public class DetailsController extends PageController {
 
     @Autowired
     private ProjectService projectService;
@@ -40,19 +40,17 @@ public class DetailsController {
 
     @GetMapping("/project/{id}")
     public String details(
-                            @AuthenticationPrincipal AuthState principal,
-                            @PathVariable(name="id") int id,
-                            @RequestParam(name="role", required=false) String debugRole,
-                            User user,
-                            Model model) throws Exception {
-        // Get current user's username for the header
-        String getUsername = getUsernameById(principal);
-        model.addAttribute("userName", getUsername);
+                @AuthenticationPrincipal AuthState principal,
+                @PathVariable(name="id") int id,
+                Model model
+    ) throws Exception {
+        PrincipalData principalData = PrincipalData.from(principal);
 
         /* Add project details to the model */
-        // Gets the project with id 0 to plonk on the page
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
+        // Get current user's username for the header
+        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
         labelUtils.refreshProjectSprintLabels(id);
 
@@ -60,22 +58,11 @@ public class DetailsController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        debugRole = "teacher";
-        // TODO: Link this with George's role helper class once that's merged
-        String role;
-        if (debugRole != null) {
-            role = debugRole;
-        } else {
-            role = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("role"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-        }
-        /* Return the name of the Thymeleaf template */
-        // detects the role of the current user and returns appropriate page
-        boolean hasEditPermissions = role.contains("teacher");
+        // If the user is at least a teacher, the template will render delete/edit buttons
+        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
+
+        /* Return the name of the Thymeleaf template */
         return "projectDetails";
     }
 
@@ -88,36 +75,20 @@ public class DetailsController {
     @DeleteMapping("/delete-sprint/{sprintId}")
     @ResponseBody
     public ResponseEntity<String> deleteSprint(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name="sprintId") int sprintId
-            ) {
-
+                @AuthenticationPrincipal AuthState principal,
+                @PathVariable(name="sprintId") int sprintId
+        ) {
+        PrincipalData principalData = PrincipalData.from(principal);
         // Check if the user is authorised to delete sprints
-        if(principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("role"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND").contains("teacher")) {
-            try {
-                sprintService.deleteSprint(sprintId);
-                return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-    }
-
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // Setting the current user's username at the header
-        String currentUserId = principal.getClaimsList().stream()
-                .filter(claim -> claim.getType().equals("nameid"))
-                .findFirst()
-                .map(ClaimDTO::getValue)
-                .orElse("NOT FOUND");
-
-        String username = userAccountClientService.getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return username;
+        try {
+            sprintService.deleteSprint(sprintId);
+            return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

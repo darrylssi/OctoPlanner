@@ -68,7 +68,7 @@ public class RegisterController {
             if (registerReply.getIsSuccess()) {
                 AuthenticateResponse loginReply = authenticateClientService.authenticate(username, password);
                 loginController.createCookie(request, response, loginReply);
-                return "redirect:/users/" + loginReply.getUserId();
+                return "redirect:./users/" + loginReply.getUserId();
             } else {
                 ValidationError err = registerReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
