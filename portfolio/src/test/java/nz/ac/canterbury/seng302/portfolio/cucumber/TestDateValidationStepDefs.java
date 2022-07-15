@@ -9,6 +9,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @CucumberContextConfiguration
 public class TestDateValidationStepDefs extends RunCucumberTest {
-
-    @Autowired
-    private ValidationService validationService;
 
     private Project project;
     private Sprint sprint;
@@ -68,9 +66,9 @@ public class TestDateValidationStepDefs extends RunCucumberTest {
     }
     @Then("Project {string} message should be displayed")
     public void project_message_should_be_displayed(String expected) {
-        String actual = validationService.validateProjectDates(project.getProjectStartDate(),
+        ValidationError error = ValidationService.validateProjectDates(project.getProjectStartDate(),
                 project.getProjectEndDate(), project.getProjectCreationDate(), sprintList);
-
+        String actual = error.getFirstError();
         assertEquals(expected, actual);
     }
 
@@ -81,9 +79,9 @@ public class TestDateValidationStepDefs extends RunCucumberTest {
     @Then("Sprint {string} message should be displayed")
     public void sprint_message_should_be_displayed(String expected) {
         sprintList.add(sprint);
-        String actual = validationService.validateSprintDates(3, sprint.getSprintStartDate(),
+        ValidationError error = ValidationService.validateSprintDates(3, sprint.getSprintStartDate(),
                 sprint.getSprintEndDate(), project, sprintList);
-
+        String actual = error.getFirstError();
         assertEquals(expected, actual);
     }
 }

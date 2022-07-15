@@ -1,21 +1,23 @@
 package nz.ac.canterbury.seng302.portfolio;
 
+import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -26,6 +28,9 @@ class ProjectControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SprintRepository sprintRepository;
 
     @Test
     void getProjectMissingId_throw404() throws Exception {

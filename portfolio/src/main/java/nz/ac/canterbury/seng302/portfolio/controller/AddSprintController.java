@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
@@ -36,8 +37,6 @@ public class AddSprintController extends PageController {
     private ProjectService projectService;              // Initializes the ProjectService object
     @Autowired
     private SprintService sprintService;                // Initializes the SprintService object
-    @Autowired
-    private ValidationService validationService;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -102,7 +101,7 @@ public class AddSprintController extends PageController {
         c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
 
         // Checks that the default end date is within the project dates
-        if (validationService.sprintsOutsideProject(sprintStart, c.getTime(),
+        if (ValidationService.sprintsOutsideProject(sprintStart, c.getTime(),
                 project.getProjectStartDate(), project.getProjectEndDate())){
             sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
         } else {
@@ -152,11 +151,12 @@ public class AddSprintController extends PageController {
         Date start = DateUtils.toDate(sprintStartDate);
         Date end = DateUtils.toDate(sprintEndDate);
         List<Sprint> sprintList = sprintService.getAllSprints();
-        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end,
+        assert start != null;
+        ValidationError dateOutOfRange = ValidationService.validateSprintDates(sprint.getId(), start, end,
                 parentProject, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || !dateOutOfRange.equals("")) {
+        if (result.hasErrors() || dateOutOfRange.isError()) {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -166,7 +166,7 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
-            model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("sprintColour", sprintColour);
             return "addSprint";
         }

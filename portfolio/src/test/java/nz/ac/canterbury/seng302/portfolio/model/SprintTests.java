@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,9 +28,6 @@ import static org.mockito.Mockito.when;
 class SprintTests {
     @Mock
     private SprintService sprintService;
-
-    @Autowired
-    private ValidationService validationService;
 
     @Mock
     private SprintRepository sprintRepository;
@@ -153,13 +149,12 @@ class SprintTests {
         Date end = DateUtils.toDate("2022-02-02");
 
         assert start != null;
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start,
+        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start,
                 end, baseProject, sprintList);
-
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         // Since our selected dates are 01/01/2022 -- 02/02/2022, this should return the error message as "", which tells
         // us that the dates are valid
-        assertEquals("", errorMessage);
+        assertFalse(error.isError());
     }
 
     @ParameterizedTest
@@ -170,11 +165,12 @@ class SprintTests {
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end,
+        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
+        String actual = error.getFirstError();
 
         assertEquals("Sprint dates must be within project date range: " +
-                baseProject.getStartDateString() + " - " + baseProject.getEndDateString(), errorMessage);
+                baseProject.getStartDateString() + " - " + baseProject.getEndDateString(), actual);
     }
 
     @ParameterizedTest
@@ -191,10 +187,11 @@ class SprintTests {
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end, baseProject, sprintList);
+        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end, baseProject, sprintList);
+        String actual = error.getFirstError();
 
         assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with "
-                + baseSprint.getStartDateString() + " - " + baseSprint.getEndDateString(), errorMessage);
+                + baseSprint.getStartDateString() + " - " + baseSprint.getEndDateString(), actual);
     }
 
     @Test
@@ -205,10 +202,11 @@ class SprintTests {
         Date start = DateUtils.toDate(sprintStartDate);
         Date end = DateUtils.toDate(sprintEndDate);
         assert start != null;
-        String errorMessage = validationService.validateSprintDates(SPRINT_ID, start, end,
+        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
+        String actual = error.getFirstError();
 
-        assertEquals("Start date must always be before end date", errorMessage);
+        assertEquals("Start date must always be before end date", actual);
     }
 
 }

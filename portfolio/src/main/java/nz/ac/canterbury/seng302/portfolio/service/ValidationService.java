@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +10,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This service class handles validations for the dates of objects in the portfolio.
+ * It has methods to compare dates and date ranges against each other to ensure that
+ * they are valid.
+ */
 @Service
 public class ValidationService {
+
+    private ValidationService() {}
 
     /**
      * Validates that a sprint's start and end dates are valid. The checks are:
@@ -19,38 +27,43 @@ public class ValidationService {
      *     <li>Sprint dates are within project dates</li>
      *     <li>Sprint dates do not overlap with other sprints</li>
      * </ul>
-     * @param id the id of the sprint to be validated, as an integer
+     * @param id The id of the sprint to be validated, as an integer
      * @param start The sprint's start date to validate
      * @param end The sprint's end date to validate
-     * @param parentProject the project that the sprint belongs to
-     * @return An error message if invalid, otherwise returns an empty string
+     * @param parentProject The project that the sprint belongs to
+     * @param sprintList A list of sprints in the same project to be compared to
+     * @return A ValidationError with a boolean error flag and a list of error messages
      */
-    public String validateSprintDates(int id, Date start, Date end,
-                                      Project parentProject, List<Sprint> sprintList) {
+    public static ValidationError validateSprintDates(int id, Date start, Date end,
+                                               Project parentProject, List<Sprint> sprintList) {
+        ValidationError error = new ValidationError(false);
+
         // Checks if the sprint's start date is after the sprint's end date
         // Does this first so that future checks can assume this is true
         if (start.after(end)) {
-            return "Start date must always be before end date";
+            error.setErrorFlag(true);
+            error.addErrorMessage("Start date must always be before end date");
         }
 
         // Checks that the sprint dates are within the project dates
         if (sprintsOutsideProject(start, end,
                 parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
-            return "Sprint dates must be within project date range: " +
-                    parentProject.getStartDateString() + " - " + parentProject.getEndDateString();
+            error.setErrorFlag(true);
+            error.addErrorMessage("Sprint dates must be within project date range: " +
+                    parentProject.getStartDateString() + " - " + parentProject.getEndDateString());
         }
 
         // Checking against other sprint dates
         for (Sprint other : sprintList) {
-            if (!compareSprintDates(start, end, other) // Sprint dates overlap
+            if (!sprintDatesOverlap(start, end, other) // Sprint dates overlap
                     && (other.getId() != id)){        // Sprint isn't checking against itself
-                return "Sprint dates must not overlap with other sprints. Dates are overlapping with "
-                        + other.getStartDateString() + " - " + other.getEndDateString();
+                error.setErrorFlag(true);
+                error.addErrorMessage("Sprint dates must not overlap with other sprints. Dates are overlapping with "
+                        + other.getStartDateString() + " - " + other.getEndDateString());
             }
         }
 
-        // No errors found
-        return "";
+        return error;
     }
 
     /**
@@ -59,25 +72,29 @@ public class ValidationService {
      *     <li>Project start date is before the end date</li>
      *     <li>Project dates contain all sprints</li>
      *     <li>Project start date is not more than 1 year before creation date</li>
-     *     <li>Project length is not more than 10 years; TODO: gives a warning</li>
      * </ul>
      * @param start The project's start date
      * @param end The project's end date
      * @param creation The project's creation date
-     * @return An error message if invalid, otherwise returns an empty string
+     * @param sprintList A list of sprints in the same project to be compared to
+     * @return A ValidationError with a boolean error flag and a list of error messages
      */
-    public String validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
+    public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
+        ValidationError error = new ValidationError(false);
+
         // Checks if the project's start date is after the project's end date
         if (start.after(end)) {
-            return "Start date must always be before end date";
+            error.setErrorFlag(true);
+            error.addErrorMessage("Start date must always be before end date");
         }
 
         // Checking against sprint dates
         for (Sprint sprint : sprintList) {
             if (sprintsOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
-                return "The sprint with dates: " +
+                error.setErrorFlag(true);
+                error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
-                        " is outside the project dates";
+                        " is outside the project dates");
             }
         }
 
@@ -86,19 +103,13 @@ public class ValidationService {
         startCal.add(Calendar.YEAR, -1);
         Date earliestStart = startCal.getTime();
         if (start.before(earliestStart)) {
-            return "Project cannot be set to start more than a year before it was " +
-                    "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")";
-        }
-
-        // After all other checks, check whether project length is more than 10 years
-        long projectLength = end.getTime() - start.getTime();
-        long lengthInYears = projectLength / (1000L*60*60*24*365);
-        if (lengthInYears >= 10) {
-            //TODO Warn the user according to UPi AC3
+            error.setErrorFlag(true);
+            error.addErrorMessage("Project cannot be set to start more than a year before it was " +
+                    "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")");
         }
 
         // No errors found
-        return "";
+        return error;
     }
 
     /**
@@ -109,7 +120,7 @@ public class ValidationService {
      * @param projectEnd The project's end date to validate
      * @return True if sprint dates are outside project dates, otherwise false
      */
-    public boolean sprintsOutsideProject(Date sprintStart, Date sprintEnd, Date projectStart, Date projectEnd) {
+    public static boolean sprintsOutsideProject(Date sprintStart, Date sprintEnd, Date projectStart, Date projectEnd) {
         if (sprintStart.before(projectStart)) { return true; }
         else return sprintEnd.after(projectEnd);
     }
@@ -121,7 +132,7 @@ public class ValidationService {
      * @param other The other sprint to compare to
      * @return True if sprint dates do not overlap, otherwise false
      */
-    public boolean compareSprintDates(Date start, Date end, Sprint other) {
+    public static boolean sprintDatesOverlap(Date start, Date end, Sprint other) {
         // If the sprint is not before or after the other sprint, then the dates must overlap
             // Sprint is before other sprint
         if (end.before(other.getSprintStartDate())) { return true; }

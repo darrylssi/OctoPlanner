@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
@@ -35,8 +36,6 @@ public class EditSprintController extends PageController {
     private ProjectService projectService;
     @Autowired
     private SprintService sprintService;
-    @Autowired
-    private ValidationService validationService;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -103,11 +102,12 @@ public class EditSprintController extends PageController {
         Date start = DateUtils.toDate(sprintStartDate);
         Date end = DateUtils.toDate(sprintEndDate);
         List<Sprint> sprintList = sprintService.getAllSprints();
-        String dateOutOfRange = validationService.validateSprintDates(sprint.getId(), start, end,
+        assert start != null;
+        ValidationError dateOutOfRange = ValidationService.validateSprintDates(sprint.getId(), start, end,
                 parentProject, sprintList);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || !dateOutOfRange.equals("")) {
+        if (result.hasErrors() || dateOutOfRange.isError()) {
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
@@ -116,7 +116,7 @@ public class EditSprintController extends PageController {
             model.addAttribute("sprintStartDate", sprintStartDate);
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
-            model.addAttribute("invalidDateRange", dateOutOfRange);
+            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("sprintColour", sprintColour);
             return "editSprint";
         }

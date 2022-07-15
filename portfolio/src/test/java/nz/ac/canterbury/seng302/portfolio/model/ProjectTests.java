@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -38,9 +37,6 @@ import static org.mockito.Mockito.when;
 public class ProjectTests {
     @Mock
     private ProjectService projectService;
-
-    @Autowired
-    private ValidationService validationService;
 
     private static Validator validator;
 
@@ -91,6 +87,8 @@ public class ProjectTests {
 
         sprint1 = new Sprint(1, "Sprint 1", "This is S1", DateUtils.toDate("2022-01-01"), DateUtils.toDate("2022-02-02"), "#aabbcc");
         sprint2 = new Sprint(1, "Sprint 2", "This is S2", DateUtils.toDate("2022-02-06"), DateUtils.toDate("2022-03-04"), "#112233");
+        sprint1.setSprintLabel("Sprint 1");
+        sprint2.setSprintLabel("Sprint 2");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
     }
@@ -166,11 +164,12 @@ public class ProjectTests {
 
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
-
-        assertEquals("The sprint with dates: " +
+        assert start != null;
+        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
-                " is outside the project dates" , errorMessage);
+                " is outside the project dates" , actual);
     }
 
     @Test
@@ -181,11 +180,12 @@ public class ProjectTests {
 
         Date start = DateUtils.toDate("2022-01-20");
         Date end = DateUtils.toDate("2022-01-20");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
-
-        assertEquals("The sprint with dates: " +
+        assert start != null;
+        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
-                " is outside the project dates" , errorMessage);
+                " is outside the project dates" , actual);
     }
 
     @Test
@@ -196,11 +196,12 @@ public class ProjectTests {
 
         Date start = DateUtils.toDate("2022-01-01");
         Date end = DateUtils.toDate("2022-02-10");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
-
-        assertEquals("The sprint with dates: " +
+        assert start != null;
+        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint2.getSprintLabel() + ": " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
-                " is outside the project dates" , errorMessage);
+                " is outside the project dates" , actual);
     }
 
     @Test
@@ -211,10 +212,11 @@ public class ProjectTests {
         /* When: these (valid) dates are validated */
         Date start = DateUtils.toDate("2021-05-27");
         Date end = DateUtils.toDate("2022-10-01");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
-
+        assert start != null;
+        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
         /* Then: the validation should return a success */
-        assertEquals("" , errorMessage);
+        assertEquals("" , actual);
     }
 
     @Test
@@ -228,11 +230,12 @@ public class ProjectTests {
 
         Date start = DateUtils.toDate("2021-05-26");
         Date end = DateUtils.toDate("2022-10-01");
-        String errorMessage = validationService.validateProjectDates(start, end, creationDate, sprintList);
-
+        assert start != null;
+        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before " + DateUtils.toDisplayString(earliestStart) + ")" , errorMessage);
+                     "(cannot start before " + DateUtils.toDisplayString(earliestStart) + ")" , actual);
     }
 
     @Test
