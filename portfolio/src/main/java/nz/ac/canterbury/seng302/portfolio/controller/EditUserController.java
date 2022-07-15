@@ -8,18 +8,13 @@ import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.util.Base64;
 
 @Controller
 public class EditUserController extends PageController{
@@ -161,15 +156,17 @@ public class EditUserController extends PageController{
     }
 
     /**
+     * A post request for uploading a base64 string of an image file (a cropped profile photo in this case).
      * This is just getting a string representing the cropped image from a hidden form input
      * https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
-     * @param user
-     * @param id
-     * @param principal
-     * @param result
-     * @param base64ImageString
-     * @param model
-     * @return
+     * @param user User object to be edited
+     * @param id ID of said user
+     * @param principal Authenticated user
+     * @param result Holds the validation result
+     * @param base64ImageString The base64 string representation of the image
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Profile page of the user if photo is valid, otherwise, edit user page
+     * @throws IOException When there is an error uploading the photo
      */
     @PostMapping(value = "/users/{id}/edit", params = {"imageString"})
     public String editImage(
@@ -182,31 +179,7 @@ public class EditUserController extends PageController{
     ) throws IOException {
         editHandler(model, id, principal);
         MultipartFile file = new BASE64DecodedMultipartFile(base64ImageString);
-        userAccountClientService.uploadUserProfilePhoto(id, file);
-        return REDIRECT + id;
-    }
 
-    /**
-     * Post request for uploading a selected image file.
-     * @param user User object to be edited
-     * @param id ID of the user to be edited
-     * @param principal Authenticated user
-     * @param result Holds the validation result
-     * @param file Image file to be uploaded
-     * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @return Profile page of the user if photo is valid, otherwise, edit user page
-     * @throws IOException When there is an error uploading the photo
-     */
-    @PostMapping(value = "/users/{id}/edit", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadPhoto(
-            User user,
-            @PathVariable int id,
-            @AuthenticationPrincipal AuthState principal,
-            BindingResult result,
-            @RequestPart(name="file") MultipartFile file,
-            Model model
-    ) throws IOException {
-        editHandler(model, id, principal);
         model.addAttribute("file", file);
         if (isValidImageFile(file) && file.getSize() > 0) {
             userAccountClientService.uploadUserProfilePhoto(id, file);
@@ -245,7 +218,7 @@ public class EditUserController extends PageController{
     ) {
         DeleteUserProfilePhotoResponse deleteReply;
 
-        /** Check the user is authorised, then send a request to the UserAccountCLientService */
+        // Check the user is authorised, then send a request to the UserAccountCLientService
         editHandler(model, id, principal);
 
         try {
