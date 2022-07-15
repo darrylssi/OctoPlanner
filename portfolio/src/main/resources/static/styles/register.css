@@ -9,3 +9,12 @@ body {
 .btn-primary {
     background-color: #5e0202;
 }
+
+.error {
+    font-size: 90%;
+}
+
+.required:after {
+    content:"*";
+    color: red;
+}
