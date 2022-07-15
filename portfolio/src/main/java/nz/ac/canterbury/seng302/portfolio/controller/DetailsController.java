@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,8 +35,6 @@ public class DetailsController extends PageController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
 
     @GetMapping("/project/{id}")
     public String details(

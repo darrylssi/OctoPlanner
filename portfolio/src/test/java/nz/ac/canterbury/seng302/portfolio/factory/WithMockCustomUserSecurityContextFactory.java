@@ -46,7 +46,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
 
         if (role == UNRECOGNIZED) {
             throw new IllegalArgumentException(
-                "Can't test an UNRECOGNIZED role, use STUDENT, TEACHER etc...");
+                    "Can't test an UNRECOGNIZED role, use STUDENT, TEACHER etc...");
         }
         AuthState authState = buildAuthState(id, role);
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(authState, null);
@@ -59,7 +59,8 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
     /**
      * Builds an AuthState object with a name & role.
      * 
-     * @param role The role of the student
+     * @param id   The user ID you want to use
+     * @param role The role of the user
      * @return A built AuthState object.
      */
     private static AuthState buildAuthState(int id, UserRole role) {

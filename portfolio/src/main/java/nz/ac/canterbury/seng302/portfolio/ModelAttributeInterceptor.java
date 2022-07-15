@@ -43,8 +43,8 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
         // * OK then, add 'em below
         // Adds the user's principaldata globally, so any template (namely the header
         // fragment) can easily access it.
-        PrincipalData principalData = extractPrincipalDataFromRequest(request);
-        model.addAttribute("G_PrincipalData", principalData);
+        PrincipalData thisUser = extractPrincipalDataFromRequest(request);
+        model.addAttribute("G_PrincipalData", thisUser);
     }
 
     /**

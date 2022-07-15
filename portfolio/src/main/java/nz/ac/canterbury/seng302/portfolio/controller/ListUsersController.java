@@ -123,8 +123,8 @@ public class ListUsersController extends PageController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        String userId = String.valueOf(principalData.getID());
+        PrincipalData thisUser = PrincipalData.from(principal);
+        String userId = String.valueOf(thisUser.getID());
         // Get the user's existing ordering
         Pair<String, Boolean> ordering = getPageOrdering(request, userId);
         String savedOrderBy = ordering.getFirst();
@@ -229,8 +229,8 @@ public class ListUsersController extends PageController {
             @PathVariable("role") UserRole role
     ) {
         // Check if the user is authorised to add roles
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Add the role to the user
                 boolean roleAdded = userAccountClientService.addRoleToUser(id, role);
@@ -264,8 +264,8 @@ public class ListUsersController extends PageController {
             @PathVariable("id") int id,
             @PathVariable("role") UserRole role
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
             try {
                 // Remove role from user
                 boolean roleRemoved = userAccountClientService.removeRoleFromUser(id, role);

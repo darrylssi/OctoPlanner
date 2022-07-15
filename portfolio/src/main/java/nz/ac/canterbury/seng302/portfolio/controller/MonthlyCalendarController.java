@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -38,8 +37,6 @@ public class MonthlyCalendarController extends PageController {
     @Autowired
     private SprintService sprintService;                        // initializing the SprintService
     @Autowired
-    private UserAccountClientService userAccountClientService;  // initializing the UserAccountClientService
-    @Autowired
     private DateUtils utils;                                    // initializing the DateUtils
 
     /**
@@ -63,7 +60,6 @@ public class MonthlyCalendarController extends PageController {
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("sprintsEditable", hasEditPermissions);
 
-        // Get current user's username for the header
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
