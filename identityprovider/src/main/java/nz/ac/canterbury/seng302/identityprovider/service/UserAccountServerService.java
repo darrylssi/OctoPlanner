@@ -69,7 +69,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
             String fileName;
             String fileExtension;
-            ByteArrayOutputStream fileContent = new ByteArrayOutputStream();
 
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
@@ -79,9 +78,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
                     } else {
-                        ByteString uploadContent = userProfilePhotoUploadRequest.getFileContent();
-                        writeFile(writer, uploadContent);
-                        fileContent.write(uploadContent.toByteArray());
+                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
                     }
                 } catch (IOException e) {
                     this.onError(e);
@@ -98,32 +95,13 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             @Override
             public void onCompleted() {
                 closeFile(writer);
-                logger.info("FILE CONTENT:\n" + fileContent.toByteArray() + "\n" + fileContent.toByteArray().length);
-                // now actually write the file(?)
-                // create the object of ByteArrayInputStream class
-                // and initialized it with the byte array.
-                // https://www.geeksforgeeks.org/java-program-to-convert-byte-array-to-image/
-
-                // read image from byte array
-                try {
-                    BufferedImage newImage = ImageIO.read(new ByteArrayInputStream(fileContent.toByteArray()));
-                    // write output image
-                    try {
-                        ImageIO.write(newImage, "jpg", new File(fileName + fileExtension));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
 
                 status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
                 FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
                         .setStatus(status)
                         .build();
 
-                // convert from PNG to JPG is necessary
+                // convert from PNG to JPG if necessary
                 if (status == FileUploadStatus.SUCCESS) {
                     if (fileExtension.equalsIgnoreCase("png")) {
                         convertPngToJpg(fileName);

@@ -119,7 +119,7 @@
         <br/>
         <hr/>
         <br/>
-            <form th:action="|./edit|" method="post">
+            <form th:action="|./edit|" method="post" id="photoForm">
             <div class="user-info">
                 <div class="input-box">
                     <label> Profile Photo </label>
@@ -128,10 +128,9 @@
                     <span th:class="error" th:text="${error_InvalidPhoto}"></span>
                 </div>
 
-                <div id="croppie-test"></div>
+                <div id="croppieWindow"></div>
             </div>
             <div class="centre-box">
-                <p id="testlink">test link></p>
                 <img src="" id="image-preview"/>
                 <button class="form-button save" type="submit" id="photo-upload-submit-button">Save Photo</button>
             </div>

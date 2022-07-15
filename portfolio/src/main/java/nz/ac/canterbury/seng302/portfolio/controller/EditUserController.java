@@ -162,9 +162,7 @@ public class EditUserController extends PageController{
 
     /**
      * This is just getting a string representing the cropped image from a hidden form input
-     * TODO Still need to figure out how to convert it to a MultipartFile object that can be passed to the idp
      * https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
-     * is the closest thing I found to an answer but it doesn't work, so I'm stuck
      * @param user
      * @param id
      * @param principal
@@ -183,14 +181,9 @@ public class EditUserController extends PageController{
             Model model
     ) throws IOException {
         editHandler(model, id, principal);
-        String[] splitString = base64ImageString.split(",");
-        byte[] bytes = DatatypeConverter.parseBase64Binary(splitString[1]);
-        System.out.println("Split strings: " + splitString[0] + "\n" + splitString[1]);
-        MultipartFile file = new BASE64DecodedMultipartFile(bytes, splitString[0]);
+        MultipartFile file = new BASE64DecodedMultipartFile(base64ImageString);
         userAccountClientService.uploadUserProfilePhoto(id, file);
         return REDIRECT + id;
-//        System.out.println("b64 str: " + base64ImageString);
-//        return EDIT_USER;
     }
 
     /**
