@@ -65,8 +65,8 @@ document.getElementById('photoForm').addEventListener('submit', function(ev) {
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
             var base64String = reader.result;
-            let input = document.getElementById("imageString");
-            input.value = base64String;
+            let stringInput = document.getElementById("imageString");
+            stringInput.value = base64String;
             context.submit();
         }
     });
