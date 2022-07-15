@@ -1,11 +1,16 @@
 package nz.ac.canterbury.seng302.identityprovider.authentication;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import io.grpc.*;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 
 @GrpcGlobalServerInterceptor
 public class AuthenticationServerInterceptor implements ServerInterceptor {
+
+    @Autowired
+    private AuthenticationValidatorUtil authenticationValidatorUtil;
 
     private final Metadata.Key<String> sessionTokenHeaderKey = Metadata.Key.of("X-Authorization", Metadata.ASCII_STRING_MARSHALLER);
 
@@ -21,7 +26,7 @@ public class AuthenticationServerInterceptor implements ServerInterceptor {
     ) {
         String sessionToken = headers.get(sessionTokenHeaderKey);
         String bearerStrippedSessionToken = sessionToken != null ? sessionToken.replaceFirst("Bearer ", "") : "";
-        AuthState authState = AuthenticationValidatorUtil.validateTokenForAuthState(bearerStrippedSessionToken);
+        AuthState authState = authenticationValidatorUtil.validateTokenForAuthState(bearerStrippedSessionToken);
 
         Context context = Context.current()
                 .withValue(SESSION_TOKEN, sessionToken)

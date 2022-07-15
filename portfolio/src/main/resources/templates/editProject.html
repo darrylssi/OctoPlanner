@@ -17,7 +17,7 @@
         <button id="confirmButton" class="modal-button delete">Confirm</button>
     </div>
 </div>
-<div th:replace="fragments :: header(title='Edit Project', username=${userName})"></div>
+<div th:replace="fragments :: header(title='Edit Project')"></div>
 <div class="content">
     <form th:action="@{../edit-project/{id}(id = ${id})}"
           method="post" th:object="${project}" id="project">

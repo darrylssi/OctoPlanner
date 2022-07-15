@@ -352,8 +352,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setPersonalPronouns(user.getPersonalPronouns())
                 .setEmail(user.getEmail())
                 .setProfileImagePath("/") // TODO Path to users profile image once implemented
-                .addAllRoles(sortedRoles)
-                .setId(user.getID())
+                .addAllRoles(user.getRoles())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
                     .setSeconds(user.getCreated().getEpochSecond())
                     .setNanos(user.getCreated().getNano()));

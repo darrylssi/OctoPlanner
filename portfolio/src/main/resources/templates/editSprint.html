@@ -7,7 +7,7 @@
     <link th:href="|../styles/form.css|" rel="stylesheet" />
 </head>
 <body>
-<div th:replace="fragments :: header(title=${sprintLabel}, username=${userName})"></div>
+<div th:replace="fragments :: header(title=${sprintLabel})"></div>
 <div class="content">
     <form th:action="@{../edit-sprint/{id}(id = ${sprintId})}" modelAttribute="sprint"
           method="post" th:object="${sprint}">

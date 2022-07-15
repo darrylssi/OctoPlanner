@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
@@ -10,13 +11,20 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import nz.ac.canterbury.seng302.portfolio.customthymeleaf.expression.RolesExpressionDialect;
 
 /**
- * <p>Configuration class for implementing WebMvcConfigurer methods, customizing the program.</p>
- * 
- * Currently being used to add Thymeleaf dialects
+ * Configuration class for implementing WebMvcConfigurer methods, customizing the program.
  */
 @Configuration
 public class PortfolioMvcConfig implements WebMvcConfigurer {
 
+    /** Interceptor - For adding values to every template's model */
+    @Autowired
+    ModelAttributeInterceptor modelAttributeInterceptor;
+
+    @Override
+    public void addInterceptors (InterceptorRegistry registry) {
+        registry.addInterceptor(modelAttributeInterceptor);
+    }
+    
     /**
      * <p>Returns the Template Engine used by Spring.</p>
      * 
