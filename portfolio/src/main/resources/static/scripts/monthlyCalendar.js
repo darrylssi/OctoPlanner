@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let sprints = [];
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i])})
+            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i]),
+            classNames: 'defaultEventBorder'})
     }
     let selectedSprint = null;
 
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!mouseoverSprint){
             if (selectedSprint != null) {
                 // removing previous sprint border colour and width
-                selectedSprint.setProp('classNames', 'previousEventBorder');
+                selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                 // de-select sprint
                 selectedSprint.setProp('durationEditable', false);
@@ -77,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // if the user clicks on a sprint, update the selected sprint
                 if (selectedSprint != null) {
                     // removing previous sprint border colour and width
-                    selectedSprint.setProp('classNames', 'previousEventBorder');
+                    selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                     // remove editing from previous sprint
                     selectedSprint.setProp('durationEditable', false);
