@@ -218,7 +218,7 @@ public class EditUserController extends PageController{
     ) {
         DeleteUserProfilePhotoResponse deleteReply;
 
-        // Check the user is authorised, then send a request to the UserAccountCLientService
+        // Check the user is authorised, then send a request to the UserAccountClientService
         editHandler(model, id, principal);
 
         try {
