@@ -24,7 +24,7 @@
         <button id="deleteButton" class="modal-button delete">Delete</button>
     </div>
 </div>
-<div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString}, username=${userName})"></div>
+<div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
 <div class="content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
