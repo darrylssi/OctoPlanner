@@ -8,3 +8,9 @@ body {
 .btn-primary {
     background-color: #5e0202;
 }
+
+#error {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
