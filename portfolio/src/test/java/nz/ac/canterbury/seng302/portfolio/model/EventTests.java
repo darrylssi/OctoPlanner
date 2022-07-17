@@ -75,7 +75,8 @@ class EventTests {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Event event = createEventOutsideSprints();
 
-        assertEquals(defaultEventColour, event.determineColour(sprintList));
+        assertEquals(defaultEventColour, event.determineColour(sprintList, false));
+        assertEquals(defaultEventColour, event.determineColour(sprintList, true));
     }
 
     @Test
@@ -84,17 +85,19 @@ class EventTests {
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
 
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
     }
 
     @Test
-    void checkEventEndingOutOfSprintInheritsColour() throws Exception {
+    void checkEventStartingInSprintInheritsStartColour() throws Exception {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
 
         event.setEndDate(utils.toDate("2022-02-26"));
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
+        assertEquals(defaultEventColour, event.determineColour(sprintList, true));
     }
 
     @Test
@@ -105,17 +108,19 @@ class EventTests {
         event.setStartDate(utils.toDate("2022-02-05"));
         event.setEndDate(utils.toDate("2022-02-05"));
 
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
     }
 
     @Test
-    void checkEventFinishingInSprintInheritsColour() throws Exception {
+    void checkEventFinishingInSprintHasSprintEndColour() throws Exception {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(1);
         Event event = createEventOutsideSprints();
         event.setEndDate(utils.toDate("2022-03-06"));
 
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
+        assertEquals(defaultEventColour, event.determineColour(sprintList, false));
     }
 
     @Test
@@ -126,15 +131,19 @@ class EventTests {
         event.setStartDate(utils.toDate("2022-02-24"));
         event.setEndDate(utils.toDate("2022-02-24"));
 
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
     }
 
     @Test
-    void checkEventSpanningSprintsInheritsFirstColour() throws Exception {
+    void checkEventSpanningSprintsInheritsBothColours() throws Exception {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
-        Sprint sprint = sprintList.get(0);
         Event event = createEventSpanningSprints();
 
-        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList));
+        Sprint sprint = sprintList.get(0);
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
+
+        sprint = sprintList.get(1);
+        assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
     }
 }

@@ -35,11 +35,11 @@ public class Event {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy")
+    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy")
+    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
     private Date eventEndDate;
 
     public Event() {}
@@ -165,35 +165,30 @@ public class Event {
 
     /**
      * Determines the correct colour for this event based on the list of sprints.
-     * Specifically, this function takes colour from the earliest sprint that overlaps with it, or returns
-     * a system default if no sprints overlap with this event.
-     * @param sprints a List object of sprints to attempt to choose a colour from.
+     * Specifically, this function returns the colour of the first sprint it finds which
+     * overlaps the start date of the event (or end date if the end paramter is true).
+     * If it finds no sprint, it returns the default colour determined by the system.
+     * @param sprints a List object of sprints to choose a colour from.
+     * @param end {boolean} fetch the colour at the end of the event, instead of the start.
      */
-    public String determineColour(List<Sprint> sprints) {
-        String colour = "#ff3823";             // Default colour
-        // Tracks the earliest point of overlap to get colour from the first sprint overlapping chronologically
-        Date overlapStart = eventEndDate;
+    public String determineColour(List<Sprint> sprints, boolean end) {
+        Date comparisonDate = eventStartDate;
+        if (end) {
+            comparisonDate = eventEndDate;
+        }
 
         for(int i = 0; i < sprints.size(); i++) {
             Sprint checkedSprint = sprints.get(i);
             Date sprintStart = checkedSprint.getSprintStartDate();
+            Date sprintEnd = checkedSprint.getSprintEndDate();
 
-            /* Sprints are assumed to be active on their end date, so we also check for equality */
-            if (checkedSprint.getSprintEndDate().after(eventStartDate) ||
-                    checkedSprint.getSprintEndDate().equals(eventStartDate)) {
-                /* Sprint covers start of event */
-                if(sprintStart.before(eventStartDate) || sprintStart.equals(eventStartDate)) {
-                    colour = checkedSprint.getSprintColour();
-                    break;
-                }
-                /* Otherwise, choose the sprint colour that falls earliest within the event */
-                if(sprintStart.before(overlapStart) || sprintStart.equals(overlapStart)) {
-                    colour = checkedSprint.getSprintColour();
-                    overlapStart = sprintStart;
-                }
+            /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
+            if ((sprintStart.before(comparisonDate) || sprintStart.equals(comparisonDate)) &&
+                    (sprintEnd.after(comparisonDate) || sprintEnd.equals(comparisonDate))) {
+                return checkedSprint.getSprintColour();
             }
         }
 
-        return colour;
+        return "#ff3823";             // Default colour
     }
 }
