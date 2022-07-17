@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
@@ -35,8 +35,6 @@ public class DetailsController extends PageController {
     private SprintService sprintService;
     @Autowired
     private SprintLabelService labelUtils;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
 
     @GetMapping("/project/{id}")
     public String details(
@@ -44,13 +42,11 @@ public class DetailsController extends PageController {
                 @PathVariable(name="id") int id,
                 Model model
     ) throws Exception {
-        PrincipalData principalData = PrincipalData.from(principal);
+        PrincipalData thisUser = PrincipalData.from(principal);
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
-        // Get current user's username for the header
-        model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
 
         labelUtils.refreshProjectSprintLabels(id);
 
@@ -59,7 +55,7 @@ public class DetailsController extends PageController {
         model.addAttribute("sprints", sprintList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
-        boolean hasEditPermissions = principalData.hasRoleOfAtLeast(UserRole.TEACHER);
+        boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
 
         /* Return the name of the Thymeleaf template */
@@ -78,9 +74,9 @@ public class DetailsController extends PageController {
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="sprintId") int sprintId
         ) {
-        PrincipalData principalData = PrincipalData.from(principal);
+        PrincipalData thisUser = PrincipalData.from(principal);
         // Check if the user is authorised to delete sprints
-        if (!principalData.hasRoleOfAtLeast(UserRole.TEACHER)) {
+        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
             return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
         }
         try {
