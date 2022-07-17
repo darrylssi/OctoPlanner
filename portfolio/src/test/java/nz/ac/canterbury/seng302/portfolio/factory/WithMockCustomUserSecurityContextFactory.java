@@ -41,15 +41,14 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
     @Override
     public SecurityContext createSecurityContext(WithMockPrincipal annotation) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
+        UserRole role = annotation.value();
+        int id = annotation.id();
 
-        // If any more roles are added in future, add 'em here
-        AuthState authState = switch (annotation.value()) {
-            case COURSE_ADMINISTRATOR -> buildAuthState("Adien", COURSE_ADMINISTRATOR);
-            case TEACHER -> buildAuthState("Thomas", TEACHER);
-            case STUDENT -> buildAuthState("Song", STUDENT);
-            case UNRECOGNIZED -> throw new IllegalArgumentException(
-                    "Can't test an UNRECOGNIZED role, use STUDENT, TEACHER etc...s");
-        };
+        if (role == UNRECOGNIZED) {
+            throw new IllegalArgumentException(
+                    "Can't test an UNRECOGNIZED role, use STUDENT, TEACHER etc...");
+        }
+        AuthState authState = buildAuthState(id, role);
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(authState, null);
         context.setAuthentication(authentication);
 
@@ -60,11 +59,11 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
     /**
      * Builds an AuthState object with a name & role.
      * 
-     * @param name The first name of the student. YAGNI and all that but it's fun
-     * @param role The role of the student
+     * @param id   The user ID you want to use
+     * @param role The role of the user
      * @return A built AuthState object.
      */
-    private AuthState buildAuthState(String name, UserRole role) {
+    private static AuthState buildAuthState(int id, UserRole role) {
         String roleString = role.toString().toLowerCase(Locale.ROOT);
 
         return AuthState.newBuilder()
@@ -73,14 +72,14 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
                 .setRoleClaimType(ROLE_CLAIM_TYPE)
                 .setAuthenticationType(AUTHENTICATION_TYPE)
                 .addAllClaims(List.of(
-                        makeClaimDTO(USERNAME_CLAIM_TYPE, name),
-                        makeClaimDTO(ID_CLAIM_TYPE, "1"),
+                        makeClaimDTO(USERNAME_CLAIM_TYPE, roleString),
+                        makeClaimDTO(ID_CLAIM_TYPE, Integer.toString(id)),
                         makeClaimDTO(ROLE_CLAIM_TYPE, roleString),
-                        makeClaimDTO(FULLNAME_CLAIM_TYPE, name + ' ' + roleString)))
+                        makeClaimDTO(FULLNAME_CLAIM_TYPE, roleString + ' ' + roleString)))
                 .build();
     }
 
-    private ClaimDTO makeClaimDTO(String key, String value) {
+    private static ClaimDTO makeClaimDTO(String key, String value) {
         return ClaimDTO.newBuilder()
                 .setType(key)
                 .setValue(value)
