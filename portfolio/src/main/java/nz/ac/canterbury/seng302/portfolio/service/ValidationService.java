@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This service class handles validations for the dates of objects in the portfolio.
+ * This service class handles validation for the dates of objects in the portfolio.
  * It has methods to compare dates and date ranges against each other to ensure that
  * they are valid.
  */
@@ -108,12 +108,11 @@ public class ValidationService {
                     "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")");
         }
 
-        // No errors found
         return error;
     }
 
     /**
-     * Checks whether a sprint's dates are within a projects dates
+     * Checks whether a sprint's dates are within a project's dates
      * @param sprintStart The sprint's start date to validate
      * @param sprintEnd The sprint's end date to validate
      * @param projectStart The project's start date to validate
@@ -126,7 +125,7 @@ public class ValidationService {
     }
 
     /**
-     * Checks that two sprint's dates do not overlap
+     * Checks that two sprints' dates do not overlap
      * @param start The sprint's start date to validate
      * @param end The sprint's end date to validate
      * @param other The other sprint to compare to
