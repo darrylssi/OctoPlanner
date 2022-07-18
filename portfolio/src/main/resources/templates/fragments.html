@@ -25,11 +25,17 @@
                 </div>
             </div>
         </div>
-        <div class="navigation-tabs">
-            <a th:href="@{|${@environment.getProperty('base-url')}project/0|}">Project Details</a>
-            <a th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
-            <a th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
-        </div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${tab} == 0 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}project/0|}">Project Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${tab} == 1 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${tab} == 2 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
+            </li>
+        </ul>
     </div>
 </header>
 

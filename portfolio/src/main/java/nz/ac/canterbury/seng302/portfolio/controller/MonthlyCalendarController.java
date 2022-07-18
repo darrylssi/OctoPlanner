@@ -18,7 +18,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -36,8 +35,6 @@ public class MonthlyCalendarController extends PageController {
     private ProjectService projectService;                      // initializing the ProjectService
     @Autowired
     private SprintService sprintService;                        // initializing the SprintService
-    @Autowired
-    private DateUtils utils;                                    // initializing the DateUtils
 
     /**
      *
@@ -76,6 +73,8 @@ public class MonthlyCalendarController extends PageController {
             model.addAttribute("sprintColours", getSprintsArrayList.get(4));
         }
 
+        model.addAttribute("tab", 2);
+
         return "monthlyCalendar";
     }
 
@@ -96,7 +95,7 @@ public class MonthlyCalendarController extends PageController {
             @RequestParam(name="sprintId") Integer sprintId,
             @RequestParam(name="sprintStartDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date sprintStartDate,
             @RequestParam(name="sprintEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date sprintEndDate
-    ) throws ParseException {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         Sprint sprintToUpdate;
         try {
@@ -131,11 +130,11 @@ public class MonthlyCalendarController extends PageController {
 
         // For loop to add each sprint ids, names, start date, end date and colours to the respective strings
         for (Sprint eachSprint: sprintList) {
-            sprintIds.append(eachSprint.getId() + ",");
-            sprintNames.append(eachSprint.getSprintName() + ",");
-            sprintStartDates.append(eachSprint.getSprintStartDate().toString().substring(0, 10) + ",");
-            sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate()) + ",");
-            sprintColours.append(eachSprint.getSprintColour() + ",");
+            sprintIds.append(eachSprint.getId()).append(",");
+            sprintNames.append(eachSprint.getSprintName()).append(",");
+            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
+            sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate())).append(",");
+            sprintColours.append(eachSprint.getSprintColour()).append(",");
         }
 
         // Removing the string's last character, which is "," and adding to the sprintsDetailsList
@@ -165,7 +164,7 @@ public class MonthlyCalendarController extends PageController {
         LocalDate newLocalEndDate = localEndDate.plusDays(1);
 
         // Converting the new project/sprint LocalDate object to Date object
-        return utils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return DateUtils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     /**

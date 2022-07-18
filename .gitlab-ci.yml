@@ -6,6 +6,14 @@ stages:
   - sonarqube
   - deploy
 
+sonarqube-report:
+  stage: sonarqube
+  script:
+    - cd identityprovider
+    - ./gradlew sonarqube
+    - cd ../portfolio
+    - ./gradlew sonarqube
+
 tag-checker:
   stage: tagChecking
   script:
