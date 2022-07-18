@@ -130,7 +130,7 @@ public class MonthlyCalendarController extends PageController {
         for (Sprint eachSprint: sprintList) {
             sprintIds.append(eachSprint.getId()).append(",");
             sprintNames.append(eachSprint.getSprintName()).append(",");
-            sprintStartDates.append(eachSprint.getSprintStartDate().toString().substring(0, 10) + ",");
+            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
             sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate())).append(",");
             sprintColours.append(eachSprint.getSprintColour()).append(",");
         }
