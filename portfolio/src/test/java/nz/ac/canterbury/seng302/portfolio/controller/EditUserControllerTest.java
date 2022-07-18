@@ -26,19 +26,20 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-@WithMockPrincipal(TEACHER)
+@WithMockPrincipal(value=TEACHER, id=EditUserControllerTest.USER_ID)
 public class EditUserControllerTest {
 
+    static final int USER_ID=1;
     final Logger logger = LoggerFactory.getLogger(EditUserControllerTest.class);
 
     // The URL which the controller handles requests on.
-    private String CONTROLLER_URL = "/users/1/edit";
+    private static final String EDIT_USER_URL = "/users/" + USER_ID + "/edit";
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private UserAccountClientService service;
+    private UserAccountClientService userAccountService;
 
     @BeforeEach
     private void setup() {
@@ -53,9 +54,9 @@ public class EditUserControllerTest {
                 .setPersonalPronouns("they/them")
                 .setEmail("test@user.site")
                 .setProfileImagePath("")
-                .setId(1)
+                .setId(USER_ID)
                 .build();
-        when(service.getUserAccountById(1)).thenReturn(testUser);
+        when(userAccountService.getUserAccountById(USER_ID)).thenReturn(testUser);
     }
 
     @Test
@@ -65,16 +66,15 @@ public class EditUserControllerTest {
                 .setIsSuccess(false)
                 .setMessage("No profile photo uploaded")
                 .build();
-        when(service.deleteUserProfilePhoto(1)).thenReturn(noPhotoResponse);
-
+        when(userAccountService.deleteUserProfilePhoto(USER_ID)).thenReturn(noPhotoResponse);
         /**
          * When: The controller attempts to delete a photo
          * Then: The page displays the message from the service
          */
-        this.mockMvc.perform(post(CONTROLLER_URL))
+        this.mockMvc.perform(post(EDIT_USER_URL))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("No profile photo uploaded")));
-        verify(service).deleteUserProfilePhoto(1);
+        verify(userAccountService).deleteUserProfilePhoto(USER_ID);
     }
 
     @Test
@@ -83,15 +83,15 @@ public class EditUserControllerTest {
         DeleteUserProfilePhotoResponse successResponse = DeleteUserProfilePhotoResponse.newBuilder()
                 .setIsSuccess(true)
                 .build();
-        when(service.deleteUserProfilePhoto(1)).thenReturn(successResponse);
+        when(userAccountService.deleteUserProfilePhoto(USER_ID)).thenReturn(successResponse);
 
         /**
          * When: The controller attempts to delete a photo
          * Then: The user is redirected to their profile
          */
-        this.mockMvc.perform(post(CONTROLLER_URL))
+        this.mockMvc.perform(post(EDIT_USER_URL))
             .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("../1"));
-        verify(service).deleteUserProfilePhoto(1);
+            .andExpect(redirectedUrl("../" + USER_ID));
+        verify(userAccountService).deleteUserProfilePhoto(USER_ID);
     }
 }
