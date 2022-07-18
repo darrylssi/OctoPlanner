@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -39,8 +38,6 @@ public class EditProjectController extends PageController {
     @Autowired
     private SprintService sprintService;
     @Autowired
-    private UserAccountClientService userAccountClientService;
-    @Autowired
     private DateUtils utils;
     /**
      * Show the edit-project page.
@@ -58,8 +55,6 @@ public class EditProjectController extends PageController {
         /* Add project details to the model */
         try {
             Project project = projectService.getProjectById(id);
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("id", id);
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
@@ -111,8 +106,6 @@ public class EditProjectController extends PageController {
 
         /* Return editProject template with user input */
         if (result.hasErrors() || !dateOutOfRange.equals("")) {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", utils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", utils.toString(project.getProjectEndDate()));

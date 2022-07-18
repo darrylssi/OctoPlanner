@@ -1,9 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.server.ResponseStatusException;
 
-import nz.ac.canterbury.seng302.portfolio.exception.ForbiddenException;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -17,18 +18,19 @@ import java.util.Date;
  */
 @Controller
 public abstract class PageController {
+
     /**
      * Adds error information to the model
      *
      * @param err the type of error used
-     * @param source_page The URL that caused this error
+     * @param sourcePage The URL that caused this error
      */
-    public static void configureError(Model model, ErrorType err, String source_page) {
+    public static void configureError(Model model, ErrorType err, String sourcePage) {
         /* Set current timestamp and page */
         SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd hh:mm:ss z yyyy");
         Date date = new Date();
         model.addAttribute("timestamp", formatter.format(date));
-        model.addAttribute("path", source_page);
+        model.addAttribute("path", sourcePage);
 
         /* Handle various types of error */
         switch(err) {
@@ -50,14 +52,13 @@ public abstract class PageController {
      * 
      * @param minimumRole The lowest role allowed to access this endpoint [STUDENT < TEACHER < ADMIN]
      * @param principal The principal object from your controller args
-     * @throws ForbiddenException If the user doesn't have permission, throws a 403 forbidden error
+     * @throws ResponseStatusException If the user doesn't have permission, throws a 403 forbidden error
      */
-    public static void requiresRoleOfAtLeast(UserRole minimumRole, AuthState principal) throws ForbiddenException {
+    public void requiresRoleOfAtLeast(UserRole minimumRole, AuthState principal) throws ResponseStatusException {
         PrincipalData user = PrincipalData.from(principal);
-
         boolean hasPermissions = user.hasRoleOfAtLeast(minimumRole);
         if (!hasPermissions) {
-            throw new ForbiddenException();
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this endpoint");
         }
     }
 }
