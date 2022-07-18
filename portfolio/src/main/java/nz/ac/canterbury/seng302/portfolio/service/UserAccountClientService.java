@@ -186,29 +186,4 @@ public class UserAccountClientService {
                 .build();
         return userAccountStub.changeUserPassword(changePasswordRequest);
     }
-
-
-    /**
-     * Returns the username of the current logged-in user
-     * @param principal Gets the current user's authentication
-     * @return The username of the current user
-     */
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // TODO [Andrew]: Do we really need this?
-        // Actually in a broader sense, this method is EXCLUSIVELY used to grab the username
-        // of the current user and add it to the model, which is done individually in each endpoint.
-        // Spring provides a postHandle() interceptor for this https://stackoverflow.com/a/8008402
-        // which can grab the principal from the request object https://www.baeldung.com/get-user-in-spring-security#controller
-
-        // !! This code has been replaced, as portfolio can't query the IdP during testing, causing
-        // !! said tests to fail. Refer to my above comments.
-        // String currentUserId = principal.getClaimsList().stream()
-        //         .filter(claim -> claim.getType().equals("nameid"))
-        //         .findFirst()
-        //         .map(ClaimDTO::getValue)
-        //         .orElse("NOT FOUND");
-
-        // String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return PrincipalData.from(principal).getUsername();
-    }
 }

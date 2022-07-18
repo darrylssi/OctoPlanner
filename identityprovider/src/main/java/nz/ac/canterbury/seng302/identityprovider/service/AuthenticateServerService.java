@@ -42,20 +42,16 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
         if (user == null) {
             reply
-            .setMessage("Username not registered.")
+            .setMessage("Username or password is incorrect.")
             .setSuccess(false)
             .setToken("");
         } else if (!encoder.matches(request.getPassword(), user.getPassword())) {
             reply
-            .setMessage("Incorrect password!")
+            .setMessage("Username or password is incorrect.")
             .setSuccess(false)
             .setToken("");
         } else if (request.getUsername().equals(user.getUsername())) {
-            // Convert all the roles into a comma-separated string of roles
-            List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
-            String commaSeparatedUserRoles = String.join(",", userRoles);
-            commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
-            String token = jwtTokenService.generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
+            String token = jwtTokenService.generateTokenForUser(user);
             reply
                 .setEmail(user.getEmail())
                 .setFirstName(user.getFirstName())

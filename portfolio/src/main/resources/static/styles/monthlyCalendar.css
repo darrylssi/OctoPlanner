@@ -3,9 +3,33 @@ p, #calendarTitle {
     text-align: center;
 }
 
+.alert {
+    width: 50%;
+    margin: 50px auto;
+    text-align: center;
+}
+
 #calendar {
     max-width: 950px;
     margin: 50px auto;
+}
+
+.defaultEventBorder {
+    border-style: none !important;
+}
+
+.currentEventBorder {
+    border-width: 2px !important;
+    border-style: solid !important;
+    border-color: black !important;
+}
+
+.fc-event-start {
+    border-left-width: 10px !important;
+}
+
+.fc-event-end {
+    border-right-width: 10px !important;
 }
 
 .fc-resource-area td {
