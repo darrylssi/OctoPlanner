@@ -103,8 +103,6 @@ public class EditProjectController extends PageController {
 
         /* Return editProject template with user input */
         if (result.hasErrors() || dateOutOfRange.isError()) {
-            // Get current user's username for the header
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
