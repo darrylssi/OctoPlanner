@@ -12,9 +12,10 @@
 
     <div class="container" id="error">
         <div class="row">
-            <div class="col-md-6 offset-md-3" th:if="${IdPErrorMessage != null}">
+            <div class="col-md-6 offset-md-3" th:if="${IdPErrorMessage != null or registerMessage != null}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" >
-                    <span id="message" th:text="${IdPErrorMessage}"> </span>
+                    <span th:text="${IdPErrorMessage}"> </span>
+                    <span th:text="${registerMessage}"> </span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </div>
