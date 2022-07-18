@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
@@ -34,6 +36,8 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintService sprintService;
     @Autowired
+    private EventService eventService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     @GetMapping("/project/{id}")
@@ -53,6 +57,11 @@ public class DetailsController extends PageController {
         List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
+
+        //
+        List<Event> eventList = eventService.getEventByParentProjectId(id);
+        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
+        model.addAttribute("events", eventList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
