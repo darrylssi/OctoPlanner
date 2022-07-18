@@ -10,6 +10,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,12 @@ public class TestDateValidationStepDefs extends RunCucumberTest {
     public void the_project_has_the_following_sprints_with_dates(DataTable table) {
         List<List<String>> dates = table.asLists();
 
+        int count = 0;
         for (List<String> sprintDates : dates) {
             Sprint sprint = new Sprint(1, "testName", "testDescription",
                     DateUtils.toDate(sprintDates.get(0)), DateUtils.toDate(sprintDates.get(1)),
                     "#aaaaaa");
+            sprint.setSprintLabel("Sprint " + ++count);
             sprintList.add(sprint);
         }
     }

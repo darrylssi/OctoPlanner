@@ -36,6 +36,7 @@ public class ValidationService {
      */
     public static ValidationError validateSprintDates(int id, Date start, Date end,
                                                Project parentProject, List<Sprint> sprintList) {
+        // Initial error flag = false (no errors yet)
         ValidationError error = new ValidationError(false);
 
         // Checks if the sprint's start date is after the sprint's end date
@@ -80,6 +81,7 @@ public class ValidationService {
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
+        // Initial error flag = false (no errors yet)
         ValidationError error = new ValidationError(false);
 
         // Checks if the project's start date is after the project's end date
