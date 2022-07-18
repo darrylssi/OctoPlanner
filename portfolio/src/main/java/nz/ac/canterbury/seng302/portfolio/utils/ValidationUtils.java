@@ -3,18 +3,18 @@ package nz.ac.canterbury.seng302.portfolio.utils;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
- * This service class handles validation for the dates of objects in the portfolio.
+ * This utility class handles validation for the dates of objects in the portfolio.
  * It has methods to compare dates and date ranges against each other to ensure that
  * they are valid.
  */
-@Service
+@Component
 public class ValidationUtils {
 
     private ValidationUtils() {}

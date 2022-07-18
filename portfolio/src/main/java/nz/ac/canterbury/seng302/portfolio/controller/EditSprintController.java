@@ -1,30 +1,22 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Controller for the edit sprint details page
@@ -99,12 +91,8 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        Date start = DateUtils.toDate(sprintStartDate);
-        Date end = DateUtils.toDate(sprintEndDate);
-        List<Sprint> sprintList = sprintService.getAllSprints();
-        assert start != null;
-        ValidationError dateOutOfRange = ValidationUtils.validateSprintDates(sprint.getId(), start, end,
-                parentProject, sprintList);
+        ValidationError dateOutOfRange = AddSprintController.getValidationError(sprintStartDate, sprintEndDate,
+                id, parentProject, sprintService.getAllSprints());
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError()) {

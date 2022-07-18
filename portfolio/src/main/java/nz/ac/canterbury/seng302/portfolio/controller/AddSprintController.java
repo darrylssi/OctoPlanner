@@ -120,8 +120,8 @@ public class AddSprintController extends PageController {
      * @param principal The principal used for authentication (role checking)
      * @param id The id of the project to add a sprint to, taken from the URL
      * @param sprintName Gets the given name of the new sprint
-     * @param sprintStartDate Gets the given sprint start date
-     * @param sprintEndDate Gets the given sprint end date
+     * @param sprintStartDate Gets the given sprint's start date
+     * @param sprintEndDate Gets the given sprint's end date
      * @param sprintDescription Gets the given sprint description
      * @param sprintColour Gets the given sprint colour string
      * @param sprint The new sprint to be added
@@ -148,12 +148,8 @@ public class AddSprintController extends PageController {
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
-        Date start = DateUtils.toDate(sprintStartDate);
-        Date end = DateUtils.toDate(sprintEndDate);
-        List<Sprint> sprintList = sprintService.getAllSprints();
-        assert start != null;
-        ValidationError dateOutOfRange = ValidationUtils.validateSprintDates(sprint.getId(), start, end,
-                parentProject, sprintList);
+        ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
+                id, parentProject, sprintService.getAllSprints());
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError()) {
@@ -182,6 +178,25 @@ public class AddSprintController extends PageController {
 
         sprintService.saveSprint(sprint);
         return "redirect:../project/" + parentProject.getId();
+    }
+
+    /**
+     * Sends the sprints dates and relevant parameters for them to be tested against to be validated
+     * @param sprintStartDate Gets the given sprint's start date
+     * @param sprintEndDate Gets the given sprint's end date
+     * @param id The id of the sprint
+     * @param parentProject The sprint's parent project
+     * @param sprintList A list of sprints in the same project
+     * @return A validation error object, with a boolean error flag and a string list of error messages
+     */
+    static ValidationError getValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
+                                              @RequestParam(name = "sprintEndDate") String sprintEndDate,
+                                              @PathVariable("id") int id, Project parentProject, List<Sprint> sprintList) {
+        Date start = DateUtils.toDate(sprintStartDate);
+        Date end = DateUtils.toDate(sprintEndDate);
+        assert start != null;
+        return ValidationUtils.validateSprintDates(id, start, end,
+                parentProject, sprintList);
     }
 
 }
