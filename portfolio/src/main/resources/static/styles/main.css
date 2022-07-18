@@ -1,4 +1,5 @@
 @import "themeColors.css";
+@import "reskinBootstrap.css";
 
 .header {
     background-color: var(--primary);

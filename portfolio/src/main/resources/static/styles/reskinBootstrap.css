@@ -27,6 +27,6 @@
 }
 
 .nav-tabs .nav-link.active{
-    background-color: var(--neutral-light);
-    color: var(--primary-light);
+    background-color: var(--neutral-dark);
+    color: var(--primary-dark);
 }
