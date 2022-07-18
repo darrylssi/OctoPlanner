@@ -131,21 +131,24 @@
                 <div id="croppieWindow"></div>
             </div>
             <div class="centre-box">
+                <div class="loader" id="croppieLoader"></div>
                 <img src="" id="image-preview"/>
                 <button class="form-button save" type="submit" id="photo-upload-submit-button">Save Photo</button>
             </div>
         </form>
         <br/>
-        <hr/>
-        <br/>
-        <form th:action="|./edit|" method="post">
-            <div th:if="${error_DeletePhoto}" class="centre-box">
-                <span th:class="error" th:text="${error_DeletePhoto}"></span>
-            </div>
-            <div class="centre-box">
-                <button class="form-button save" type="submit">Delete Profile Photo</button>
-            </div>
-        </form>
+        <div th:if="${userHasProfilePhoto}">
+            <hr/>
+            <br/>
+            <form th:action="|./edit|" method="post">
+                <div th:if="${error_DeletePhoto}" class="centre-box">
+                    <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                </div>
+                <div class="centre-box">
+                    <button class="form-button save" type="submit">Delete Profile Photo</button>
+                </div>
+            </form>
+        </div>
     </div>
     </div>
 

@@ -62,3 +62,20 @@ form .user-info .input-box {
 #inputFile {
     background-color: white;
 }
+
+/* Used for a loading animation when a photo is being compressed */
+/* From W3Schools https://www.w3schools.com/howto/howto_css_loader.asp */
+/* TODO use one from bootstrap! https://getbootstrap.com/docs/4.2/components/spinners/ */
+.loader {
+    border: 16px solid #c0c0c0; /* Header grey */
+    border-top: 16px solid #b70f0a; /* Header red */
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

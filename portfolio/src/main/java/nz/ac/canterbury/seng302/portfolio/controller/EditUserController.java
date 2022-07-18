@@ -24,6 +24,7 @@ public class EditUserController extends PageController{
 
     private static final String EDIT_USER_TEMPLATE = "editUser";
     private static final String REDIRECT_TO_PROFILE = "redirect:../";
+    private static final String DEFAULT_PROFILE_PICTURE_NAME = "default-pfp.jpg";
 
     /**
      * Check that the current user has sufficient permissions, then populate the page accordingly
@@ -48,6 +49,8 @@ public class EditUserController extends PageController{
         } else {
             // Gets the current user's username
             model.addAttribute("profileInfo", userResponse);
+            // True if user has their own pfp, false if they don't. Used to render the button to delete your pfp or not.
+            model.addAttribute("userHasProfilePhoto", !userResponse.getProfileImagePath().contains(DEFAULT_PROFILE_PICTURE_NAME));
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
                     userResponse.getFirstName(), userResponse.getMiddleName(),
@@ -201,7 +204,7 @@ public class EditUserController extends PageController{
     }
 
     /**
-     * Post request for removing an uploaded image file.
+     * The post request for removing an uploaded image file.
      * @param user User object to be edited
      * @param id ID of the user to be edited
      * @param principal Authenticated user

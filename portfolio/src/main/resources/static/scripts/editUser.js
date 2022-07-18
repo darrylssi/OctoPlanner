@@ -1,18 +1,31 @@
 import "./croppie.js";
 
-var input = document.getElementById("inputFile");
-var photoFormSubmitButton = document.getElementById('photo-upload-submit-button');
+// for image compression
+const MAX_WIDTH = 5000;
+const MAX_HEIGHT = 5000;
+const QUALITY = 1;
+
+const input = document.getElementById("inputFile");
+const photoFormSubmitButton = document.getElementById('photo-upload-submit-button');
+const croppieLoader = document.getElementById("croppieLoader");
 
 // this creates the image cropping widget on the page
 // docs are here https://foliotek.github.io/Croppie/
-var croppieWindow = document.getElementById('croppieWindow');
-var croppieObject = new Croppie(croppieWindow, {
-    viewport: { width: 200, height: 200, type: 'circle'},
-    boundary: { width: 300, height: 300 },
+const croppieWindow = document.getElementById('croppieWindow');
+const croppieObject = new Croppie(croppieWindow, {
+    viewport: {width: 200, height: 200, type: 'circle'},
+    boundary: {width: 300, height: 300},
     showZoomer: true,
     enableOrientation: true
 });
 
+function showCroppieLoader() {
+    croppieLoader.style.display = "block";
+}
+function hideCroppieLoader() {
+    croppieLoader.style.display = "none";
+}
+hideCroppieLoader(); // hidden by default
 function hidePhotoObjects() {
     photoFormSubmitButton.style.display = "none";
     croppieWindow.style.display = "none";
@@ -27,44 +40,39 @@ hidePhotoObjects(); // hidden by default
 // a bit of code is from https://stackoverflow.com/questions/5697605/limit-the-size-of-a-file-upload-html-input-element
 // some other code is from https://stackoverflow.com/questions/32222786/file-upload-check-if-valid-image
 document.querySelector('#inputFile').addEventListener('change',function() {
-    var context = this;
-    if (context.files[0].size > 31457280) {
-        context.value = "";
-        hidePhotoObjects();
-        alert("File is too big! Max size is 30MB.");
-    } else {
-        if (input.files && input.files[0]) {
-            var image = new Image();
-            image.onload = function() {
-                // valid image
-                showPhotoObjects();
-                readURL();
-            };
-            image.onerror = function() {
-               context.value = "";
-               hidePhotoObjects();
-               alert('That image is invalid or corrupted.');
-            };
-            image.src = URL.createObjectURL(input.files[0]);
-        }
+    const context = this;
+    // this image is only used for validation, and isn't displayed anywhere
+    if (input.files && input.files[0]) {
+        const image = new Image();
+        image.onload = function() {
+            // valid image
+            showCroppieLoader();
+            hidePhotoObjects();
+            readURL();
+        };
+        image.onerror = function() {
+           context.value = "";
+           hidePhotoObjects();
+           alert('That image is invalid or corrupted.');
+        };
+        image.src = URL.createObjectURL(input.files[0]);
     }
 });
 
 // converts the photo to a base64 string, shoves it into a hidden input, then submits the form
 document.getElementById('photoForm').addEventListener('submit', function(ev) {
     ev.preventDefault();
-    var context = this;
+    const context = this;
 
     croppieObject.result({
         type: 'blob',
        format: "jpeg",
         circle: false
     }).then(function (blob) {
-        let url = URL.createObjectURL(blob);
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
-            var base64String = reader.result;
+            const base64String = reader.result;
             let stringInput = document.getElementById("imageString");
             stringInput.value = base64String;
             context.submit();
@@ -74,16 +82,54 @@ document.getElementById('photoForm').addEventListener('submit', function(ev) {
 
 
 // This will take the provided input image and show it in the croppie window
-// Note that the croppie window must be visible when bind() is called!
+// This function (as well as calculateSize()) copied and modified from https://stackoverflow.com/a/68956880
+// Answer by Eyni Kave, licensed under https://creativecommons.org/licenses/by-sa/4.0/
 function readURL() {
     if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            console.log("changed");
-            croppieObject.bind({
-            url: e.target.result
-            });
+        const file = input.files[0];
+        const blobURL = URL.createObjectURL(file);
+        const img = new Image();
+        img.src = blobURL;
+        img.onload = function () {
+            URL.revokeObjectURL(this.src)
+            const [newWidth, newHeight] = calculateSize(img, MAX_WIDTH, MAX_HEIGHT);
+            const canvas = document.createElement("canvas");
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            const canvasContext = canvas.getContext("2d");
+            canvasContext.drawImage(img, 0, 0, newWidth, newHeight);
+            showPhotoObjects();
+            bindUrlToCroppie(canvas.toDataURL("image/jpeg", QUALITY))
+            hideCroppieLoader();
         }
-        reader.readAsDataURL(input.files[0]);
     }
+}
+
+// Changes the largest dimension of the image to match the max, and scales the other dimension proportionally
+// This effectively calculates a width and height to resize the image
+function calculateSize(img, maxWidth, maxHeight) {
+    let width = img.width;
+    let height = img.height;
+
+    // calculate the width and height, constraining the proportions
+    if (width > height) {
+        if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+        }
+    } else {
+        if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+        }
+    }
+    return [width, height];
+}
+
+// Binds the specified data URL to the croppie instance
+// Note that the croppie window must be visible when bind() is called!
+function bindUrlToCroppie(url) {
+    croppieObject.bind({
+        url: url
+    });
 }
