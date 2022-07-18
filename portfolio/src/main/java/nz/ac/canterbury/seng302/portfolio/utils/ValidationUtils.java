@@ -1,9 +1,8 @@
-package nz.ac.canterbury.seng302.portfolio.service;
+package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -16,9 +15,9 @@ import java.util.List;
  * they are valid.
  */
 @Service
-public class ValidationService {
+public class ValidationUtils {
 
-    private ValidationService() {}
+    private ValidationUtils() {}
 
     /**
      * Validates that a sprint's start and end dates are valid. The checks are:

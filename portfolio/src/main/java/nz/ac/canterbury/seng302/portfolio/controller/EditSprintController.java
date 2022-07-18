@@ -5,7 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -103,7 +103,7 @@ public class EditSprintController extends PageController {
         Date end = DateUtils.toDate(sprintEndDate);
         List<Sprint> sprintList = sprintService.getAllSprints();
         assert start != null;
-        ValidationError dateOutOfRange = ValidationService.validateSprintDates(sprint.getId(), start, end,
+        ValidationError dateOutOfRange = ValidationUtils.validateSprintDates(sprint.getId(), start, end,
                 parentProject, sprintList);
 
         // Checking if there are errors in the input, and also doing the valid dates validation

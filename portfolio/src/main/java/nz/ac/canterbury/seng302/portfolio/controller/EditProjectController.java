@@ -5,7 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -100,7 +100,7 @@ public class EditProjectController extends PageController {
         Project newProject = projectService.getProjectById(id);
 
         List<Sprint> sprintList = sprintService.getAllSprints();
-        ValidationError dateOutOfRange = ValidationService.validateProjectDates(projectStartDate, projectEndDate,
+        ValidationError dateOutOfRange = ValidationUtils.validateProjectDates(projectStartDate, projectEndDate,
                 newProject.getProjectCreationDate(), sprintList);
 
         /* Return editProject template with user input */

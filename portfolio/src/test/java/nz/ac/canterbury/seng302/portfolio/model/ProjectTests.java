@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,7 +165,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
-        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -181,7 +181,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-20");
         Date end = DateUtils.toDate("2022-01-20");
         assert start != null;
-        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -197,7 +197,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-01");
         Date end = DateUtils.toDate("2022-02-10");
         assert start != null;
-        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
         String actual = error.getFirstError();
         assertEquals(sprint2.getSprintLabel() + ": " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
@@ -213,7 +213,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-27");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
         String actual = error.getFirstError();
         /* Then: the validation should return a success */
         assertEquals("" , actual);
@@ -231,7 +231,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-26");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationService.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
         String actual = error.getFirstError();
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +

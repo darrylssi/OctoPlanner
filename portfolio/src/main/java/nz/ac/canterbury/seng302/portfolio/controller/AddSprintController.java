@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -101,7 +101,7 @@ public class AddSprintController extends PageController {
         c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
 
         // Checks that the default end date is within the project dates
-        if (ValidationService.sprintsOutsideProject(sprintStart, c.getTime(),
+        if (ValidationUtils.sprintsOutsideProject(sprintStart, c.getTime(),
                 project.getProjectStartDate(), project.getProjectEndDate())){
             sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
         } else {
@@ -152,7 +152,7 @@ public class AddSprintController extends PageController {
         Date end = DateUtils.toDate(sprintEndDate);
         List<Sprint> sprintList = sprintService.getAllSprints();
         assert start != null;
-        ValidationError dateOutOfRange = ValidationService.validateSprintDates(sprint.getId(), start, end,
+        ValidationError dateOutOfRange = ValidationUtils.validateSprintDates(sprint.getId(), start, end,
                 parentProject, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation

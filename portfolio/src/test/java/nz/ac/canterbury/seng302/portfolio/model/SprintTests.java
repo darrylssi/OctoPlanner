@@ -1,14 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.ValidationService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -149,7 +148,7 @@ class SprintTests {
         Date end = DateUtils.toDate("2022-02-02");
 
         assert start != null;
-        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start,
+        ValidationError error = ValidationUtils.validateSprintDates(SPRINT_ID, start,
                 end, baseProject, sprintList);
         // Sprint list has one sprint with dates 05/02/2022 -- 24/03/2022
         // Since our selected dates are 01/01/2022 -- 02/02/2022, this should return the error message as "", which tells
@@ -165,7 +164,7 @@ class SprintTests {
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
-        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end,
+        ValidationError error = ValidationUtils.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
         String actual = error.getFirstError();
 
@@ -187,7 +186,7 @@ class SprintTests {
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
-        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end, baseProject, sprintList);
+        ValidationError error = ValidationUtils.validateSprintDates(SPRINT_ID, start, end, baseProject, sprintList);
         String actual = error.getFirstError();
 
         assertEquals("Sprint dates must not overlap with other sprints. Dates are overlapping with "
@@ -202,7 +201,7 @@ class SprintTests {
         Date start = DateUtils.toDate(sprintStartDate);
         Date end = DateUtils.toDate(sprintEndDate);
         assert start != null;
-        ValidationError error = ValidationService.validateSprintDates(SPRINT_ID, start, end,
+        ValidationError error = ValidationUtils.validateSprintDates(SPRINT_ID, start, end,
                 baseProject, sprintList);
         String actual = error.getFirstError();
 
