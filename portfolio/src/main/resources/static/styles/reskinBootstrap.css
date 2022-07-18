@@ -10,7 +10,7 @@
 }
 
 .btn-primary:disabled {
-    background-color: var(--primary-light);
+    background-color: var(--primary);
 }
 .btn-primary:hover {
     background-color: var(--primary-dark);

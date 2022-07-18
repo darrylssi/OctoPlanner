@@ -107,8 +107,9 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="eventNameInput" placeholder="Name">
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="eventNameInput" placeholder="Name" th:required="required" aria-describedby="inputGroupPrepend3 eventNameFeedback">
                                 <label for="eventNameInput">Name</label>
+                                <div id="eventNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
                         </div>
                         <div class="col-10">
@@ -122,15 +123,17 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="datetime-local" class="form-control" id="eventStartTime">
+                                <input type="datetime-local" class="form-control" th:classappend="${startDateError} ? is-invalid : '' " id="eventStartTime" th:required="required" aria-describedby="inputGroupPrepend3 eventStartFeedback">
                                 <label for="eventStartTime">Start Time</label>
+                                <div id="eventStartFeedback" class="invalid-feedback" th:text="${startDateError}"></div>
                             </div>
 
                         </div>
                         <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="datetime-local" class="form-control" id="eventEndTime">
+                            <div class="form-floating mb-3 has-validation">
+                                <input type="datetime-local" class="form-control" th:classappend="${endDateError} ? is-invalid : '' " id="eventEndTime" required aria-describedby="eventEndFeedback">
                                 <label for="eventEndTime">End Time</label>
+                                <div id="eventEndFeedback" class="invalid-feedback" th:text="${endDateError}"></div>
                             </div>
 
                         </div>
