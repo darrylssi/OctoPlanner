@@ -11,7 +11,7 @@ import java.io.*;
  * properly implemented.
  * Copied & adapted from https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
  */
-public class BASE64DecodedMultipartFile implements MultipartFile {
+public class Base64DecodedMultipartFile implements MultipartFile {
     private final byte[] imgContent;
     private final String imgType;
 
@@ -21,7 +21,7 @@ public class BASE64DecodedMultipartFile implements MultipartFile {
      * @param base64String full base64 image string including the content type metadata at the start, e.g. data:image/jpeg;base64,[image data]
      * @throws IllegalArgumentException if the base64 string cannot be split into two strings at a ',' character
      */
-    public BASE64DecodedMultipartFile(String base64String) throws IllegalArgumentException {
+    public Base64DecodedMultipartFile(String base64String) throws IllegalArgumentException {
         String[] splitString = base64String.split(",");
         if (splitString.length != 2) {
             throw new IllegalArgumentException("Input must be a base 64 string that can be split into two strings at a ',' character.");

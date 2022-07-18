@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
-import nz.ac.canterbury.seng302.portfolio.model.BASE64DecodedMultipartFile;
+import nz.ac.canterbury.seng302.portfolio.model.Base64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
@@ -180,7 +180,7 @@ public class EditUserController extends PageController{
             Model model
     ) throws IOException {
         editHandler(model, id, principal);
-        MultipartFile file = new BASE64DecodedMultipartFile(base64ImageString);
+        MultipartFile file = new Base64DecodedMultipartFile(base64ImageString);
 
         model.addAttribute("file", file);
         if (isValidImageFile(file) && file.getSize() > 0) {
