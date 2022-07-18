@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -13,22 +15,41 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
+    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+
+    private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
     /**
-     * Converts a Date type object to String with yyyy-MM-dd format.
+     * Converts a Date object to a String with dd/MMM/yyyy format.
      * @param date Date to be converted
      * @return Date as a String
      */
-    public String toString(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    public static String toDisplayString(Date date) {
+        return displayDateFormat.format(date);
     }
 
     /**
-     * Converts a String in yyyy-MM-dd format to a Date object.
+     * Converts a String to a Date in yyyy-MM-dd format.
      * @param date String to be converted to Date
      * @return Date object
-     * @throws ParseException If the String date is of unexpected format
      */
-    public Date toDate(String date) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+    public static Date toDate(String date) {
+        try {
+            return backendDateFormat.parse(date);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date: %s", e.getMessage()));
+        }
+        return null;
     }
+
+    /**
+     * Converts a Date object to a String with yyyy-MM-dd format.
+     * @param date String to be converted to Date
+     * @return Date object
+     */
+    public static String toString(Date date) {
+        return backendDateFormat.format(date);
+    }
+
 }
