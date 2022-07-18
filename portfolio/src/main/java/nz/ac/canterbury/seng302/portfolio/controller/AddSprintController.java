@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -42,6 +43,13 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+
+    // Provide a list of colours that are noticably different for the system to cycle through
+    private final List<String> SPRINT_COLOURS = Arrays.asList(
+            "#320d6d",
+            "#b83daf",
+            "#449dd1",
+            "#ce8964");
 
     // Initializes the DateUtils object to be used for converting date to string and string to date
     @Autowired
@@ -75,13 +83,6 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
-
-        // Generate a random colour, from https://www.codespeedy.com/generate-random-hex-color-code-in-java/
-        Random random = new Random();
-        int colourNum = random.nextInt(0xffffff + 1);
-        String colourCode = String.format("#%06x", colourNum);
-
-        model.addAttribute("sprintColour", colourCode);
 
         // Puts the default sprint start date
         String getSprintStartDate = "";
@@ -144,7 +145,6 @@ public class AddSprintController extends PageController {
      * @param sprintStartDate Gets the given sprint start date
      * @param sprintEndDate Gets the given sprint end date
      * @param sprintDescription Gets the given sprint description
-     * @param sprintColour Gets the given sprint colour string
      * @param sprint The new sprint to be added
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
@@ -159,7 +159,6 @@ public class AddSprintController extends PageController {
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
-            @RequestParam(name="sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -171,6 +170,10 @@ public class AddSprintController extends PageController {
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getAllSprints();
+
+        // Fetch system colour for sprint
+        int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
+        String sprintColour = SPRINT_COLOURS.get(colourIndex);
 
         // Checking the sprint dates validation and returning appropriate error message
         Date utilsProjectStartDate = parentProject.getProjectStartDate();
@@ -189,7 +192,6 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange);
-            model.addAttribute("sprintColour", sprintColour);
             return "addSprint";
         }
 
