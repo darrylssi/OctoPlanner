@@ -1,5 +1,7 @@
+@import "themeColors.css";
+
 .header {
-    background-color: #b70f0a;
+    background-color: var(--primary);
     height:auto;
 }
 
@@ -173,6 +175,7 @@ a {
     min-width: 50px;
     display: flex;
     align-items: center;
+    margin: 10px;
 }
 
 button {
@@ -246,4 +249,8 @@ button:hover {
 
 .clickable {
     cursor: pointer;
+}
+
+.bi-calendar-event {
+    margin: 5px;
 }

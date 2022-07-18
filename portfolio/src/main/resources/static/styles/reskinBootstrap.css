@@ -1,0 +1,17 @@
+@import "themeColors.css";
+
+.card-header {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+}
+
+.btn-primary:disabled {
+    background-color: var(--primary-light);
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
