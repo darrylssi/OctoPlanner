@@ -201,30 +201,6 @@ public class UserAccountClientService {
 
 
     /**
-     * Returns the username of the current logged-in user
-     * @param principal Gets the current user's authentication
-     * @return The username of the current user
-     */
-    public String getUsernameById(@AuthenticationPrincipal AuthState principal) {
-        // TODO [Andrew]: Do we really need this?
-        // Actually in a broader sense, this method is EXCLUSIVELY used to grab the username
-        // of the current user and add it to the model, which is done individually in each endpoint.
-        // Spring provides a postHandle() interceptor for this https://stackoverflow.com/a/8008402
-        // which can grab the principal from the request object https://www.baeldung.com/get-user-in-spring-security#controller
-
-        // !! This code has been replaced, as portfolio can't query the IdP during testing, causing
-        // !! said tests to fail. Refer to my above comments.
-        // String currentUserId = principal.getClaimsList().stream()
-        //         .filter(claim -> claim.getType().equals("nameid"))
-        //         .findFirst()
-        //         .map(ClaimDTO::getValue)
-        //         .orElse("NOT FOUND");
-
-        // String username = getUserAccountById(Integer.parseInt(currentUserId)).getUsername();
-        return PrincipalData.from(principal).getUsername();
-    }
-
-    /**
      * Sends an UploadUserProfilePhotoRequest to the identity provider.
      * @param userId ID of the user to upload the profile photo to
      * @param file Image file to be uploaded
@@ -269,7 +245,7 @@ public class UserAccountClientService {
      * @param userId The id of the user to remove the photo from
      * @return A DeleteUserProfilePhotoResponse containing the success (or failure message) of the request
      */
-    public DeleteUserProfilePhotoResponse deleteUserProfilePhoto(final int userId) {
+    public DeleteUserProfilePhotoResponse deleteUserProfilePhoto(final int userId) throws StatusRuntimeException {
         DeleteUserProfilePhotoRequest deletePhotoRequest = DeleteUserProfilePhotoRequest.newBuilder()
                 .setUserId(userId)
                 .build();

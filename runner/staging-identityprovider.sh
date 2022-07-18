@@ -7,6 +7,10 @@ HTTP_ENDPOINT='https://csse-s302g8.canterbury.ac.nz/test/identity/'
 fuser -k $HTTP_PORT/tcp || true
 fuser -k $GRPC_PORT/tcp || true
 
+set -o allexport
+source staging-identityprovider/env
+set +o allexport
+
 java -jar staging-identityprovider/libs/identityprovider-0.0.1-SNAPSHOT.jar \
     --spring.application.name=identity-provider \
     --server.port=$HTTP_PORT \

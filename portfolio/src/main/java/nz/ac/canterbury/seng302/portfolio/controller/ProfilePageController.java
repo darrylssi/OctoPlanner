@@ -31,12 +31,12 @@ public class ProfilePageController {
     @GetMapping("/users/current")
     public String profileRedirect(@AuthenticationPrincipal AuthState principal) {
 
-        PrincipalData principalData = PrincipalData.from(principal);
-        if (!principalData.isAuthenticated()) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (!thisUser.isAuthenticated()) {
             return "redirect:./";
         }
 
-        return "redirect:./" + principalData.getID();
+        return "redirect:./" + thisUser.getID();
     }
 
     /**
@@ -53,13 +53,13 @@ public class ProfilePageController {
             @PathVariable("id") int id,
             Model model
     ) {
-        PrincipalData principalData = PrincipalData.from(principal);
+        PrincipalData thisUser = PrincipalData.from(principal);
         UserResponse user = userAccountClientService.getUserAccountById(id);
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
 
-        boolean isCurrentUser = principalData.getID() == id; // User's logged in, and this page is about them
+        boolean isCurrentUser = thisUser.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
         
         if (user != null) {
@@ -69,7 +69,6 @@ public class ProfilePageController {
                 model.addAttribute("fullName", getFullName(
                         user.getFirstName(), user.getMiddleName(), user.getLastName()));
                 model.addAttribute("id", id);
-                model.addAttribute("userName", user.getUsername());
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
             } else {

@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found', username=${userName})"></div>
+    <div th:replace="fragments :: header(title='Edit Profile', subtitle=${userExists} ? ${fullName} : 'User not Found')"></div>
 
     <p class="errors" th:if="${errors}" th:each="errMsg : ${errors}">
         <th th:text="${errMsg}"></th>
@@ -139,7 +139,7 @@
         <hr/>
         <br/>
         <form th:action="|./edit|" method="post">
-            <div class="centre-box">
+            <div th:if="${error_DeletePhoto}" class="centre-box">
                 <span th:class="error" th:text="${error_DeletePhoto}"></span>
             </div>
             <div class="centre-box">

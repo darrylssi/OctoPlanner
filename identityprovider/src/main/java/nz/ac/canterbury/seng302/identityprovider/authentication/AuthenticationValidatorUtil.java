@@ -1,11 +1,21 @@
 package nz.ac.canterbury.seng302.identityprovider.authentication;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import nz.ac.canterbury.seng302.identityprovider.model.User;
+import nz.ac.canterbury.seng302.identityprovider.service.UserService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 
+@Service
 public class AuthenticationValidatorUtil {
 
+    @Autowired
+    private UserService userService;
+    
+    private static final JwtTokenUtil jwtTokenUtil = JwtTokenUtil.getInstance();
 
     /**
      * Consumes the provided session token in the request body. If the session token is invalid, return an
@@ -19,9 +29,8 @@ public class AuthenticationValidatorUtil {
      * @param sessionToken The provided session token to validate
      * @return An AuthState derived from validating the token
      */
-    public static AuthState validateTokenForAuthState(String sessionToken) {
+    public AuthState validateTokenForAuthState(String sessionToken) {
         AuthState.Builder reply = AuthState.newBuilder();
-        JwtTokenUtil jwtTokenUtil = JwtTokenUtil.getInstance();
 
         boolean tokenIsValid;
         try {
@@ -33,16 +42,19 @@ public class AuthenticationValidatorUtil {
             tokenIsValid = false;
         }
 
-        if(!tokenIsValid) {
+        if (!tokenIsValid) {
             reply.setIsAuthenticated(false);
         } else {
-            reply.addAllClaims(jwtTokenUtil.getClaimDTOsForAuthStateCheck(sessionToken));
+            int userID = (int) jwtTokenUtil.getNamedClaimFromToken(sessionToken, "nameid");
+            User user = userService.getUser(userID);
+            String newToken = jwtTokenUtil.generateTokenForUser(user);
+            reply.addAllClaims(jwtTokenUtil.getClaimDTOsForAuthStateCheck(newToken));
             reply
                 .setIsAuthenticated(true)
                 .setNameClaimType(JwtTokenUtil.NAME_CLAIM_TYPE)
                 .setRoleClaimType(JwtTokenUtil.ROLE_CLAIM_TYPE)
                 .setAuthenticationType(JwtTokenUtil.AUTHENTICATION_TYPE)
-                .setName(jwtTokenUtil.getNamedClaimFromToken(sessionToken, "name").toString());
+                .setName(jwtTokenUtil.getNamedClaimFromToken(newToken, "name").toString());
         }
 
         return reply.build();

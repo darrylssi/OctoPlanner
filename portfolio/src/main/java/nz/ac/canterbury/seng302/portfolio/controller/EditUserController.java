@@ -22,8 +22,8 @@ public class EditUserController extends PageController{
     @Autowired
     private UserAccountClientService userAccountClientService;
 
-    private static final String EDIT_USER = "editUser";
-    private static final String REDIRECT = "redirect:../";
+    private static final String EDIT_USER_TEMPLATE = "editUser";
+    private static final String REDIRECT_TO_PROFILE = "redirect:../";
 
     /**
      * Check that the current user has sufficient permissions, then populate the page accordingly
@@ -42,12 +42,11 @@ public class EditUserController extends PageController{
         model.addAttribute("isCurrentUser", isCurrentUser);
 
         if(userResponse == null) {
-            configureError(model, ErrorType.NOT_FOUND, "/users" + id + EDIT_USER);
+            configureError(model, ErrorType.NOT_FOUND, "/users" + id + EDIT_USER_TEMPLATE);
         } else if(!isCurrentUser) {
-            configureError(model, ErrorType.ACCESS_DENIED, "/users" + id + EDIT_USER);
+            configureError(model, ErrorType.ACCESS_DENIED, "/users" + id + EDIT_USER_TEMPLATE);
         } else {
             // Gets the current user's username
-            model.addAttribute("userName", userAccountClientService.getUsernameById(principal));
             model.addAttribute("profileInfo", userResponse);
             model.addAttribute("userExists", true);
             model.addAttribute("fullName", ProfilePageController.getFullName(
@@ -67,7 +66,7 @@ public class EditUserController extends PageController{
             Model model
     ) {
         editHandler(model, id, principal);
-        return EDIT_USER;
+        return EDIT_USER_TEMPLATE;
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"firstName", "middleName", "lastName",
@@ -91,7 +90,7 @@ public class EditUserController extends PageController{
         /* Set (new) user details to the corresponding user */
         EditUserResponse editReply;
         if (result.hasErrors()) {
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
         try {
             editReply = userAccountClientService.editUser(id, firstName, middleName,
@@ -99,18 +98,18 @@ public class EditUserController extends PageController{
 
             if (editReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return REDIRECT + id;
+                return REDIRECT_TO_PROFILE + id;
             } else {
                 ValidationError err = editReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("editErrorMessage", "Unknown error updating details");
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
 
         model.addAttribute("editMessage", editReply.getMessage());
-        return EDIT_USER;
+        return EDIT_USER_TEMPLATE;
     }
 
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
@@ -130,29 +129,29 @@ public class EditUserController extends PageController{
         /* Set (new) user details to the corresponding user */
         ChangePasswordResponse changeReply;
         if (result.hasErrors()) {
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
         if(!newPassword.equals(confirmPassword)) {
             model.addAttribute("error_PasswordsEqual", "New and confirm passwords do not match");
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
         try {
             changeReply = userAccountClientService.changeUserPassword(id, oldPassword, newPassword);
 
             if (changeReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return REDIRECT + id;
+                return REDIRECT_TO_PROFILE + id;
             } else {
                 ValidationError err = changeReply.getValidationErrors(0);
                 model.addAttribute("error_" + err.getFieldName(), err.getErrorText());
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("pwErrorMessage", "Unknown error changing password");
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
 
         model.addAttribute("pwMessage", changeReply.getMessage());
-        return EDIT_USER;
+        return EDIT_USER_TEMPLATE;
     }
 
     /**
@@ -183,10 +182,10 @@ public class EditUserController extends PageController{
         model.addAttribute("file", file);
         if (isValidImageFile(file) && file.getSize() > 0) {
             userAccountClientService.uploadUserProfilePhoto(id, file);
-            return REDIRECT + id;
+            return REDIRECT_TO_PROFILE + id;
         } else {
             model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type .jpeg, .jpg, or .png, and must not be empty.");
-            return EDIT_USER;
+            return EDIT_USER_TEMPLATE;
         }
     }
 
@@ -217,24 +216,22 @@ public class EditUserController extends PageController{
             Model model
     ) {
         DeleteUserProfilePhotoResponse deleteReply;
-
         // Check the user is authorised, then send a request to the UserAccountClientService
         editHandler(model, id, principal);
-
+        
         try {
             deleteReply = userAccountClientService.deleteUserProfilePhoto(id);
 
             if (deleteReply.getIsSuccess()) {
                 /* Redirect to profile page when done */
-                return REDIRECT + id;
+                return REDIRECT_TO_PROFILE + id;
             } else {
                 model.addAttribute("error_DeletePhoto", deleteReply.getMessage());
             }
-        } catch (StatusRuntimeException e){
+        } catch (StatusRuntimeException e) {
             model.addAttribute("error_DeletePhoto", "Unknown error deleting profile photo");
         }
-
-        return EDIT_USER;
+        return EDIT_USER_TEMPLATE;
     }
 
 }

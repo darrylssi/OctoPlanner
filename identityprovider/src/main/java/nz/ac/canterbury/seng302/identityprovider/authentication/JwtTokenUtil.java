@@ -6,8 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -142,6 +143,20 @@ public class JwtTokenUtil implements Serializable {
 				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
 				.signWith(key).compact();
     }
+
+	/**
+	 * Generate a JWT token for a user, containing some basic information about the user.
+	 * 
+	 * @param user A user database object
+	 * @return String encoded JWT token
+	 */
+	public String generateTokenForUser(User user) {
+		// Convert all the roles into a comma-separated string of roles
+		List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
+		String commaSeparatedUserRoles = String.join(",", userRoles);
+		commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
+		return generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
+	}
 
 	/**
 	 * Validate the token. For now we simply check if it was signed using our signing key, and if it isn't expired.

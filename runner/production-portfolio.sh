@@ -2,6 +2,9 @@ PROFILE=prod
 
 fuser -k 10501/tcp || true
 
+set -o allexport
+source production-portfolio/env
+set +o allexport
 java -jar production-portfolio/libs/portfolio-0.0.1-SNAPSHOT.jar \
     --server.port=10501 \
     --spring.application.name=portfolio \

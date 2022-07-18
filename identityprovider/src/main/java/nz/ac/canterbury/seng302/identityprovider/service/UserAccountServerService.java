@@ -559,7 +559,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setEmail(user.getEmail())
                 .setProfileImagePath(profilePhotoService.getUserProfileImageUrl(id))
                 .addAllRoles(user.getRoles())
-                .setId(user.getID())
                 .setCreated(Timestamp.newBuilder()  // Converts Instant to protobuf.Timestamp
                     .setSeconds(user.getCreated().getEpochSecond())
                     .setNanos(user.getCreated().getNano()));
