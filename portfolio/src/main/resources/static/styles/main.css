@@ -142,6 +142,10 @@ body {
     justify-content: center;
     align-items: center;
 }
+.edit-event-button {
+    height: 30px !important;
+    width: 30px !important;
+}
 
 .delete-button {
     height: 40px;
@@ -150,6 +154,11 @@ body {
     border: none;
     background-color: #e61610;
     color: white;
+}
+
+.delete-event-button {
+    height: 30px !important;
+    width: 30px !important;
 }
 
 .detail-block {
@@ -177,6 +186,10 @@ a {
 
 button {
     cursor:pointer;
+}
+
+.event button {
+    display: inline-block;
 }
 
 .error {

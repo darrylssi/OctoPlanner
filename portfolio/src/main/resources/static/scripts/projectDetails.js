@@ -26,3 +26,25 @@ function deleteSprint(sprintId) {
     deleteRequest.send();
 }
 
+/** Inserts the event edit form directly below the event being edited */
+function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eventEndDate) {
+    hideEditEvent();
+    const eventBox = document.getElementById("event-" + eventId);
+    let editForm = document.createElement("div");
+    editForm.setAttribute("id", "editEventForm");
+    editForm.innerHTML = editFormTemplate;
+    document.getElementById("event-box-1").appendChild(editForm, eventBox);
+    document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
+    document.getElementById("editEventNameInput").setAttribute("value", eventName);
+    document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);
+    document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
+    document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
+}
+
+/** Remove the edit form from any event it is attached to */
+function hideEditEvent() {
+    const eventForm = document.getElementById("editEventForm");
+    if (eventForm) {
+        eventForm.parentNode.removeChild(eventForm);
+    }
+}
