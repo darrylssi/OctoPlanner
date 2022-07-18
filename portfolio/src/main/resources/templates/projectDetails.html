@@ -24,11 +24,17 @@
     <script th:src="|../scripts/projectDetails.js|"></script>
 
 <div id="deleteSprintModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title"></div>
+    <div class="modal-content container">
+        <div class="row">
+        <div class="modal-title"></div></div>
         <br/>
+        <div class="row">
+            <div class="col-2">
         <button onclick="hideModal()" class="modal-button cancel">Cancel</button>
-        <button id="deleteButton" class="modal-button delete">Delete</button>
+                </div><div class="col">
+            <button id="deleteButton" class="modal-button delete">Delete</button>
+        </div>
+        </div>
     </div>
 </div>
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=${project.getStartDateString} + ' - ' + ${project.getEndDateString})"></div>
