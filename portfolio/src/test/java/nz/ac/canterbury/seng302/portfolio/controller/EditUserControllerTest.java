@@ -26,7 +26,7 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-@WithMockPrincipal(value=TEACHER, id=EditUserControllerTest.USER_ID)
+@WithMockPrincipal(value=TEACHER, id=EditUserControllerTest.USER_ID)    // Make our mocked user be the one we're editing
 public class EditUserControllerTest {
 
     static final int USER_ID=1;

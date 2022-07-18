@@ -13,7 +13,7 @@
             <div class="title-username" th:text="${G_PrincipalData.getUsername}" />
             <div class="dropdown">
                 <!-- TODO use the actual user's profile image -->
-                <button th:style="|background-image: url(${@environment.getProperty('base-url')}img/default-pfp.jpg)|" class="profile-icon" onclick="toggleMenu()">
+                <button th:style="|background-image: url(${G_ProfilePic})|" class="profile-icon" onclick="toggleMenu()">
                 </button>
                 <div id="userMenu" class="dropdown-content">
                     <a th:href="@{|${@environment.getProperty('base-url')}users/current|}">
