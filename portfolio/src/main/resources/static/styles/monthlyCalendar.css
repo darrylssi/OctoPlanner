@@ -15,6 +15,24 @@ p, #calendarTitle {
     margin: 50px auto;
 }
 
+.defaultEventBorder {
+    border-style: none !important;
+}
+
+.currentEventBorder {
+    border-width: 2px !important;
+    border-style: solid !important;
+    border-color: black !important;
+}
+
+.fc-event-start {
+    border-left-width: 10px !important;
+}
+
+.fc-event-end {
+    border-right-width: 10px !important;
+}
+
 .fc-resource-area td {
     cursor: pointer;
 }

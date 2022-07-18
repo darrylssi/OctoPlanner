@@ -25,7 +25,7 @@ public class ProjectService {
     /**
      * Get project by id
      */
-    public Project getProjectById(Integer id) throws Exception{
+    public Project getProjectById(Integer id) throws Exception {
         Project project = repository.findProjectById(id);
         if (project != null) {
             return project;
