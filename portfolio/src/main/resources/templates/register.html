@@ -12,7 +12,7 @@
 
     <div class="container" id="error">
         <div class="row">
-            <div class="col-md-6 offset-md-3" th:if="${IdPErrorMessage != null or registerMessage != null}">
+            <div class="col-lg-6 offset-lg-3" th:if="${IdPErrorMessage != null or registerMessage != null}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" >
                     <span th:text="${IdPErrorMessage}"> </span>
                     <span th:text="${registerMessage}"> </span>
@@ -25,33 +25,32 @@
 
     <div class="container">
         <div class="row cardContainer">
-            <div class="col-md-10 offset-md-1">
+            <div class="card mt-5">
 
-    <div class="card mt-5">
         <div class="row">
-            <div class="col-md-4 header d-flex align-items-center">
-                <div class="row ">
+            <div class="col-lg-4 header d-flex align-items-center mx-0">
+                <div class="row">
                     <div>
                         <h1 class="text-center text-light display-4 fw-bold"> REGISTER </h1>
                     </div>
                     <div class="text-center text-light">
-                        Already have an account?
+                        Already have an account? <br>
                         <a href="login" class="text-light fw-bold"> Login here </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-lg-8">
                 <div class="card-body">
                     <form th:action="|./register|" th:object="${user}" method="post">
 
                         <div class="row my-4">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="firstName"> First Name </label>
                                 <input type="text" class="form-control" id="firstName" placeholder="First Name"
                                        th:field="*{firstName}" th:required="required" maxlength="20">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"> </span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label for="middleName"> Middle Name </label>
                                 <input type="text" class="form-control" id="middleName" placeholder="Middle Name"
                                        th:field="*{middleName}" maxlength="20">
@@ -60,13 +59,13 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="lastName"> Last Name </label>
                                 <input type="text" class="form-control" id="lastName" placeholder="Last Name"
                                        th:field="*{lastName}" th:required="required" maxlength="20">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"> </span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label for="nickname"> Nickname </label>
                                 <input type="text" class="form-control" id="nickname" placeholder="Nickname"
                                        th:field="*{nickname}" maxlength="20">
@@ -75,13 +74,13 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="username"> Username </label>
                                 <input type="text" class="form-control" id="username" placeholder="Username"
                                        th:field="*{username}" th:required="required" maxlength="15">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"> </span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="email"> Email </label>
                                 <input type="email" class="form-control" id="email" placeholder="Email"
                                        th:field="*{email}" th:required="required" maxlength="20">
@@ -90,7 +89,7 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label for="pronouns"> Personal Pronouns </label>
                                 <input type="text" class="form-control" id="pronouns" placeholder="Personal Pronouns"
                                        th:field="*{personalPronouns}" maxlength="20">
@@ -99,7 +98,7 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-md-12">
+                            <div class="col-lg-12">
                                 <label for="bio"> Bio </label>
                                 <textarea class="form-control" id="bio" placeholder="Bio" rows="3"
                                           th:field="*{bio}" maxlength="200"> </textarea>
@@ -108,13 +107,13 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="password"> Password </label>
                                 <input type="password" class="form-control" id="password" placeholder="Password"
                                        th:field="*{password}" th:required="required" maxlength="20">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"> </span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                                 <label class="required" for="confirmPassword"> Confirm Password </label>
                                 <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter Password"
                                        th:field="*{confirmPassword}" th:required="required" maxlength="20">
@@ -128,7 +127,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     </div> </div> </div>
 
