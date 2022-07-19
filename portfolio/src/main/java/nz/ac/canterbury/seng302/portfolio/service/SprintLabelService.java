@@ -43,7 +43,7 @@ public class SprintLabelService {
      * @param projectId the id of the project to refresh
      */
     public void refreshProjectSprintLabels(int projectId) {
-        List<Sprint> projectSprints = sprintService.getSprintsOfProjectById(projectId);
+        List<Sprint> projectSprints = sprintService.getSprintsInProject(projectId);
         projectSprints.sort(Comparator.comparing(Sprint::getSprintStartDate));
         for (int i = 0; i < projectSprints.size(); i++) {
             Sprint sprint = projectSprints.get(i);
@@ -66,7 +66,7 @@ public class SprintLabelService {
      * @return a label String of the form (SPRINT_LABEL_BASE + [x]), where [x] is a number >= 1
      */
     public String nextLabel(int projectId) {
-        return SPRINT_LABEL_BASE + (sprintService.getSprintsOfProjectById(projectId).size() + SPRINT_LABEL_OFFSET);
+        return SPRINT_LABEL_BASE + (sprintService.getSprintsInProject(projectId).size() + SPRINT_LABEL_OFFSET);
     }
 
     /**

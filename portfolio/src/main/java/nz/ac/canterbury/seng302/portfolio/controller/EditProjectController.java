@@ -97,7 +97,7 @@ public class EditProjectController extends PageController {
 
         Project newProject = projectService.getProjectById(id);
 
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         ValidationError dateOutOfRange = ValidationUtils.validateProjectDates(projectStartDate, projectEndDate,
                 newProject.getProjectCreationDate(), sprintList);
 

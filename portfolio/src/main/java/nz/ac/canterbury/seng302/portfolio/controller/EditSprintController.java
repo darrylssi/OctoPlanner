@@ -90,7 +90,7 @@ public class EditSprintController extends PageController {
         Project parentProject = projectService.getProjectById(projectId);
 
         ValidationError dateOutOfRange = AddSprintController.getValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getAllSprints());
+                id, parentProject, sprintService.getSprintsInProject(projectId));
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError()) {

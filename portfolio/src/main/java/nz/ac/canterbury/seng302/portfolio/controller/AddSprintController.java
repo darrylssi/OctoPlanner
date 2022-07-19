@@ -64,7 +64,7 @@ public class AddSprintController extends PageController {
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
 
         // Creating a new sprint object
         Sprint sprint = new Sprint();

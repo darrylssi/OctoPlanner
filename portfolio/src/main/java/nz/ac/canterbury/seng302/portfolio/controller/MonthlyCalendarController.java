@@ -61,7 +61,7 @@ public class MonthlyCalendarController extends PageController {
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
         model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
 
-        List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         if (!sprintList.isEmpty()) {
             // Gets the sprint string list containing five strings which are sprintIds, sprintNames, sprintStartDates, sprintEndDates and sprintColours
             ArrayList<String> getSprintsArrayList = getSprintsStringList(sprintList);
