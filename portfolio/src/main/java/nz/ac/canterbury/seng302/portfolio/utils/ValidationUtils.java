@@ -19,6 +19,8 @@ public class ValidationUtils {
 
     private ValidationUtils() {}
 
+    public static final String DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+
     /**
      * Validates that a sprint's start and end dates are valid. The checks are:
      * <ul>
@@ -42,11 +44,11 @@ public class ValidationUtils {
         // Does this first so that future checks can assume this is true
         if (start.after(end)) {
             error.setErrorFlag(true);
-            error.addErrorMessage("Start date must always be before end date");
+            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checks that the sprint dates are within the project dates
-        if (sprintsOutsideProject(start, end,
+        if (datesOutsideProject(start, end,
                 parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
             error.setErrorFlag(true);
             error.addErrorMessage("Sprint dates must be within project date range: " +
@@ -86,12 +88,12 @@ public class ValidationUtils {
         // Checks if the project's start date is after the project's end date
         if (start.after(end)) {
             error.setErrorFlag(true);
-            error.addErrorMessage("Start date must always be before end date");
+            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checking against sprint dates
         for (Sprint sprint : sprintList) {
-            if (sprintsOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
+            if (datesOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
                 error.setErrorFlag(true);
                 error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
@@ -113,16 +115,48 @@ public class ValidationUtils {
     }
 
     /**
-     * Checks whether a sprint's dates are within a project's dates
-     * @param sprintStart The sprint's start date to validate
-     * @param sprintEnd The sprint's end date to validate
+     * Validates that an event's start and end dates are valid. The checks are:
+     * <ul>
+     *     <li>Event's start date is before the end date</li>
+     *     <li>Event dates are within project dates</li>
+     * </ul>
+     * @param start The event's start date
+     * @param end The event's end date
+     * @param parentProject The project that the event belongs to
+     * @return A ValidationError with a boolean error flag and a list of error messages
+     */
+    public static ValidationError validateEventDates(Date start, Date end, Project parentProject) {
+        // Initial error flag = false (no errors yet)
+        ValidationError error = new ValidationError(false);
+
+        // Checks if the event's start date is after the project's end date
+        if (start.after(end)) {
+            error.setErrorFlag(true);
+            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
+        }
+
+        // Checks that the event's dates are within the project dates
+        if (datesOutsideProject(start, end,
+                parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
+            error.setErrorFlag(true);
+            error.addErrorMessage("Event dates must be within project date range: " +
+                    parentProject.getStartDateString() + " - " + parentProject.getEndDateString());
+        }
+
+        return error;
+    }
+
+    /**
+     * Checks whether a given start and end date are within a project's dates
+     * @param startDate The start date to validate
+     * @param endDate The end date to validate
      * @param projectStart The project's start date to validate
      * @param projectEnd The project's end date to validate
-     * @return True if sprint dates are outside project dates, otherwise false
+     * @return True if given dates are outside the project dates, otherwise false
      */
-    public static boolean sprintsOutsideProject(Date sprintStart, Date sprintEnd, Date projectStart, Date projectEnd) {
-        if (sprintStart.before(projectStart)) { return true; }
-        else return sprintEnd.after(projectEnd);
+    public static boolean datesOutsideProject(Date startDate, Date endDate, Date projectStart, Date projectEnd) {
+        if (startDate.before(projectStart)) { return true; }
+        else return endDate.after(projectEnd);
     }
 
     /**
