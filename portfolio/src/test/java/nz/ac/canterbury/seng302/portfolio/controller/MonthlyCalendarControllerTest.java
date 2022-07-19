@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(controllers = MonthlyCalendarController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class MonthlyCalendarControllerTest {
+class MonthlyCalendarControllerTest {
 
     @Autowired
     private MockMvc mockMvc;                                    // initializing the MockMvc
@@ -53,7 +53,7 @@ public class MonthlyCalendarControllerTest {
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
     void getMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
-        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+        Project project = new Project("Project 2022", "This is first project", "2022-01-01", "2022-12-31");
         
         Mockito.when(projectService.getProjectById(0)).thenReturn(project);
         mockMvc.perform(get("/monthlyCalendar/0"))
@@ -65,11 +65,11 @@ public class MonthlyCalendarControllerTest {
     @WithMockPrincipal(UserRole.TEACHER)
     void getMonthlyCalendar_whenGivenPostMapping_returnUpdatedSprint() throws Exception {
         // initializing project object and mocking it
-        Project project = new Project("Project 2022", "This is first project", "01/JAN/2022", "31/DEC/2022");
+        Project project = new Project("Project 2022", "This is first project", "2022-01-01", "2022-12-31");
         Mockito.when(projectService.getProjectById(0)).thenReturn(project);
 
         // initializing sprint object and mocking it
-        Sprint sprint = new Sprint(0, "Sprint 1", "This is sprint 1", "02/JAN/2022", "10/JAN/2022", "#3ea832");
+        Sprint sprint = new Sprint(0, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
         Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint);
 
         mockMvc.perform(post("/monthlyCalendar/0")

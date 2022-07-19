@@ -15,11 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
-
+import java.util.*;
 
 
 @GrpcService
@@ -47,17 +43,19 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("register() has been called");
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
         List<ValidationError> errors = validator.validateRegisterRequest(request);
+        StringJoiner bld = new StringJoiner(". ");
 
-        if(errors.size() > 0) { // If there are errors in the request
+        if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
                 logger.error(String.format("Register user %s : %s - %s",
                         request.getUsername(), error.getFieldName(), error.getErrorText()));
+                bld.add(error.getErrorText());
             }
 
             reply
                     .setIsSuccess(false)
-                    .setMessage("User could not be created")
+                    .setMessage(bld.toString())
                     .addAllValidationErrors(errors);
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();
