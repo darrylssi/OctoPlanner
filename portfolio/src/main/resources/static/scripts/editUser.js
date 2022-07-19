@@ -1,9 +1,9 @@
 import "./croppie.js";
 
 // for image compression
-const MAX_WIDTH = 5000;
-const MAX_HEIGHT = 5000;
-const QUALITY = 1;
+const MAX_WIDTH = 3000;
+const MAX_HEIGHT = 3000;
+const QUALITY = .9;
 
 const input = document.getElementById("inputFile");
 const photoFormSubmitButton = document.getElementById('photo-upload-submit-button');
