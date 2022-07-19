@@ -56,7 +56,7 @@ public class AddSprintController extends PageController {
 
         /* Getting project object by using project id */
         Project project = projectService.getProjectById(id);
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
 
         // Creating a new sprint object
         Sprint sprint = new Sprint();
@@ -149,7 +149,7 @@ public class AddSprintController extends PageController {
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
         ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getAllSprints());
+                id, parentProject, sprintService.getSprintsInProject(id));
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError()) {

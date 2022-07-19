@@ -78,8 +78,8 @@ class SprintTests {
 
     @Test
     void searchByParentProjectId_getSprint() {
-        when(sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId())).thenReturn(sprintList);
-        List<Sprint> foundSprints = sprintService.getSprintByParentProjectId(baseSprint.getParentProjectId());
+        when(sprintService.getSprintsInProject(baseSprint.getParentProjectId())).thenReturn(sprintList);
+        List<Sprint> foundSprints = sprintService.getSprintsInProject(baseSprint.getParentProjectId());
         Sprint foundSprint = foundSprints.get(0);
         assertEquals(baseSprint, foundSprint);
     }
@@ -181,7 +181,7 @@ class SprintTests {
             "2022-01-05,2022-03-24"})
     void checkSprintDatesOverlap_getErrorMessage(String startString, String endString){
         // Sprint list has one sprint with dates 2022-02-05 -- 2022-03-24
-        when(sprintService.getAllSprints()).thenReturn(sprintList);
+        when(sprintService.getSprintsInProject(baseProject.getId())).thenReturn(sprintList);
 
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
