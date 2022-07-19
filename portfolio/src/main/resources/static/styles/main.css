@@ -167,6 +167,7 @@ body {
 .detail-block {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 a {
@@ -194,6 +195,15 @@ button {
 
 .event button {
     display: inline-block;
+}
+
+.event-box {
+    flex-grow: 1;
+}
+
+.break {
+    flex-basis: 100%;
+    height: 0;
 }
 
 .error {

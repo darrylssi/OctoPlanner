@@ -62,8 +62,9 @@
                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                         </svg>
                     </button>
-                </div><br/>
-                <div id="event-box-1">
+                </div>
+                <div class="break"></div>
+                <div id="event-box-1" class="event-box">
                     <div id="event-1" class="event">
                         Event Name (Event Dates)
                         <!--TODO: remove hard-coded values-->
@@ -168,8 +169,9 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="text" class="form-control" id="editEventNameInput">' +
+    '                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">' +
     '                            <label for="editEventNameInput">Name</label>' +
+    '                            <div id="editEventNameFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col-10">' +
@@ -182,18 +184,26 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventStartTime">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback">' +
     '                            <label for="editEventStartTime">Start Time</label>' +
+    '                            <div id="editEventStartFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col">' +
-    '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventEndTime">' +
+    '                        <div class="form-floating mb-3 has-validation">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback">' +
     '                            <label for="editEventEndTime">End Time</label>' +
+    '                            <div id="editEventEndFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
+    '                </div>' +
+    '                <div class="row">' +
+    '                    <div class="col-9"></div>' +
     '                    <div class="col-1">' +
-    '                        <button type="button" class="btn btn-primary btn-lg">Save Changes</button>' +
+    '                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick=hideEditEvent()>Cancel</button>' +
+    '                    </div>' +
+    '                    <div class="col-2">' +
+    '                        <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>' +
     '                    </div>' +
     '                </div>' +
     '            </form>' +
