@@ -41,6 +41,21 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
 }
 
+function overlaps(eventStartString, eventEndString, sprintStartString, sprintEndString) {
+    console.log("data: ");
+    console.log("data: " + eventStartString);
+    console.log("data: " + eventEndString);
+    console.log("data: " + sprintStartString);
+    console.log("data: " + sprintEndString);
+
+    let eventStart = new Date(eventStartString);
+    let eventEnd = new Date(eventEndString);
+    let sprintStart = new Date(sprintStartString);
+    let sprintEnd = new Date(sprintEndString);
+
+    return eventStart <= sprintEnd && eventEnd >= sprintStart;
+}
+
 /** Remove the edit form from any event it is attached to */
 function hideEditEvent() {
     const eventForm = document.getElementById("editEventForm");
@@ -48,3 +63,4 @@ function hideEditEvent() {
         eventForm.parentNode.removeChild(eventForm);
     }
 }
+
