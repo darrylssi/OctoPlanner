@@ -54,7 +54,7 @@ class SprintLabelServiceTest {
         sprint3 = new Sprint(PROJECT_ID_1, "Sprint 3", "desc", DateUtils.toDate("2022-04-02"), DateUtils.toDate("2022-05-01"), "#aa0055");
         List<Sprint> sprintList = Arrays.asList(sprint1, sprint2, sprint3);
 
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(sprintList);
+        when(sprintService.getSprintsInProject(PROJECT_ID_1)).thenReturn(sprintList);
     }
 
     // NOTE: some methods aren't tested with both the Project object and Id in inputs
@@ -74,8 +74,8 @@ class SprintLabelServiceTest {
         sprint3.setEndDate(DateUtils.toDate("2022-05-01"));
 
         when(projectService.getAllProjects()).thenReturn(Arrays.asList(testProject1, testProject2));
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2));
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_2)).thenReturn(Arrays.asList(sprint3));
+        when(sprintService.getSprintsInProject(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2));
+        when(sprintService.getSprintsInProject(PROJECT_ID_2)).thenReturn(Arrays.asList(sprint3));
         // DO NOT change this (or anything else) to List.of(), even though Intellij wants you to, because it will break things
         // see https://stackoverflow.com/questions/46579074/what-is-the-difference-between-list-of-and-arrays-aslist
 
@@ -94,7 +94,7 @@ class SprintLabelServiceTest {
      */
     @Test
     void refreshLabelsOneSprint_labelAssignedProperly() {
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
+        when(sprintService.getSprintsInProject(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1)); // no List.of()
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
 
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
@@ -144,7 +144,7 @@ class SprintLabelServiceTest {
         Assertions.assertEquals(BASE + 3, sprint3.getSprintLabel());
 
         // "delete" a sprint, and expect that the labels adjust, including nextLabel()
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint3));
+        when(sprintService.getSprintsInProject(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint3));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
         Assertions.assertEquals(BASE + 2, sprint3.getSprintLabel());
@@ -161,7 +161,7 @@ class SprintLabelServiceTest {
 
         // "add" a sprint, and expect that the labels adjust, including nextLabel()
         Sprint sprint4 = new Sprint(PROJECT_ID_1, "Sprint 4", "desc", DateUtils.toDate("2022-03-02"), DateUtils.toDate("2022-04-01"), "#987654");
-        when(sprintService.getSprintsOfProjectById(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2, sprint3, sprint4));
+        when(sprintService.getSprintsInProject(PROJECT_ID_1)).thenReturn(Arrays.asList(sprint1, sprint2, sprint3, sprint4));
         sprintLabelService.refreshProjectSprintLabels(PROJECT_ID_1);
         Assertions.assertEquals(BASE + 1, sprint1.getSprintLabel());
         Assertions.assertEquals(BASE + 2, sprint2.getSprintLabel());
