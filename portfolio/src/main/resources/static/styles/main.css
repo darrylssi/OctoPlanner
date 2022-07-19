@@ -197,7 +197,7 @@ button {
     display: inline-block;
 }
 
-.event-box {
+.event-list-container {
     flex-grow: 1;
 }
 
