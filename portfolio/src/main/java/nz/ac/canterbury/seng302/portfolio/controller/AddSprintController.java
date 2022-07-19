@@ -75,7 +75,6 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
-        model.addAttribute("sprintColour", colourCode);
 
         // Calculate the default sprint start date
         Date sprintStart;
