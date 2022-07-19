@@ -50,7 +50,7 @@ public class DetailsController extends PageController {
 
         labelUtils.refreshProjectSprintLabels(id);
 
-        List<Sprint> sprintList = sprintService.getSprintsOfProjectById(id);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 

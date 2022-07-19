@@ -1,0 +1,40 @@
+body {
+    background-color: #f0e6e5;
+}
+
+.header {
+    background-color: #b70f0a;
+}
+
+.btn-primary {
+    background-color: #5e0202;
+}
+
+.error {
+    font-size: 90%;
+}
+
+.required:after {
+    content:"*";
+    color: red;
+}
+
+#error {
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin-top: -30px;
+    z-index: 9;
+}
+
+.cardContainer {
+    margin-top:50px;
+}
+
+.card {
+    border-radius: 1em;
+}
+
+.header {
+    border-radius: 1em;
+}
