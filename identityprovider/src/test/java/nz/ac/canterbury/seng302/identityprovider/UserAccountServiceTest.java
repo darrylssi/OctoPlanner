@@ -20,9 +20,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 
+import javax.imageio.ImageIO;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +34,7 @@ import java.nio.file.Path;
 @SpringBootTest
 @DirtiesContext
 @SuppressWarnings("unchecked")
-public class UserAccountServiceTest {
+class UserAccountServiceTest {
 
     @Autowired
     private UserAccountServerService userAccountServerService;
@@ -1461,27 +1465,26 @@ public class UserAccountServiceTest {
         assertNotEquals("", response.getMessage());
     }
 
-    /* TODO [Jonathan/Darryl]: when tests are implemented for adding the photo
-     * please add a photo for user 1 in the given section and uncomment */
-//     @Test
-//     void deleteExistingPhoto_getSuccess() {
-//         /* Given: There is a photo for the given user */
-//         // ADD_PHOTO_HERE
+     @Test
+     void deleteExistingPhoto_getSuccess() throws IOException {
+         /* Given: There is a photo for the given user */
+         BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+         ImageIO.write(image, "jpg", new File( profileImageFolder + "/1_photo.jpg"));
 
-//         /* When: A request is received to delete the user's photo */
-//         DeleteUserProfilePhotoRequest request = DeleteUserProfilePhotoRequest.newBuilder()
-//                 .setUserId(1)
-//                 .build();
-//         StreamObserver<DeleteUserProfilePhotoResponse> observer = mock(StreamObserver.class);
-//         userAccountServerService.deleteUserProfilePhoto(request, observer);
+         /* When: A request is received to delete the user's photo */
+         DeleteUserProfilePhotoRequest request = DeleteUserProfilePhotoRequest.newBuilder()
+                 .setUserId(1)
+                 .build();
+         StreamObserver<DeleteUserProfilePhotoResponse> observer = mock(StreamObserver.class);
+         userAccountServerService.deleteUserProfilePhoto(request, observer);
 
-//         /* Then: The response will be a success */
-//         verify(observer, times(1)).onCompleted();
-//         ArgumentCaptor<DeleteUserProfilePhotoResponse> captor = ArgumentCaptor.forClass(
-//                         DeleteUserProfilePhotoResponse.class);
-//         verify(observer, times(1)).onNext(captor.capture());
-//         DeleteUserProfilePhotoResponse response = captor.getValue();
+         /* Then: The response will be a success */
+         verify(observer, times(1)).onCompleted();
+         ArgumentCaptor<DeleteUserProfilePhotoResponse> captor = ArgumentCaptor.forClass(
+                         DeleteUserProfilePhotoResponse.class);
+         verify(observer, times(1)).onNext(captor.capture());
+         DeleteUserProfilePhotoResponse response = captor.getValue();
 
-//         assertTrue(response.getIsSuccess());
-//     }
+         assertTrue(response.getIsSuccess());
+     }
 }
