@@ -1,3 +1,4 @@
+@import "themeColors.css";
 
 p, #calendarTitle {
     text-align: center;
@@ -34,4 +35,8 @@ p, #calendarTitle {
 
 .fc-resource-area td {
     cursor: pointer;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: #ff7b5588;
 }

@@ -67,6 +67,8 @@ public class DetailsController extends PageController {
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
 
+        model.addAttribute("tab", 0);
+
         /* Return the name of the Thymeleaf template */
         return "projectDetails";
     }
