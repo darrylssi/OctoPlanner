@@ -45,7 +45,7 @@ public class AddSprintController extends PageController {
             "#320d6d",
             "#b83daf",
             "#449dd1",
-            "#ce8964");
+            "#52ffb8");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -147,11 +147,15 @@ public class AddSprintController extends PageController {
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
         // Getting sprint list containing all the sprints
-        List<Sprint> sprintList = sprintService.getAllSprints();
+        List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
+        sprintList.sort((s1, s2) -> { return s1.getSprintEndDate().compareTo(s2.getSprintEndDate()); });
 
         // Fetch system colour for sprint
         int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
         String sprintColour = SPRINT_COLOURS.get(colourIndex);
+        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+            sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
+        }
 
         ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintList);
