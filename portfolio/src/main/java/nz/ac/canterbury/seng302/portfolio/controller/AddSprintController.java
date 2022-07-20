@@ -46,7 +46,7 @@ public class AddSprintController extends PageController {
             "#320d6d",
             "#b83daf",
             "#449dd1",
-            "#ce8964");
+            "#52ffb8");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
