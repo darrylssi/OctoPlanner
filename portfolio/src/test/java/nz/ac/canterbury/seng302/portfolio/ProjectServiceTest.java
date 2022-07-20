@@ -9,13 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.text.ParseException;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class ProjectServiceTest {
+class ProjectServiceTest {
 
     @Autowired
     private ProjectService projectService;
@@ -40,9 +42,7 @@ public class ProjectServiceTest {
 
     @Test
     void getProjectInvalidId_thenThrowException() {
-        Exception e = assertThrows(Exception.class, () -> {
-            projectService.getProjectById(2);
-        });
+        Exception e = assertThrows(Exception.class, () -> projectService.getProjectById(2));
         String expectedMessage = "Project not found.";
         assertTrue(e.getMessage().contains(expectedMessage));
     }

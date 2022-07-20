@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let sprints = [];
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i])})
+            end: sprintEndDatesList[i], backgroundColor: sprintColoursList[i], textColor: getTextColour(sprintColoursList[i]),
+            classNames: 'defaultEventBorder'})
     }
     let selectedSprint = null;
 
@@ -37,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousedown', () => {
         if(!mouseoverSprint){
             if (selectedSprint != null) {
+                // removing previous sprint border colour and width
+                selectedSprint.setProp('classNames', 'defaultEventBorder');
+
                 // de-select sprint
                 selectedSprint.setProp('durationEditable', false);
                 selectedSprint = null;
@@ -47,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
-        eventDurationEditable: false,                       // sprints can't be edited by default
+        eventDurationEditable: false,                          // sprints can't be edited by default
         timeZone: 'UTC',
         themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
@@ -73,10 +77,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sprintsEditable === "true") {
                 // if the user clicks on a sprint, update the selected sprint
                 if (selectedSprint != null) {
-                    // remove editing from current sprint
+                    // removing previous sprint border colour and width
+                    selectedSprint.setProp('classNames', 'defaultEventBorder');
+
+                    // remove editing from previous sprint
                     selectedSprint.setProp('durationEditable', false);
                 }
                 selectedSprint = info.event;
+
+                // adding current sprint border colour and width
+                selectedSprint.setProp('classNames', 'currentEventBorder');
 
                 // allow editing on new selected sprint
                 selectedSprint.setProp('durationEditable', true);

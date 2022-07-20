@@ -23,31 +23,28 @@ import org.junit.jupiter.api.BeforeAll;
  */
 @SpringBootTest
 class EventTests {
-    @Autowired
-    private DateUtils utils;
-
     private static List<Sprint> sprintList = new ArrayList<Sprint>();
 
     private String defaultEventColour = "#ff3823";
 
     /* Some helper functions for creation of events */
     private Event createEventOutsideSprints() throws Exception {
-        Date eventStartDate = utils.toDate("2022-02-25");
-        Date eventEndDate = utils.toDate("2022-02-26");
+        Date eventStartDate = DateUtils.toDate("2022-02-25");
+        Date eventEndDate = DateUtils.toDate("2022-02-26");
         int parentProjId = 5;
         return new Event(parentProjId, "Outside sprints", "", eventStartDate, eventEndDate);
     }
 
     private Event createEventInsideSprint() throws Exception {
-        Date eventStartDate = utils.toDate("2022-02-06");
-        Date eventEndDate = utils.toDate("2022-02-06");
+        Date eventStartDate = DateUtils.toDate("2022-02-06");
+        Date eventEndDate = DateUtils.toDate("2022-02-06");
         int parentProjId = 5;
         return new Event(parentProjId, "Inside sprints", "", eventStartDate, eventEndDate);
     }
 
     private Event createEventSpanningSprints() throws Exception {
-        Date eventStartDate = utils.toDate("2022-02-06");
-        Date eventEndDate = utils.toDate("2022-03-06");
+        Date eventStartDate = DateUtils.toDate("2022-02-06");
+        Date eventEndDate = DateUtils.toDate("2022-03-06");
         int parentProjId = 5;
         return new Event(parentProjId, "Spanning sprints", "", eventStartDate, eventEndDate);
     }
@@ -57,14 +54,13 @@ class EventTests {
     public static void createSprintList() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         int parentProjId = 5;
-        List<String> months = Arrays.asList("FEB", "MAR", "APR", "MAY", "JUN");
         for(int i = 1; i < 6; i++) {
             Sprint tempSprint = new Sprint();
             tempSprint.setSprintLabel("Sprint " + i);
             tempSprint.setSprintName("Sprint " + i);
             tempSprint.setParentProjectId(parentProjId);
-            tempSprint.setStartDateString("05/" + months.get(i-1) + "/2022");
-            tempSprint.setEndDateString("24/" + months.get(i-1) + "/2022");
+            tempSprint.setStartDateString("2022-0" + (i+1) + "-05");
+            tempSprint.setEndDateString("2022-0" + (i+1) + "-24");
             tempSprint.setSprintColour("#00000" + i);
             sprintList.add(tempSprint);
         }
@@ -95,7 +91,7 @@ class EventTests {
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
 
-        event.setEndDate(utils.toDate("2022-02-26"));
+        event.setEndDate(DateUtils.toDate("2022-02-26"));
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
         assertEquals(defaultEventColour, event.determineColour(sprintList, true));
     }
@@ -105,8 +101,8 @@ class EventTests {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
-        event.setStartDate(utils.toDate("2022-02-05"));
-        event.setEndDate(utils.toDate("2022-02-05"));
+        event.setStartDate(DateUtils.toDate("2022-02-05"));
+        event.setEndDate(DateUtils.toDate("2022-02-05"));
 
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
@@ -117,7 +113,7 @@ class EventTests {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(1);
         Event event = createEventOutsideSprints();
-        event.setEndDate(utils.toDate("2022-03-06"));
+        event.setEndDate(DateUtils.toDate("2022-03-06"));
 
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
         assertEquals(defaultEventColour, event.determineColour(sprintList, false));
@@ -128,8 +124,8 @@ class EventTests {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
-        event.setStartDate(utils.toDate("2022-02-24"));
-        event.setEndDate(utils.toDate("2022-02-24"));
+        event.setStartDate(DateUtils.toDate("2022-02-24"));
+        event.setEndDate(DateUtils.toDate("2022-02-24"));
 
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, false));
         assertEquals(sprint.getSprintColour(), event.determineColour(sprintList, true));
