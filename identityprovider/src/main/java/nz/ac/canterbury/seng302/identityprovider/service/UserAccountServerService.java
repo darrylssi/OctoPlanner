@@ -27,8 +27,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
 
-
+/**
+ * This class contains server-side methods for dealing with user accounts in the IDP, such as
+ * methods dealing with profile photos, registering, roles, paginated users, etc.
+ */
 @GrpcService
 public class UserAccountServerService extends UserAccountServiceGrpc.UserAccountServiceImplBase {
 
