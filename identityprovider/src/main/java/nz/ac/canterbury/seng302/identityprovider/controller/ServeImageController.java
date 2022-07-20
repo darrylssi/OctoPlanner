@@ -54,8 +54,8 @@ public class ServeImageController {
             HttpServletResponse response) throws IOException {
         // Construct the directory path
         Path pathToImage = avatarFolder.resolve(filename).normalize();
-        logger.info("pathToImage={}", pathToImage);
-        logger.info("avatarFolder={}", avatarFolder);
+        logger.info("pathToImage={}", pathToImage.toAbsolutePath());
+        logger.info("avatarFolder={}", avatarFolder.toAbsolutePath());
 
         if (!pathToImage.startsWith(avatarFolder)) { // Directory Traversal check
             response.setStatus(404);
