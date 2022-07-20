@@ -61,6 +61,7 @@ public class UserAccountClientService {
         return userAccountStub.register(registerRequest);
     }
 
+
     /**
      * Gets a user account from the identity provider with the specified id
      * @param id The id of the user account to get

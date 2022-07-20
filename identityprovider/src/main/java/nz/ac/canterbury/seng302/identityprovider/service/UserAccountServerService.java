@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
+
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -25,21 +26,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+
 
 @GrpcService
 public class UserAccountServerService extends UserAccountServiceGrpc.UserAccountServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
-    
+
     private static final String USER_PHOTO_SUFFIX = "_photo.";
-    
+
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
-    
+
     @Value("${profile-image-folder}")
     private Path profileImageFolder;
 
@@ -247,10 +246,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("register() has been called");
         UserRegisterResponse.Builder reply = UserRegisterResponse.newBuilder();
         List<ValidationError> errors = validator.validateRegisterRequest(request);
+        StringJoiner bld = new StringJoiner(". ");
 
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
+                logger.error(String.format("Register user %s : %s - %s",
+                        request.getUsername(), error.getFieldName(), error.getErrorText()));
+                bld.add(error.getErrorText());
                 String logOutput = String.format("Register user %s : %s - %s",
                         request.getUsername(), error.getFieldName(), error.getErrorText());
                 logger.error(logOutput);
@@ -258,7 +261,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
             reply
                     .setIsSuccess(false)
-                    .setMessage("User could not be created")
+                    .setMessage(bld.toString())
                     .addAllValidationErrors(errors);
             responseObserver.onNext(reply.build());
             responseObserver.onCompleted();

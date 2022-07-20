@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Edit Sprint</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -16,10 +16,6 @@
         <input id="sprintName" type="text" th:name="sprintName" th:field="*{sprintName}">
         <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         <br/>
-        <div>
-            <label for="colourPicker">Pick a colour:</label>
-            <input type="color" id="colourPicker" value="#000000" th:name="sprintColour" th:value="${sprintColour}">
-        </div>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
                 <label for="sprintStartDate" class="required">Sprint Start Date</label> <br/>

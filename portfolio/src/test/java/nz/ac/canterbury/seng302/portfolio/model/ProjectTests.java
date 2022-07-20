@@ -1,11 +1,15 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -14,21 +18,12 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 /**
  * Holds unit tests for the Project class.
@@ -38,8 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * being saved to the database.
  */
 @SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectTests {
-    @Autowired
+    @Mock
     private ProjectService projectService;
 
     private static Validator validator;
@@ -50,11 +46,8 @@ public class ProjectTests {
         validator = factory.getValidator();
     }
 
-    @Autowired
+    @Mock
     private ProjectRepository projectRepository;
-
-    @Autowired
-    private DateUtils utils;
 
     private Project baseProject;
 
@@ -62,7 +55,7 @@ public class ProjectTests {
 
     private Sprint sprint1;
     private Sprint sprint2;
-    private List<Sprint> sprintList;
+    private final List<Sprint> sprintList = new ArrayList<>();
 
     /**
      * This exists to check that dates are equivalent for the purposes of these tests. It checks
@@ -81,20 +74,21 @@ public class ProjectTests {
     }
 
     @BeforeEach
-    public void setUp() throws ParseException {
-        sprintList = new ArrayList<>();
-        projectRepository.deleteAll();
+    public void setUp() {
         baseProject = new Project();
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
-        baseProject.setStartDateString("01/JAN/2022");
-        baseProject.setEndDateString("01/OCT/2022");
+        baseProject.setStartDateString("2022-01-01");
+        baseProject.setEndDateString("2022-10-01");
+        baseProject.setId(1);
 
         // Artificially set for validation here so that tests aren't dependent on when they are run
-        creationDate = utils.toDate("2022-05-27");
+        creationDate = DateUtils.toDate("2022-05-27");
 
-        sprint1 = new Sprint(1, "Sprint 1", "This is S1", utils.toDate("2022-01-01"), utils.toDate("2022-02-02"), "#aabbcc");
-        sprint2 = new Sprint(1, "Sprint 2", "This is S2", utils.toDate("2022-02-06"), utils.toDate("2022-03-04"), "#112233");
+        sprint1 = new Sprint(1, "Sprint 1", "This is S1", DateUtils.toDate("2022-01-01"), DateUtils.toDate("2022-02-02"), "#aabbcc");
+        sprint2 = new Sprint(1, "Sprint 2", "This is S2", DateUtils.toDate("2022-02-06"), DateUtils.toDate("2022-03-04"), "#112233");
+        sprint1.setSprintLabel("Sprint 1");
+        sprint2.setSprintLabel("Sprint 2");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
     }
@@ -112,126 +106,140 @@ public class ProjectTests {
 
     @Test
     void searchById_getProject() throws Exception {
-        projectService.saveProject(baseProject);
+        Mockito.when(projectService.getProjectById(baseProject.getId())).thenReturn(baseProject);
+
         Project foundProject = projectService.getProjectById(baseProject.getId());
-        foundProject.setStartDateString(Project.dateToString(foundProject.getProjectStartDate()));
-        foundProject.setEndDateString(Project.dateToString(foundProject.getProjectEndDate()));
+        foundProject.setStartDateString(DateUtils.toString(foundProject.getProjectStartDate()));
+        foundProject.setEndDateString(DateUtils.toString(foundProject.getProjectEndDate()));
         assertEquals(foundProject.toString(), baseProject.toString());
     }
 
     @Test
     void saveNullProject_getException() {
         Project nullProject = new Project();
+        when(projectRepository.save(nullProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(nullProject));
     }
 
     @Test
     void saveNullNameProject_getException() {
         baseProject.setProjectName(null);
+        when(projectRepository.save(baseProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveEmptyNameProject_getException() {
         baseProject.setProjectName("");
+        when(projectRepository.save(baseProject)).thenThrow(TransactionSystemException.class);
         assertThrows(TransactionSystemException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullDescriptionProject_getException() {
         baseProject.setProjectDescription(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullStartDateProject_getException() {
         baseProject.setProjectStartDate(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
     @Test
     void saveNullEndDateProject_getException() {
         baseProject.setProjectEndDate(null);
+        when(projectRepository.save(baseProject)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> projectRepository.save(baseProject));
     }
 
-
     @Test
-    void checkValidProjectDateRangesForEditProject_getErrorMessage() throws ParseException {
+    void checkValidProjectDateRangesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        String newProjectStartDate = "2022-02-04";
-        String newProjectEndDate = "2022-08-05";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
-
-        assertEquals("Project dates must not be before or after the sprint dates " + utils.toString(sprint1.getSprintStartDate())
-                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+        Date start = DateUtils.toDate("2022-02-04");
+        Date end = DateUtils.toDate("2022-08-05");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint1.getSprintLabel() + ": " +
+                sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
+                " is outside the project dates" , actual);
     }
 
     @Test
-    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectStartDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        String newProjectStartDate = "2022-01-20";
-        String newProjectEndDate = "2022-08-20";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
-
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint1.getSprintStartDate())
-                + " - " + utils.toString(sprint1.getSprintEndDate()) , errorMessage);
+        Date start = DateUtils.toDate("2022-01-20");
+        Date end = DateUtils.toDate("2022-01-20");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint1.getSprintLabel() + ": " +
+                sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
+                " is outside the project dates" , actual);
     }
 
     @Test
-    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectEndDateBetweenSprintDatesForEditProject_getErrorMessage() {
         // Sprint list has two sprints with dates:
         // Sprint 1:  2022-01-01 -- 2022-02-02
         // Sprint 2:  2022-02-06 -- 2022-03-04
 
-        String newProjectStartDate = "2022-01-01";
-        String newProjectEndDate = "2022-02-10";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
-
-        assertEquals("Dates must not overlap with other sprints & it is overlapping with " + utils.toString(sprint2.getSprintStartDate())
-                + " - " + utils.toString(sprint2.getSprintEndDate()) , errorMessage);
+        Date start = DateUtils.toDate("2022-01-01");
+        Date end = DateUtils.toDate("2022-02-10");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
+        assertEquals(sprint2.getSprintLabel() + ": " +
+                sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
+                " is outside the project dates" , actual);
     }
 
     @Test
-    void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() throws ParseException {
-        // Project start date cannot be more than a year before the artifically set creation date
+    void checkProjectStartDateNotTooEarlyForEditProject_getSuccess() {
+        // Project start date cannot be more than a year before the artificially set creation date
 
         /* Given: setup() has been run */
         /* When: these (valid) dates are validated */
-        String newProjectStartDate = "2021-05-27";
-        String newProjectEndDate = "2022-10-01";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
-
+        Date start = DateUtils.toDate("2021-05-27");
+        Date end = DateUtils.toDate("2022-10-01");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
         /* Then: the validation should return a success */
-        assertEquals("" , errorMessage);
+        assertEquals("" , actual);
     }
 
     @Test
-    void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() throws ParseException {
+    void checkProjectStartDateNotTooEarlyForEditProject_getErrorMessage() {
         /* Given: setup() has been run */
         /* When: these (invalid) dates are validated */
-        String newProjectStartDate = "2021-05-26";
-        String newProjectEndDate = "2022-10-01";
-        String errorMessage = baseProject.validEditProjectDateRanges(utils.toDate(newProjectStartDate),
-                utils.toDate(newProjectEndDate), creationDate, sprintList);
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(creationDate);
+        startCal.add(Calendar.YEAR, -1);
+        Date earliestStart = startCal.getTime();
 
+        Date start = DateUtils.toDate("2021-05-26");
+        Date end = DateUtils.toDate("2022-10-01");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        String actual = error.getFirstError();
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
-                     "(cannot start before 2021-05-27)\n" , errorMessage);
+                     "(cannot start before " + DateUtils.toDisplayString(earliestStart) + ")" , actual);
     }
 
     @Test
-    void checkProjectCreationDateRecordedCorrectly_getSuccess() throws ParseException {
+    void checkProjectCreationDateRecordedCorrectly_getSuccess() {
         /* Given: setup() has been run */
         /* When: the creation date is fetched */
         Date recordedCreation = baseProject.getProjectCreationDate();
