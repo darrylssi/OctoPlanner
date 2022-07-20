@@ -17,12 +17,12 @@ public class EventForm {
     private String description;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    private Date startTime;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date endDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    private Date endTime;
 
     public String getName() {
         return name;
@@ -40,20 +40,20 @@ public class EventForm {
         this.description = description;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setStartDate(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public Date getEndTime() {
+        return endTime;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void endTime(Date endTime) {
+        this.endTime = endTime;
     }
 
 }

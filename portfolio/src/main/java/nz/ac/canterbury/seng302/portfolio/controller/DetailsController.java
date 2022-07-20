@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
@@ -44,6 +45,7 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
+                EventForm eventForm,
                 Model model
     ) throws Exception {
         PrincipalData thisUser = PrincipalData.from(principal);
