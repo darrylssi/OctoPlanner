@@ -33,7 +33,7 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     let editForm = document.createElement("div");
     editForm.setAttribute("id", "editEventForm");
     editForm.innerHTML = editFormTemplate;
-    document.getElementById("event-box-1").appendChild(editForm, eventBox);
+    document.getElementById("event-box-" + eventId).appendChild(editForm);
     document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
     document.getElementById("editEventNameInput").setAttribute("value", eventName);
     document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);

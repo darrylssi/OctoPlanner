@@ -65,8 +65,8 @@
                 </div>
                 <div class="break"></div>
                 <div th:unless="${#arrays.isEmpty(events)}" th:each="event: ${events}" class="event-list-container">
-                    <div th:if="${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" id="event-box-1" class="event-box" >
-                        <div id="event-1" class="event" th:object="${event}" >
+                    <div th:if="${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:id="'event-box-' + ${event.getId}" class="event-box" >
+                        <div th:id="'event-' + *{getId}" class="event" th:object="${event}" >
                             <div>
                                 <span th:text="*{getEventName}" ></span>
                                 <span class="sprint-date" th:text="|*{getEventStartDate.toString().substring(0, 10)} - *{getEventEndDate.toString().substring(0, 10)}|" ></span>
@@ -163,8 +163,10 @@
         </div>
     </div>
 </div>
-<script>
+<script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event
+    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/;
+    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/;
     const editFormTemplate = '' +
     '<div id="editEventForm">' +
     '    <div class="card">' +
@@ -189,14 +191,14 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
     '                            <label for="editEventStartTime">Start Time</label>' +
     '                            <div id="editEventStartFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3 has-validation">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
     '                            <label for="editEventEndTime">End Time</label>' +
     '                            <div id="editEventEndFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
