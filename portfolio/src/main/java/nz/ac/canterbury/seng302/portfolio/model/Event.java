@@ -72,10 +72,10 @@ public class Event {
                 id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-/**
- * Sets the value of the event id 
- * @param id the value to set the id to
- */
+    /**
+    * Sets the value of the event id
+    * @param id the value to set the id to
+    */
     public void setId(int id) {
         this.id = id;
     }
