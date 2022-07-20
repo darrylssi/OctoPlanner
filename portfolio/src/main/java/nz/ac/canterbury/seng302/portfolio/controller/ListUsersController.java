@@ -104,6 +104,8 @@ public class ListUsersController extends PageController {
         int totalPages = (users.getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
         model.addAttribute("totalPages", totalPages);
 
+        model.addAttribute("tab", 1);
+
         return "users";
     }
 
