@@ -10,6 +10,10 @@
     <link rel="stylesheet" th:href="|../../styles/profile.css|">
     <link rel="stylesheet" th:href="|../../styles/editUser.css|">
     <link rel="stylesheet" th:href="|../../styles/form.css|">
+    <link rel="stylesheet" th:href="|../../styles/croppie.css|">
+
+    <script th:src="|../../scripts/editUser.js|" type="module"></script>
+    <script th:src="|../../scripts/croppie.js|" type="module"></script>
 
 </head>
 
@@ -23,8 +27,7 @@
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div th:text="${dateCreated}"></div>
         <div class="centre-box">
-            <img class="profile-image" th:src=@{../../img/default-pfp.jpg}><br/>
-            <!--Add a button to edit the profile image here if necessary-->
+            <img class="profile-image" th:src="${G_ProfilePic}" alt="User profile photo"><br/>
         </div>
         <form th:action="@{./edit}"
             method="post">
@@ -98,7 +101,7 @@
             <div class="input-box">
                 <label class="required"> New Password </label>
                 <input type="password" placeholder="Enter your new password" th:field="*{password}" th:required="required" /><br>
-                <span th:class="error" th:text="${error_Password}"></span>
+                <span th:class="error" th:text="${error_NewPassword}"></span>
             </div>
             <div class="input-box">
                 <label class="required"> Confirm New Password </label>
@@ -115,6 +118,39 @@
                 <button class="form-button save" type="submit">Change Password</button>
             </div>
         </form>
+        <br/>
+        <hr/>
+        <br/>
+            <form th:action="|./edit|" method="post" id="photoForm">
+            <div class="user-info">
+                <div class="input-box">
+                    <label> Profile Photo </label>
+                    <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
+                    <input id="imageString" type="hidden" th:name="imageString">
+                    <span th:class="error" th:text="${error_InvalidPhoto}"></span>
+                </div>
+
+                <div id="croppieWindow"></div>
+            </div>
+            <div class="centre-box">
+                <div class="loader" id="croppieLoader"></div>
+                <img src="" id="image-preview"/>
+                <button class="form-button save" type="submit" id="photo-upload-submit-button">Save Photo</button>
+            </div>
+        </form>
+        <br/>
+        <div th:if="${userHasProfilePhoto}">
+            <hr/>
+            <br/>
+            <form th:action="|./edit|" method="post">
+                <div th:if="${error_DeletePhoto}" class="centre-box">
+                    <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                </div>
+                <div class="centre-box">
+                    <button class="form-button save" type="submit">Delete Profile Photo</button>
+                </div>
+            </form>
+        </div>
     </div>
     </div>
 
