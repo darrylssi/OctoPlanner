@@ -208,6 +208,9 @@ button {
 .event-box {
     padding: 5px;
     border-radius: 5px;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
 }
 
 .event-list-container {
@@ -217,13 +220,24 @@ button {
     width: 100%;
 }
 
+.outside-event {
+    width: calc(100% - 48px);
+    margin-left: 48px;
+}
+
 .event-date {
     color: #666666;
     font-size: small;
 }
 
+.event {
+    flex-grow: 1;
+}
+
 .editEventForm {
     width: 100%;
+    flex-grow: 5;
+    margin-top: 5px;
 }
 
 .break {
