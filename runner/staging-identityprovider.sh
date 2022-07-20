@@ -12,7 +12,6 @@ source staging-identityprovider/env
 set +o allexport
 
 java -jar staging-identityprovider/libs/identityprovider-0.0.1-SNAPSHOT.jar \
-    --server.port=9502 \
     --spring.application.name=identity-provider \
     --server.port=$HTTP_PORT \
     --grpc.server.port=$GRPC_PORT \
