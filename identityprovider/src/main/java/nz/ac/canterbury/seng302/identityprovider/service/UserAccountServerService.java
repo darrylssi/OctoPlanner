@@ -165,12 +165,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         String extension = request.getMetaData().getFileType();
         var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
 
-        Path filePath = profileImageFolder.resolve(fileName);
-
         // delete the file if it already exists
-        Files.deleteIfExists(filePath);
-        Files.createDirectories(filePath.getParent()); // creates the folders if they don't exist already
-        return Files.newOutputStream(filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        Files.deleteIfExists(profileImageFolder.resolve(fileName));
+
+        return Files.newOutputStream(profileImageFolder.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
     /**

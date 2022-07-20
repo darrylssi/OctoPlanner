@@ -20,7 +20,7 @@ public class ProfilePhotoService {
     private Path profileImageFolder;
 
     private static final String IMAGE_FILENAME_FORMAT = "%d_photo.jpg";
-    private static final String DEFAULT_PROFILE_IMAGE_PATH = "img/default-pfp.jpg";
+    private static final String DEFAULT_PROFILE_IMAGE = "default-pfp.jpg";
 
     public String getUserProfileImageUrl(int id) {
         String userImageFilename = String.format(IMAGE_FILENAME_FORMAT, id);
@@ -36,7 +36,7 @@ public class ProfilePhotoService {
             return userImageUrl.toString();
         } else {
             // Use the default image
-            URI defaultImageUrl = httpURL.resolve(DEFAULT_PROFILE_IMAGE_PATH);
+            URI defaultImageUrl = fullImageEndpoint.resolve(DEFAULT_PROFILE_IMAGE);
             return defaultImageUrl.toString();
         }
     }
