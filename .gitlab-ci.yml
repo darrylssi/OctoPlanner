@@ -64,6 +64,10 @@ deploy-staging-identityprovider:
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-identityprovider/ || true
     - mkdir /home/gitlab-runner/staging-identityprovider/
+#    - mkdir /home/gitlab-runner/staging-identityprovider/data
+#    - mkdir /home/gitlab-runner/staging-identityprovider/data/photos
+#    - mkdir /home/gitlab-runner/staging-identityprovider/media
+#    - mkdir /home/gitlab-runner/staging-identityprovider/media/avatars
     - echo "MARIADB_USERNAME=${MARIADB_USERNAME} MARIADB_PASSWORD=${MARIADB_PASSWORD}" > /home/gitlab-runner/staging-identityprovider/env
     - cp -r ./build/libs /home/gitlab-runner/staging-identityprovider
     - cp ../runner/staging-identityprovider.sh /home/gitlab-runner/staging-identityprovider.sh

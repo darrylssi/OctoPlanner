@@ -25,6 +25,7 @@ import javax.validation.Valid;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -39,6 +40,13 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+
+    // Provide a list of colours that are noticably different for the system to cycle through
+    private final List<String> SPRINT_COLOURS = Arrays.asList(
+            "#320d6d",
+            "#b83daf",
+            "#449dd1",
+            "#52ffb8");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -67,13 +75,6 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
-
-        // Generate a random colour, from https://www.codespeedy.com/generate-random-hex-color-code-in-java/
-        Random random = new Random();
-        int colourNum = random.nextInt(0xffffff + 1);
-        String colourCode = String.format("#%06x", colourNum);
-
-        model.addAttribute("sprintColour", colourCode);
 
         // Calculate the default sprint start date
         Date sprintStart;
@@ -123,7 +124,6 @@ public class AddSprintController extends PageController {
      * @param sprintStartDate Gets the given sprint's start date
      * @param sprintEndDate Gets the given sprint's end date
      * @param sprintDescription Gets the given sprint description
-     * @param sprintColour Gets the given sprint colour string
      * @param sprint The new sprint to be added
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
@@ -138,7 +138,6 @@ public class AddSprintController extends PageController {
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
-            @RequestParam(name="sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -148,8 +147,19 @@ public class AddSprintController extends PageController {
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
+        // Getting sprint list containing all the sprints
+        List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
+        sprintList.sort((s1, s2) -> { return s1.getSprintEndDate().compareTo(s2.getSprintEndDate()); });
+
+        // Fetch system colour for sprint
+        int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
+        String sprintColour = SPRINT_COLOURS.get(colourIndex);
+        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+            sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
+        }
+
         ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getSprintsInProject(id));
+                id, parentProject, sprintList);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError()) {
@@ -163,7 +173,6 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            model.addAttribute("sprintColour", sprintColour);
             return "addSprint";
         }
 

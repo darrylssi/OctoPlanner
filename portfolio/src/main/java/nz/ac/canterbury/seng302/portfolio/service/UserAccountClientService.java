@@ -1,20 +1,33 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
+import com.google.protobuf.ByteString;
+import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 public class UserAccountClientService {
 
     @GrpcClient("identity-provider-grpc-server")
     private UserAccountServiceGrpc.UserAccountServiceBlockingStub userAccountStub;
+
+    @GrpcClient("identity-provider-grpc-server")
+    private UserAccountServiceGrpc.UserAccountServiceStub userAccountServiceStub;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserAccountClientService.class);
 
     /**
      * Sends a UserRegisterRequest to the identity provider
@@ -68,8 +81,8 @@ public class UserAccountClientService {
 
     /**
      * Gets a paginated list of users from the identity provider
-     * @param pageNumber What "page" of the users you want. Affected by the ordering and page size
-     * @param pageSize How many items you want from 
+     * @param offset What "page" of the users you want. Affected by the ordering and page size
+     * @param limit How many items you want from
      * @param orderBy How the list is ordered.
      *                Your options are:
      *                  <ul>
@@ -185,5 +198,58 @@ public class UserAccountClientService {
                 .setNewPassword(newPassword)
                 .build();
         return userAccountStub.changeUserPassword(changePasswordRequest);
+    }
+
+
+    /**
+     * Sends an UploadUserProfilePhotoRequest to the identity provider.
+     * @param userId ID of the user to upload the profile photo to
+     * @param file Image file to be uploaded
+     * @throws IOException When there is an error with reading file
+     */
+    public void uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
+
+        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
+
+        String filetype = file.getContentType();
+        if (filetype != null) {
+            filetype = filetype.split("/")[1];
+        }
+
+        logger.info("Uploading profile photo with filetype: {} ", filetype);
+        UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
+                .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
+                        .setUserId(userId)
+                        .setFileType(filetype)
+                        .build())
+                .build();
+        streamObserver.onNext(metadata);
+
+        // upload file as chunk
+        InputStream inputStream = file.getInputStream();
+        byte[] bytes = new byte[4096];
+        int size;
+        while ((size = inputStream.read(bytes)) > 0){
+            UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
+                    .setFileContent(ByteString.copyFrom(bytes, 0 , size))
+                    .build();
+            streamObserver.onNext(uploadRequest);
+        }
+
+        // close the stream
+        inputStream.close();
+        streamObserver.onCompleted();
+    }
+
+    /**
+     * Sends a DeleteUserProfilePhoto request to the identity provider
+     * @param userId The id of the user to remove the photo from
+     * @return A DeleteUserProfilePhotoResponse containing the success (or failure message) of the request
+     */
+    public DeleteUserProfilePhotoResponse deleteUserProfilePhoto(final int userId) throws StatusRuntimeException {
+        DeleteUserProfilePhotoRequest deletePhotoRequest = DeleteUserProfilePhotoRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+        return userAccountStub.deleteUserProfilePhoto(deletePhotoRequest);
     }
 }

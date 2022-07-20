@@ -73,6 +73,8 @@ public class MonthlyCalendarController extends PageController {
             model.addAttribute("sprintColours", getSprintsArrayList.get(4));
         }
 
+        model.addAttribute("tab", 2);
+
         return "monthlyCalendar";
     }
 
