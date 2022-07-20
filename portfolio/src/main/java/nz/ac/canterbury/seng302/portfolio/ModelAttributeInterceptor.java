@@ -3,14 +3,17 @@ package nz.ac.canterbury.seng302.portfolio;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 
 /**
  * Interceptor for the template renderer.
@@ -27,7 +30,11 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
      * clashes.
      * Example: <code>G_fullname</code> instead of <code>fullname</code>
      * </p>
-     */
+    */
+
+    @Autowired
+    private UserAccountClientService userAccountClientService;
+    
     @Override
     public void postHandle(
             final HttpServletRequest request,
@@ -45,6 +52,13 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
         // fragment) can easily access it.
         PrincipalData thisUser = extractPrincipalDataFromRequest(request);
         model.addAttribute("G_PrincipalData", thisUser);
+        // Add the user's full UserResponse, currently used to get the PFP
+        if (thisUser.isAuthenticated()) {
+            UserResponse fullUser = userAccountClientService.getUserAccountById(thisUser.getID());
+            model.addAttribute("G_ProfilePic", fullUser.getProfileImagePath());
+        }
+
+        
     }
 
     /**

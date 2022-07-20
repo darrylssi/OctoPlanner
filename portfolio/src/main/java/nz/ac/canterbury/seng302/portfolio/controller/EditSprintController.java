@@ -113,6 +113,7 @@ public class EditSprintController extends PageController {
         sprint.setEndDate(DateUtils.toDate(sprintEndDate));
         sprint.setSprintDescription(sprintDescription);
         sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+        sprint.setSprintColour(sprintService.getSprintById(id).getSprintColour());
 
         sprintService.saveSprint(sprint);
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
