@@ -197,8 +197,33 @@ button {
     display: inline-block;
 }
 
+.event-left {
+    float: left;
+}
+
+.event-right {
+    float: right;
+}
+
+.event-box {
+    padding: 5px;
+    border-radius: 5px;
+}
+
 .event-list-container {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.event-date {
+    color: #666666;
+    font-size: small;
+}
+
+.editEventForm {
+    width: 100%;
 }
 
 .break {

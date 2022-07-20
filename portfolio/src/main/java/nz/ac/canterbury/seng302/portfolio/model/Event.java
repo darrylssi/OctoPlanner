@@ -214,38 +214,4 @@ public class Event {
         return DEFAULT_COLOUR;             // Default colour
     }
 
-//    /**
-//     *
-//     * @param eventList
-//     * @param sprintList
-//     * @return
-//     */
-//    public ArrayList[] getInAndOutEventsOfSprints(List<Event> eventList, List<Sprint> sprintList) {
-//        ArrayList<Event> eventsInSprints = new ArrayList<>();
-//        ArrayList<Event> eventsOutSprints = new ArrayList<>();
-//
-//        for (int i = 0; i < eventList.size(); i++) {
-//            Date eventStartDate = eventList.get(i).getEventStartDate();
-//            Date eventEndDate = eventList.get(i).getEventEndDate();
-//
-//            for (int j = 0; j < sprintList.size(); j++) {
-//                Date sprintStartDate = sprintList.get(j).getSprintStartDate();
-//                Date sprintEndDate = sprintList.get(j).getSprintEndDate();
-//
-//                if (eventStartDate.before(sprintStartDate) && eventEndDate.before(sprintStartDate)) {
-//                    eventsOutSprints.add(eventList.get(i));
-//                    break;
-//                } else if (eventStartDate.before(sprintStartDate) && (eventEndDate.equals(sprintStartDate) ||
-//                        eventEndDate.equals(sprintEndDate) || (eventEndDate.after(sprintStartDate)
-//                        && eventEndDate.before(sprintEndDate)))) {
-//                    eventsInSprints.add(eventList.get(i));
-//                    eventsOutSprints.add(eventList.get(i));
-//                }
-//
-//            }
-//        }
-//
-//        return [eventsInSprints, eventsOutSprints];
-//    }
-
 }
