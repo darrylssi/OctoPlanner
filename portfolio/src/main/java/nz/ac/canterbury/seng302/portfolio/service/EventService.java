@@ -1,0 +1,78 @@
+package nz.ac.canterbury.seng302.portfolio.service;
+
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class EventService {
+    @Autowired
+    private EventRepository repository;
+
+    /**
+     * Get list of all events
+     */
+    public List<Event> getAllEvents() {
+        return (List<Event>) repository.findAll();
+    }
+
+    /**
+     * Returns a list of all events that match the given name
+     * @param name the event name to search for
+     * @return list of matching events, or empty list if no matches
+     */
+    public List<Event> getEventByName(String name) {
+        return repository.findByEventName(name);
+    }
+
+    /**
+     * Returns a list of all events for a given project
+     * @param id the id of the project to find events from
+     * @return list of matching events, or empty list if no matches
+     */
+    public List<Event> getEventByParentProjectId(int id) {
+        return repository.findEventByParentProjectId(id);
+    }
+
+    /**
+     * Get event by id
+     */
+    public Event getEventById(Integer id) throws Exception {
+        Event event = repository.findEventById(id);
+        if (event != null) {
+            return event;
+        } else {
+            throw new Exception("Event not found!");
+        }
+    }
+
+    /**
+     * Gets all the events that belong to a given project.
+     *
+     * TODO [Andrew]: Tried making the relationship part of the Project class using @OneToMany & @ManyToOne, didn't work. If someone can figure it out, I'd rather use that.
+     */
+    public List<Event> getEventsOfProjectById(Integer id) {
+        return repository.findEventByParentProjectId(id);
+    }
+
+    /**
+     * Deletes an event from the repository
+     * @param eventId the id of the event to be deleted
+     */
+    public void deleteEvent(int eventId) {
+        repository.deleteById(eventId);
+    }
+
+    /**
+     * Adds a new event into the database if the event with the given ID does not exist.
+     * Otherwise, updates the event with the given ID.
+     * @param event event to be added to the database
+     */
+    public void saveEvent(Event event) {
+        repository.save(event);
+    }
+
+}
