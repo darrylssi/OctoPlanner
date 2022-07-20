@@ -26,7 +26,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * Controller for the add sprint details page

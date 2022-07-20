@@ -3,6 +3,7 @@ import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ class DetailsControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    EventService eventService;
     @MockBean
     SprintService sprintService;
     @MockBean

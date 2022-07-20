@@ -33,27 +33,12 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     let editForm = document.createElement("div");
     editForm.setAttribute("id", "editEventForm");
     editForm.innerHTML = editFormTemplate;
-    document.getElementById("event-box-1").appendChild(editForm, eventBox);
+    document.getElementById("event-box-" + eventId).appendChild(editForm);
     document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
     document.getElementById("editEventNameInput").setAttribute("value", eventName);
     document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);
     document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
     document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
-}
-
-function overlaps(eventStartString, eventEndString, sprintStartString, sprintEndString) {
-    console.log("data: ");
-    console.log("data: " + eventStartString);
-    console.log("data: " + eventEndString);
-    console.log("data: " + sprintStartString);
-    console.log("data: " + sprintEndString);
-
-    let eventStart = new Date(eventStartString);
-    let eventEnd = new Date(eventEndString);
-    let sprintStart = new Date(sprintStartString);
-    let sprintEnd = new Date(sprintEndString);
-
-    return eventStart <= sprintEnd && eventEnd >= sprintStart;
 }
 
 /** Remove the edit form from any event it is attached to */
