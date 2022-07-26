@@ -63,7 +63,6 @@ public class ProfilePageController {
         model.addAttribute("isCurrentUser", isCurrentUser);
         
         if (user != null) {
-//                model.addAttribute("profileImageURL", user.getProfileImagePath()); // TODO may be able to remove this
                 model.addAttribute("profileInfo", user);
                 model.addAttribute("userExists", true);
                 model.addAttribute("fullName", getFullName(
