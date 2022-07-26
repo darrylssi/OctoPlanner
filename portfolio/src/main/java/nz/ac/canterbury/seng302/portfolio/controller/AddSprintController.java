@@ -26,7 +26,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * Controller for the add sprint details page
@@ -154,7 +153,7 @@ public class AddSprintController extends PageController {
         // Fetch system colour for sprint
         int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
         String sprintColour = SPRINT_COLOURS.get(colourIndex);
-        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+        if (!sprintList.isEmpty() && sprintColour.equals(sprintList.get(sprintList.size() - 1).getSprintColour())) {
             sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
         }
 
