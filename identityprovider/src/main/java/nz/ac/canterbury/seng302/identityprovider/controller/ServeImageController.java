@@ -75,7 +75,7 @@ public class ServeImageController {
             IOUtils.copy(fileStream, response.getOutputStream());
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
         } catch (FileNotFoundException e) {
-            logger.info("Everything is fucked");
+            logger.info("Everything is fucked"); // TODO give better message
             response.setStatus(404);
             return;
         }
