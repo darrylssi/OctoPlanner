@@ -40,7 +40,7 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    // Provide a list of colours that are noticably different for the system to cycle through
+    // Provide a list of colours that are noticeably different for the system to cycle through
     private final List<String> SPRINT_COLOURS = Arrays.asList(
             "#320d6d",
             "#b83daf",

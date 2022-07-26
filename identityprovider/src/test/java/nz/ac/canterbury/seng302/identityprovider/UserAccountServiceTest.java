@@ -1473,7 +1473,7 @@ class UserAccountServiceTest {
         verify(observer, times(1)).onNext(captor.capture());
         DeleteUserProfilePhotoResponse response = captor.getValue();
 
-        assertFalse(response.getIsSuccess());
+        assertFalse(response.getIsSuccess(), response.getMessage());
 
         assertNotNull(response.getMessage());
         assertNotEquals("", response.getMessage());
