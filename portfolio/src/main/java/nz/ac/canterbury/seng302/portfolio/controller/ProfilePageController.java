@@ -5,6 +5,8 @@ import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
  */
 @Controller
 public class ProfilePageController {
+    private static final Logger logger = LoggerFactory.getLogger(ProfilePageController.class);
 
     @Autowired
     private UserAccountClientService userAccountClientService;
@@ -71,6 +74,7 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
+                logger.info("User profile image path: " + user.getProfileImagePath()); // TODO temporary for testing
             } else {
                 errors.add("Invalid ID");
             }
