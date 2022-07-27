@@ -75,7 +75,7 @@ public class ServeImageController {
             IOUtils.copy(fileStream, response.getOutputStream());
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
         } catch (FileNotFoundException e) {
-            logger.info(String.format("Exception when writing file: %s", e.getMessage()));
+            logger.info("Everything is fucked");
             response.setStatus(404);
             return;
         }
