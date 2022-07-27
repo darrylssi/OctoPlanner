@@ -55,7 +55,7 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
         // Add the user's full UserResponse, currently used to get the PFP
         if (thisUser.isAuthenticated()) {
             UserResponse fullUser = userAccountClientService.getUserAccountById(thisUser.getID());
-            model.addAttribute("G_ProfilePic", fullUser.getProfileImagePath());
+//            model.addAttribute("G_ProfilePic", fullUser.getProfileImagePath());
         }
 
         
