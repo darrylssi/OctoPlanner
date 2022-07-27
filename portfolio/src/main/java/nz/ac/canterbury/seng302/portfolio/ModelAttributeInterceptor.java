@@ -18,13 +18,13 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 /**
  * Interceptor for the template renderer.
  * 
- * Use this class to add any values that you want to be globally accessable.
+ * Use this class to add any values that you want to be globally accessible.
  */
 @Component
 public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
 
     /**
-     * Add any globally accessable attributes you want below.
+     * Add any globally accessible attributes you want below.
      * <p>
      * <b>One condition:</b> Give them a G_ prefix to prevent namespace
      * clashes.
@@ -40,7 +40,7 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
             final HttpServletRequest request,
             final HttpServletResponse response,
             final Object handler,
-            final ModelAndView modelAndView) throws Exception {
+            final ModelAndView modelAndView) {
         // Don't bother on pages without models (i.e. response bodies)
         if (modelAndView == null) {
             return;
