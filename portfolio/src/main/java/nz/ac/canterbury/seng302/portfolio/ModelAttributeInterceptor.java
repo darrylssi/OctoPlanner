@@ -34,7 +34,31 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
 
     @Autowired
     private UserAccountClientService userAccountClientService;
-    
+
+    /**
+     * This class is a hack.
+     * The problem is that model attributes that are strings WILL show up in the URL
+     * whenever a redirect is performed.
+     * We don't want this, so we have to encapsulate them in a class that is not a string.
+     * This is a problem with Spring and not something we can solve on our end. See:
+     * https://www.baeldung.com/spring-redirect-and-forward
+     * The methods all have model attributes in the URL.
+     */
+    private record NotString(String string) {
+        @Override
+        public String toString() {
+            return string;
+        }
+    }
+
+    /**
+     * Does things after a request is made, but before processing the view.
+     * Used to add globally accessible attributes to the model.
+     * @param request the request object
+     * @param response the response object
+     * @param handler the handler that is executed
+     * @param modelAndView the object containing the model and view. Add attributes to the model part.
+     */
     @Override
     public void postHandle(
             final HttpServletRequest request,
@@ -55,10 +79,9 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
         // Add the user's full UserResponse, currently used to get the PFP
         if (thisUser.isAuthenticated()) {
             UserResponse fullUser = userAccountClientService.getUserAccountById(thisUser.getID());
-            model.addAttribute("G_ProfilePic", fullUser.getProfileImagePath());
+            model.addAttribute("G_ProfilePic", new NotString(fullUser.getProfileImagePath()));
+            // see NotString documentation for why this has to be done
         }
-
-        
     }
 
     /**
