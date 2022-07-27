@@ -37,7 +37,7 @@ public abstract class PageController {
             case NOT_FOUND:
                 model.addAttribute("error", "Page not found");
                 model.addAttribute("status", "404");
-                model.addAttribute("feedback", "The page you attempted to access does not exist");
+                model.addAttribute("feedback", "We couldn't find the page you're looking for");
                 break;
             case ACCESS_DENIED:
                 model.addAttribute("error", "Access Denied");
