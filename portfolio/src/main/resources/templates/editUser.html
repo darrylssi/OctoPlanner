@@ -128,6 +128,7 @@
                     <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
                     <input id="imageString" type="hidden" th:name="imageString">
                     <span th:class="error" th:text="${error_InvalidPhoto}"></span>
+                    <span th:class="error" id="invalidPhotoJS"></span>
                 </div>
 
                 <div id="croppieWindow"></div>
