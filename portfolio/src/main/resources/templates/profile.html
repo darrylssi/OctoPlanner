@@ -23,7 +23,7 @@
 
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div class="sprint-block">
-            <img class="profile-image" th:src="${G_ProfilePic}" alt="User profile photo">
+            <img class="profile-image" alt="Profile Image" th:src="${profileImageURL}">
             <div class="detail-block">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />
