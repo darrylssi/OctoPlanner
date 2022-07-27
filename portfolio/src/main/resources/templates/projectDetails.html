@@ -42,7 +42,7 @@
     <div class="event-list-container outside-event">
         <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId}"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
-            <div th:id="'event-' + *{getId}" class="event" th:object="${event}" >
+            <span th:id="'event-' + *{getId}" class="event" th:object="${event}" th:title="${event.getEventDescription()}">
                 <div class="event-left">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
                         <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
@@ -63,7 +63,7 @@
                         </svg>
                     </button>
                 </div>
-            </div>
+            </span>
         </div>
     </div>
 
@@ -96,7 +96,7 @@
                 <div th:class="event-list-container">
                     <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId}"
                             th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
-                        <div th:id="'event-' + *{getId}" class="event" th:object="${event}" >
+                        <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${event.getEventDescription()}">
                             <div class="event-left">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
                                     <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
@@ -124,9 +124,9 @@
         </div>
         <!-- The events outside the sprint -->
         <div class="event-list-container outside-event">
-            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}"
+            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
-                <div th:id="'event-' + *{getId}" class="event" th:object="${event}" >
+                <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${event.getEventDescription()}">
                     <div class="event-left">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
                             <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
