@@ -43,10 +43,10 @@ document.querySelector('#inputFile').addEventListener('change',function() {
     const context = this;
     // this image is only used for validation, and isn't displayed anywhere
     if (input.files && input.files[0]) {
+        showCroppieLoader();
         const image = new Image();
         image.onload = function() {
             // valid image
-            showCroppieLoader();
             hidePhotoObjects();
             readURL();
         };
