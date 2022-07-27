@@ -36,7 +36,7 @@ public class ProfilePhotoService {
             return userImageUrl.toString();
         } else {
             // Use the default image
-            URI defaultImageUrl = fullImageEndpoint.resolve(DEFAULT_PROFILE_IMAGE);
+            URI defaultImageUrl = httpURL.resolve(DEFAULT_PROFILE_IMAGE);
             return defaultImageUrl.toString();
         }
     }
