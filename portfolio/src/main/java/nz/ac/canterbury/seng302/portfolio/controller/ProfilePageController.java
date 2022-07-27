@@ -35,8 +35,7 @@ public class ProfilePageController {
         if (!thisUser.isAuthenticated()) {
             return "redirect:./";
         }
-
-        return "redirect:./" + thisUser.getID();
+        return "redirect:././users/" + thisUser.getID();
     }
 
     /**
@@ -81,6 +80,7 @@ public class ProfilePageController {
      * Handles loading the page
      * implemented as an experiment to try and remove the photo path from the URL
      * TODO check if this works
+     * update: it doesn't
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @param id the user's id
      * @param principal object that holds the principal data
