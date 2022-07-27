@@ -10,11 +10,13 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
@@ -42,20 +44,24 @@ public class EditSprintController extends PageController {
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Add sprint details to the model */
-        Sprint sprint = sprintService.getSprintById(id);
-        sprint.setId(id);
-        model.addAttribute("id", id);
-        model.addAttribute("sprint", sprint);
-        model.addAttribute("projectId", sprint.getParentProjectId());
-        model.addAttribute("sprintId", sprint.getId());
-        model.addAttribute("sprintName", sprint.getSprintName());
-        model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
-        model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
-        model.addAttribute("sprintDescription", sprint.getSprintDescription());
+        try {
+            Sprint sprint = sprintService.getSprintById(id);
+            sprint.setId(id);
+            model.addAttribute("id", id);
+            model.addAttribute("sprint", sprint);
+            model.addAttribute("projectId", sprint.getParentProjectId());
+            model.addAttribute("sprintId", sprint.getId());
+            model.addAttribute("sprintName", sprint.getSprintName());
+            model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
+            model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
+            model.addAttribute("sprintDescription", sprint.getSprintDescription());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found.", e);
+        }
 
         /* Return the name of the Thymeleaf template */
         return "editSprint";
