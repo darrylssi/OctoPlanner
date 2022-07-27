@@ -43,16 +43,17 @@ document.querySelector('#inputFile').addEventListener('change',function() {
     const context = this;
     // this image is only used for validation, and isn't displayed anywhere
     if (input.files && input.files[0]) {
+        showCroppieLoader();
         const image = new Image();
         image.onload = function() {
             // valid image
-            showCroppieLoader();
             hidePhotoObjects();
             readURL();
         };
         image.onerror = function() {
            context.value = "";
            hidePhotoObjects();
+           hideCroppieLoader();
            alert('That image is invalid or corrupted.');
         };
         image.src = URL.createObjectURL(input.files[0]);
