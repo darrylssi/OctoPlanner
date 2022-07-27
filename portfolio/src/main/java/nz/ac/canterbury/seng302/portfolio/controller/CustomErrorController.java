@@ -5,29 +5,42 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
+@RestController
 public class CustomErrorController implements ErrorController {
     
     @RequestMapping("/error")
-    public String handleError(HttpServletRequest request, Model model) {
+    public ModelAndView handleError(HttpServletRequest request) {
+        ModelAndView modelAndView = new ModelAndView();
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         if (status != null) {
             Integer statusCode = Integer.valueOf(status.toString());
+            // Remove the code number from the string
+            String error = HttpStatus.valueOf(statusCode).toString().split(" ")[1];
+            //Swap the underscores for spaces and make title case
+            error = StringUtils.capitalize(error.replace('_', ' ').toLowerCase());
     
             if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                model.addAttribute("feedback", "We couldn't find the page you're looking for");
+                modelAndView.addObject("feedback", "We couldn't find the page you're looking for");
             } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
-                model.addAttribute("feedback", "You do not have permission to view this page");
+                modelAndView.addObject("feedback", "You do not have permission to view this page");
             } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-                model.addAttribute("feedback", "The server wasn't able to complete that request");
+                modelAndView.addObject("feedback", "The server wasn't able to complete that request");
             } else {
-                model.addAttribute("feedback", "An unexpected error occurred");
+                modelAndView.addObject("feedback", "An unexpected error occurred");
             }
-            
+            modelAndView.addObject("status", status);
+            modelAndView.addObject("error", error);
         }
         // Do logging
-        return "error";
+        return modelAndView;
+    }
+
+    public String getErrorPath() {
+        return "/error";
     }
 }

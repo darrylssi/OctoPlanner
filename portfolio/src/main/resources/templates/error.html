@@ -15,8 +15,7 @@
     <div class="cardContainer">
         <div class="card">
             <h2 class="card-header text-center" th:text="'Error ' + ${status} + ' - ' + ${error}"></h2>
-            <h4 th:if="${feedback}" class="card-body text-center" th:text="${feedback}"></h4>
-            <h4 th:unless="${feedback}" class="card-body text-center" th:text="${message}"></h4>
+            <h4 class="card-body text-center" th:text="${feedback}"></h4>
         </div>
     </div>
 </div>
