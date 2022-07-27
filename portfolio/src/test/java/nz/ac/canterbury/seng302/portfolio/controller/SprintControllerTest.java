@@ -85,29 +85,6 @@ class SprintControllerTest {
     }
 
     @Test
-    void addValidSprint_thenRedirect() throws Exception {
-        when(sprintService.getSprintsInProject(0)).thenReturn(Arrays.asList(sprint));
-        this.mockMvc.perform(post("/add-sprint/0")
-                        .param("sprintName", "sprint 1")
-                        .param("sprintDescription", "desc")
-                        .param("sprintStartDate", "2022-06-20")
-                        .param("sprintEndDate", "2022-06-21"))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    void editWithValidDetails_thenRedirect() throws Exception {
-        when(sprintService.getSprintById(1)).thenReturn(sprint);
-        this.mockMvc.perform(post("/edit-sprint/1")
-                        .param("sprintName", "new Name")
-                        .param("projectId", "0")
-                        .param("sprintDescription", "new Description")
-                        .param("sprintStartDate", "2022-06-19")
-                        .param("sprintEndDate", "2022-06-22"))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
     void editWithBlankName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/edit-sprint/1")
