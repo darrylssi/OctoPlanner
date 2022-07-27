@@ -35,7 +35,7 @@ public class ProfilePageController {
         if (!thisUser.isAuthenticated()) {
             return "redirect:./";
         }
-        return "redirect:././users/" + thisUser.getID();
+        return "redirect:./" + thisUser.getID();
     }
 
     /**
@@ -43,7 +43,9 @@ public class ProfilePageController {
      *
      * Example URL:
      * <code>/users/123</code>
-     * @param id The ID associated with a given user
+     * @param principal object that holds the principal data
+     * @param id the user's id
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @author Andrew Hall <amh284@uclive.ac.nz>
      */
     @GetMapping("/users/{id}")
@@ -52,40 +54,6 @@ public class ProfilePageController {
             @PathVariable("id") int id,
             Model model
     ) {
-//        PrincipalData thisUser = PrincipalData.from(principal);
-//        UserResponse user = userAccountClientService.getUserAccountById(id);
-//
-//        ArrayList<String> errors = new ArrayList<>();
-//        model.addAttribute("errors", errors);
-//
-//        boolean isCurrentUser = thisUser.getID() == id; // User's logged in, and this page is about them
-//        model.addAttribute("isCurrentUser", isCurrentUser);
-//
-//        if (user != null) {
-//                model.addAttribute("profileInfo", user);
-//                model.addAttribute("userExists", true);
-//                model.addAttribute("fullName", getFullName(
-//                        user.getFirstName(), user.getMiddleName(), user.getLastName()));
-//                model.addAttribute("id", id);
-//                model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-//                model.addAttribute("roles", user.getRolesList());
-//            } else {
-//                errors.add("Invalid ID");
-//            }
-        loadHandler(model, id, principal);
-        return "profile";
-    }
-
-    /**
-     * Handles loading the page
-     * implemented as an experiment to try and remove the photo path from the URL
-     * TODO check if this works
-     * update: it doesn't
-     * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @param id the user's id
-     * @param principal object that holds the principal data
-     */
-    public void loadHandler(Model model, int id, AuthState principal) {
         PrincipalData thisUser = PrincipalData.from(principal);
         UserResponse user = userAccountClientService.getUserAccountById(id);
 
@@ -96,16 +64,17 @@ public class ProfilePageController {
         model.addAttribute("isCurrentUser", isCurrentUser);
 
         if (user != null) {
-            model.addAttribute("profileInfo", user);
-            model.addAttribute("userExists", true);
-            model.addAttribute("fullName", getFullName(
-                    user.getFirstName(), user.getMiddleName(), user.getLastName()));
-            model.addAttribute("id", id);
-            model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
-            model.addAttribute("roles", user.getRolesList());
-        } else {
-            errors.add("Invalid ID");
-        }
+                model.addAttribute("profileInfo", user);
+                model.addAttribute("userExists", true);
+                model.addAttribute("fullName", getFullName(
+                        user.getFirstName(), user.getMiddleName(), user.getLastName()));
+                model.addAttribute("id", id);
+                model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
+                model.addAttribute("roles", user.getRolesList());
+            } else {
+                errors.add("Invalid ID");
+            }
+        return "profile";
     }
 
     /**
