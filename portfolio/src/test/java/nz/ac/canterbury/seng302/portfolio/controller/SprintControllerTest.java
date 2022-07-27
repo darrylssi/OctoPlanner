@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -84,6 +86,7 @@ class SprintControllerTest {
 
     @Test
     void addValidSprint_thenRedirect() throws Exception {
+        when(sprintService.getSprintsInProject(0)).thenReturn(Arrays.asList(sprint));
         this.mockMvc.perform(post("/add-sprint/0")
                         .param("sprintName", "sprint 1")
                         .param("sprintDescription", "desc")
