@@ -148,12 +148,12 @@ public class AddSprintController extends PageController {
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
-        sprintList.sort((s1, s2) -> { return s1.getSprintEndDate().compareTo(s2.getSprintEndDate()); });
+        sprintList.sort((s1, s2) -> s1.getSprintEndDate().compareTo(s2.getSprintEndDate()));
 
         // Fetch system colour for sprint
         int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
         String sprintColour = SPRINT_COLOURS.get(colourIndex);
-        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+        if (sprintColour.equals(sprintList.get(sprintList.size() - 1).getSprintColour())) {
             sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
         }
 

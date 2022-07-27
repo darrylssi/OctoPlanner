@@ -5,9 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link th:href="|../styles/main.css|" rel="stylesheet" />
-    <link th:href="|../styles/modals.css|" rel="stylesheet" />
-    <link th:href="|../styles/reskinBootstrap.css|" rel="stylesheet" />
+    <link th:href="|../../styles/main.css|" rel="stylesheet" />
+    <link th:href="|../../styles/modals.css|" rel="stylesheet" />
+    <link th:href="|../../styles/reskinBootstrap.css|" rel="stylesheet" />
 
 </head>
 <body>
@@ -29,7 +29,7 @@
 <div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
-            <a th:href="|../edit-project/${project.getId}|">
+            <a th:href="|../../edit-project/${project.getId}|">
                 <button class="edit-button" th:if="${canEdit}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
@@ -49,7 +49,7 @@
                     <div class="sprint-description" th:text="*{getSprintDescription}" />
                 </div>
                 <div>
-                    <a th:href="|../edit-sprint/${sprint.getId}|">
+                    <a th:href="|../../edit-sprint/${sprint.getId}|">
                         <button class="edit-button" th:if="${canEdit}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
@@ -94,7 +94,7 @@
     </div>
     <div class="row">
         <div class="col-2">
-        <a th:href="|../add-sprint/${project.getId}|">
+        <a th:href="|../../add-sprint/${project.getId}|">
         <button class="add-sprint" th:if="${canEdit}">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -119,14 +119,15 @@
         */-->
     <!--/* Clipping off the offset (The +1200 at the end) because HTML forms don't */-->
     <div class="collapse" id="addEventForm"
-        th:with="projectStart=${#dates.format(project.getProjectStartDate, 'yyyy-MM-dd''T''hh:mm')},
-                 projectEnd=${#dates.format(project.getProjectEndDate, 'yyyy-MM-dd''T''hh:mm')}">
+        th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
+                 projectStart=${#dates.format(project.getProjectStartDate, DATE_FORMAT)},
+                 projectEnd=${#dates.format(project.getProjectEndDate, DATE_FORMAT)}">
         <div class="card">
             <div class="card-header">
                 New Event
             </div>
             <div class="card-body">
-                <form th:action="@{../add-event/{projID}(projID=${projectID})}" method="post" class="container-fluid" th:object="${eventForm}">
+                <form th:action="@{add-event/}" method="post" class="container-fluid" th:object="${eventForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
@@ -235,6 +236,6 @@
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
 </script>
-<script th:src="|../scripts/projectDetails.js|"></script>
+<script th:src="|../../scripts/projectDetails.js|"></script>
 </body>
 </html>

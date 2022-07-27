@@ -17,11 +17,11 @@ public class EventForm {
     private String description;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'hh:mm")
     private Date startTime;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'hh:mm")
     private Date endTime;
 
     public String getName() {
@@ -44,7 +44,7 @@ public class EventForm {
         return startTime;
     }
 
-    public void setStartDate(Date startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
@@ -52,7 +52,7 @@ public class EventForm {
         return endTime;
     }
 
-    public void endTime(Date endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
