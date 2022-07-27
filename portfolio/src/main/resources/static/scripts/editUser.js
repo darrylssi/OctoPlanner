@@ -53,6 +53,7 @@ document.querySelector('#inputFile').addEventListener('change',function() {
         image.onerror = function() {
            context.value = "";
            hidePhotoObjects();
+           hideCroppieLoader();
            alert('That image is invalid or corrupted.');
         };
         image.src = URL.createObjectURL(input.files[0]);
