@@ -8,6 +8,7 @@ const QUALITY = .9;
 const input = document.getElementById("inputFile");
 const photoFormSubmitButton = document.getElementById('photo-upload-submit-button');
 const croppieLoader = document.getElementById("croppieLoader");
+const errorSpan = document.getElementById("invalidPhotoJS");
 
 // this creates the image cropping widget on the page
 // docs are here https://foliotek.github.io/Croppie/
@@ -43,6 +44,7 @@ document.querySelector('#inputFile').addEventListener('change',function() {
     const context = this;
     // this image is only used for validation, and isn't displayed anywhere
     if (input.files && input.files[0]) {
+        errorSpan.textContent="";
         showCroppieLoader();
         const image = new Image();
         image.onload = function() {
@@ -54,7 +56,8 @@ document.querySelector('#inputFile').addEventListener('change',function() {
            context.value = "";
            hidePhotoObjects();
            hideCroppieLoader();
-           alert('That image is invalid or corrupted.');
+           errorSpan.textContent="That image file is invalid or corrupted.";
+
         };
         image.src = URL.createObjectURL(input.files[0]);
     }
