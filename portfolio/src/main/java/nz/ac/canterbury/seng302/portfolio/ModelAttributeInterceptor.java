@@ -36,7 +36,7 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
     private UserAccountClientService userAccountClientService;
 
     /**
-     * This class is a hack.
+     * This class is a workaround.
      * The problem is that model attributes that are strings WILL show up in the URL
      * whenever a redirect is performed.
      * We don't want this, so we have to encapsulate them in a class that is not a string.
