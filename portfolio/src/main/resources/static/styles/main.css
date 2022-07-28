@@ -84,7 +84,6 @@
 }
 
 .sprint-label {
-    background-color: white;
     border-radius: 8px;
     margin: 10px;
     padding: 2px;
@@ -92,7 +91,7 @@
     justify-content: center;
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    color: #ff3823;
+    color: black;
 }
 
 .sprint-title {
@@ -238,6 +237,10 @@ button {
     width: 100%;
     flex-grow: 5;
     margin-top: 5px;
+}
+
+.tooltip-inner {
+    max-width: 1000px;
 }
 
 .break {

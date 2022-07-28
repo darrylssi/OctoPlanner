@@ -41,7 +41,7 @@
     <hr/>
     <!-- The first events outside the sprint -->
     <div class="event-list-container outside-event">
-        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId}"
+        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId}"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
             <span th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                 <div class="event-left">
@@ -71,7 +71,7 @@
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
-            <div class="sprint-label" th:text="*{getSprintLabel}" />
+            <div class="sprint-label" th:text="*{getSprintLabel}" th:style="'background-color:'+ *{getSprintColour} + '4c'"/>
             <div class="detail-block">
                 <div>
                     <div class="sprint-title" th:text="*{getSprintName}" />
@@ -294,8 +294,8 @@
 
     /** Required for initialisation of bootstrap tooltip for event description */
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 </script>
 <script th:src="|../scripts/projectDetails.js|"></script>
 </body>
