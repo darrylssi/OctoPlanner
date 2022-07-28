@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Controller for the add sprint details page
@@ -41,7 +38,7 @@ public class AddSprintController extends PageController {
     private SprintLabelService labelUtils;
 
     // Provide a list of colours that are noticeably different for the system to cycle through
-    private final List<String> SPRINT_COLOURS = Arrays.asList(
+    private static final List<String> SPRINT_COLOURS = Arrays.asList(
             "#320d6d",
             "#b83daf",
             "#449dd1",
@@ -148,12 +145,12 @@ public class AddSprintController extends PageController {
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
-        sprintList.sort((s1, s2) -> { return s1.getSprintEndDate().compareTo(s2.getSprintEndDate()); });
+        sprintList.sort(Comparator.comparing(Sprint::getSprintEndDate));
 
         // Fetch system colour for sprint
         int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
         String sprintColour = SPRINT_COLOURS.get(colourIndex);
-        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+        if (!sprintList.isEmpty() && sprintColour.equals(sprintList.get(sprintList.size() - 1).getSprintColour())) {
             sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
         }
 
