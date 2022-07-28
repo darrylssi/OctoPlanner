@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
@@ -10,13 +11,11 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
@@ -33,6 +32,9 @@ public class EditSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    private static final String EDIT_SPRINT_TEMPLATE = "editSprint";
+    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
+
     /**
      * Show the edit-sprint page.
      * @param id ID of the sprint to be edited
@@ -44,12 +46,15 @@ public class EditSprintController extends PageController {
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,
             Model model
-    ) {
+    ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Add sprint details to the model */
-        try {
-            Sprint sprint = sprintService.getSprintById(id);
+        Sprint sprint = sprintService.getSprintById(id);
+        if (sprint == null) {
+            configureError(model, ErrorType.NOT_FOUND, "/edit-sprint" + id);
+        } else {
+            System.out.println(sprint);
             sprint.setId(id);
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
@@ -59,12 +64,9 @@ public class EditSprintController extends PageController {
             model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
             model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
             model.addAttribute("sprintDescription", sprint.getSprintDescription());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found.", e);
         }
-
         /* Return the name of the Thymeleaf template */
-        return "editSprint";
+        return EDIT_SPRINT_TEMPLATE;
     }
 
     /**
@@ -95,11 +97,13 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        ValidationError dateOutOfRange = AddSprintController.getValidationError(sprintStartDate, sprintEndDate,
+        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintService.getSprintsInProject(projectId));
 
+        ValidationError invalidName = AddSprintController.getNameValidationError(sprintName);
+
         // Checking if there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
@@ -109,7 +113,8 @@ public class EditSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            return "editSprint";
+            model.addAttribute("invalidName", invalidName.getFirstError());
+            return EDIT_SPRINT_TEMPLATE;
         }
 
         // Adding the new sprint object
@@ -123,7 +128,7 @@ public class EditSprintController extends PageController {
 
         sprintService.saveSprint(sprint);
         labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
-        return "redirect:../project/" + projectId;
+        return REDIRECT_TO_PROJECT + projectId;
     }
 
 }
