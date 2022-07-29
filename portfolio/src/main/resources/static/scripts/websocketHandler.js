@@ -9,12 +9,12 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var socket = new SockJS('/here');
+    var socket = new SockJS('/chat');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/project/test', function(messageOutput) {
+        stompClient.subscribe('/topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -31,7 +31,7 @@ function disconnect() {
 function sendMessage() {
     var from = document.getElementById('from').value;
     var text = document.getElementById('text').value;
-    stompClient.send("/app/project", {},
+    stompClient.send("/app/chat", {},
     JSON.stringify({'from':from, 'text':text}));
 }
 
