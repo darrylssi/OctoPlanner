@@ -21,7 +21,7 @@
 </div>
 <div th:replace="fragments :: header(title='Edit Project')"></div>
 <div class="content">
-    <form th:action="@{../edit-project/{id}(id = ${id})}"
+    <form th:action="@{../edit-project/{id}(id = ${id})}" onsubmit="showLongProjectModal(event)"
           method="post" th:object="${project}" id="project">
         <label for="projectName" class="required">Project Name</label> <br/>
         <input id="projectName" type="text" th:field="*{projectName}">
@@ -54,7 +54,7 @@
             Cancel
         </button>
     </a>
-    <button class="form-button save" type="button" th:onclick="showLongProjectModal()">
+    <button class="form-button save" type="submit">
         Save
     </button>
 </div>
