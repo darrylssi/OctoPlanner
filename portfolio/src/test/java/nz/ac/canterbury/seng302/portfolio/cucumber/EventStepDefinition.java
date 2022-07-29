@@ -50,7 +50,7 @@ public class EventStepDefinition {
 
     @When("the user creates an event with {string}, {string}, {string}, {string}")
     public void the_user_creates_an_event_with(String name, String startDate, String endDate, String description) throws Exception {
-        result = this.mockMvc.perform(post("/add-event/0").sessionAttrs(sessionAttributes)
+        result = this.mockMvc.perform(post("/project/0/add-event").sessionAttrs(sessionAttributes)
                         .param("eventName", name)
                         .param("eventDescription", description)
                         .param("eventStartDate", startDate)
@@ -60,7 +60,7 @@ public class EventStepDefinition {
 
     @Then("an event called {string} exists with {string}, {string}, {string}")
     public void an_event_called_exists_with(String name, String startDate, String endDate, String description) throws Exception {
-        this.mockMvc.perform(post("/add-event/0").sessionAttrs(sessionAttributes)
+        this.mockMvc.perform(post("/project/0/add-event").sessionAttrs(sessionAttributes)
                         .param("eventName", name)
                         .param("eventDescription", description)
                         .param("eventStartDate", startDate)

@@ -111,7 +111,7 @@ public class DetailsController extends PageController {
         }
     }
 
-    @PostMapping("/project/{project_id}/add-event/")
+    @PostMapping("/project/{project_id}/add-event")
     public String postAddEvent(
         @AuthenticationPrincipal AuthState principal,
         @PathVariable("project_id") int projectID,
@@ -144,7 +144,7 @@ public class DetailsController extends PageController {
         // OK, the data's valid... add it
         Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.getStartTime(), eventForm.getEndTime());
         eventService.saveEvent(event);
-        return "redirect:..";
+        return "redirect:.";
     }
 
 
