@@ -33,7 +33,7 @@ public class ServeImageController {
      * 
      * Note: This method ONLY works if the file is a .jpg
      * 
-     * Note #2: I know the method sucks, but I've spent 3 god damned hours
+     * Note #2: I know the method sucks, but I've spent three hours
      * trying to get `Resource` or something else working, something that
      * doesn't care about the filetype, something that doesn't read the
      * whole file into memory first.
