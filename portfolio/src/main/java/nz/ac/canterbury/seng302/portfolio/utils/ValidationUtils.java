@@ -145,20 +145,20 @@ public class ValidationUtils {
 
     /**
      * Checks whether the name contains only valid characters
-     * @param name
-     * @return
+     * @param name Sprint name to be tested
+     * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
 
         ValidationError error = new ValidationError(false);
 
         /* string can only have alphanumeric and _ , . - ( ) symbols */
-        String regex = "^([a-zA-Z0-9\\s\\-\\.]){2,}$";
+        String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {
             error.setErrorFlag(true);
-            error.addErrorMessage("Name can only have alphanumeric and . - characters.");
+            error.addErrorMessage("Name can only have alphanumeric and . - _ characters.");
         }
 
         return error;
