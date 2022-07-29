@@ -49,7 +49,7 @@ public class SprintService {
         if (sprint != null) {
             return sprint;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found.");
         }
     }
 

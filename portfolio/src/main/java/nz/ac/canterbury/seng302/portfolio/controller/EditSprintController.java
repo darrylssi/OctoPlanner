@@ -46,7 +46,7 @@ public class EditSprintController extends PageController {
             @PathVariable("id") int id,
             @AuthenticationPrincipal AuthState principal,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Add sprint details to the model */
@@ -54,7 +54,6 @@ public class EditSprintController extends PageController {
         if (sprint == null) {
             configureError(model, ErrorType.NOT_FOUND, "/edit-sprint" + id);
         } else {
-            System.out.println(sprint);
             sprint.setId(id);
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);

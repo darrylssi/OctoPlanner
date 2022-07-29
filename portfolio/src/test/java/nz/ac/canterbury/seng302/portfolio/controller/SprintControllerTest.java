@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 
@@ -57,7 +59,6 @@ class SprintControllerTest {
         when(mockedGRPCUserAccount.getUserAccountById(annotatedUserId))
                 .thenReturn(user);
 
-
         sprint = new Sprint();
         sprint.setId(0);
         sprint.setSprintLabel("Sprint 1");
@@ -79,6 +80,7 @@ class SprintControllerTest {
 
     @Test
     void getSprintInvalidId_thenThrow404() throws Exception {
+        when(sprintService.getSprintById(1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found"));
         this.mockMvc.perform(get("/edit-sprint/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason(containsString("Sprint not found")));
