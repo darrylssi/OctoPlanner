@@ -100,6 +100,19 @@ class SprintControllerTest {
     }
 
     @Test
+    void editNameWithInvalidSymbols_thenShowError() throws Exception {
+        when(sprintService.getSprintById(1)).thenReturn(sprint);
+        this.mockMvc.perform(post("/edit-sprint/1")
+                        .param("sprintName", "A@!#@#!")
+                        .param("projectId", "0")
+                        .param("sprintDescription", "desc")
+                        .param("sprintStartDate", "2022-06-20")
+                        .param("sprintEndDate", "2022-06-21"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Name can only have alphanumeric and . - characters")));
+    }
+
+    @Test
     void editWithShortName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/edit-sprint/1")
