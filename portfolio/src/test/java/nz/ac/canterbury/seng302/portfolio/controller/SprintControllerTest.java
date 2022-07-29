@@ -109,7 +109,7 @@ class SprintControllerTest {
                         .param("sprintStartDate", "2022-06-20")
                         .param("sprintEndDate", "2022-06-21"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Name can only have alphanumeric and . - characters")));
+                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters")));
     }
 
     @Test
