@@ -39,10 +39,10 @@ public class AddSprintController extends PageController {
 
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
-            "#320d6d",
+            "#5aff15",
             "#b83daf",
             "#449dd1",
-            "#52ffb8");
+            "#d6871f");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
