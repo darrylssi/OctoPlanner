@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -45,14 +44,13 @@ public class EventService {
         if (event != null) {
             return event;
         } else {
-            throw new Exception("Event not found!");
+            throw new Exception("Event not found.");
         }
     }
 
     /**
      * Gets all the events that belong to a given project.
      *
-     * TODO [Andrew]: Tried making the relationship part of the Project class using @OneToMany & @ManyToOne, didn't work. If someone can figure it out, I'd rather use that.
      */
     public List<Event> getEventsOfProjectById(Integer id) {
         return repository.findEventByParentProjectId(id);
