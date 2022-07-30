@@ -49,3 +49,45 @@ function hideEditEvent() {
     }
 }
 
+/**
+ * Binds the child elements, such that the input's remaining length is displayed.
+ * 
+ * Requires:
+ * * A single `<input type="text">` child, with a `maxlength` attribute
+ * * A single "output" child, with a `.remaining-chars-field` class
+ * 
+ * @param {HTMLElement} inputGroup The parent element containing a single text input,
+ * and a single element with a class of 'remaining-chars-field'
+ * @throws {EvalError} If any of the above requirements are broken
+ */
+function displayRemainingCharacters(inputGroup) {
+    const inputTags = Array
+                        .from(inputGroup.getElementsByTagName('input'))
+                        .filter(e => e.getAttribute('type') == 'text'
+                                  && e.hasAttribute('maxlength'));
+    if (inputTags.length != 1) {
+        throw new EvalError(
+            "Expected 1 child of type <input type=\"text\" maxlength=...>, got " + inputTags.length
+        );
+    }
+    const outputTags = Array.from(inputGroup.getElementsByClassName('remaining-chars-field'));
+    if (outputTags.length != 1) {
+        throw new EvalError(
+            "Expected 1 child with class '.remaining-chars-field' got " + inputTags.length
+        );
+    }
+
+    const input = inputTags[0];
+    const output = outputTags[0];
+    output.textContent = input.getAttribute('maxlength');
+    input.addEventListener("input", () => {
+        const remainingChars = input.getAttribute('maxlength') - input.value.length;
+        output.textContent = remainingChars;
+        if (remainingChars <= 0) {
+            output.classList.add('text-danger');
+        } else {
+            output.classList.remove('text-danger');
+        }
+    })
+}
+
