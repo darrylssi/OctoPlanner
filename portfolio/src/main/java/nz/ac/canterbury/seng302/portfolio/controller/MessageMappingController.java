@@ -12,6 +12,11 @@ import java.util.Date;
 @Controller
 public class MessageMappingController {
 
+    /**
+     * Websocket sending example
+     * @param message Data to send through the websocket
+     * @return An output that gets sent to the endpoint in the @SendTo parameter
+     */
     @MessageMapping("/ws")
     @SendTo("/topic/messages")
     public OutputMessage send(Message message) {

@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
-
+/**
+ * Basic class for sending data through a websocket
+ */
 public class OutputMessage {
 
     private String from;
