@@ -3,9 +3,12 @@ var stompClient = null;
 function setConnected(connected) {
     //document.getElementById('connect').disabled = connected;
     //document.getElementById('disconnect').disabled = !connected;
-    document.getElementById('conversationDiv').style.visibility
-        = connected ? 'visible' : 'hidden';
-    document.getElementById('response').innerHTML = '';
+    //document.getElementById('conversationDiv').style.visibility
+    //    = connected ? 'visible' : 'hidden';
+    let response = document.getElementById('response');
+    if (response !== null ) {
+        response.innerHTML = '';
+    }
 }
 
 function connect() {
@@ -29,17 +32,16 @@ function disconnect() {
 }
 
 function sendMessage() {
-    var from = document.getElementById('from').value;
-    var text = document.getElementById('text').value;
+    let user = document.getElementById('user').getAttribute('data-name');
     stompClient.send("/app/ws", {},
-    JSON.stringify({'from':from, 'text':text}));
+    JSON.stringify({'from':user, 'text':" was here"}));
 }
 
 function showMessageOutput(messageOutput) {
     var response = document.getElementById('response');
     var p = document.createElement('p');
     p.style.wordWrap = 'break-word';
-    p.appendChild(document.createTextNode(messageOutput.from + ": "
-    + messageOutput.text + " (" + messageOutput.time + ")"));
+    p.appendChild(document.createTextNode(messageOutput.from +
+        messageOutput.text + " (" + messageOutput.time + ")"));
     response.appendChild(p);
 }
