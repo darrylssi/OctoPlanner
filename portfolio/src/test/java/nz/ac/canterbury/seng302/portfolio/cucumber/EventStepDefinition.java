@@ -60,12 +60,7 @@ public class EventStepDefinition {
 
     @Then("an event called {string} exists with {string}, {string}, {string}")
     public void an_event_called_exists_with(String name, String startDate, String endDate, String description) throws Exception {
-        this.mockMvc.perform(post("/project/0/add-event").sessionAttrs(sessionAttributes)
-                        .param("eventName", name)
-                        .param("eventDescription", description)
-                        .param("eventStartDate", startDate)
-                        .param("eventEndDate", endDate))
-                .andExpect(status().is3xxRedirection());
+        status().is3xxRedirection().match(result);
     }
 
     @Then("{string} message should be displayed")

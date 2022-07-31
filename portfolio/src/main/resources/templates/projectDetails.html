@@ -249,8 +249,11 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
 </script>
 <script th:src="|../../scripts/projectDetails.js|"></script>
 <script defer>
-    for (const elem of document.getElementsByClassName('limited-text-input')) {
-        displayRemainingCharacters(elem);
+    // Bind a display to their output
+    for (const parent of document.getElementsByClassName('limited-text-input')) {
+        const input = parent.getElementsByTagName('input')[0];
+        const display = parent.getElementsByClassName('remaining-chars-field')[0];
+        displayRemainingCharacters(input, display);
     }
 </script>
 </body>

@@ -50,44 +50,48 @@ function hideEditEvent() {
 }
 
 /**
- * Binds the child elements, such that the input's remaining length is displayed.
+ * Binds an event to the input, such that the remaining length is displayed.
  * 
- * Requires:
- * * A single `<input type="text">` child, with a `maxlength` attribute
- * * A single "output" child, with a `.remaining-chars-field` class
+ * How to use:
+ * I'd recommend giving the 'parent' its own 
  * 
- * @param {HTMLElement} inputGroup The parent element containing a single text input,
- * and a single element with a class of 'remaining-chars-field'
+ * @param {HTMLInputElement} input An `<input type="text" maxlength=...>` element,
+ *                                  with an optional `minlength` element
+ * @param {Element} display The element that'll display the output (Note: Will overwrite
+ *                                  any inner HTML)
  * @throws {EvalError} If any of the above requirements are broken
  */
-function displayRemainingCharacters(inputGroup) {
-    const inputTags = Array
-                        .from(inputGroup.getElementsByTagName('input'))
-                        .filter(e => e.getAttribute('type') == 'text'
-                                  && e.hasAttribute('maxlength'));
-    if (inputTags.length != 1) {
+function displayRemainingCharacters(input, display) {
+    if (
+        input.tagName.toLowerCase() !== 'input'
+        || input.getAttribute('type') !== 'text'
+        || !input.hasAttribute('maxlength')
+    ) {
+        console.error(input);
         throw new EvalError(
-            "Expected 1 child of type <input type=\"text\" maxlength=...>, got " + inputTags.length
+            '`input` doesn\'t look like `<input type="text" maxlength=...>'
         );
     }
-    const outputTags = Array.from(inputGroup.getElementsByClassName('remaining-chars-field'));
-    if (outputTags.length != 1) {
-        throw new EvalError(
-            "Expected 1 child with class '.remaining-chars-field' got " + inputTags.length
-        );
-    }
-
-    const input = inputTags[0];
-    const output = outputTags[0];
-    output.textContent = input.getAttribute('maxlength');
-    input.addEventListener("input", () => {
-        const remainingChars = input.getAttribute('maxlength') - input.value.length;
-        output.textContent = remainingChars;
+    const event = () => {
+        const maxLength = input.getAttribute('maxlength');
+        const minLength = input.getAttribute('minlength');
+        const inputLength = input.value.length;
+        const remainingChars = maxLength - inputLength;
         if (remainingChars <= 0) {
-            output.classList.add('text-danger');
+            // Too many characters
+            display.classList.add('text-danger');
+            display.textContent = remainingChars;
+        } else if (minLength !== null && inputLength < minLength) {
+            // (Optional) Not enough characters
+            display.classList.add('text-danger');
+            display.textContent = '<' + (minLength - inputLength);
         } else {
-            output.classList.remove('text-danger');
+            display.classList.remove('text-danger');
+            display.textContent = remainingChars;
         }
-    })
+    }
+    // Bind the event, then give it an initial kick
+    input.addEventListener("input", event);
+    event();
 }
 
