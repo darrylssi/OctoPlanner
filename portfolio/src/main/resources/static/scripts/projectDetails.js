@@ -49,3 +49,18 @@ function hideEditEvent() {
     }
 }
 
+function editEvent(eventId) {
+    document.getElementById("hello").style.color = "red";
+    const url = BASE_URL + "edit-event/" + eventId;
+    const postRequest = new XMLHttpRequest();
+
+    postRequest.open("POST", url, true);
+    postRequest.send(JSON.stringify({
+        eventName: "name",
+        eventDescription: "descriptionism",
+    }));
+    postRequest.onload = () => {
+        window.location.reload();
+    }
+}
+

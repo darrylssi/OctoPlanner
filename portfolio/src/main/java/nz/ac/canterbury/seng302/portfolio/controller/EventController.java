@@ -9,14 +9,16 @@ import java.util.TimeZone;
 
 import javax.validation.Valid;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
@@ -32,8 +34,12 @@ public class EventController extends PageController {
 
     @Autowired
     private ProjectService projectService;
+
     @Autowired
     private SprintService sprintService;
+
+    @Autowired
+    private EventService eventService;
 
     @GetMapping("/project/{project_id}/add-event")
     public String getAddEvent(
@@ -95,6 +101,27 @@ public class EventController extends PageController {
         if (bindingResult.hasErrors()) {
             return ADD_EVENT_FORM_TEMPLATE;
         }
+
+        return "redirect:../";
+    }
+
+    @PostMapping("/edit-event/{event_id}")
+    public String postEditEvent(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("event_id") int eventId,
+            @RequestParam(name = "eventName") String name,
+            @RequestParam(name = "eventDescription") String description
+    ) throws Exception {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        Event event = eventService.getEventById(eventId);
+        System.out.println("hello");
+        // Set new event details
+        event.setEventName("fdd");
+//        event.setEventDescription(description);
+//        event.setStartDate(DateUtils.toDate(startDate));
+//        event.setEndDate(DateUtils.toDate(endDate));
+
+        eventService.saveEvent(event);
 
         return "redirect:../";
     }

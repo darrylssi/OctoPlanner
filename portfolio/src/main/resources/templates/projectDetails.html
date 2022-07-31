@@ -224,11 +224,11 @@
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
 <script th:inline="javascript">
+    //th:action="@{../edit-event/1)}" method="post" th:object="${event}"
     // Included to allow the javascript to "paste" this under the necessary event
     let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/;
     let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/;
@@ -241,14 +241,16 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">' +
+    '                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback"' +
+    '                               th:name="eventName" th:value="${eventName}">' +
     '                            <label for="editEventNameInput">Name</label>' +
     '                            <div id="editEventNameFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col-10">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="text" class="form-control" id="editEventDescriptionInput">' +
+    '                            <input type="text" class="form-control" id="editEventDescriptionInput"' +
+    '                               th:name="eventDescription" th:value="${eventDescription}">' +
     '                            <label for="editEventDescriptionInput">Description</label>' +
     '                        </div>' +
     '                    </div>' +
@@ -275,7 +277,7 @@
     '                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick=hideEditEvent()>Cancel</button>' +
     '                    </div>' +
     '                    <div class="col-2">' +
-    '                        <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save</button>' +
+    '                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right" onclick="editEvent(1)">Save</button>' +
     '                    </div>' +
     '                </div>' +
     '            </form>' +
