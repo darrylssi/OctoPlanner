@@ -237,12 +237,12 @@
     '    <div class="card">' +
     '        <div class="card-header" id="edit-event-form-header"></div>' +
     '        <div class="card-body">' +
-    '            <form class="container-fluid">' +
+    '            <form class="container-fluid" action="/edit-event/1" method="post" modelAttribute="event">' +
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
     '                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback"' +
-    '                               th:name="eventName" th:value="${eventName}">' +
+    '                               name="eventName">' +
     '                            <label for="editEventNameInput">Name</label>' +
     '                            <div id="editEventNameFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
@@ -250,7 +250,7 @@
     '                    <div class="col-10">' +
     '                        <div class="form-floating mb-3">' +
     '                            <input type="text" class="form-control" id="editEventDescriptionInput"' +
-    '                               th:name="eventDescription" th:value="${eventDescription}">' +
+    '                               name="eventDescription">' +
     '                            <label for="editEventDescriptionInput">Description</label>' +
     '                        </div>' +
     '                    </div>' +
@@ -258,14 +258,16 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="' + projectStart + '" max="' + projectEnd + '"' +
+        '                               name="eventStartDate">' +
     '                            <label for="editEventStartTime">Start Time</label>' +
     '                            <div id="editEventStartFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3 has-validation">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="' + projectStart + '" max="' + projectEnd + '"' +
+        '                               name="eventEndDate">' +
     '                            <label for="editEventEndTime">End Time</label>' +
     '                            <div id="editEventEndFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
@@ -277,7 +279,7 @@
     '                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick=hideEditEvent()>Cancel</button>' +
     '                    </div>' +
     '                    <div class="col-2">' +
-    '                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right" onclick="editEvent(1)">Save</button>' +
+    '                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save</button>' +
     '                    </div>' +
     '                </div>' +
     '            </form>' +

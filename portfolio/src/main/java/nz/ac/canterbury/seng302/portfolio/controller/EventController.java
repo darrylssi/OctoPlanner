@@ -110,19 +110,20 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("event_id") int eventId,
             @RequestParam(name = "eventName") String name,
-            @RequestParam(name = "eventDescription") String description
+            @RequestParam(name = "eventDescription") String description,
+            @RequestParam(name = "eventStartDate") String startDate,
+            @RequestParam(name = "eventEndDate") String endDate
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         Event event = eventService.getEventById(eventId);
-        System.out.println("hello");
         // Set new event details
-        event.setEventName("fdd");
-//        event.setEventDescription(description);
-//        event.setStartDate(DateUtils.toDate(startDate));
-//        event.setEndDate(DateUtils.toDate(endDate));
+        event.setEventName(name);
+        event.setEventDescription(description);
+//        event.setStartDate(DateUtils.toDateTime(startDate));
+//        event.setEndDate(DateUtils.toDateTime(endDate));
 
         eventService.saveEvent(event);
 
-        return "redirect:../";
+        return "redirect:../project/0";
     }
 }
