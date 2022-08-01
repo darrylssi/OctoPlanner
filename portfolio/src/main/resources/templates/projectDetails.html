@@ -50,7 +50,7 @@
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     </svg>
                     <span th:text="*{getEventName}" ></span>
-                    <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                    <span class="event-date" th:text="|${#lensfolioDates.toDisplayString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayString(event.getEventEndDate())}|" ></span>
                 </div>
                 <div class="event-right">
                     <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-before']], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -104,7 +104,7 @@
                                     <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                                 </svg>
                                 <span th:text="*{getEventName}" ></span>
-                                <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                                <span class="event-date" th:text="|${#lensfolioDates.toDisplayString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayString(event.getEventEndDate())}|" ></span>
                             </div>
                             <div class="event-right">
                                 <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -124,8 +124,8 @@
             </div>
         </div>
         <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event">
-            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}  + '-after-' + *{getId}"
+        <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId} + '-after-' + *{getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
                 <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                     <div class="event-left">
@@ -134,7 +134,7 @@
                             <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                         </svg>
                         <span th:text="*{getEventName}" ></span>
-                        <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                        <span class="event-date" th:text="|${#lensfolioDates.toDisplayString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayString(event.getEventEndDate())}|" ></span>
                     </div>
                     <div class="event-right">
                         <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -291,7 +291,9 @@
 
     /** Required for initialisation of bootstrap tooltip for event description */
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger : 'hover'
+        });
     });
 </script>
 <script th:src="|../scripts/projectDetails.js|"></script>
