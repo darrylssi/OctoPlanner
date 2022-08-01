@@ -27,25 +27,26 @@ function deleteSprint(sprintId) {
 }
 
 /** Inserts the event edit form directly below the event being edited */
-function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eventEndDate) {
-    hideEditEvent();
-    const eventBox = document.getElementById("event-" + eventId);
+function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
+    // Quick check that the form isn't already on the page. If it is, remove it
+    const eventForm = document.getElementById("editEventForm");
+    if (eventForm) {
+        const eventBox = eventForm.parentNode;
+        eventBox.removeChild(eventForm);
+        // If this is true, the user clicked the edit button on the event that was showing the form.
+        if (eventBox.id == 'event-box-' + eventBoxId) {
+            return;
+        }
+    }
+
+    // Insert elements into form
     let editForm = document.createElement("div");
     editForm.setAttribute("id", "editEventForm");
     editForm.innerHTML = editFormTemplate;
-    document.getElementById("event-box-" + eventId).appendChild(editForm);
+    document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
     document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
     document.getElementById("editEventNameInput").setAttribute("value", eventName);
     document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);
     document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
     document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
 }
-
-/** Remove the edit form from any event it is attached to */
-function hideEditEvent() {
-    const eventForm = document.getElementById("editEventForm");
-    if (eventForm) {
-        eventForm.parentNode.removeChild(eventForm);
-    }
-}
-
