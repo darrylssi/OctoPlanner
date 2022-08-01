@@ -40,6 +40,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
 
     private static final String USER_PHOTO_SUFFIX = "_photo.";
+    private static final int USER_PHOTO_DIMENSIONS = 200;
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
@@ -67,25 +68,32 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
         return new StreamObserver<>() {
-            // upload context variables
+            // declare upload context variables
             OutputStream writer;
+            ByteArrayOutputStream byteWriter;
+            ArrayList<ByteString> imageByteStrings = new ArrayList<>();
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
             String fileName;
             String fileExtension;
+            String filePath;
 
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
-                try {
+//                try {
                     if (userProfilePhotoUploadRequest.hasMetaData()) {
-                        writer = getFilePath(userProfilePhotoUploadRequest);
+//                        writer = getFilePathOutputStream(userProfilePhotoUploadRequest);
                         fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
+                        filePath = getFilePath(userProfilePhotoUploadRequest);
+                        logger.info(filePath);
                     } else {
-                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
+//                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
+//                        writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
+                        imageByteStrings.add(userProfilePhotoUploadRequest.getFileContent());
                     }
-                } catch (IOException e) {
+                /*} catch (IOException e) {
                     this.onError(e);
-                }
+                }*/ // TODO
 
             }
 
@@ -97,21 +105,39 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
             @Override
             public void onCompleted() {
-                closeFile(writer);
+//                closeFile(writer);
+                byteWriter = new ByteArrayOutputStream();
+
+                for (ByteString byteString : imageByteStrings) {
+                    try {
+                        writeFile(byteWriter, byteString);
+                    } catch (IOException e) {
+                        logger.error("Error writing ByteString to file"); // TODO better message
+                    }
+                }
+
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
+                try {
+                    BufferedImage image = ImageIO.read(inputStream);
+                    logger.info(String.format("Dimensions of saved image are %d x %d", image.getWidth(), image.getHeight()));
+                    ImageIO.write(image, "jpg", new File(filePath));
+                } catch (IOException e) {
+                    logger.error(String.format("Error reading uploaded image: %s", (Object) e.getStackTrace()));
+                }
+                closeFile(byteWriter);
+
 
                 status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
                 FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
                         .setStatus(status)
                         .build();
 
-                // convert from PNG to JPG if necessary
                 if (status == FileUploadStatus.SUCCESS) {
-                    if (fileExtension.equalsIgnoreCase("png")) {
-                        convertPngToJpg(fileName);
-                    } else if (!fileExtension.equalsIgnoreCase("jpeg")) {
-                        // delete the file if its extension is invalid
-                        // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
-                        deleteInvalidFile(fileName + fileExtension);
+                    try {
+                        checkProfilePhoto(fileName, fileExtension);
+                    } catch (IOException e) {
+                        logger.error(String.format("Error reading profile image while checking it: %s%n%s",
+                                e.getMessage(), Arrays.toString(e.getStackTrace())));
                     }
                 }
 
@@ -119,6 +145,32 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 responseObserver.onCompleted();
             }
         };
+    }
+
+    private void checkProfilePhoto(String fileName, String fileExtension) throws IOException {
+        logger.info(fileName);
+        logger.info(fileExtension);
+        if (fileExtension.equalsIgnoreCase("png")) {
+            convertPngToJpg(fileName);
+        } else if (!fileExtension.equalsIgnoreCase("jpeg")) {
+            // delete the file if its extension is invalid
+            // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
+            deleteInvalidFile(fileName + fileExtension);
+        } /*else {
+            BufferedImage image = ImageIO.read(new File(String.valueOf(profileImageFolder.resolve(fileName + "jpg"))));
+            int imgWidth = image.getWidth();
+            int imgHeight = image.getHeight();
+            if (imgHeight != USER_PHOTO_DIMENSIONS || imgWidth != USER_PHOTO_DIMENSIONS) {
+                logger.info("Image {} detected to have invalid dimensions: {} by {}. Deleting.", fileName + "jpg",
+                        imgHeight, imgWidth);
+                Files.deleteIfExists(profileImageFolder.resolve(fileName + "jpg"));
+            }
+        }*/
+
+        // check image dimensions
+        // TODO https://stackoverflow.com/questions/17451918/get-a-bufferedimage-from-and-outputstream looky here
+
+
     }
 
     /**
@@ -153,22 +205,31 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         responseObserver.onCompleted();
     }
 
-    /**
+    /** TODO update this javadoc
      * Sets the path of the file to be uploaded to data/photos/USERID_photo.FILETYPE
      * Copied from tutorial; see above.
      * @param request A request object containing the user ID and the file type
-     * @return Output stream
+     * @return Output stream for that file path
      * @throws IOException When there is an error in creating the output stream
      */
-    private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
-        // convert .jpeg into .jpg, else you'd get two separate files
-        String extension = request.getMetaData().getFileType();
-        var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
-
+    private OutputStream getFilePathOutputStream(UploadUserProfilePhotoRequest request) throws IOException {
+        String fileName = getFilePath(request);
         // delete the file if it already exists
         Files.deleteIfExists(profileImageFolder.resolve(fileName));
 
         return Files.newOutputStream(profileImageFolder.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+
+    /**
+     * Gets the path, in the user profile photos folder, for the photo in the provided upload request.
+     * @param request A request object containing the user ID and the file type
+     * @return a string object representing the path to the photo in the request
+     */
+    private String getFilePath(UploadUserProfilePhotoRequest request) {
+        // convert .jpeg into .jpg, else you'd get two separate files
+        String extension = request.getMetaData().getFileType();
+        String fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
+        return profileImageFolder.resolve(fileName).toString();
     }
 
     /**
@@ -177,10 +238,13 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @param fileName a String of the input and output file. File assumed to be a png.
      */
     private void convertPngToJpg(String fileName) {
+        logger.info(String.format("Attempting to convert \"%s\" to jpg", fileName));
         try {
             Path source = profileImageFolder.resolve(fileName + "png");
             Path target = profileImageFolder.resolve(fileName + "jpg");
-            BufferedImage originalImage = ImageIO.read(source.toFile());
+            logger.info(source.toFile().toString());
+//            BufferedImage originalImage = ImageIO.read(source.toFile());
+            BufferedImage originalImage = ImageIO.read(profileImageFolder.resolve("1_photo.png").toFile());
 
             BufferedImage newImage = new BufferedImage(
                     originalImage.getWidth(),
@@ -197,8 +261,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
             ImageIO.write(newImage, "jpg", target.toFile());
             Files.deleteIfExists(source);
-        } catch (IOException e) {
-            logger.info("Error converting \"{}\" from PNG to JPG: {}", fileName + ".png", e.getMessage());
+        } catch (Exception e) {
+            logger.info("Error converting \"{}\" from PNG to JPG: {}", fileName + "png", e.getMessage());
         }
     }
 
