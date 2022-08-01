@@ -124,7 +124,7 @@
             </div>
         </div>
         <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event">
+        <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
             <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
                 <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
