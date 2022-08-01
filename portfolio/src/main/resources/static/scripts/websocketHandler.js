@@ -2,6 +2,7 @@ var stompClient = null;
 
 function setConnected(connected) {
     // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
+    // TODO check these lines before merging to master!
 
     //document.getElementById('connect').disabled = connected;
     //document.getElementById('disconnect').disabled = !connected;
