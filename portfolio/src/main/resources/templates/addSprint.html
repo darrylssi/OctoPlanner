@@ -26,7 +26,7 @@
                 <label for="sprintEndDate">Sprint End Date</label> <br/>
                 <input id="sprintEndDate" type="date" th:name="sprintEndDate" th:value="${sprintEndDate}" />
             </div>
-            <div class="horizontal-group-element" >
+            <div class="horizontal-group-element" id="element-description" >
                 <label for="sprintDescription">Sprint Description</label> <br/>
                 <textarea th:class="description-input" th:type="text" class="description-input" id="sprintDescription"
                           th:name="sprintDescription" th:field="*{sprintDescription}"></textarea>
