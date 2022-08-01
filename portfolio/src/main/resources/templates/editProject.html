@@ -15,8 +15,8 @@
     <div class="modal-content">
         <div class="modal-title"></div>
         <br/>
-        <button onclick="hideModal()" class="modal-button cancel">Cancel</button>
-        <button id="confirmButton" class="modal-button delete">Confirm</button>
+        <button onclick="hideModal()" class="btn btn-neutral btn-lg">Cancel</button>
+        <button id="confirmButton" class="btn btn-primary btn-lg">Confirm</button>
     </div>
 </div>
 <div th:replace="fragments :: header(title='Edit Project')"></div>
@@ -49,12 +49,10 @@
 </div>
 <br/>
 <div class="buttons">
-    <a th:href="|../project/${id}|">
-        <button class="form-button cancel" type="button">
+    <a th:href="|../project/${id}|" class="btn btn-neutral btn-lg">
             Cancel
-        </button>
     </a>
-    <button class="form-button save" type="submit">
+    <button class="btn btn-primary btn-lg" type="button" th:onclick="showLongProjectModal()">
         Save
     </button>
 </div>

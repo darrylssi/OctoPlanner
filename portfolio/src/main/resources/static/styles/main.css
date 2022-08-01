@@ -127,11 +127,15 @@ body {
     width: 40px;
     border-radius: 40px;
     border: none;
-    background-color: #c0c0c0;
-    color: #5e0202;
+    background-color: var(--neutral-mid);
+    color: var(--primary-dark);
     display: flex;
     justify-content: center;
     align-items: center;
+}
+.edit-button:hover {
+    background-color: var(--neutral-dark);
+    color: var(--primary-dark);
 }
 .edit-project-button {
     height: 60px;
@@ -153,6 +157,9 @@ body {
     border: none;
     background-color: #e61610;
     color: white;
+}
+.delete-button:hover {
+    background-color: var(--primary);
 }
 
 .detail-block {
