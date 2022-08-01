@@ -16,7 +16,7 @@ import java.util.Date;
 public class DateUtils {
 
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat backendDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss");
+    private static final SimpleDateFormat backendDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);

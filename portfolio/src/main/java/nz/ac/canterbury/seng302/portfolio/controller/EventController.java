@@ -116,11 +116,12 @@ public class EventController extends PageController {
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         Event event = eventService.getEventById(eventId);
+
         // Set new event details
         event.setEventName(name);
         event.setEventDescription(description);
-//        event.setStartDate(DateUtils.toDateTime(startDate));
-//        event.setEndDate(DateUtils.toDateTime(endDate));
+        event.setStartDate(DateUtils.toDateTime(startDate));
+        event.setEndDate(DateUtils.toDateTime(endDate));
 
         eventService.saveEvent(event);
 
