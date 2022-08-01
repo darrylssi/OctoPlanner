@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -21,6 +22,7 @@ public class Sprint {
 
     @Column(nullable = false)
     @Size(min=2, max=32, message="The sprint name must be between 2 and 32 characters.")
+    @NotBlank(message="Sprint name is required.")
     private String sprintName;
 
     @Column(nullable = false)
@@ -81,12 +83,11 @@ public class Sprint {
         this.sprintColour = sprintColour;
     }
 
-
-    @Override
     /**
      * Returns a string listing the attributes of the sprint in the form "Sprint[x, x, x]".
      * @return said string
      */
+    @Override
     public String toString() {
         return String.format(
                 "Sprint[id=%d, parentProjectId='%d', sprintName='%s', sprintLabel='%s', sprintStartDate='%s', sprintEndDate='%s', sprintDescription='%s', sprintColour='%s']",
