@@ -16,6 +16,7 @@
         <input th:id="projectId" th:name="projectId" th:type="hidden" th:value="${projectId}">
         <label for="sprintName" class="required">Sprint Name</label> <br/>
         <input id="sprintName" type="text" th:name="sprintName" th:field="*{sprintName}">
+        <span th:text="${invalidName}" th:class="error"></span>
         <span th:if="${#fields.hasErrors('sprintName')}" th:errors="*{sprintName}" th:errorclass="error" />
         <br/>
         <div class="horizontal-group">
