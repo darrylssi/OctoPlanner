@@ -56,10 +56,12 @@ class UserAccountServiceTest {
     private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
     // Used for photo tests only
-    private static final String BASE64_PREFIX = "data:image/jpeg;base64,";
+    private static final String BASE64_PREFIX_JPG = "data:image/jpeg;base64,";
+    private static final String BASE64_PREFIX_PNG = "data:image/png;base64,";
     private static final int TEST_PHOTO_USERID = 1;
-    private static final String TEST_PHOTO_NAME = "/" + TEST_PHOTO_USERID + "_photo.jpg";
-    private static final String TEST_PHOTO_FORMAT = "jpg";
+    private static final String TEST_PHOTO_NAME = "/" + TEST_PHOTO_USERID + "_photo.";
+    private static final String TEST_PHOTO_FORMAT_JPG = "jpg";
+    private static final String TEST_PHOTO_FORMAT_PNG = "png";
 
     @Value("${profile-image-folder}")
     private Path profileImageFolder;
@@ -1457,7 +1459,7 @@ class UserAccountServiceTest {
     @Test
     void deleteNonexistentPhoto_getFailure() throws IOException {
         /* Given: There is no photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME));
+        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
 
         /* When: A request is received to delete the user's photo */
         DeleteUserProfilePhotoRequest request = DeleteUserProfilePhotoRequest.newBuilder()
@@ -1480,26 +1482,34 @@ class UserAccountServiceTest {
     }
 
     /**
-     * Creates a 100x100 px image saved in the photo folder for the test user id.
+     * Creates a 100x100 px jpg image saved in the photo folder for the test user id.
      */
     void createTestUserImage() throws IOException {
         BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        ImageIO.write(image, TEST_PHOTO_FORMAT, new File( profileImageFolder + TEST_PHOTO_NAME));
+        ImageIO.write(image, TEST_PHOTO_FORMAT_JPG, new File( profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
     }
 
     /**
-     * Creates a blank, square image of custom size and packs it into a MultipartFile to sending over grpc.
+     * Creates a blank, square image of custom size and format, and packs it into a MultipartFile for sending over GRPC.
      * @param imageSize width and height of image
-     * @return MultpartFile with this image enclosed
+     * @param format format string for the image; jpg or png
+     * @return MultipartFile with this image enclosed
      * @throws IOException if an error occurs when writing the image
      */
-    MultipartFile getTestUserImageMultipartFile(int imageSize) throws IOException {
+    MultipartFile getTestUserImageMultipartFile(int imageSize, String format) throws IOException {
         BufferedImage newImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(newImage, TEST_PHOTO_FORMAT, outputStream);
+        ImageIO.write(newImage, format, outputStream);
         byte[] fileBytes = outputStream.toByteArray();
         String base64ImageString = DatatypeConverter.printBase64Binary(fileBytes);
-        return new Base64DecodedMultipartFile(BASE64_PREFIX + base64ImageString);
+        switch (format) {
+            case "png":
+                return new Base64DecodedMultipartFile(BASE64_PREFIX_PNG + base64ImageString);
+            case "jpg":
+                return new Base64DecodedMultipartFile(BASE64_PREFIX_JPG + base64ImageString);
+            default:
+                throw new IllegalArgumentException("Error running UserAccountServiceTest: getTestUserImageMultipartFile parameter 'format' must be 'jpg' or 'png'");
+        }
     }
 
     @Test
@@ -1527,13 +1537,14 @@ class UserAccountServiceTest {
     @Test
     void addNewPhoto_getSuccessAndFileExists() throws IOException {
         /* Given: There is no photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME));
+        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
 
         /* When: a request is received to create a photo for the user */
         // This code is just copied from UserAccountClientService.java
-        MultipartFile file = getTestUserImageMultipartFile(100);
+        MultipartFile file = getTestUserImageMultipartFile(200, TEST_PHOTO_FORMAT_JPG);
 
         String filetype = file.getContentType();
+        System.out.printf(filetype);
         if (filetype != null) {
             filetype = filetype.split("/")[1];
         }
@@ -1556,7 +1567,6 @@ class UserAccountServiceTest {
             UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
                     .setFileContent(ByteString.copyFrom(bytes, 0 , size))
                     .build();
-            System.out.println(uploadRequest.getFileContent());
             assertTrue(uploadRequest.hasFileContent());
             requestStreamObserver.onNext(uploadRequest);
         }
@@ -1566,7 +1576,7 @@ class UserAccountServiceTest {
         requestStreamObserver.onCompleted();
 
         /* Then: The file exists and the response will be a success */
-        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME);
+        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
         assertTrue(pfp.exists());
         pfp.delete();
 
@@ -1582,16 +1592,16 @@ class UserAccountServiceTest {
     @Test
     void replaceExistingPhoto_getSuccessAndFileDifferent() throws IOException {
         /* Given: There is an existing photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME));
+        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
         createTestUserImage();
-        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME);
+        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
         assertTrue(pfp.exists());
         Long originalFileSize = pfp.length(); // save this to check that it is different
 
         /* When: a request is received to create a photo for the user */
         // This code is just copied from UserAccountClientService.java
         // Note that this image is 200x200, so will be larger than the one created by createTestUserImage()!
-        MultipartFile file = getTestUserImageMultipartFile(200);
+        MultipartFile file = getTestUserImageMultipartFile(200, TEST_PHOTO_FORMAT_JPG);
 
         String filetype = file.getContentType();
         if (filetype != null) {
@@ -1616,7 +1626,6 @@ class UserAccountServiceTest {
             UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
                     .setFileContent(ByteString.copyFrom(bytes, 0 , size))
                     .build();
-            System.out.println(uploadRequest.getFileContent());
             assertTrue(uploadRequest.hasFileContent());
             requestStreamObserver.onNext(uploadRequest);
         }
