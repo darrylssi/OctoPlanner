@@ -46,13 +46,18 @@ public class DateUtils {
 
     /**
      * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date String to be converted to Date
-     * @return Date object
+     * @param date Date object to be converted to String
+     * @return String object
      */
     public static String toString(Date date) {
         return backendDateFormat.format(date);
     }
 
+    /**
+     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
+     * @param date String to be converted to a Date
+     * @return Date object of the corresponding string
+     */
     public static Date toDateTime(String date) {
         try {
             return backendDateTimeFormat.parse(date);

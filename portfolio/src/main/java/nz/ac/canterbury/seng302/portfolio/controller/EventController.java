@@ -105,6 +105,17 @@ public class EventController extends PageController {
         return "redirect:../";
     }
 
+    /**
+     * Post request for editing an event with a given ID.
+     * @param principal The authenticated user.
+     * @param eventId ID of the event to be edited.
+     * @param name New name of the event, if changed.
+     * @param description New description of the event, if changed.
+     * @param startDate New start date and time of the event, if changed.
+     * @param endDate New end date and time of the event, if changed.
+     * @return Project details page.
+     * @throws Exception when the event of the said ID does not exist.
+     */
     @PostMapping("/edit-event/{event_id}")
     public String postEditEvent(
             @AuthenticationPrincipal AuthState principal,
