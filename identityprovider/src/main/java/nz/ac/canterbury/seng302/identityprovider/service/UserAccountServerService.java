@@ -114,20 +114,24 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
              */
             @Override
             public void onCompleted() {
+                FileUploadStatusResponse.Builder response = FileUploadStatusResponse.newBuilder();
+
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
+
                 status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
                 closeFile(byteWriter);
 
                 status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
-                FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
-                        .setStatus(status)
-                        .build();
 
                 if (status == FileUploadStatus.SUCCESS) {
                     deleteIncorrectPhotoFileType(fileName, fileExtension);
+                    response.setMessage("Successfully uploaded profile photo");
+                } else {
+                    response.setMessage("Uploading profile photo failed");
                 }
 
-                responseObserver.onNext(response);
+                response.setStatus(status);
+                responseObserver.onNext(response.build());
                 responseObserver.onCompleted();
             }
         };
@@ -181,7 +185,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     @Override
     public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {
-        logger.info("Received request to delete profile photo");
+        logger.info("Received request to delete profile photo for user {}", request.getUserId());
         DeleteUserProfilePhotoResponse.Builder reply = DeleteUserProfilePhotoResponse.newBuilder();
         String filename = request.getUserId() + USER_PHOTO_SUFFIX;
 
@@ -189,7 +193,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             if (Files.exists(profileImageFolder.resolve(filename))) {
                 // Left as a deleteIfExists in case of two nearly simultaneous requests
                 Files.deleteIfExists(profileImageFolder.resolve(filename));
-                logger.info("Trying to delete (form request) user photo {}", filename); // TODO
                 reply
                         .setIsSuccess(true)
                         .setMessage("User photo deleted successfully");
