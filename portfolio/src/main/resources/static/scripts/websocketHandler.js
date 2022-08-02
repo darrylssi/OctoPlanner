@@ -24,12 +24,12 @@ function setConnected(connected) {
  * Uses the endpoint registered in WebSocketConfig.java
  */
 function connect() {
-    const socket = new SockJS('/ws');
+    const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/messages', function(messageOutput) {
+        stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -51,7 +51,7 @@ function disconnect() {
  */
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send("/app/ws", {},
+    stompClient.send(BASE_URL + "app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
 }
 
