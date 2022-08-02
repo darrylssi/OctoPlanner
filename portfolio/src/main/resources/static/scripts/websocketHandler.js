@@ -1,5 +1,9 @@
-var stompClient = null;
+let stompClient = null;
 
+/**
+ * Sets html elements according to whether a WebSocket has been connected to or not
+ * @param connected Boolean if a connection has been established to a WebSocket
+ */
 function setConnected(connected) {
     // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
     // TODO check these lines before merging to master!
@@ -15,8 +19,12 @@ function setConnected(connected) {
     }
 }
 
+/**
+ * Sets up a connection to a WebSocket
+ * Uses the endpoint registered in WebSocketConfig.java
+ */
 function connect() {
-    var socket = new SockJS('/ws');
+    const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
@@ -27,6 +35,9 @@ function connect() {
     });
 }
 
+/**
+ * Disconnects from a WebSocket
+ */
 function disconnect() {
     if(stompClient != null) {
         stompClient.disconnect();
@@ -35,15 +46,22 @@ function disconnect() {
         console.log("Disconnected");
 }
 
+/**
+ * Sends a message to a WebSocket endpoint using data from an HTML element
+ */
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
     stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
 }
 
+/**
+ * Updates an HTML element to display a received WebSocket message
+ * @param messageOutput JSON object received from the WebSocket
+ */
 function showMessageOutput(messageOutput) {
-    var response = document.getElementById('response');
-    var p = document.createElement('p');
+    const response = document.getElementById('response');
+    const p = document.createElement('p');
     p.style.wordWrap = 'break-word';
     p.appendChild(document.createTextNode(messageOutput.from +
         messageOutput.text + " (" + messageOutput.time + ")"));
