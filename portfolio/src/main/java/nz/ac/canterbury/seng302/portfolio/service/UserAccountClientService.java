@@ -207,9 +207,9 @@ public class UserAccountClientService {
      * @param file Image file to be uploaded
      * @throws IOException When there is an error with reading file
      */
-    public void uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
-
-        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
+    public FileUploadObserver uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
+        FileUploadObserver fileUploadObserver = new FileUploadObserver();
+        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(fileUploadObserver);
 
         String filetype = file.getContentType();
         if (filetype != null) {
@@ -229,7 +229,7 @@ public class UserAccountClientService {
         InputStream inputStream = file.getInputStream();
         byte[] bytes = new byte[4096];
         int size;
-        while ((size = inputStream.read(bytes)) > 0){
+        while ((size = inputStream.read(bytes)) > 0) {
             UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
                     .setFileContent(ByteString.copyFrom(bytes, 0 , size))
                     .build();
@@ -239,6 +239,10 @@ public class UserAccountClientService {
         // close the stream
         inputStream.close();
         streamObserver.onCompleted();
+
+        // TODO
+        logger.info("TEST FILE UPLOAD OBSERVER CLIENT\nSTATUS: {}\nMESSAGE: {}", fileUploadObserver.isUploadSuccessful(), fileUploadObserver.getUploadMessage());
+        return fileUploadObserver;
     }
 
     /**
