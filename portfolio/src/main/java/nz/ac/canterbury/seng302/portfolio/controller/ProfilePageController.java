@@ -35,7 +35,6 @@ public class ProfilePageController {
         if (!thisUser.isAuthenticated()) {
             return "redirect:./";
         }
-
         return "redirect:./" + thisUser.getID();
     }
 
@@ -44,11 +43,13 @@ public class ProfilePageController {
      *
      * Example URL:
      * <code>/users/123</code>
-     * @param id The ID associated with a given user
+     * @param principal object that holds the principal data
+     * @param id the user's id
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @author Andrew Hall <amh284@uclive.ac.nz>
      */
     @GetMapping("/users/{id}")
-    public String GetProfile(
+    public String getProfile(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
@@ -62,7 +63,7 @@ public class ProfilePageController {
         boolean isCurrentUser = thisUser.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
 
-            if (user != null) {
+        if (user != null) {
                 model.addAttribute("profileInfo", user);
                 model.addAttribute("userExists", true);
                 model.addAttribute("fullName", getFullName(
@@ -75,7 +76,6 @@ public class ProfilePageController {
             }
         return "profile";
     }
-
 
     /**
      * Combines a user's names into one string

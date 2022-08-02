@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.portfolio;
+package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
@@ -92,17 +92,6 @@ class ProjectControllerTest {
                 .param("projectEndDate", "2022-03-05"))
             .andExpect(status().isForbidden());
     }
-
-    // TODO: This test FAILS, and honestly should be mocked.
-    // @Test
-    // public void postValidProject_thenRedirect() throws Exception {
-    //     this.mockMvc.perform(post("/edit-project/0")
-    //             .param("projectName", "name")
-    //             .param("projectDescription", "desc")
-    //             .param("projectStartDate", "2021-05-15")
-    //             .param("projectEndDate", "2022-03-05"))
-    //         .andExpect(status().is3xxRedirection());
-    // }
 
     @Test
     void postProjectWithNoName_thenShowError() throws Exception {

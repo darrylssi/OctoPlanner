@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Controller for the add sprint details page
@@ -39,6 +36,13 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+
+    // Provide a list of colours that are noticeably different for the system to cycle through
+    private static final List<String> SPRINT_COLOURS = Arrays.asList(
+            "#320d6d",
+            "#b83daf",
+            "#449dd1",
+            "#52ffb8");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -67,13 +71,6 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
-
-        // Generate a random colour, from https://www.codespeedy.com/generate-random-hex-color-code-in-java/
-        Random random = new Random();
-        int colourNum = random.nextInt(0xffffff + 1);
-        String colourCode = String.format("#%06x", colourNum);
-
-        model.addAttribute("sprintColour", colourCode);
 
         // Calculate the default sprint start date
         Date sprintStart;
@@ -123,7 +120,6 @@ public class AddSprintController extends PageController {
      * @param sprintStartDate Gets the given sprint's start date
      * @param sprintEndDate Gets the given sprint's end date
      * @param sprintDescription Gets the given sprint description
-     * @param sprintColour Gets the given sprint colour string
      * @param sprint The new sprint to be added
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
@@ -138,7 +134,6 @@ public class AddSprintController extends PageController {
             @RequestParam(name="sprintStartDate") String sprintStartDate,
             @RequestParam(name="sprintEndDate") String sprintEndDate,
             @RequestParam(name="sprintDescription") String sprintDescription,
-            @RequestParam(name="sprintColour") String sprintColour,
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
@@ -148,11 +143,24 @@ public class AddSprintController extends PageController {
         // Getting project object by project id
         Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
 
-        ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getSprintsInProject(id));
+        // Getting sprint list containing all the sprints
+        List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
+        sprintList.sort(Comparator.comparing(Sprint::getSprintEndDate));
+
+        // Fetch system colour for sprint
+        int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
+        String sprintColour = SPRINT_COLOURS.get(colourIndex);
+        if (!sprintList.isEmpty() && sprintColour.equals(sprintList.get(sprintList.size() - 1).getSprintColour())) {
+            sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
+        }
+
+        ValidationError dateOutOfRange = getDateValidationError(sprintStartDate, sprintEndDate,
+                id, parentProject, sprintList);
+
+        ValidationError invalidName = getNameValidationError(sprintName);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -163,7 +171,8 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            model.addAttribute("sprintColour", sprintColour);
+            model.addAttribute("invalidName", invalidName.getFirstError());
+
             return "addSprint";
         }
 
@@ -189,7 +198,7 @@ public class AddSprintController extends PageController {
      * @param sprintList A list of sprints in the same project
      * @return A validation error object, with a boolean error flag and a string list of error messages
      */
-    static ValidationError getValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
+    static ValidationError getDateValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
                                               @RequestParam(name = "sprintEndDate") String sprintEndDate,
                                               @PathVariable("id") int id, Project parentProject, List<Sprint> sprintList) {
         Date start = DateUtils.toDate(sprintStartDate);
@@ -198,5 +207,15 @@ public class AddSprintController extends PageController {
         return ValidationUtils.validateSprintDates(id, start, end,
                 parentProject, sprintList);
     }
+
+    /**
+     * Checks whether the sprint name is valid
+     * @param sprintName Sprint name to be tested
+     * @return A validation error object, with a boolean error flag and a string list of error messages
+     */
+    static ValidationError getNameValidationError(String sprintName) {
+        return ValidationUtils.validateName(sprintName);
+    }
+
 
 }

@@ -1,0 +1,33 @@
+@import "themeColors.css";
+
+.card-header {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+}
+
+.btn-primary:disabled {
+    background-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.nav-item {
+    margin: 0px 2px;
+}
+
+.nav-item .nav-link {
+    background-color: var(--neutral-mid);
+    color: var(--primary-dark);
+    font-weight: bold;
+}
+
+.nav-tabs .nav-link.active{
+    background-color: var(--neutral-light);
+    color: var(--primary);
+    border-color: var(--neutral-light);
+}
