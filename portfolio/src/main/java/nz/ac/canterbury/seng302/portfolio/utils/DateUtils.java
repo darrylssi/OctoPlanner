@@ -18,6 +18,7 @@ public class DateUtils {
 
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -47,7 +48,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayDateTimeString(Date date) {
-        return displayDateFormat.format(date) + " " + date.toString().substring(11, 19);
+        return displayDateTimeFormat.format(date);
     }
 
     /**
