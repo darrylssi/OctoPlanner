@@ -42,6 +42,15 @@ public class DateUtils {
     }
 
     /**
+     * Converts a Date object to a String with dd/MMM/yyyy HH:mm:ss format.
+     * @param date Date to be converted
+     * @return Date as a String
+     */
+    public static String toDisplayDateTimeString(Date date) {
+        return displayDateFormat.format(date) + " " + date.toString().substring(11, 19);
+    }
+
+    /**
      * Converts a String to a Date in yyyy-MM-dd format.
      * @param date String to be converted to Date
      * @return Date object
