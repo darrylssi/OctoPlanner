@@ -19,12 +19,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
@@ -38,8 +36,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
-
-    private static final String USER_PHOTO_SUFFIX = "_photo.";
+    private static final String USER_PHOTO_FILENAME = "_photo.";
+    private static final String USER_PHOTO_FORMAT = "jpg";
+    private static final String USER_PHOTO_SUFFIX = USER_PHOTO_FILENAME + USER_PHOTO_FORMAT;
     private static final int USER_PHOTO_DIMENSIONS = 200;
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
@@ -59,7 +58,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Autowired
     private ValidationService validator;
 
-    /**
+    /** TODO logging!
      * Creates a request to upload a profile photo for a user, following these tutorials:
      * https://www.vinsguru.com/grpc-file-upload-client-streaming/ so far it's just copied from this one
      * @param responseObserver Observable stream of messages
@@ -69,63 +68,55 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
         return new StreamObserver<>() {
             // declare upload context variables
-            OutputStream writer;
-            ByteArrayOutputStream byteWriter;
-            ArrayList<ByteString> imageByteStrings = new ArrayList<>();
+            ByteArrayOutputStream byteWriter = new ByteArrayOutputStream();
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
-            String fileName;
-            String fileExtension;
-            String filePath;
+            String fileName; // file name of the image, e.g. "5_photo."
+            String fileExtension; // this is the type of file uploaded - we only save JPGs, so don't use this to save!
+            String filePath; // the actual path to save the image to, including the file name and type (.JPG)
 
+            /**
+             * Processes a file upload request, and saves the file contents to a ByteArrayOutputStream
+             * so that it can be verified before being saved.
+             * @param userProfilePhotoUploadRequest the file upload request object
+             */
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
-//                try {
+                try {
                     if (userProfilePhotoUploadRequest.hasMetaData()) {
-//                        writer = getFilePathOutputStream(userProfilePhotoUploadRequest);
-                        fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
+                        logger.info("Got upload profile request for user with id {}", userProfilePhotoUploadRequest.getMetaData().getUserId());
+                        fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_FILENAME;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
                         filePath = getFilePath(userProfilePhotoUploadRequest);
-                        logger.info(filePath);
                     } else {
-//                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
-//                        writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
-                        imageByteStrings.add(userProfilePhotoUploadRequest.getFileContent());
+                        writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
                     }
-                /*} catch (IOException e) {
+                } catch (IOException e) {
                     this.onError(e);
-                }*/ // TODO
-
+                }
             }
 
+            /**
+             * Called when an error is encountered while uploading an image.
+             * Sets the status of the upload to failed and calls onCompleted.
+             * TODO logs the error
+             * @param t the thrown exception which caused the error
+             */
             @Override
             public void onError(Throwable t) {
                 status = FileUploadStatus.FAILED;
                 this.onCompleted();
             }
 
+            /**
+             * Called when the file upload stops, either because it completed or an error was encountered.
+             * Checks the validity of the image and saves it to a file if it is valid.
+             * Creates a file upload response to send back to the user.
+             */
             @Override
             public void onCompleted() {
-//                closeFile(writer);
-                byteWriter = new ByteArrayOutputStream();
-
-                for (ByteString byteString : imageByteStrings) {
-                    try {
-                        writeFile(byteWriter, byteString);
-                    } catch (IOException e) {
-                        logger.error("Error writing ByteString to file"); // TODO better message
-                    }
-                }
-
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
-                try {
-                    BufferedImage image = ImageIO.read(inputStream);
-                    logger.info(String.format("Dimensions of saved image are %d x %d", image.getWidth(), image.getHeight()));
-                    ImageIO.write(image, "jpg", new File(filePath));
-                } catch (IOException e) {
-                    logger.error(String.format("Error reading uploaded image: %s", (Object) e.getStackTrace()));
-                }
+                status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
                 closeFile(byteWriter);
-
 
                 status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
                 FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
@@ -133,12 +124,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         .build();
 
                 if (status == FileUploadStatus.SUCCESS) {
-                    try {
-                        checkProfilePhoto(fileName, fileExtension);
-                    } catch (IOException e) {
-                        logger.error(String.format("Error reading profile image while checking it: %s%n%s",
-                                e.getMessage(), Arrays.toString(e.getStackTrace())));
-                    }
+                    deleteIncorrectPhotoFileType(fileName, fileExtension);
                 }
 
                 responseObserver.onNext(response);
@@ -147,30 +133,46 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         };
     }
 
-    private void checkProfilePhoto(String fileName, String fileExtension) throws IOException {
-        logger.info(fileName);
-        logger.info(fileExtension);
-        if (fileExtension.equalsIgnoreCase("png")) {
-            convertPngToJpg(fileName);
-        } else if (!fileExtension.equalsIgnoreCase("jpeg")) {
-            // delete the file if its extension is invalid
-            // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
-            deleteInvalidFile(fileName + fileExtension);
-        } /*else {
-            BufferedImage image = ImageIO.read(new File(String.valueOf(profileImageFolder.resolve(fileName + "jpg"))));
-            int imgWidth = image.getWidth();
-            int imgHeight = image.getHeight();
-            if (imgHeight != USER_PHOTO_DIMENSIONS || imgWidth != USER_PHOTO_DIMENSIONS) {
-                logger.info("Image {} detected to have invalid dimensions: {} by {}. Deleting.", fileName + "jpg",
-                        imgHeight, imgWidth);
-                Files.deleteIfExists(profileImageFolder.resolve(fileName + "jpg"));
+    /**
+     * Tries to read an image from a ByteArrayInputStream and save it.
+     * Will not save if the image cannot be read or has invalid dimensions.
+     * @param inputStream the input stream of bytes that contains the image
+     * @return true on successful save, false otherwise
+     */
+    private boolean saveImageIfValid(ByteArrayInputStream inputStream, String filePath) {
+        try {
+            BufferedImage image = ImageIO.read(inputStream);
+
+            if (image.getWidth() == USER_PHOTO_DIMENSIONS && image.getHeight() == USER_PHOTO_DIMENSIONS) {
+                ImageIO.write(image, "jpg", new File(filePath));
+                logger.info("Saved profile image {} with dimensions {} x {}", filePath, image.getWidth(), image.getHeight());
+                return true;
+            } else { // invalid
+                logger.info("Image {} has invalid dimensions {} x {} and was not saved", filePath, image.getWidth(), image.getHeight());
+                return false;
             }
-        }*/
+        } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write
+            logger.error(String.format("Error reading or writing uploaded image: %s", (Object) e.getStackTrace()));
+            return false;
+        }
+    }
 
-        // check image dimensions
-        // TODO https://stackoverflow.com/questions/17451918/get-a-bufferedimage-from-and-outputstream looky here
-
-
+    /**
+     * Attempts to delete any uploaded file that is not a jpg.
+     * @param fileName the saved file name WITHOUT extension, eg. "5_photo."
+     * @param originalFileExtension the original filetype of the upload - could be png, zip, pdf, jpg, or anything else
+     */
+    private void deleteIncorrectPhotoFileType(String fileName, String originalFileExtension) {
+        // JPEG, not JPG, is what the file type is set as in the upload
+        if (!originalFileExtension.equalsIgnoreCase("jpeg")) {
+            try {
+                Boolean success = Files.deleteIfExists(profileImageFolder.resolve(fileName + originalFileExtension));
+                logger.info("Attempted to delete potentially invalid file \"{}{}\". File detected and deleted: {}",
+                        fileName, originalFileExtension, success);
+            } catch (IOException e) {
+                logger.info("Error deleting invalid file \"{}\": {}", fileName + originalFileExtension, e.getMessage());
+            }
+        }
     }
 
     /**
@@ -184,9 +186,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         String filename = request.getUserId() + USER_PHOTO_SUFFIX;
 
         try {
-            if (Files.exists(profileImageFolder.resolve(filename + "jpg"))) {
+            if (Files.exists(profileImageFolder.resolve(filename))) {
                 // Left as a deleteIfExists in case of two nearly simultaneous requests
-                Files.deleteIfExists(profileImageFolder.resolve(filename + "jpg"));
+                Files.deleteIfExists(profileImageFolder.resolve(filename));
+                logger.info("Trying to delete (form request) user photo {}", filename); // TODO
                 reply
                         .setIsSuccess(true)
                         .setMessage("User photo deleted successfully");
@@ -205,85 +208,19 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         responseObserver.onCompleted();
     }
 
-    /** TODO update this javadoc
-     * Sets the path of the file to be uploaded to data/photos/USERID_photo.FILETYPE
-     * Copied from tutorial; see above.
-     * @param request A request object containing the user ID and the file type
-     * @return Output stream for that file path
-     * @throws IOException When there is an error in creating the output stream
-     */
-    private OutputStream getFilePathOutputStream(UploadUserProfilePhotoRequest request) throws IOException {
-        String fileName = getFilePath(request);
-        // delete the file if it already exists
-        Files.deleteIfExists(profileImageFolder.resolve(fileName));
-
-        return Files.newOutputStream(profileImageFolder.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-    }
-
     /**
      * Gets the path, in the user profile photos folder, for the photo in the provided upload request.
-     * @param request A request object containing the user ID and the file type
+     * The file type is always set to JPG, per USER_PHOTO_SUFFIX, regardless of what type the initial file is.
+     * @param request A request object containing the user ID and the file's information
      * @return a string object representing the path to the photo in the request
      */
     private String getFilePath(UploadUserProfilePhotoRequest request) {
-        // convert .jpeg into .jpg, else you'd get two separate files
-        String extension = request.getMetaData().getFileType();
-        String fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
+        String fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
         return profileImageFolder.resolve(fileName).toString();
     }
 
     /**
-     * Takes a .png file existing in the profileImageFolder folder and replaces it with (converts it to) a .jpg file.
-     * Code pretty much copied from https://mkyong.com/java/convert-png-to-jpeg-image-file-in-java/
-     * @param fileName a String of the input and output file. File assumed to be a png.
-     */
-    private void convertPngToJpg(String fileName) {
-        logger.info(String.format("Attempting to convert \"%s\" to jpg", fileName));
-        try {
-            Path source = profileImageFolder.resolve(fileName + "png");
-            Path target = profileImageFolder.resolve(fileName + "jpg");
-            logger.info(source.toFile().toString());
-//            BufferedImage originalImage = ImageIO.read(source.toFile());
-            BufferedImage originalImage = ImageIO.read(profileImageFolder.resolve("1_photo.png").toFile());
-
-            BufferedImage newImage = new BufferedImage(
-                    originalImage.getWidth(),
-                    originalImage.getHeight(),
-                    BufferedImage.TYPE_INT_RGB
-            );
-
-            newImage.createGraphics()
-                    .drawImage(originalImage,
-                            0,
-                            0,
-                            Color.WHITE,
-                            null);
-
-            ImageIO.write(newImage, "jpg", target.toFile());
-            Files.deleteIfExists(source);
-        } catch (Exception e) {
-            logger.info("Error converting \"{}\" from PNG to JPG: {}", fileName + "png", e.getMessage());
-        }
-    }
-
-    /**
-     * Deletes the specified file from the profileImageFolder if it exists.
-     * This method shouldn't really be called, because files can only get here through the Portfolio module and
-     * the controller for the edit profile page, which should reject everything that isn't a JPG or PNG.
-     * Still, this provides a fail-safe in the event a file gets through that shouldn't.
-     * @param fileNameAndExtension a String of the filename and its extension, e.g. "totally-a-photo.zip"
-     */
-    private void deleteInvalidFile(String fileNameAndExtension) {
-        logger.info("Detected a profile photo upload of invalid type: \"{}\". Deleting file.", fileNameAndExtension);
-        try {
-            Files.deleteIfExists(profileImageFolder.resolve(fileNameAndExtension));
-        } catch (IOException e) {
-            logger.info("Error deleting invalid file \"{}\": {}", fileNameAndExtension, e.getMessage());
-        }
-    }
-
-    /**
-     * Writes the file content. Copied from tutorial; see above.
+     * Writes the file content to the OutputStream. Copied from tutorial; see above.
      * @param writer Output stream
      * @param content File content
      * @throws IOException When there is an error writing the content to the output stream
@@ -319,8 +256,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                logger.error(String.format("Register user %s : %s - %s",
-                        request.getUsername(), error.getFieldName(), error.getErrorText()));
+                logger.error("Register user {} : {} - {}",
+                        request.getUsername(), error.getFieldName(), error.getErrorText());
                 bld.add(error.getErrorText());
                 String logOutput = String.format("Register user %s : %s - %s",
                         request.getUsername(), error.getFieldName(), error.getErrorText());
