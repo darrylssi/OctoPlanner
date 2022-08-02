@@ -98,10 +98,24 @@ class ValidationUtilsTest {
     "2030-01-01,2030-02-01",
     "2022-11-01,2023-01-02"})
     void testDatesOutsideProject_getTrue(String startString, String endString) {
+        // Project dates are 2022-01-01 to 2023-01-01
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
         boolean result = ValidationUtils.datesOutsideProject(start, end,
+                baseProject.getProjectStartDate(), baseProject.getProjectEndDate());
+        assertTrue(result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"2021-12-31", "2005-01-01",
+            "2005-02-01", "2030-01-01",
+            "2030-02-01", "2023-01-02"})
+    void testDateOutsideProject_getTrue(String dateString) {
+        // Project dates are 2022-01-01 to 2023-01-01
+        Date date = DateUtils.toDate(dateString);
+        assert date != null;
+        boolean result = ValidationUtils.dateOutsideProject(date,
                 baseProject.getProjectStartDate(), baseProject.getProjectEndDate());
         assertTrue(result);
     }
@@ -112,6 +126,7 @@ class ValidationUtilsTest {
             "2030-01-01,2030-02-01",
             "2022-11-01,2023-01-02"})
     void testSprintDatesOutsideProject_getErrorMessage(String startString, String endString) {
+        // Project dates are 2022-01-01 to 2023-01-01
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
@@ -128,10 +143,25 @@ class ValidationUtilsTest {
     "2022-06-08,2023-01-01",
     "2022-01-01,2023-01-01"})
     void testValidDatesOutsideProject_getFalse(String startString, String endString) {
+        // Project dates are 2022-01-01 to 2023-01-01
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
         boolean result = ValidationUtils.datesOutsideProject(start, end,
+                baseProject.getProjectStartDate(), baseProject.getProjectEndDate());
+        assertFalse(result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"2022-01-01", "2022-02-01",
+            "2022-01-02", "2022-12-31",
+            "2022-06-08", "2023-01-01",
+            "2022-01-01", "2023-01-01"})
+    void testValidDateOutsideProject_getFalse(String dateString) {
+        // Project dates are 2022-01-01 to 2023-01-01
+        Date date = DateUtils.toDate(dateString);
+        assert date != null;
+        boolean result = ValidationUtils.dateOutsideProject(date,
                 baseProject.getProjectStartDate(), baseProject.getProjectEndDate());
         assertFalse(result);
     }
@@ -142,6 +172,7 @@ class ValidationUtilsTest {
             "2022-06-08,2023-01-01",
             "2022-01-01,2023-01-01"})
     void testValidSprintDatesOutsideProject_noErrorFlag(String startString, String endString) {
+        // Project dates are 2022-01-01 to 2023-01-01
         Date start = DateUtils.toDate(startString);
         Date end = DateUtils.toDate(endString);
         assert start != null;
@@ -181,5 +212,27 @@ class ValidationUtilsTest {
         boolean result = ValidationUtils.sprintDatesOverlap(testSprint.getSprintStartDate(),
                 testSprint.getSprintEndDate(), sprint2);
         assertFalse(result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"!@#", "''", "' '", "Sprint @"})
+    void testInvalidSprintName_getErrorMessage(String name) {
+        ValidationError result = ValidationUtils.validateName(name);
+        assertTrue(result.isError());
+        assertEquals("Name can only have alphanumeric and . - _ characters", result.getFirstError());
+    }
+
+    @Test
+    void testNullSprintName_getErrorMessage() {
+        ValidationError result = ValidationUtils.validateName(null);
+        assertTrue(result.isError());
+        assertEquals("Must enter a sprint name", result.getFirstError());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Sprint 1", "Sprint_1", "Sprint-1", "Sprint.1"})
+    void testValidSprintName(String name) {
+        ValidationError result = ValidationUtils.validateName(name);
+        assertFalse(result.isError());
     }
 }

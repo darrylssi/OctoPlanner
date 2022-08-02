@@ -149,16 +149,29 @@ public class ValidationUtils {
     }
 
     /**
-     * Checks whether a given start and end date are within a project's dates
+     * Checks whether a given start and end date are within a project's dates (or any two given dates)
      * @param startDate The start date to validate
      * @param endDate The end date to validate
-     * @param projectStart The project's start date to validate
-     * @param projectEnd The project's end date to validate
+     * @param projectStart The project's start date to test against
+     * @param projectEnd The project's end date to test against
      * @return True if given dates are outside the project dates, otherwise false
      */
     public static boolean datesOutsideProject(Date startDate, Date endDate, Date projectStart, Date projectEnd) {
         if (startDate.before(projectStart)) { return true; }
         else return endDate.after(projectEnd);
+    }
+
+    /**
+     * Checks whether a given date is within a project's dates (or any two given dates)
+     * @param date The date to validate
+     * @param projectStart The project's start date to test against
+     * @param projectEnd The project's end date to test against
+     * @return True if the given date is outside the project dates, otherwise false
+     */
+    public static boolean dateOutsideProject(Date date, Date projectStart, Date projectEnd) {
+        // TODO use this for milestones & deadlines because they only have one date to check
+        if (date.before(projectStart)) { return true; }
+        else return date.after(projectEnd);
     }
 
     /**
@@ -176,15 +189,20 @@ public class ValidationUtils {
         else return start.after(other.getSprintEndDate());
     }
 
-
     /**
      * Checks whether the name contains only valid characters
-     * @param name Sprint name to be tested
+     * @param name The sprint name to be tested
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
-
+        // Initial error flag = false (no errors yet)
         ValidationError error = new ValidationError(false);
+
+        if (name == null) {
+            error.setErrorFlag(true);
+            error.addErrorMessage("Must enter a sprint name");
+            return error;
+        }
 
         /* string can only have alphanumeric and _ , . - ( ) symbols */
         String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
@@ -192,7 +210,7 @@ public class ValidationUtils {
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {
             error.setErrorFlag(true);
-            error.addErrorMessage("Name can only have alphanumeric and . - _ characters.");
+            error.addErrorMessage("Name can only have alphanumeric and . - _ characters");
         }
 
         return error;
