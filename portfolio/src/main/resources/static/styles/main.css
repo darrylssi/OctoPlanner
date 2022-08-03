@@ -84,7 +84,6 @@
 }
 
 .sprint-label {
-    background-color: white;
     border-radius: 8px;
     margin: 10px;
     padding: 2px;
@@ -92,7 +91,7 @@
     justify-content: center;
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    color: #ff3823;
+    color: black;
 }
 
 .sprint-title {
@@ -197,8 +196,58 @@ button {
     display: inline-block;
 }
 
+.event-left {
+    float: left;
+    margin-top: 2px;
+}
+
+.event-left span {
+    line-height: 100%;
+    vertical-align: middle;
+}
+
+.event-right {
+    float: right;
+}
+
+.event-box {
+    padding: 5px;
+    border-radius: 5px;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
 .event-list-container {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.outside-event {
+    width: calc(100% - 68px);
+    margin-left: 58px;
+}
+
+.event-date {
+    color: #666666;
+    font-size: small;
+}
+
+.event {
+    flex-grow: 1;
+}
+
+.editEventForm {
+    width: 100%;
+    flex-grow: 5;
+    margin-top: 5px;
+}
+
+.tooltip-inner {
+    max-width: 65%;
+    margin: auto;
 }
 
 .break {

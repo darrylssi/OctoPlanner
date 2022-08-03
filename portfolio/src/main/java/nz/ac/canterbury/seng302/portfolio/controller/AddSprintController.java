@@ -39,10 +39,10 @@ public class AddSprintController extends PageController {
 
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
-            "#320d6d",
+            "#5aff15",
             "#b83daf",
             "#449dd1",
-            "#52ffb8");
+            "#d6871f");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -154,11 +154,13 @@ public class AddSprintController extends PageController {
             sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
         }
 
-        ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
+        ValidationError dateOutOfRange = getDateValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintList);
 
+        ValidationError invalidName = getNameValidationError(sprintName);
+
         // Checking it there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -169,6 +171,8 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
+            model.addAttribute("invalidName", invalidName.getFirstError());
+
             return "addSprint";
         }
 
@@ -194,7 +198,7 @@ public class AddSprintController extends PageController {
      * @param sprintList A list of sprints in the same project
      * @return A validation error object, with a boolean error flag and a string list of error messages
      */
-    static ValidationError getValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
+    static ValidationError getDateValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
                                               @RequestParam(name = "sprintEndDate") String sprintEndDate,
                                               @PathVariable("id") int id, Project parentProject, List<Sprint> sprintList) {
         Date start = DateUtils.toDate(sprintStartDate);
@@ -203,5 +207,15 @@ public class AddSprintController extends PageController {
         return ValidationUtils.validateSprintDates(id, start, end,
                 parentProject, sprintList);
     }
+
+    /**
+     * Checks whether the sprint name is valid
+     * @param sprintName Sprint name to be tested
+     * @return A validation error object, with a boolean error flag and a string list of error messages
+     */
+    static ValidationError getNameValidationError(String sprintName) {
+        return ValidationUtils.validateName(sprintName);
+    }
+
 
 }

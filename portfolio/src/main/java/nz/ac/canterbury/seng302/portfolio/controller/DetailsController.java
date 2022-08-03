@@ -67,18 +67,20 @@ public class DetailsController extends PageController {
 
         labelUtils.refreshProjectSprintLabels(id);
 
+        // Gets the sprint list and sort it based on the sprint start date
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        //
+        // Gets the event list and sort it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(id);
-        sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
+        eventList.sort(Comparator.comparing(Event::getEventStartDate));
         model.addAttribute("events", eventList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
+        model.addAttribute("user", thisUser.getFullName());
 
         model.addAttribute("tab", 0);
 
