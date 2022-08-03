@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import java.util.Collection;
+import java.util.Locale;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -35,6 +36,7 @@ public class RoleUtils {
             case TEACHER -> "Teacher";
             case COURSE_ADMINISTRATOR -> "Course Admin";
             case UNRECOGNIZED -> "Unrecognized (!!! this shouldn't be here !!!)";
+            default -> throw new IllegalArgumentException(role.toString() + " hasn't been registered in `RoleUtils.toName()`, add it please thanks");
         };
     }
 
@@ -66,6 +68,10 @@ public class RoleUtils {
     public static boolean hasRoleOfAtLeast(UserResponse user, UserRole targetRole) {
         Collection<UserRole> userRoles = user.getRolesList();
         return hasRoleOfAtLeast(userRoles, targetRole);
+    }
+
+    public static UserRole fromString(String sRole) {
+        return UserRole.valueOf(sRole.toUpperCase(Locale.ROOT));
     }
     
 }
