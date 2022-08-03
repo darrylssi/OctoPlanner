@@ -32,6 +32,9 @@ function connect() {
         stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
+        stompClient.subscribe(BASE_URL + 'topic/editing-event', function(message) {
+            showEditMessage(JSON.parse(message.body));
+        });
     });
 }
 
@@ -56,6 +59,15 @@ function sendMessage() {
 }
 
 /**
+ * Sends a message to a WebSocket endpoint using data from an HTML element
+ */
+function sendEditingEventMessage(eventName) {
+    let user = document.getElementById('user').getAttribute('data-name');
+    stompClient.send(BASE_URL + "app/ws", {},
+    JSON.stringify({'from':user, 'content':eventName}));
+}
+
+/**
  * Updates an HTML element to display a received WebSocket message
  * @param messageOutput JSON object received from the WebSocket
  */
@@ -65,5 +77,18 @@ function showMessageOutput(messageOutput) {
     p.style.wordWrap = 'break-word';
     p.appendChild(document.createTextNode(messageOutput.from +
         messageOutput.text + " (" + messageOutput.time + ")"));
+    response.appendChild(p);
+}
+
+/**
+ * Shows editing-event notifications on the page
+ * @param editMessage JSON object received from the WebSocket
+ */
+function showEditMessage(editMessage) {
+    const response = document.getElementById('response');
+    const p = document.createElement('p');
+    p.style.wordWrap = 'break-word';
+    p.appendChild(document.createTextNode(editMessage.from +
+        " is editing event \"" + editMessage.content + "\""));
     response.appendChild(p);
 }

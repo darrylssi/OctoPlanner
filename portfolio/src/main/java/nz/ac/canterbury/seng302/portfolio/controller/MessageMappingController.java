@@ -12,15 +12,26 @@ import java.util.Date;
 @Controller
 public class MessageMappingController {
 
+    // /**
+    //  * Websocket sending example
+    //  * @param message Data to send through the websocket
+    //  * @return An output that gets sent to the endpoint in the @SendTo parameter
+    //  */
+    // @MessageMapping("/ws")
+    // @SendTo("/topic/messages")
+    // public OutputMessage send(Message message) {
+    //     String time = new SimpleDateFormat("HH:mm").format(new Date());
+    //     return new OutputMessage(message.getFrom(), message.getContent(), time);
+    // }
+
     /**
-     * Websocket sending example
+     * Websocket message mapping for editing events
      * @param message Data to send through the websocket
      * @return An output that gets sent to the endpoint in the @SendTo parameter
      */
     @MessageMapping("/ws")
-    @SendTo("/topic/messages")
-    public OutputMessage send(Message message) {
-        String time = new SimpleDateFormat("HH:mm").format(new Date());
-        return new OutputMessage(message.getFrom(), message.getText(), time);
+    @SendTo("/topic/editing-event")
+    public Message send(Message message) {
+        return message;
     }
 }
