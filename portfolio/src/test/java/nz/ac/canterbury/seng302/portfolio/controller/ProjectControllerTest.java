@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -18,6 +19,8 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import nz.ac.canterbury.seng302.portfolio.builder.MockUserResponseBuilder;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
+
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -102,14 +105,15 @@ class ProjectControllerTest {
     }
 
     @Test
-    void postProjectWitLongName_thenShowError() throws Exception {
+    void postProjectWithLongName_thenShowError() throws Exception {
         this.mockMvc.perform(post("/edit-project/0")
                         .param("projectName", "blah".repeat(1000))
                         .param("projectDescription", "desc")
                         .param("projectStartDate", "2021-06-20")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")));
+                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")))
+                .andExpect(result -> Assertions.assertEquals("TEST", Objects.requireNonNull(result.getResolvedException()).getMessage())); // TODO
     }
 
     @Test
