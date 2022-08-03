@@ -31,6 +31,7 @@ function connect() {
         console.log('Connected: ' + frame);
         stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
+            showEditNotif();
         });
     });
 }
@@ -66,4 +67,8 @@ function showMessageOutput(messageOutput) {
     p.appendChild(document.createTextNode(messageOutput.from +
         messageOutput.text + " (" + messageOutput.time + ")"));
     response.appendChild(p);
+
+    // set message toast message
+    document.getElementById("editMessage").textContent = messageOutput.from +
+        messageOutput.text + " (" + messageOutput.time + ")";
 }

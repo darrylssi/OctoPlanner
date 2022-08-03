@@ -8,7 +8,6 @@
     <link th:href="|../styles/main.css|" rel="stylesheet" />
     <link th:href="|../styles/modals.css|" rel="stylesheet" />
     <link th:href="|../styles/reskinBootstrap.css|" rel="stylesheet" />
-
 </head>
 <body onload="connect()"> <!-- Immediately connect to WebSocket -->
 
@@ -170,5 +169,20 @@
         </div>
     </div>
 </div>
+
+<!-- Notification pop up when editing events -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div class="toast" id="toast">
+        <div class="toast-header text-white bg-danger">
+            <strong class="me-auto"><i class="bi-gift-fill"></i> Editing event</strong>
+            <small>1 sec ago</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="editMessage">
+            Another user is editing an event.
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
