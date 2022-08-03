@@ -69,10 +69,3 @@ function hideEditEvent() {
         eventForm.parentNode.removeChild(eventForm);
     }
 }
-
-/** shows a notification when an event is being edited */
-function showEditNotif() {
-    var toastLiveExample = document.getElementById("toast");
-    var toast = new bootstrap.Toast(toastLiveExample);
-    toast.show();
-}
