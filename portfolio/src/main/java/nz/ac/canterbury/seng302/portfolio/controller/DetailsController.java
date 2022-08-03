@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
@@ -34,6 +36,8 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintService sprintService;
     @Autowired
+    private EventService eventService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     @GetMapping("/project/{id}")
@@ -50,9 +54,15 @@ public class DetailsController extends PageController {
 
         labelUtils.refreshProjectSprintLabels(id);
 
+        // Gets the sprint list and sort it based on the sprint start date
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
+
+        // Gets the event list and sort it based on the event start date
+        List<Event> eventList = eventService.getEventByParentProjectId(id);
+        eventList.sort(Comparator.comparing(Event::getEventStartDate));
+        model.addAttribute("events", eventList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
@@ -85,6 +95,31 @@ public class DetailsController extends PageController {
         try {
             sprintService.deleteSprint(sprintId);
             return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Deletes an event and redirects back to the project view
+     * @param principal used to check if the user is authorised to delete events
+     * @param eventId the id of the event to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/delete-event/{eventId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteEvent(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="eventId") int eventId
+    ) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        // Check if the user is authorised to delete events
+        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            eventService.deleteEvent(eventId);
+            return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
