@@ -16,6 +16,7 @@ import java.util.Date;
 public class DateUtils {
 
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat backendDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
@@ -45,11 +46,25 @@ public class DateUtils {
 
     /**
      * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date String to be converted to Date
-     * @return Date object
+     * @param date Date object to be converted to String
+     * @return String object
      */
     public static String toString(Date date) {
         return backendDateFormat.format(date);
+    }
+
+    /**
+     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
+     * @param date String to be converted to a Date
+     * @return Date object of the corresponding string
+     */
+    public static Date toDateTime(String date) {
+        try {
+            return backendDateTimeFormat.parse(date);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
+        }
+        return null;
     }
 
 }
