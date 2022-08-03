@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title th:text="|${parentProject.projectName} - Add Event|"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="|../../styles/main.css|" rel="stylesheet" />
+    <link th:href="|../../styles/form.css|" rel="stylesheet" />
+</head>
+<body>
+<div th:replace="fragments :: header(title=${parentProject.projectName}, subtitle='Add Event')"></div>
+<div class="content">
+    <form th:action="@{../add-event/{id}(id = ${parentProject.Id})}" th:object="${eventForm}" method="post">
+        <div>
+            <label for="eventName">Event Name</label> <br/>
+            <input th:type="text" th:field="*{name}" />
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="error" />
+        </div>
+        <br/>
+        <div class="horizontal-group">
+            <div class="horizontal-group-element" >
+                <label for="startDate">Event Start Date</label> <br/>
+                <input type="datetime-local"
+                    th:min="${#dates.format(earliestDate, 'yyyy-MM-dd''T''hh:mm')}"
+                    th:max="${#dates.format(latestDate, 'yyyy-MM-dd''T''hh:mm')}"
+                    th:value="*{#dates.format(startDate, 'yyyy-MM-dd''T''hh:mm')}"/>
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="endDate">Event End Date</label> <br/>
+                <input type="datetime-local"
+                    th:min="${#dates.format(earliestDate, 'yyyy-MM-dd''T''hh:mm')}"
+                    th:max="${#dates.format(latestDate, 'yyyy-MM-dd''T''hh:mm')}"
+                    th:value="*{#dates.format(endDate, 'yyyy-MM-dd''T''hh:mm')}"/>
+            </div>
+            <div class="horizontal-group-element" >
+                <label for="eventDescription">Event Description</label> <br/>
+                <textarea th:class="description-input" th:type="text" class="description-input" th:field="*{description}"></textarea>
+                <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="error" />
+            </div>
+        </div>
+        <div>
+            <p th:text="${invalidDateRange}" th:class="error"></p>
+        </div>
+        <br/>
+        <div class="buttons">
+            <button class="form-button cancel" type="button">
+                <a th:href="|../project/${parentProjectId}|">Cancel</a>
+            </button>
+            <button class="form-button save" type="submit">Save</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

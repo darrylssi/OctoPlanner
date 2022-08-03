@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -80,7 +79,7 @@ public class PrincipalData {
         // It's saved as a lower-case comma-separated list, let's fix that.
         List<UserRole> roles = List.of(stringRoles.split(","))
             .stream()
-            .map(role -> UserRole.valueOf(role.toUpperCase(Locale.ROOT)))
+            .map(RoleUtils::fromString)
             .toList();
         
         return new PrincipalData(id, username, fullname, roles);
