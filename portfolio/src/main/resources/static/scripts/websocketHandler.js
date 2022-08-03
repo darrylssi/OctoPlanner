@@ -74,9 +74,39 @@ function updateEvent(eventMessage) {
     const event_lists = document.getElementsByClassName('event-list-container');
 // check each event list container to see if it has the event in it / should have the event in it
     for (let i = 0; i < event_lists.length; i++) {
-      event_lists[i].appendChild(document.createTextNode(messageOutput.from +
-                                                           messageOutput.text + " (" + messageOutput.time + ")"));
+      if(eventMessage.sprintIds.includes(event_lists[i].id)) {
+        //event is in this sprint and needs to be added or updated
+        event = event_lists[i].querySelector('#event-' + eventMessage.id);
+        console.log(event);
+        if (event !== null) {
+        console.log('event found');
+            //event is already displayed in this area. values can be updated
+            eventName = event.querySelector('#event-name');
+            eventName.innerHTML = eventMessage.name;
+            eventDates = event.querySelector('#event-date');
+            eventDates.innerHTML = eventMessage.dateString;
+            event.setAttribute('data-bs-original-title', eventMessage.description);
+        } else {
+            //event is not displayed in this area and needs to be created
+            //TODO
+            console.log('no event');
+        }
+      } else {
+        //event is not in this sprint and needs to be removed if it is on the page
+        //check if event is there
+        //remove event if it exists
+      }
     }
 // generate/update/delete relevant event instances
-    response.setAttribute('data-bs-original-title', messageOutput.description);
+}
+
+function testUpdateEvent(){
+    eventMessage = {
+        sprintIds: ['events-38'],
+        name: 'Updated Event',
+        dateString: '2022 Jan 1st to 2022 November 15th',
+        id: 1
+    }
+    console.log(eventMessage);
+    updateEvent(eventMessage);
 }
