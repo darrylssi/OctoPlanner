@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -71,10 +72,10 @@ public class Event {
                 id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-    /**
-    * Sets the value of the event id
-    * @param id the value to set the id to
-    */
+/**
+ * Sets the value of the event id 
+ * @param id the value to set the id to
+ */
     public void setId(int id) {
         this.id = id;
     }
