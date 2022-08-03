@@ -47,6 +47,8 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
     document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
     document.getElementById("editEventNameInput").setAttribute("value", eventName);
     document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);
-    document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
-    document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
+    document.getElementById("editEventStartDate").setAttribute("value", eventStartDate.substring(0, 10));
+    document.getElementById("editEventStartTime").setAttribute("value", eventStartDate.substring(11, 16));
+    document.getElementById("editEventEndDate").setAttribute("value", eventEndDate.substring(0, 10));
+    document.getElementById("editEventEndTime").setAttribute("value", eventEndDate.substring(11, 16));
 }

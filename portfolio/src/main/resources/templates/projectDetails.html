@@ -256,16 +256,30 @@
     '                <div class="row">' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <label for="editEventStartDate">Start Date</label>' +
+    '                            <div id="editEventStartDateFeedback" class="invalid-feedback"></div>' +
+    '                        </div>' +
+    '                    </div>' +
+    '                    <div class="col">' +
+    '                        <div class="form-floating mb-3">' +
+    '                            <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback">' +
     '                            <label for="editEventStartTime">Start Time</label>' +
-    '                            <div id="editEventStartFeedback" class="invalid-feedback"></div>' +
+    '                            <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                    <div class="col">' +
     '                        <div class="form-floating mb-3 has-validation">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
+    '                            <label for="editEventEndDate">End Date</label>' +
+    '                            <div id="editEventEndDateFeedback" class="invalid-feedback"></div>' +
+    '                        </div>' +
+    '                    </div>' +
+    '                    <div class="col">' +
+    '                        <div class="form-floating mb-3 has-validation">' +
+    '                            <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
     '                            <label for="editEventEndTime">End Time</label>' +
-    '                            <div id="editEventEndFeedback" class="invalid-feedback"></div>' +
+    '                            <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>' +
     '                        </div>' +
     '                    </div>' +
     '                </div>' +
