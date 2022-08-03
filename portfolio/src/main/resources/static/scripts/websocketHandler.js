@@ -63,7 +63,7 @@ function sendMessage() {
  */
 function sendEditingEventMessage(eventName) {
     let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send(BASE_URL + "app/ws", {},
+    stompClient.send(BASE_URL + "app/ws/editing-event", {},
     JSON.stringify({'from':user, 'content':eventName}));
 }
 

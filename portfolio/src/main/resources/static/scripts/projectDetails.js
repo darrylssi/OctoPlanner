@@ -40,6 +40,7 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
     document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
     document.getElementById("form").action="/edit-event/" + eventId;
+    sendEditingEventMessage(eventName);
 }
 
 /** Remove the edit form from any event it is attached to */
@@ -49,3 +50,8 @@ function hideEditEvent() {
         eventForm.parentNode.removeChild(eventForm);
     }
 }
+
+// function toggleSendingEditMessages(eventName) {
+//     if (send != null) {
+//         setTimeout(sendEditingEventMessage(eventName));
+// }
