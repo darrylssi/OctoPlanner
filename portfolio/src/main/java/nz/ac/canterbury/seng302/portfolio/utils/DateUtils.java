@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -17,9 +18,21 @@ public class DateUtils {
 
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
+    // Using a singleton pattern, because SonarLint doesn't like it when a static
+    // utility class get initialized, but `DatesExpressionDialect` NEEDS an instance.
+    private static DateUtils singleton = null;
+
+    public static DateUtils getInstance() {
+        if (singleton == null)
+            singleton = new DateUtils();
+        return singleton;
+    }
+
+    private DateUtils() {}
     /**
      * Converts a Date object to a String with dd/MMM/yyyy format.
      * @param date Date to be converted
@@ -27,6 +40,15 @@ public class DateUtils {
      */
     public static String toDisplayString(Date date) {
         return displayDateFormat.format(date);
+    }
+
+    /**
+     * Converts a Date object to a String with dd/MMM/yyyy HH:mm:ss format.
+     * @param date Date to be converted
+     * @return Date as a String
+     */
+    public static String toDisplayDateTimeString(Date date) {
+        return displayDateTimeFormat.format(date);
     }
 
     /**
@@ -52,4 +74,13 @@ public class DateUtils {
         return backendDateFormat.format(date);
     }
 
+    /**
+     * Checks whether the first date given is the day after the second date given
+     */
+    public static boolean isDayAfter(Date dayAfter, Date dayBefore) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(dayBefore);
+        c.add(Calendar.DATE, 1);    // Add n days to the date
+        return c.getTime().equals(dayAfter);
+    }
 }

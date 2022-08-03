@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 
+import nz.ac.canterbury.seng302.portfolio.customthymeleaf.expression.DatesExpressionDialect;
 import nz.ac.canterbury.seng302.portfolio.customthymeleaf.expression.RolesExpressionDialect;
 
 /**
@@ -34,7 +35,8 @@ public class PortfolioMvcConfig implements WebMvcConfigurer {
     public SpringTemplateEngine templateEngine(
         @Autowired SpringResourceTemplateResolver templateResolver,
         // * Add your dialects below, as autowires
-        @Autowired RolesExpressionDialect rolesExpressions
+        @Autowired RolesExpressionDialect rolesExpressions,
+        @Autowired DatesExpressionDialect datesExpressions
     ) {
         // Uses the template engine provided by `spring-boot-starter-thymeleaf`,
         // because this method overwrites it.
@@ -43,6 +45,7 @@ public class PortfolioMvcConfig implements WebMvcConfigurer {
         
         // A dialect encapsulates most Thymeleaf features (th:*, #strings...)
         templateEngine.addDialect(rolesExpressions);
+        templateEngine.addDialect(datesExpressions);
         
 
         return templateEngine;
