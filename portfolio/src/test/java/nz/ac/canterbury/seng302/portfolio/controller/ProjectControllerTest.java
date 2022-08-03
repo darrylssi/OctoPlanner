@@ -19,6 +19,7 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import nz.ac.canterbury.seng302.portfolio.builder.MockUserResponseBuilder;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
+import org.springframework.web.util.NestedServletException;
 
 import java.util.Objects;
 
@@ -113,7 +114,7 @@ class ProjectControllerTest {
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Project name cannot be more than 50 characters")))
-                .andExpect(result -> Assertions.assertEquals("TEST", Objects.requireNonNull(result.getResolvedException()).getMessage())); // TODO
+                .andExpect(result -> Assertions.assertEquals(NestedServletException.class, Objects.requireNonNull(result.getResolvedException()).getMessage())); // TODO
     }
 
     @Test
@@ -126,7 +127,8 @@ class ProjectControllerTest {
                         .param("projectStartDate", "2021-06-20")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Description cannot be more than 200 characters")));
+                .andExpect(content().string(containsString("Description cannot be more than 200 characters")))
+                .andExpect(result -> Assertions.assertEquals(NestedServletException.class, Objects.requireNonNull(result.getResolvedException()).getClass())); // TODO
     }
 
     @Test
