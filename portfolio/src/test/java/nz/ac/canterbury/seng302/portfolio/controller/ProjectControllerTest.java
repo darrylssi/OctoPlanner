@@ -2,12 +2,9 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,9 +16,6 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import nz.ac.canterbury.seng302.portfolio.builder.MockUserResponseBuilder;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
-import org.springframework.web.util.NestedServletException;
-
-import java.util.Objects;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -34,8 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockPrincipal(TEACHER)
 class ProjectControllerTest {
-
-    final Logger logger = LoggerFactory.getLogger(ProjectControllerTest.class);
 
     @Autowired
     private MockMvc mockMvc;
