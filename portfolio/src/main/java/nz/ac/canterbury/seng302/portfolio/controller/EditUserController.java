@@ -8,8 +8,6 @@ import nz.ac.canterbury.seng302.portfolio.service.FileUploadObserver;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -19,11 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.Objects;
 
 @Controller
 public class EditUserController extends PageController{
-
-    private static final Logger logger = LoggerFactory.getLogger(EditUserController.class);
 
     @Autowired
     private UserAccountClientService userAccountClientService;
@@ -191,15 +188,23 @@ public class EditUserController extends PageController{
         model.addAttribute("file", file);
         if (isValidImageFile(file) && file.getSize() > 0) {
             FileUploadObserver fileUploadObserver = userAccountClientService.uploadUserProfilePhoto(id, file);
-            logger.info("TEST ARGARGARG ME BOY BEFORE WHILE: {} AND {}", fileUploadObserver.isUploadSuccessful(), fileUploadObserver.getUploadMessage());
-            // TODO try a while loop here to see if that breaks things lmao
+            // This is a very silly solution to the problem of the page loading before the image is saved on the idp
+            // I cannot think of any other way, because the predefined proto method doesn't return a response object
+            // The FileUploadObserver here is the only form of feedback it is possible to get
+            // But, without the while loop, it will not receive the response with status and message before the redirect
+            // (at least consistently), meaning the can upload a valid photo but not have it display on redirect
+            // so the while loop exists. It will time out if no response is returned to avoid breaking everything...
+            // but it's still not great. I think it's the least bad solution.
             int count = 0;
-            while (fileUploadObserver.isUploadSuccessful() == null || fileUploadObserver.getUploadMessage() == "") {
+            while ((fileUploadObserver.isUploadSuccessful() == null || Objects.equals(fileUploadObserver.getUploadMessage(), "")) && count < 500000000) {
                 count++;
             }
-            logger.info("TEST ARGARGARG ME BOY AFTER WHILE: {} AND {}", fileUploadObserver.isUploadSuccessful(), fileUploadObserver.getUploadMessage());
-            logger.info("COUNT: {}", count);
-            return REDIRECT_TO_PROFILE + id;
+            if (Boolean.TRUE.equals(fileUploadObserver.isUploadSuccessful())) { // Sonarlint wanted this
+                return REDIRECT_TO_PROFILE + id;
+            } else {
+                model.addAttribute("error_InvalidPhoto", "Something went wrong uploading your photo: " + fileUploadObserver.getUploadMessage());
+                return EDIT_USER_TEMPLATE;
+            }
         } else {
             model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type .jpeg, .jpg, or .png, and must not be empty.");
             return EDIT_USER_TEMPLATE;

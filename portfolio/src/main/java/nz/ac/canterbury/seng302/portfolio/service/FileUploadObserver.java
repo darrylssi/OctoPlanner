@@ -15,13 +15,10 @@ public class FileUploadObserver implements StreamObserver<FileUploadStatusRespon
     private String uploadMessage = "";
 
     @Override
-    public void onNext(FileUploadStatusResponse response) { // TODO
+    public void onNext(FileUploadStatusResponse response) {
         uploadSuccessful = (response.getStatus() == FileUploadStatus.SUCCESS);
         uploadMessage = response.getMessage();
-        System.out.println(
-                "File Upload status : " + response.getStatus()
-        );
-        logger.info("UPLOAD STATUS TEST {}\nMESSAGE: {}", response.getStatus(), response.getMessage()); // TODO
+        logger.info("File upload status {}, Message: {}", response.getStatus(), response.getMessage());
     }
 
     public Boolean isUploadSuccessful() {

@@ -58,8 +58,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Autowired
     private ValidationService validator;
 
-    /** TODO logging!
-     * Creates a request to upload a profile photo for a user, following these tutorials:
+    /**
+     * Creates a request to upload a profile photo for a user, following this tutorial:
      * https://www.vinsguru.com/grpc-file-upload-client-streaming/ so far it's just copied from this one
      * @param responseObserver Observable stream of messages
      * @return FileUploadStatusResponse with the status of the upload
@@ -98,11 +98,11 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             /**
              * Called when an error is encountered while uploading an image.
              * Sets the status of the upload to failed and calls onCompleted.
-             * TODO logs the error
              * @param t the thrown exception which caused the error
              */
             @Override
             public void onError(Throwable t) {
+                logger.error("Error uploading file: {}", t.getMessage());
                 status = FileUploadStatus.FAILED;
                 this.onCompleted();
             }
@@ -118,16 +118,33 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
 
-                status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
+//                status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
+
+                try {
+                    BufferedImage image = ImageIO.read(inputStream);
+
+                    if (image.getWidth() == USER_PHOTO_DIMENSIONS && image.getHeight() == USER_PHOTO_DIMENSIONS) {
+                        ImageIO.write(image, "jpg", new File(filePath));
+                        logger.info("Saved profile image {} with dimensions {} x {}", filePath, image.getWidth(), image.getHeight());
+                        status = FileUploadStatus.SUCCESS;
+                    } else { // invalid
+                        logger.info("Image {} has invalid dimensions {} x {} and was not saved", filePath, image.getWidth(), image.getHeight());
+                        response.setMessage(String.format("Image has invalid dimensions %d x %d when they must be %d x %<d", image.getWidth(), image.getHeight(), USER_PHOTO_DIMENSIONS));
+                        status = FileUploadStatus.FAILED;
+                    }
+                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write
+                    logger.error(String.format("Error reading or writing uploaded image: %s", (Object) e.getStackTrace()));
+                    response.setMessage("Error saving image: could not read image from file. Make sure the image is not corrupted.");
+                    status = FileUploadStatus.FAILED;
+                }
+
                 closeFile(byteWriter);
 
                 status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
 
                 if (status == FileUploadStatus.SUCCESS) {
                     deleteIncorrectPhotoFileType(fileName, fileExtension);
-                    response.setMessage("Successfully uploaded profile photo");
-                } else {
-                    response.setMessage("Uploading profile photo failed");
+                    response.setMessage("Successfully uploaded profile photo.");
                 }
 
                 response.setStatus(status);
@@ -135,30 +152,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 responseObserver.onCompleted();
             }
         };
-    }
-
-    /**
-     * Tries to read an image from a ByteArrayInputStream and save it.
-     * Will not save if the image cannot be read or has invalid dimensions.
-     * @param inputStream the input stream of bytes that contains the image
-     * @return true on successful save, false otherwise
-     */
-    private boolean saveImageIfValid(ByteArrayInputStream inputStream, String filePath) {
-        try {
-            BufferedImage image = ImageIO.read(inputStream);
-
-            if (image.getWidth() == USER_PHOTO_DIMENSIONS && image.getHeight() == USER_PHOTO_DIMENSIONS) {
-                ImageIO.write(image, "jpg", new File(filePath));
-                logger.info("Saved profile image {} with dimensions {} x {}", filePath, image.getWidth(), image.getHeight());
-                return true;
-            } else { // invalid
-                logger.info("Image {} has invalid dimensions {} x {} and was not saved", filePath, image.getWidth(), image.getHeight());
-                return false;
-            }
-        } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write
-            logger.error(String.format("Error reading or writing uploaded image: %s", (Object) e.getStackTrace()));
-            return false;
-        }
     }
 
     /**
