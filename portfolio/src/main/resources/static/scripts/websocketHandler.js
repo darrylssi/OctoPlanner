@@ -8,8 +8,8 @@ function setConnected(connected) {
     // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
     // TODO check these lines before merging to master!
 
-    //document.getElementById('connect').disabled = connected;
-    //document.getElementById('disconnect').disabled = !connected;
+    document.getElementById('connect').disabled = connected;
+    document.getElementById('disconnect').disabled = !connected;
     //document.getElementById('conversationDiv').style.visibility
     //    = connected ? 'visible' : 'hidden';
 
@@ -24,12 +24,12 @@ function setConnected(connected) {
  * Uses the endpoint registered in WebSocketConfig.java
  */
 function connect() {
-    const socket = new SockJS('/ws');
+    const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/messages', function(messageOutput) {
+        stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -51,7 +51,7 @@ function disconnect() {
  */
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send("/app/ws", {},
+    stompClient.send(BASE_URL + "app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
 }
 
