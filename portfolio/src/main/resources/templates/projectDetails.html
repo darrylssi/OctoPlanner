@@ -13,6 +13,25 @@
 </head>
 <body>
 <div id="deleteModal" class="modal">
+<body onload="connect()"> <!-- Immediately connect to WebSocket -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <!--/*
+        JS files are static, and thus don't know anything about the project (i.e. the base URL).
+        This code sets a global variable inside this template (which does know the base URL),
+        which the imported script can access.
+    */-->
+    <script th:inline="javascript">
+            var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ]]*/ "/";
+    </script>
+    <script th:src="|../scripts/projectDetails.js|"></script>
+
+    <!-- WebSockets -->
+    <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js|" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js|" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script th:src="|../scripts/websocketHandler.js|"></script>
+
+<div id="deleteSprintModal" class="modal">
     <div class="modal-content container">
         <div class="row">
         <div class="modal-title"></div></div>
@@ -50,7 +69,7 @@
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     </svg>
                     <span th:text="*{getEventName}" ></span>
-                    <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                    <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                 </div>
                 <div class="event-right">
                     <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -104,7 +123,7 @@
                                     <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                                 </svg>
                                 <span th:text="*{getEventName}" ></span>
-                                <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                                <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                             </div>
                             <div class="event-right">
                                 <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -124,7 +143,7 @@
             </div>
         </div>
         <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event">
+        <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
             <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
                 <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
@@ -134,7 +153,7 @@
                             <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                         </svg>
                         <span th:text="*{getEventName}" ></span>
-                        <span class="event-date" th:text="|*{getEventStartDate.toString().substring(0, 16)} - *{getEventEndDate.toString().substring(0, 16)}|" ></span>
+                        <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                     </div>
                     <div class="event-right">
                         <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -151,7 +170,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     <!-- /* If the project has no sprints */ -->
     <div th:if="${#arrays.isEmpty(sprints)}" style="text-align:center">
@@ -178,6 +196,18 @@
     </button>
         </div>
     </div>
+
+    <!-- Jacques' WebSocket Nuclear Testing Ground -->
+    <div> <!-- just put th:if="${canEdit} in the div if you want it to be teacher only -->
+        <div id="user" th:data-name="${user}" value="${user}" />
+        <br />
+        <div id="conversationDiv">
+            <button id="sendMessage" onclick="sendMessage();">Send Websocket Message</button>
+            <p id="response"></p>
+        </div>
+    </div>
+    <!-- Other End Of Jacques' WebSocket Nuclear Testing Ground -->
+
     <div class="collapse" id="addEventForm">
         <div class="card">
             <div class="card-header">
@@ -294,7 +324,9 @@
 
     /** Required for initialisation of bootstrap tooltip for event description */
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger : 'hover'
+        });
     });
 </script>
 <script th:src="|../scripts/projectDetails.js|"></script>

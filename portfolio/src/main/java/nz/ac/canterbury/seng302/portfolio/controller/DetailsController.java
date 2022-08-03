@@ -67,6 +67,7 @@ public class DetailsController extends PageController {
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
+        model.addAttribute("user", thisUser.getFullName());
 
         model.addAttribute("tab", 0);
 

@@ -3,7 +3,9 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -42,12 +44,12 @@ public class SprintService {
     /**
      * Get sprint by id
      */
-    public Sprint getSprintById(Integer id) throws Exception {
+    public Sprint getSprintById(Integer id) throws ResponseStatusException {
         Sprint sprint = repository.findSprintById(id);
         if (sprint != null) {
             return sprint;
         } else {
-            throw new Exception("Sprint not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found.");
         }
     }
 
