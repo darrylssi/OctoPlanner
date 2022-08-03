@@ -60,10 +60,23 @@ function sendMessage() {
  * @param messageOutput JSON object received from the WebSocket
  */
 function showMessageOutput(messageOutput) {
+
     const response = document.getElementById('response');
     const p = document.createElement('p');
     p.style.wordWrap = 'break-word';
     p.appendChild(document.createTextNode(messageOutput.from +
         messageOutput.text + " (" + messageOutput.time + ")"));
     response.appendChild(p);
+}
+
+function updateEvent(eventMessage) {
+// get a list of event list containers
+    const event_lists = document.getElementsByClassName('event-list-container');
+// check each event list container to see if it has the event in it / should have the event in it
+    for (let i = 0; i < event_lists.length; i++) {
+      event_lists[i].appendChild(document.createTextNode(messageOutput.from +
+                                                           messageOutput.text + " (" + messageOutput.time + ")"));
+    }
+// generate/update/delete relevant event instances
+    response.setAttribute('data-bs-original-title', messageOutput.description);
 }
