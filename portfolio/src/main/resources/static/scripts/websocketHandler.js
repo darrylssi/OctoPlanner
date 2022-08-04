@@ -93,29 +93,16 @@ function updateEvent(eventMessage) {
       } else {
           //event is not in this sprint and needs to be removed if it is on the page
           //check if event is there, then remove event if it exists
-          console.log("delete events?");
-          // event = event_lists[i].querySelector('#event-' + eventMessage.id);
-          // if (event_lists[i].id == "" && event) {
-          //     console.log("delete maybe");
-          //     eventDates = event.querySelector('#event-date');
-          //     prevEventStartDate = eventDates.innerHTML.toString().substring(0, 18);
-          //     prevEventEndDate = eventDates.innerHTML.toString().substring(20);
-          //
-          //     // if (prevEventStartDate < eventMessage.sprintIds)
-          // } else {
-          //     console.log("delete it");
-          //     event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
-          // }
-        event = event_lists[i].querySelector('#event-' + eventMessage.id);
-        if (event !== null) {
-          event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
-          }
+          console.log("remove id : " + event_lists[i].id)
+          event_lists[i].remove()
       }
     }
 // generate/update/delete relevant event instances
 }
 
 function testUpdateEvent(){
+    eventMessage = {
+        sprintIds: ['events-33-inside', 'events-33-outside',  'events-34-inside'],
     eventMessage = {
         sprintIds: ['events-38', 'events-65'],
         name: 'Updated Event',
@@ -125,6 +112,9 @@ function testUpdateEvent(){
         id: 1,
         startColor: "#2c2c2c2c",
         endColor: '#ff00ff4c'
+        startDateString: '01/Aug/2022 00:00',
+        endDateString: '04/Aug/2022 00:00',
+        id: 1
     }
     console.log(eventMessage);
     updateEvent(eventMessage);
