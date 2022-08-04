@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.identityprovider.model;
+package nz.ac.canterbury.seng302.portfolio.utils;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,9 +10,6 @@ import java.io.*;
  * Only intended to be used to upload user profile photos in EditUserController, hence some methods aren't
  * properly implemented.
  * Copied & adapted from https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
- * TODO find a way to put this in shared so the file isn't duplicated in two different places
- * Only used for running tests of the user profile photo upload
- * Look at "gradle mark project as library"?
  */
 public class Base64DecodedMultipartFile implements MultipartFile {
     private final byte[] imgContent;
@@ -41,14 +38,12 @@ public class Base64DecodedMultipartFile implements MultipartFile {
      */
     @Override
     public String getContentType() {
-        switch (imgType) {
-            case "data:image/jpeg;base64":
-                return "image/jpeg";
-            case "data:image/png;base64":
-                return "image/png";
-            default:
-                return null;
-        }
+        return switch (imgType) {
+            case "data:image/jpeg;base64" -> "image/jpeg";
+            case "data:image/png;base64" -> "image/png";
+            case "data:@file/plain;base64" -> "@file/plain";
+            default -> null;
+        };
     }
 
     // these methods aren't intended to be used, but need to be implemented to satisfy the interface
@@ -86,6 +81,8 @@ public class Base64DecodedMultipartFile implements MultipartFile {
 
     @Override
     public void transferTo(File dest) throws IOException, IllegalStateException {
-        new FileOutputStream(dest).write(imgContent);
+        try (FileOutputStream stream = new FileOutputStream(dest)) {
+            stream.write(imgContent);
+        }
     }
 }

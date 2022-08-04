@@ -31,11 +31,11 @@ public class FileUploadObserver implements StreamObserver<FileUploadStatusRespon
 
     @Override
     public void onError(Throwable t) {
-
+        // Isn't needed to be implemented at this stage
     }
 
     @Override
     public void onCompleted() {
-
+        // Isn't needed to be implemented at this stage
     }
 }

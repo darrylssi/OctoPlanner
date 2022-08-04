@@ -83,10 +83,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
                 try {
                     if (userProfilePhotoUploadRequest.hasMetaData()) {
-                        logger.info("Got upload profile request for user with id {}", userProfilePhotoUploadRequest.getMetaData().getUserId());
                         fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_FILENAME;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
                         filePath = getFilePath(userProfilePhotoUploadRequest);
+                        logger.info("Got upload profile request for user with id {}, filetype of {}", userProfilePhotoUploadRequest.getMetaData().getUserId(), fileExtension);
                     } else {
                         writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
                     }
@@ -102,7 +102,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
              */
             @Override
             public void onError(Throwable t) {
-                logger.error("Error uploading file: {}", t.getMessage());
+                logger.error("Error uploading profile photo: {}", t.getMessage());
                 status = FileUploadStatus.FAILED;
                 this.onCompleted();
             }
@@ -110,15 +110,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             /**
              * Called when the file upload stops, either because it completed or an error was encountered.
              * Checks the validity of the image and saves it to a file if it is valid.
-             * Creates a file upload response to send back to the user.
+             * If the image can't be read, the upload fails.
+             * Creates a file upload response to send back to the user with a success/fail message.
              */
             @Override
             public void onCompleted() {
                 FileUploadStatusResponse.Builder response = FileUploadStatusResponse.newBuilder();
 
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
-
-//                status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
 
                 try {
                     BufferedImage image = ImageIO.read(inputStream);
@@ -132,8 +131,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         response.setMessage(String.format("Image has invalid dimensions %d x %d when they must be %d x %<d", image.getWidth(), image.getHeight(), USER_PHOTO_DIMENSIONS));
                         status = FileUploadStatus.FAILED;
                     }
-                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write
-                    logger.error(String.format("Error reading or writing uploaded image: %s", (Object) e.getStackTrace()));
+                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write - will happen if the file isn't an image
+                    logger.error(String.format("Error reading or writing uploaded image: %s", Arrays.toString(e.getStackTrace())));
                     response.setMessage("Error saving image: could not read image from file. Make sure the image is not corrupted.");
                     status = FileUploadStatus.FAILED;
                 }
@@ -155,8 +154,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Attempts to delete any uploaded file that is not a jpg.
-     * @param fileName the saved file name WITHOUT extension, eg. "5_photo."
+     * Attempts to delete any uploaded file that was somehow saved that is not a jpg.
+     * @param fileName the saved file name WITHOUT extension, e.g. "5_photo."
      * @param originalFileExtension the original filetype of the upload - could be png, zip, pdf, jpg, or anything else
      */
     private void deleteIncorrectPhotoFileType(String fileName, String originalFileExtension) {
@@ -178,7 +177,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     @Override
     public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {
-        logger.info("Received request to delete profile photo for user {}", request.getUserId());
         DeleteUserProfilePhotoResponse.Builder reply = DeleteUserProfilePhotoResponse.newBuilder();
         String filename = request.getUserId() + USER_PHOTO_SUFFIX;
 
@@ -189,15 +187,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 reply
                         .setIsSuccess(true)
                         .setMessage("User photo deleted successfully");
+                logger.info("Deleted profile photo for user {}", request.getUserId());
             } else {
                 reply
                         .setIsSuccess(false)
                         .setMessage("User does not have a profile photo uploaded");
+                logger.info("Didn't delete profile photo for user {} as they do not have one", request.getUserId());
             }
         } catch (IOException err) {
             reply
                     .setIsSuccess(false)
                     .setMessage("Unable to delete user photo: " + err.getMessage());
+            logger.error("Error deleting photo for user {}: {}", request.getUserId(), err.getStackTrace());
         }
 
         responseObserver.onNext(reply.build());
@@ -206,7 +207,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     /**
      * Gets the path, in the user profile photos folder, for the photo in the provided upload request.
-     * The file type is always set to JPG, per USER_PHOTO_SUFFIX, regardless of what type the initial file is.
+     * The file type is always set to JPG, per USER_PHOTO_FORMAT, regardless of what type the initial file is.
      * @param request A request object containing the user ID and the file's information
      * @return a string object representing the path to the photo in the request
      */
@@ -216,7 +217,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Writes the file content to the OutputStream. Copied from tutorial; see above.
+     * Writes the file content to the OutputStream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      * @param content File content
      * @throws IOException When there is an error writing the content to the output stream
@@ -227,14 +228,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Closes the output stream. Copied from tutorial; see above.
+     * Closes the output stream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      */
     private void closeFile(OutputStream writer) {
         try {
             writer.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error closing writer during photo upload: {}", (Object) e.getStackTrace());
         }
     }
 

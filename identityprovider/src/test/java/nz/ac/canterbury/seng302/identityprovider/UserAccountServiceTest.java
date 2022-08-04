@@ -1,43 +1,24 @@
 package nz.ac.canterbury.seng302.identityprovider;
 
-import com.google.protobuf.ByteString;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import nz.ac.canterbury.seng302.identityprovider.model.Base64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.UserAccountServerService;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterRequest;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRegisterResponse;
-import nz.ac.canterbury.seng302.shared.util.FileUploadStatus;
-import nz.ac.canterbury.seng302.shared.util.FileUploadStatusResponse;
-import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
-import javax.xml.bind.DatatypeConverter;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @SpringBootTest
 @DirtiesContext
@@ -54,17 +35,6 @@ class UserAccountServiceTest {
 
     private static final int testUserID = 999;
     private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
-
-    // Used for photo tests only
-    private static final String BASE64_PREFIX_JPG = "data:image/jpeg;base64,";
-    private static final String BASE64_PREFIX_PNG = "data:image/png;base64,";
-    private static final int TEST_PHOTO_USERID = 1;
-    private static final String TEST_PHOTO_NAME = "/" + TEST_PHOTO_USERID + "_photo.";
-    private static final String TEST_PHOTO_FORMAT_JPG = "jpg";
-    private static final String TEST_PHOTO_FORMAT_PNG = "png";
-
-    @Value("${profile-image-folder}")
-    private Path profileImageFolder;
 
     @BeforeEach
     public void setup() {
@@ -1454,197 +1424,5 @@ class UserAccountServiceTest {
 
         assertFalse(response.getIsSuccess());
         assertEquals(error, response.getValidationErrors(0));
-    }
-
-    @Test
-    void deleteNonexistentPhoto_getFailure() throws IOException {
-        /* Given: There is no photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
-
-        /* When: A request is received to delete the user's photo */
-        DeleteUserProfilePhotoRequest request = DeleteUserProfilePhotoRequest.newBuilder()
-                .setUserId(TEST_PHOTO_USERID)
-                .build();
-        StreamObserver<DeleteUserProfilePhotoResponse> observer = mock(StreamObserver.class);
-        userAccountServerService.deleteUserProfilePhoto(request, observer);
-
-        /* Then: The response will be a failure */
-        verify(observer, times(1)).onCompleted();
-        ArgumentCaptor<DeleteUserProfilePhotoResponse> captor = ArgumentCaptor.forClass(
-                DeleteUserProfilePhotoResponse.class);
-        verify(observer, times(1)).onNext(captor.capture());
-        DeleteUserProfilePhotoResponse response = captor.getValue();
-
-        assertFalse(response.getIsSuccess(), response.getMessage());
-
-        assertNotNull(response.getMessage());
-        assertNotEquals("", response.getMessage());
-    }
-
-    /**
-     * Creates a 100x100 px jpg image saved in the photo folder for the test user id.
-     */
-    void createTestUserImage() throws IOException {
-        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        ImageIO.write(image, TEST_PHOTO_FORMAT_JPG, new File( profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
-    }
-
-    /**
-     * Creates a blank, square image of custom size and format, and packs it into a MultipartFile for sending over GRPC.
-     * @param imageSize width and height of image
-     * @param format format string for the image; jpg or png
-     * @return MultipartFile with this image enclosed
-     * @throws IOException if an error occurs when writing the image
-     */
-    MultipartFile getTestUserImageMultipartFile(int imageSize, String format) throws IOException {
-        BufferedImage newImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(newImage, format, outputStream);
-        byte[] fileBytes = outputStream.toByteArray();
-        String base64ImageString = DatatypeConverter.printBase64Binary(fileBytes);
-        switch (format) {
-            case "png":
-                return new Base64DecodedMultipartFile(BASE64_PREFIX_PNG + base64ImageString);
-            case "jpg":
-                return new Base64DecodedMultipartFile(BASE64_PREFIX_JPG + base64ImageString);
-            default:
-                throw new IllegalArgumentException("Error running UserAccountServiceTest: getTestUserImageMultipartFile parameter 'format' must be 'jpg' or 'png'");
-        }
-    }
-
-    @Test
-    void deleteExistingPhoto_getSuccess() throws IOException {
-        /* Given: There is a photo for the given user */
-        createTestUserImage();
-
-        /* When: A request is received to delete the user's photo */
-        DeleteUserProfilePhotoRequest request = DeleteUserProfilePhotoRequest.newBuilder()
-                .setUserId(TEST_PHOTO_USERID)
-                .build();
-        StreamObserver<DeleteUserProfilePhotoResponse> observer = mock(StreamObserver.class);
-        userAccountServerService.deleteUserProfilePhoto(request, observer);
-
-        /* Then: The response will be a success */
-        verify(observer, times(1)).onCompleted();
-        ArgumentCaptor<DeleteUserProfilePhotoResponse> captor = ArgumentCaptor.forClass(
-                DeleteUserProfilePhotoResponse.class);
-        verify(observer, times(1)).onNext(captor.capture());
-        DeleteUserProfilePhotoResponse response = captor.getValue();
-
-        assertTrue(response.getIsSuccess());
-    }
-
-    @Test
-    void addNewPhoto_getSuccessAndFileExists() throws IOException {
-        /* Given: There is no photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
-
-        /* When: a request is received to create a photo for the user */
-        // This code is just copied from UserAccountClientService.java
-        MultipartFile file = getTestUserImageMultipartFile(200, TEST_PHOTO_FORMAT_JPG);
-
-        String filetype = file.getContentType();
-        System.out.printf(filetype);
-        if (filetype != null) {
-            filetype = filetype.split("/")[1];
-        }
-        UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
-                .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
-                        .setUserId(TEST_PHOTO_USERID)
-                        .setFileType(filetype)
-                        .build())
-                .build();
-        StreamObserver<FileUploadStatusResponse> responseStreamObserver = mock(StreamObserver.class);
-        StreamObserver<UploadUserProfilePhotoRequest> requestStreamObserver = userAccountServerService.uploadUserProfilePhoto(responseStreamObserver);
-
-        requestStreamObserver.onNext(metadata);
-
-        // upload file as chunk
-        InputStream inputStream = file.getInputStream();
-        byte[] bytes = new byte[4096];
-        int size;
-        while ((size = inputStream.read(bytes)) > 0){
-            UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
-                    .setFileContent(ByteString.copyFrom(bytes, 0 , size))
-                    .build();
-            assertTrue(uploadRequest.hasFileContent());
-            requestStreamObserver.onNext(uploadRequest);
-        }
-
-        // close the stream
-        inputStream.close();
-        requestStreamObserver.onCompleted();
-
-        /* Then: The file exists and the response will be a success */
-        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
-        assertTrue(pfp.exists());
-        pfp.delete();
-
-        verify(responseStreamObserver, times(1)).onCompleted();
-        ArgumentCaptor<FileUploadStatusResponse> captor = ArgumentCaptor.forClass(
-                FileUploadStatusResponse.class);
-        verify(responseStreamObserver, times(1)).onNext(captor.capture());
-        FileUploadStatusResponse response = captor.getValue();
-
-        assertEquals(FileUploadStatus.SUCCESS, response.getStatus());
-    }
-
-    @Test
-    void replaceExistingPhoto_getSuccessAndFileDifferent() throws IOException {
-        /* Given: There is an existing photo for the given user */
-        Files.deleteIfExists(profileImageFolder.resolve(TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG));
-        createTestUserImage();
-        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
-        assertTrue(pfp.exists());
-        Long originalFileSize = pfp.length(); // save this to check that it is different
-
-        /* When: a request is received to create a photo for the user */
-        // This code is just copied from UserAccountClientService.java
-        // Note that this image is 200x200, so will be larger than the one created by createTestUserImage()!
-        MultipartFile file = getTestUserImageMultipartFile(200, TEST_PHOTO_FORMAT_JPG);
-
-        String filetype = file.getContentType();
-        if (filetype != null) {
-            filetype = filetype.split("/")[1];
-        }
-        UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
-                .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
-                        .setUserId(TEST_PHOTO_USERID)
-                        .setFileType(filetype)
-                        .build())
-                .build();
-        StreamObserver<FileUploadStatusResponse> responseStreamObserver = mock(StreamObserver.class);
-        StreamObserver<UploadUserProfilePhotoRequest> requestStreamObserver = userAccountServerService.uploadUserProfilePhoto(responseStreamObserver);
-
-        requestStreamObserver.onNext(metadata);
-
-        // upload file as chunk
-        InputStream inputStream = file.getInputStream();
-        byte[] bytes = new byte[4096];
-        int size;
-        while ((size = inputStream.read(bytes)) > 0){
-            UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
-                    .setFileContent(ByteString.copyFrom(bytes, 0 , size))
-                    .build();
-            assertTrue(uploadRequest.hasFileContent());
-            requestStreamObserver.onNext(uploadRequest);
-        }
-
-        // close the stream
-        inputStream.close();
-        requestStreamObserver.onCompleted();
-
-        /* Then: The file will be different (different size), and the response will be a success */
-        assertTrue(pfp.exists());
-        assertNotEquals(originalFileSize, pfp.length());
-        pfp.delete();
-
-        verify(responseStreamObserver, times(1)).onCompleted();
-        ArgumentCaptor<FileUploadStatusResponse> captor = ArgumentCaptor.forClass(
-                FileUploadStatusResponse.class);
-        verify(responseStreamObserver, times(1)).onNext(captor.capture());
-        FileUploadStatusResponse response = captor.getValue();
-
-        assertEquals(FileUploadStatus.SUCCESS, response.getStatus());
     }
 }
