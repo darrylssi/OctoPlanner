@@ -99,7 +99,7 @@ public class ProjectTests {
         Set<ConstraintViolation<Project>> constraintViolations = validator.validate(baseProject);
         assertEquals( 1, constraintViolations.size() );
         assertEquals(
-                "Project name is required", // this should match the (message = "test") part of the annotation
+                "Project name is required.", // this should match the (message = "test") part of the annotation
                 constraintViolations.iterator().next().getMessage()
         );
     }
