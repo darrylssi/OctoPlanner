@@ -93,7 +93,7 @@ function updateEvent(eventMessage) {
       } else {
           //event is not in this sprint and needs to be removed if it is on the page
           //check if event is there, then remove event if it exists
-          event = event_lists[i].querySelector('#event-' + eventMessage.id);
+          event = event_lists[i].querySelector('#event-box-' + eventMessage.id);
           if (event !== null) {
             event.remove();
           }
@@ -110,7 +110,7 @@ function testUpdateEvent(){
         endDateString: '23/Jan/2022 00:00',
         description: 'this event has been updated',
         startColor: "#2c2c2c2c",
-        endColor: '#ff00ff4c'
+        endColor: '#ff00ff4c',
         id: 1
     }
     console.log(eventMessage);
