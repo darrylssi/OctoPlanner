@@ -25,7 +25,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
  * feature
  */
 @SpringBootTest
-@CucumberContextConfiguration
 public class EventStepDefinition extends RunCucumberTest {
 
     private static final int ID = 1;
@@ -60,7 +59,7 @@ public class EventStepDefinition extends RunCucumberTest {
     @Then("an event called {string} exists starting at {string}, ending at {string}, with a description {string}")
     public void an_event_called_exists_starting_at_ending_on_with_a_description(
         String name, String startDate, String endDate, String description
-    ) throws Exception {
+    ) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         var errors = validator.validate(event);
@@ -68,7 +67,7 @@ public class EventStepDefinition extends RunCucumberTest {
     }
 
     @Then("creating the event should fail")
-    public void adding_event_should_fail(String message) {
+    public void adding_event_should_fail() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         var errors = validator.validate(event);

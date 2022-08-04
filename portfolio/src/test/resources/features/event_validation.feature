@@ -1,12 +1,8 @@
 Feature: Events
   Scenario Outline: Adding valid events
     Given the parent project starts at <ParentStart> and ends on <ParentEnd>
-    When the user creates an event called <Name>,
-    starting at <EventStart>, ending on <EventEnd>,
-    with a description <Desc>
-    Then an event called <Name> exists
-    starting at <EventStart>, ending at <EventEnd>,
-    with a description <Desc>
+    When the user creates an event called <Name>, starting at <EventStart>, ending on <EventEnd>, with a description <Desc>
+    Then an event called <Name> exists starting at <EventStart>, ending at <EventEnd>, with a description <Desc>
 
     Examples:
       | ParentStart  | ParentEnd    | EventStart         | EventEnd           | Name                               | Desc                                 |
@@ -17,9 +13,7 @@ Feature: Events
 
   Scenario Outline: Adding invalid events
     Given the parent project starts at <ParentStart> and ends on <ParentEnd>
-    When the user creates an event called <Name>,
-    starting at <EventStart>, ending on <EventEnd>,
-    with a description <Desc>
+    When the user creates an event called <Name>, starting at <EventStart>, ending on <EventEnd>, with a description <Desc>
     Then creating the event should fail
 
     Examples:
