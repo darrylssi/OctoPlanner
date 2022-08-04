@@ -63,8 +63,9 @@
                         <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     </svg>
-                    <span th:text="*{getEventName}" ></span>
+                    <span th:text="*{getEventName}" id="event-name" ></span>
                     <span class="event-date" id="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
+                    <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                 </div>
                 <div class="event-right">
                     <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
@@ -117,6 +118,7 @@
                                 </svg>
                                 <span th:text="*{getEventName}" id="event-name"></span>
                                 <span class="event-date" id="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
+                                <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                             </div>
                             <div class="event-right">
                                 <span class="me-2">
@@ -151,6 +153,7 @@
                         </svg>
                         <span th:text="*{getEventName}" id="event-name"></span>
                         <span class="event-date" id="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
+                        <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                     </div>
                     <div class="event-right">
                         <span class="me-2">
@@ -206,6 +209,7 @@
             <button id="connect" onclick="connect();">Connect</button>
             <button id="disconnect" onclick="disconnect();">Disconnect</button>
             <p id="response"></p>
+            <p id="eventResponse"></p>
         </div>
     </div>
     <!-- Other End Of Jacques' WebSocket Nuclear Testing Ground -->

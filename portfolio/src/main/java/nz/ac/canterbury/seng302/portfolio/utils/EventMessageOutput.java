@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Class for sending event updates through websockets.
- */
-public class EventMessage {
-
+public class EventMessageOutput {
     private int id;
     private int parentProjectId;
     private String name;

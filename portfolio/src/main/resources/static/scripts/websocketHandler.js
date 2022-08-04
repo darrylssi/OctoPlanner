@@ -32,6 +32,9 @@ function connect() {
         stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
+        stompClient.subscribe(BASE_URL + 'topic/messages', function(eventMessageOutput) {
+            showEventMessageData(JSON.parse(eventMessageOutput.body));
+        });
     });
 }
 
@@ -52,7 +55,7 @@ function disconnect() {
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
     stompClient.send(BASE_URL + "app/ws", {},
-    JSON.stringify({'from':user, 'text':" was here"}));
+            JSON.stringify({'from':user, 'text':" was here"}));
 }
 
 /**
@@ -76,7 +79,8 @@ function updateEvent(eventMessage) {
 // check each event list container to see if it has the event in it / should have the event in it
     for (let i = 0; i < event_lists.length; i++) {
         console.log("event list at id: " + typeof event_lists[i].id + " " + event_lists[i].id);
-      if(eventMessage.sprintIds.includes(event_lists[i].id)) {
+
+        if(eventMessage.sprintIds.includes(event_lists[i].id)) {
         //event is in this sprint and needs to be added or updated
         event = event_lists[i].querySelector('#event-' + eventMessage.id);
         if (event !== null) {
@@ -102,12 +106,12 @@ function updateEvent(eventMessage) {
 // generate/update/delete relevant event instances
 }
 
-function testUpdateEvent(){
+function testUpdateEvent() {
     eventMessage = {
-        sprintIds: ['events-33-inside', 'events-33-outside',  'events-34-inside'],
+        sprintIds: ['events-37-inside', 'events-37-outside',  'events-39-inside', 'events-39-outside'],
         name: 'Updated Event',
-        startDateString: '02/Jan/2022 00:00',
-        endDateString: '23/Jan/2022 00:00',
+        startDateString: '12/Jan/2022 00:00',
+        endDateString: '26/Jan/2022 00:00',
         description: 'this event has been updated',
         startColor: "#2c2c2c2c",
         endColor: '#ff00ff4c',
@@ -115,6 +119,50 @@ function testUpdateEvent(){
     }
     console.log(eventMessage);
     updateEvent(eventMessage);
+}
+
+/**
+ * Sends a data message to a WebSocket endpoint using attributes from the HTML elements
+ */
+function sendUpdateEventData() {
+    eventId = 1;
+
+    // Gets all the sprint ids that exist in the project details page
+    allSprintIds = document.getElementsByClassName('event-list-container');
+    sprintIdsForEvent = [];         // sprints ids for the given specific event
+    for (let i = 0; i < allSprintIds.length; i++) {
+        event = allSprintIds[i].querySelector('#event-' + eventId);
+        // checks if the event exist in this current sprint container. If it exists, then it is added to the sprints ids list
+        if (event !== null) {
+            sprintIdsForEvent.push(allSprintIds[i]);
+        }
+    }
+
+    //
+    eventMessage = {
+        sprintIds: sprintIdsForEvent,
+        name: document.getElementById('event-name'),
+        startDateString: document.getElementById('event-date').innerText.substring(0, 17),
+        endDateString: document.getElementById('event-date').innerText.substring(20),
+        description: document.getElementById('event-description').innerText,
+        color: document.getElementById('event-box-' + eventMessage.id).style.background,
+        id: eventId
+    }
+    stompClient.send(BASE_URL + "app/events", {}, JSON.stringify(eventMessage));
+}
+
+/**
+ * Updates an HTML element to display a received WebSocket message
+ * @param eventMessage JSON object received from the WebSocket
+ */
+function showEventMessageData(eventMessage) {
+
+    const eventResponse = document.getElementById('eventResponse');
+    const p = document.createElement('p');
+    p.style.wordWrap = 'break-word';
+    p.appendChild(document.createTextNode(eventMessage.id + eventMessage.sprintIds + " " + eventMessage.name + " "
+        + eventMessage.startDate + " - " + eventMessage.endDate));
+    eventResponse.appendChild(p);
 }
 
 function createEventDisplay(eventMessage, parent) {

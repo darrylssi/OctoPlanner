@@ -31,6 +31,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("https://*.canterbury.ac.nz")
                 .withSockJS();
+        registry.addEndpoint("/events")
+                .setAllowedOriginPatterns("https://*.canterbury.ac.nz");
+        registry.addEndpoint("/events")
+                .setAllowedOriginPatterns("https://*.canterbury.ac.nz")
+                .withSockJS();
     }
 
 }
