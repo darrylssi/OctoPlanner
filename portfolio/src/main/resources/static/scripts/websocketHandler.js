@@ -24,7 +24,7 @@ function setConnected(connected) {
  * Uses the endpoint registered in WebSocketConfig.java
  */
 function connect() {
-    const socket = new SockJS('/ws');
+    const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
