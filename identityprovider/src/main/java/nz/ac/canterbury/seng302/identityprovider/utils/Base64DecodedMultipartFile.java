@@ -1,9 +1,12 @@
 package nz.ac.canterbury.seng302.identityprovider.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * Implementation of the {@link MultipartFile} interface to wrap a base64 encoded string as a byte[] object.
@@ -15,6 +18,7 @@ import java.io.*;
  * Look at "gradle mark project as library"?
  */
 public class Base64DecodedMultipartFile implements MultipartFile {
+    private static final Logger logger = LoggerFactory.getLogger(Base64DecodedMultipartFile.class);
     private final byte[] imgContent;
     private final String imgType;
 
@@ -83,9 +87,11 @@ public class Base64DecodedMultipartFile implements MultipartFile {
     }
 
     @Override
-    public void transferTo(File dest) throws IOException, IllegalStateException {
+    public void transferTo(File dest) {
         try (FileOutputStream stream = new FileOutputStream(dest)) {
             stream.write(imgContent);
+        } catch (IOException e) {
+            logger.error("Error using transferTo in Base64DecodedMultipartFile. This isn't meant to be used! {}", Arrays.toString(e.getStackTrace()));
         }
     }
 }
