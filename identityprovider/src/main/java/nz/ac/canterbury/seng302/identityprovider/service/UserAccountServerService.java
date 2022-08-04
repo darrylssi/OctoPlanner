@@ -102,7 +102,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
              */
             @Override
             public void onError(Throwable t) {
-                logger.error("Error uploading file: {}", t.getMessage());
+                logger.error("Error uploading profile photo: {}", t.getMessage());
                 status = FileUploadStatus.FAILED;
                 this.onCompleted();
             }
@@ -117,8 +117,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 FileUploadStatusResponse.Builder response = FileUploadStatusResponse.newBuilder();
 
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
-
-//                status = saveImageIfValid(inputStream, filePath) ? status : FileUploadStatus.FAILED; // fail if not saved
 
                 try {
                     BufferedImage image = ImageIO.read(inputStream);
@@ -155,8 +153,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Attempts to delete any uploaded file that is not a jpg.
-     * @param fileName the saved file name WITHOUT extension, eg. "5_photo."
+     * Attempts to delete any uploaded file that was somehow saved that is not a jpg.
+     * @param fileName the saved file name WITHOUT extension, e.g. "5_photo."
      * @param originalFileExtension the original filetype of the upload - could be png, zip, pdf, jpg, or anything else
      */
     private void deleteIncorrectPhotoFileType(String fileName, String originalFileExtension) {
@@ -236,7 +234,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         try {
             writer.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error closing writer during photo upload: {}", (Object) e.getStackTrace());
         }
     }
 
