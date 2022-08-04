@@ -88,7 +88,7 @@ function updateEvent(eventMessage) {
             event.setAttribute('data-bs-original-title', eventMessage.description);
         } else {
             //event is not displayed in this area and needs to be created
-            //TODO
+            createEventDisplay(eventMessage, event_lists[i]);
         }
       } else {
           //event is not in this sprint and needs to be removed if it is on the page
@@ -106,22 +106,39 @@ function updateEvent(eventMessage) {
           //     console.log("delete it");
           //     event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
           // }
+        event = event_lists[i].querySelector('#event-' + eventMessage.id);
+        if (event !== null) {
           event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
+          }
       }
     }
 // generate/update/delete relevant event instances
 }
 
 function testUpdateEvent(){
-    eventMessage = {0
-        sprintIds: ['events-37', 'events-39'],
+    eventMessage = {
+        sprintIds: ['events-38', 'events-65'],
         name: 'Updated Event',
         startDateString: '02/Jan/2022 00:00',
         endDateString: '23/Jan/2022 00:00',
-        dateString: '2022 Jan 1st to 2022 November 15th',
         description: 'this event has been updated',
-        id: 1
+        id: 1,
+        startColor: "#2c2c2c2c",
+        endColor: '#ff00ff4c'
     }
     console.log(eventMessage);
     updateEvent(eventMessage);
+}
+
+function createEventDisplay(eventMessage, parent) {
+    console.log('creating event');
+    let newEvent = document.createElement("div");
+    newEvent.setAttribute("id", "event-" + eventMessage.id);
+    newEvent.setAttribute("class", "event-box");
+    newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColor + ', ' + eventMessage.endColor);
+    newEvent.innerHTML = eventTemplate;
+    parent.appendChild(newEvent);
+    newEvent.getElementsByClassName("event")[0].setAttribute('data-bs-original-title', eventMessage.description);
+    newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
+    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
 }
