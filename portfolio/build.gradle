@@ -51,6 +51,13 @@ dependencies {
     // Java Persistence API
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.4'
 
+    // WebSockets
+    implementation 'org.springframework:spring-websocket:5.3.22'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+    implementation 'org.springframework:spring-messaging:5.3.22'
+
+
     // Cucumber dependencies
     testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
 

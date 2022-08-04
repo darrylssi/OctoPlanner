@@ -1,12 +1,15 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
-import nz.ac.canterbury.seng302.portfolio.model.Base64DecodedMultipartFile;
+import nz.ac.canterbury.seng302.portfolio.utils.Base64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.User;
+import nz.ac.canterbury.seng302.portfolio.service.FileUploadObserver;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -16,9 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.Objects;
 
 @Controller
 public class EditUserController extends PageController{
+
+    private static final Logger logger = LoggerFactory.getLogger(EditUserController.class);
 
     @Autowired
     private UserAccountClientService userAccountClientService;
@@ -179,18 +185,38 @@ public class EditUserController extends PageController{
             BindingResult result,
             @RequestParam(name="imageString") String base64ImageString,
             Model model
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         editHandler(model, id, principal);
         MultipartFile file = new Base64DecodedMultipartFile(base64ImageString);
 
         model.addAttribute("file", file);
         if (isValidImageFile(file) && file.getSize() > 0) {
-            userAccountClientService.uploadUserProfilePhoto(id, file);
-            return REDIRECT_TO_PROFILE + id;
+            FileUploadObserver fileUploadObserver = userAccountClientService.uploadUserProfilePhoto(id, file);
+            waitForPhotoResponse(fileUploadObserver);
+            if (Boolean.TRUE.equals(fileUploadObserver.isUploadSuccessful())) { // Sonarlint wanted this
+                return REDIRECT_TO_PROFILE + id;
+            } else {
+                model.addAttribute("error_InvalidPhoto", "Something went wrong uploading your photo: " + fileUploadObserver.getUploadMessage());
+                return EDIT_USER_TEMPLATE;
+            }
         } else {
             model.addAttribute("error_InvalidPhoto", "Invalid file. Profile photos must be of type .jpeg, .jpg, or .png, and must not be empty.");
             return EDIT_USER_TEMPLATE;
         }
+    }
+
+    /**
+     * Waits until the uploaded image has been saved / rejected / caused an error, or 500ms have passed.
+     * @param observer the FileUploadObserver for this upload
+     * @throws InterruptedException if a thread interrupts the current one (?)
+     */
+    private synchronized void waitForPhotoResponse(FileUploadObserver observer) throws InterruptedException {
+        int count = 0;
+        while ((observer.isUploadSuccessful() == null || Objects.equals(observer.getUploadMessage(), "")) && count < 500) {
+            count++;
+            wait(1);
+        }
+        logger.debug("EditUserController waited for {} ms to receive a photo response.", count);
     }
 
     /**

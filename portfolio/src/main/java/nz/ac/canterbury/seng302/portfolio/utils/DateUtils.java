@@ -18,6 +18,7 @@ public class DateUtils {
 
     private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -39,6 +40,15 @@ public class DateUtils {
      */
     public static String toDisplayString(Date date) {
         return displayDateFormat.format(date);
+    }
+
+    /**
+     * Converts a Date object to a String with dd/MMM/yyyy HH:mm:ss format.
+     * @param date Date to be converted
+     * @return Date as a String
+     */
+    public static String toDisplayDateTimeString(Date date) {
+        return displayDateTimeFormat.format(date);
     }
 
     /**
