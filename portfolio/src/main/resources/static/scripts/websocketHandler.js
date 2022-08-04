@@ -24,7 +24,7 @@ function setConnected(connected) {
  * Uses the endpoint registered in WebSocketConfig.java
  */
 function connect() {
-    const socket = new SockJS(BASE_URL + 'ws');
+    const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         setConnected(true);
@@ -51,7 +51,7 @@ function disconnect() {
  */
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send(BASE_URL + "app/ws", {},
+    stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
 }
 
