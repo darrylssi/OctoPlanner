@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Cucumber.class)
 @CucumberOptions(
         plugin = {"pretty", "html:target/cucumber-report.html"},
         features = {"src/test/resources"}

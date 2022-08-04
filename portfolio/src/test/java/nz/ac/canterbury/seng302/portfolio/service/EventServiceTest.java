@@ -1,5 +1,15 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
-
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class EventServiceTest {
@@ -46,7 +48,7 @@ public class EventServiceTest {
         when(eventRepository.findEventById(ID))
                 .thenReturn(event);
 
-        assertThat(eventService.getEventById(ID)).isEqualTo(event);
+        Assertions.assertThat(eventService.getEventById(ID)).isEqualTo(event);
     }
 
     @Test

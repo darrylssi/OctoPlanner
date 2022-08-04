@@ -1,13 +1,16 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+
 import javax.persistence.*;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 
 
 /**
@@ -16,6 +19,10 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
  */
 @Entity
 public class Event {
+
+    @Transient
+    @Autowired
+    private ProjectService projectService;
 
     /** The id of this event. This id should be unique between all events.*/
     @Id
@@ -27,10 +34,12 @@ public class Event {
     private int parentProjectId;
 
     @Column(nullable = false)
+    @NotBlank(message="Event name can't be blank")
     @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
     private String eventName;
 
     @Column (nullable = false)
+    @NotBlank(message="Event description can't be blank")
     @Size(max=200, message="The event description must not exceed 200 characters.")
     private String eventDescription;
 
@@ -61,21 +70,21 @@ public class Event {
         this.eventEndDate = eventEndDate;
     }
 
-    @Override
     /**
      * Returns a string listing the attributes of the event in the form "Event[x, x, x]".
      * @return said string
      */
+    @Override
     public String toString() {
         return String.format(
                 "Event[id=%d, parentProjectId='%d', eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
                 id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-/**
- * Sets the value of the event id 
- * @param id the value to set the id to
- */
+    /**
+     * Sets the value of the event id 
+     * @param id the value to set the id to
+     */
     public void setId(int id) {
         this.id = id;
     }
@@ -85,7 +94,7 @@ public class Event {
      * @return event's id
      */
     public int getId(){
-        return  id;
+        return id;
     }
 
     /**

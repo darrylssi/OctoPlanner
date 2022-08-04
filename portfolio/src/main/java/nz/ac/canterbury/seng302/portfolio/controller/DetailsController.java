@@ -121,29 +121,11 @@ public class DetailsController extends PageController {
         BindingResult bindingResult
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        // Initial return so I don't have to also null test
+        // Initial checks that the data has some integrity (The data isn't null, etc.)
         if (bindingResult.hasErrors()) {
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
 
-        Project parentProject = projectService.getProjectById(projectID);
-        // Test here if the event leaks outside the project's range
-        if (eventForm.getStartTime().before(parentProject.getProjectStartDate())) {
-            bindingResult.rejectValue("startDate", "Event can't start before the project");
-        } else if (eventForm.getStartTime().after(parentProject.getProjectEndDate())) {
-            bindingResult.rejectValue("startDate", "Event can't start after the project");
-        }
-        if (eventForm.getEndTime().before(parentProject.getProjectStartDate())) {
-            bindingResult.rejectValue("endDate", "Event can't end before the project");
-        } else if (eventForm.getEndTime().after(parentProject.getProjectEndDate())) {
-            bindingResult.rejectValue("endDate", "Event can't end after the project");
-        }
-        // Now that we've added more error, do it again.
-        if (bindingResult.hasErrors()) {
-            return PROJECT_DETAILS_TEMPLATE_NAME;
-        }
-
-        // OK, the data's valid... add it
         Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.getStartTime(), eventForm.getEndTime());
         eventService.saveEvent(event);
         return "redirect:.";
