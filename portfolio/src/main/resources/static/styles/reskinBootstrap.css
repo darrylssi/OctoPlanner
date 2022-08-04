@@ -51,6 +51,14 @@
     border-color: var(--neutral-light);
 }
 
+.nav-item .nav-link:hover {
+    background-color: var(--neutral-dark);
+}
+
+.nav-tabs .nav-link.active:hover{
+    background-color: var(--neutral-light);
+}
+
 .btn-lg {
     font-weight: bold;
 }
