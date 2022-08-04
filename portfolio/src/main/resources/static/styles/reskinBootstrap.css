@@ -12,8 +12,27 @@
 .btn-primary:disabled {
     background-color: var(--primary);
 }
+.btn-primary:focus {
+    background-color: var(--primary);
+}
 .btn-primary:hover {
     background-color: var(--primary-dark);
+}
+
+.btn-neutral {
+    background-color: var(--neutral-mid);
+    color: var(--primary-dark);
+}
+
+.btn-neutral:disabled {
+    background-color: var(--neutral-mid);
+}
+.btn-neutral:focus {
+    background-color: var(--neutral-mid);
+}
+.btn-neutral:hover {
+    background-color: var(--neutral-dark);
+    color: var(--primary-dark);
 }
 
 .nav-item {
@@ -30,4 +49,8 @@
     background-color: var(--neutral-light);
     color: var(--primary);
     border-color: var(--neutral-light);
+}
+
+.btn-lg {
+    font-weight: bold;
 }

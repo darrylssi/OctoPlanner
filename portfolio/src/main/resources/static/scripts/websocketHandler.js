@@ -72,8 +72,10 @@ function showMessageOutput(messageOutput) {
 function updateEvent(eventMessage) {
 // get a list of event list containers
     const event_lists = document.getElementsByClassName('event-list-container');
+
 // check each event list container to see if it has the event in it / should have the event in it
     for (let i = 0; i < event_lists.length; i++) {
+        console.log("event list at id: " + typeof event_lists[i].id + " " + event_lists[i].id);
       if(eventMessage.sprintIds.includes(event_lists[i].id)) {
         //event is in this sprint and needs to be added or updated
         event = event_lists[i].querySelector('#event-' + eventMessage.id);
@@ -82,25 +84,40 @@ function updateEvent(eventMessage) {
             eventName = event.querySelector('#event-name');
             eventName.innerHTML = eventMessage.name;
             eventDates = event.querySelector('#event-date');
-            eventDates.innerHTML = eventMessage.dateString;
+            eventDates.innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
             event.setAttribute('data-bs-original-title', eventMessage.description);
         } else {
             //event is not displayed in this area and needs to be created
             //TODO
         }
       } else {
-        //event is not in this sprint and needs to be removed if it is on the page
-        //check if event is there
-        //remove event if it exists
+          //event is not in this sprint and needs to be removed if it is on the page
+          //check if event is there, then remove event if it exists
+          console.log("delete events?");
+          // event = event_lists[i].querySelector('#event-' + eventMessage.id);
+          // if (event_lists[i].id == "" && event) {
+          //     console.log("delete maybe");
+          //     eventDates = event.querySelector('#event-date');
+          //     prevEventStartDate = eventDates.innerHTML.toString().substring(0, 18);
+          //     prevEventEndDate = eventDates.innerHTML.toString().substring(20);
+          //
+          //     // if (prevEventStartDate < eventMessage.sprintIds)
+          // } else {
+          //     console.log("delete it");
+          //     event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
+          // }
+          event_lists[i].querySelector("#event-box-" + eventMessage.id).remove();
       }
     }
 // generate/update/delete relevant event instances
 }
 
 function testUpdateEvent(){
-    eventMessage = {
-        sprintIds: ['events-38'],
+    eventMessage = {0
+        sprintIds: ['events-37', 'events-39'],
         name: 'Updated Event',
+        startDateString: '02/Jan/2022 00:00',
+        endDateString: '23/Jan/2022 00:00',
         dateString: '2022 Jan 1st to 2022 November 15th',
         description: 'this event has been updated',
         id: 1
