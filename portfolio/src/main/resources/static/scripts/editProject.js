@@ -34,7 +34,8 @@ function hideModal() {
 
 // Checks whether the project is longer than 10 years
 // If it is, the confirmation modal is shown
-function showLongProjectModal() {
+function showLongProjectModal(e) {
+    e.preventDefault();
     const startDate = new Date(document.getElementById('projectStartDate').value);
     const startString = startDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).replace(/ /g, '/');;
     const endDate = new Date(document.getElementById('projectEndDate').value);
