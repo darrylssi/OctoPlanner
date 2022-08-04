@@ -83,10 +83,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
                 try {
                     if (userProfilePhotoUploadRequest.hasMetaData()) {
-                        logger.info("Got upload profile request for user with id {}", userProfilePhotoUploadRequest.getMetaData().getUserId());
                         fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_FILENAME;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
                         filePath = getFilePath(userProfilePhotoUploadRequest);
+                        logger.info("Got upload profile request for user with id {}, filetype of {}", userProfilePhotoUploadRequest.getMetaData().getUserId(), fileExtension);
                     } else {
                         writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
                     }
@@ -110,7 +110,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
             /**
              * Called when the file upload stops, either because it completed or an error was encountered.
              * Checks the validity of the image and saves it to a file if it is valid.
-             * Creates a file upload response to send back to the user.
+             * If the image can't be read, the upload fails.
+             * Creates a file upload response to send back to the user with a success/fail message.
              */
             @Override
             public void onCompleted() {
@@ -206,7 +207,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     /**
      * Gets the path, in the user profile photos folder, for the photo in the provided upload request.
-     * The file type is always set to JPG, per USER_PHOTO_SUFFIX, regardless of what type the initial file is.
+     * The file type is always set to JPG, per USER_PHOTO_FORMAT, regardless of what type the initial file is.
      * @param request A request object containing the user ID and the file's information
      * @return a string object representing the path to the photo in the request
      */
@@ -216,7 +217,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Writes the file content to the OutputStream. Copied from tutorial; see above.
+     * Writes the file content to the OutputStream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      * @param content File content
      * @throws IOException When there is an error writing the content to the output stream
@@ -227,7 +228,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Closes the output stream. Copied from tutorial; see above.
+     * Closes the output stream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      */
     private void closeFile(OutputStream writer) {

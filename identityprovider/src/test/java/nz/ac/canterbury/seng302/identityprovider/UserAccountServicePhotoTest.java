@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 
 /**
  * Holds tests for the photo-related methods in {@link UserAccountServerService}.
- * The tests cover all cases except those with unexpected exceptions.
+ * According to coverage, the tests cover all cases except those with unexpected exceptions.
  */
 @SpringBootTest
 @DirtiesContext
@@ -369,7 +369,6 @@ class UserAccountServicePhotoTest {
 
         assertEquals(FileUploadStatus.FAILED, response.getStatus());
     }
-
 
     @Test
     void uploadTxtFile_getFailAndFileDoesNotExist() throws IOException {
