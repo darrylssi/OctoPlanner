@@ -178,7 +178,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     @Override
     public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {
-        logger.info("Received request to delete profile photo for user {}", request.getUserId());
         DeleteUserProfilePhotoResponse.Builder reply = DeleteUserProfilePhotoResponse.newBuilder();
         String filename = request.getUserId() + USER_PHOTO_SUFFIX;
 
@@ -189,15 +188,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 reply
                         .setIsSuccess(true)
                         .setMessage("User photo deleted successfully");
+                logger.info("Deleted profile photo for user {}", request.getUserId());
             } else {
                 reply
                         .setIsSuccess(false)
                         .setMessage("User does not have a profile photo uploaded");
+                logger.info("Didn't delete profile photo for user {} as they do not have one", request.getUserId());
             }
         } catch (IOException err) {
             reply
                     .setIsSuccess(false)
                     .setMessage("Unable to delete user photo: " + err.getMessage());
+            logger.error("Error deleting photo for user {}: {}", request.getUserId(), err.getStackTrace());
         }
 
         responseObserver.onNext(reply.build());
