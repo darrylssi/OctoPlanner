@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.identityprovider;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import nz.ac.canterbury.seng302.identityprovider.model.Base64DecodedMultipartFile;
+import nz.ac.canterbury.seng302.identityprovider.utils.Base64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.identityprovider.service.UserAccountServerService;
 import nz.ac.canterbury.seng302.shared.identityprovider.DeleteUserProfilePhotoRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.DeleteUserProfilePhotoResponse;
@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -49,6 +50,7 @@ class UserAccountServicePhotoTest {
 
     private static final String BASE64_PREFIX_JPG = "data:image/jpeg;base64,";
     private static final String BASE64_PREFIX_PNG = "data:image/png;base64,";
+    private static final String BASE64_PREFIX_TXT = "data:@file/plain;base64,";
     private static final int TEST_PHOTO_USERID = 1;
     private static final String TEST_PHOTO_NAME = "/" + TEST_PHOTO_USERID + "_photo.";
     private static final String TEST_PHOTO_FORMAT_JPG = "jpg";
@@ -86,11 +88,21 @@ class UserAccountServicePhotoTest {
         ImageIO.write(newImage, format, outputStream);
         byte[] fileBytes = outputStream.toByteArray();
         String base64ImageString = DatatypeConverter.printBase64Binary(fileBytes);
+
         return switch (format) {
             case "png" -> new Base64DecodedMultipartFile(BASE64_PREFIX_PNG + base64ImageString);
             case "jpg" -> new Base64DecodedMultipartFile(BASE64_PREFIX_JPG + base64ImageString);
             default -> throw new IllegalArgumentException("Error running UserAccountServiceTest: getTestUserImageMultipartFile parameter 'format' must be 'jpg' or 'png'");
         };
+    }
+
+    /**
+     * Encodes some text into a multipart file in base64 format. Should come out as a .txt... TODO
+     * @param text some text that will be encoded into a MultipartFile
+     * @return MultipartFile with this string enclosed
+     */
+    MultipartFile getMultipartFileFromString(String text) {
+        return new Base64DecodedMultipartFile(BASE64_PREFIX_TXT + DatatypeConverter.printBase64Binary(text.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -348,6 +360,60 @@ class UserAccountServicePhotoTest {
         /* Then: The file doesn't exist and the response will be a failure */
         File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
         assertFalse(pfp.exists());
+
+        verify(responseStreamObserver, times(1)).onCompleted();
+        ArgumentCaptor<FileUploadStatusResponse> captor = ArgumentCaptor.forClass(
+                FileUploadStatusResponse.class);
+        verify(responseStreamObserver, times(1)).onNext(captor.capture());
+        FileUploadStatusResponse response = captor.getValue();
+
+        assertEquals(FileUploadStatus.FAILED, response.getStatus());
+    }
+
+
+    @Test
+    void uploadTxtFile_getFailAndFileDoesNotExist() throws IOException {
+        /* Given: There is no photo for the given user */
+
+        /* When: a request is received to upload a txt file for the user */
+        MultipartFile file = getMultipartFileFromString("Lorem ipsum");
+
+        String filetype = file.getContentType();
+        if (filetype != null) {
+            filetype = filetype.split("/")[1];
+        }
+        UploadUserProfilePhotoRequest metadata = UploadUserProfilePhotoRequest.newBuilder()
+                .setMetaData(ProfilePhotoUploadMetadata.newBuilder()
+                        .setUserId(TEST_PHOTO_USERID)
+                        .setFileType(filetype)
+                        .build())
+                .build();
+        StreamObserver<FileUploadStatusResponse> responseStreamObserver = mock(StreamObserver.class);
+        StreamObserver<UploadUserProfilePhotoRequest> requestStreamObserver = userAccountServerService.uploadUserProfilePhoto(responseStreamObserver);
+
+        requestStreamObserver.onNext(metadata);
+
+        // upload file as chunk
+        InputStream inputStream = file.getInputStream();
+        byte[] bytes = new byte[4096];
+        int size;
+        while ((size = inputStream.read(bytes)) > 0){
+            UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
+                    .setFileContent(ByteString.copyFrom(bytes, 0 , size))
+                    .build();
+            assertTrue(uploadRequest.hasFileContent());
+            requestStreamObserver.onNext(uploadRequest);
+        }
+
+        // close the stream
+        inputStream.close();
+        requestStreamObserver.onCompleted();
+
+        /* Then: The file doesn't exist in either format and the response will be a failure */
+        File pfp = new File(profileImageFolder + TEST_PHOTO_NAME + TEST_PHOTO_FORMAT_JPG);
+        File txt = new File(profileImageFolder + TEST_PHOTO_NAME + "txt");
+        assertFalse(pfp.exists());
+        assertFalse(txt.exists());
 
         verify(responseStreamObserver, times(1)).onCompleted();
         ArgumentCaptor<FileUploadStatusResponse> captor = ArgumentCaptor.forClass(

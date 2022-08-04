@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import io.grpc.StatusRuntimeException;
-import nz.ac.canterbury.seng302.portfolio.model.Base64DecodedMultipartFile;
+import nz.ac.canterbury.seng302.portfolio.utils.Base64DecodedMultipartFile;
 import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.FileUploadObserver;

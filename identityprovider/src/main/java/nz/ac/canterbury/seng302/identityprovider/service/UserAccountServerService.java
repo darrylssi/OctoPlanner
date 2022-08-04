@@ -130,8 +130,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                         response.setMessage(String.format("Image has invalid dimensions %d x %d when they must be %d x %<d", image.getWidth(), image.getHeight(), USER_PHOTO_DIMENSIONS));
                         status = FileUploadStatus.FAILED;
                     }
-                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write
-                    logger.error(String.format("Error reading or writing uploaded image: %s", (Object) e.getStackTrace()));
+                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write - will happen if the file isn't an image
+                    logger.error(String.format("Error reading or writing uploaded image: %s", Arrays.toString(e.getStackTrace())));
                     response.setMessage("Error saving image: could not read image from file. Make sure the image is not corrupted.");
                     status = FileUploadStatus.FAILED;
                 }
