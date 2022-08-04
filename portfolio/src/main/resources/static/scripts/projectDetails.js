@@ -1,16 +1,16 @@
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
-function showDeleteModal(sprintId, sprintName) {
-    const modal = document.getElementById("deleteSprintModal");
+function showDeleteSprintModal(sprintId, sprintName) {
+    const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
     document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
     deleteButton.onclick = () => {deleteSprint(sprintId)}
     modal.style.display = "block";
 }
 
-/** Hides the confirm delete sprint modal without deleting a sprint */
+/** Hides the confirm delete modal without deleting a sprint/event */
 function hideModal() {
-    const modal = document.getElementById("deleteSprintModal");
+    const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
 }
 
@@ -21,6 +21,27 @@ function deleteSprint(sprintId) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Reload the page to get the updated list of sprints after the delete
+        window.location.reload();
+    }
+    deleteRequest.send();
+}
+
+/** When the delete event button is clicked, show a modal checking if the user is sure about deleting the event */
+function showDeleteEventModal(eventId, eventName) {
+    const modal = document.getElementById("deleteModal");
+    const deleteButton = document.getElementById("deleteButton");
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + eventName + "?";
+    deleteButton.onclick = () => {deleteEvent(eventId)}
+    modal.style.display = "block";
+}
+
+/** sends a http request to delete the event with the given id */
+function deleteEvent(eventId) {
+    const url = BASE_URL + "delete-event/" + eventId;
+    const deleteRequest = new XMLHttpRequest();
+    deleteRequest.open("DELETE", url, true);
+    deleteRequest.onload = () => {
+        // Reload the page to get the updated list of events after the delete
         window.location.reload();
     }
     deleteRequest.send();

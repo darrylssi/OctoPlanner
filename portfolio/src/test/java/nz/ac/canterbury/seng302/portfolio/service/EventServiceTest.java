@@ -12,8 +12,9 @@ import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -55,8 +56,8 @@ public class EventServiceTest {
         Exception e = assertThrows(Exception.class, () -> {
             eventService.getEventById(ID + 1);
         });
-        String expectedMessage = "Event not found!";
-        assertTrue(e.getMessage().contains(expectedMessage));
+        String expectedMessage = "Event not found.";
+        assertThat(e.getMessage(), containsString(expectedMessage));
     }
 
     @Test
