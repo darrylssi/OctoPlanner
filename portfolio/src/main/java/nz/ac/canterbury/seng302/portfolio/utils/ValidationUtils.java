@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 @Component
 public class ValidationUtils {
 
+    // Private constructor to hide the implicit public one
     private ValidationUtils() {}
 
     public static final String DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
@@ -205,7 +206,7 @@ public class ValidationUtils {
         }
 
         /* string can only have alphanumeric and _ , . - ( ) symbols */
-        String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
+        String regex = "^([a-zA-Z0-9\\s\\-._]){2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {

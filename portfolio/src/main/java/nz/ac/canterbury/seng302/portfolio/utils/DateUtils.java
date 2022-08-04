@@ -15,8 +15,11 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
-    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
+    // Private constructor to hide the implicit public one
+    private DateUtils() {}
+
+    private static final String BACKEND_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DISPLAY_DATE_FORMAT = "dd/MMM/yyyy";
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -26,7 +29,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayString(Date date) {
-        return displayDateFormat.format(date);
+        return new SimpleDateFormat(DISPLAY_DATE_FORMAT).format(date);
     }
 
     /**
@@ -36,7 +39,7 @@ public class DateUtils {
      */
     public static Date toDate(String date) {
         try {
-            return backendDateFormat.parse(date);
+            return new SimpleDateFormat(BACKEND_DATE_FORMAT).parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }
@@ -49,7 +52,7 @@ public class DateUtils {
      * @return Date object
      */
     public static String toString(Date date) {
-        return backendDateFormat.format(date);
+        return new SimpleDateFormat(BACKEND_DATE_FORMAT).format(date);
     }
 
 }
