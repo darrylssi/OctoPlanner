@@ -3,11 +3,9 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import io.grpc.Status;
@@ -140,7 +138,7 @@ public class UserAccountClientService {
      * 
      * @param userId The user's ID
      * @param role The enum object of the role getting removed.
-     * @return <code>true</code> if the user had this role, but doesn't now.
+     * @return <code>true</code> if the user had this role, but doesn't any longer.
      * @throws StatusException <code>NOT_FOUND</code> if the user ID points to no one.
      */
     public boolean removeRoleFromUser(final int userId, final UserRole role) throws StatusException {
@@ -203,13 +201,17 @@ public class UserAccountClientService {
 
     /**
      * Sends an UploadUserProfilePhotoRequest to the identity provider.
+     * This returns the upload observer because it is required for the client to know that the photo
+     * was successfully uploaded - without it, they cannot possibly know, and thus could load the profile page
+     * before their photo is saved, wrongly showing the default picture.
      * @param userId ID of the user to upload the profile photo to
      * @param file Image file to be uploaded
+     * @return FileUploadObserver that the controller can query to check if the photo has been uploaded
      * @throws IOException When there is an error with reading file
      */
-    public void uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
-
-        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(new FileUploadObserver());
+    public FileUploadObserver uploadUserProfilePhoto(int userId, MultipartFile file) throws IOException {
+        FileUploadObserver fileUploadObserver = new FileUploadObserver();
+        StreamObserver<UploadUserProfilePhotoRequest> streamObserver = userAccountServiceStub.uploadUserProfilePhoto(fileUploadObserver);
 
         String filetype = file.getContentType();
         if (filetype != null) {
@@ -229,7 +231,7 @@ public class UserAccountClientService {
         InputStream inputStream = file.getInputStream();
         byte[] bytes = new byte[4096];
         int size;
-        while ((size = inputStream.read(bytes)) > 0){
+        while ((size = inputStream.read(bytes)) > 0) {
             UploadUserProfilePhotoRequest uploadRequest = UploadUserProfilePhotoRequest.newBuilder()
                     .setFileContent(ByteString.copyFrom(bytes, 0 , size))
                     .build();
@@ -239,6 +241,8 @@ public class UserAccountClientService {
         // close the stream
         inputStream.close();
         streamObserver.onCompleted();
+
+        return fileUploadObserver;
     }
 
     /**
