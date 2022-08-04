@@ -73,9 +73,6 @@ function hideEditEvent() {
 /**
  * Binds an event to the input, such that the remaining length is displayed.
  * 
- * How to use:
- * I'd recommend giving the 'parent' its own 
- * 
  * @param {HTMLInputElement} input An `<input type="text" maxlength=...>` element,
  *                                  with an optional `minlength` element
  * @param {Element} display The element that'll display the output (Note: Will overwrite
@@ -111,8 +108,7 @@ function displayRemainingCharacters(input, display) {
             display.textContent = remainingChars;
         }
     }
-    // Bind the event, then give it an initial kick
+    // Bind the event, then give it a kick to initialise the display
     input.addEventListener("input", event);
     event();
 }
-
