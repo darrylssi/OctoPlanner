@@ -5,7 +5,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 
 
 /**
@@ -180,8 +179,7 @@ public class Event {
             comparisonDate = eventEndDate;
         }
 
-        for(int i = 0; i < sprints.size(); i++) {
-            Sprint checkedSprint = sprints.get(i);
+        for (Sprint checkedSprint : sprints) {
             Date sprintStart = checkedSprint.getSprintStartDate();
             Date sprintEnd = checkedSprint.getSprintEndDate();
 
