@@ -69,4 +69,3 @@ function hideEditEvent() {
         eventForm.parentNode.removeChild(eventForm);
     }
 }
-
