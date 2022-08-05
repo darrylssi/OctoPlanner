@@ -34,12 +34,11 @@ public class Event {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @NotBlank(message="Event name can't be blank")
+    @NotBlank(message="Event name cannot be blank")
     @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
     private String eventName;
 
     @Column (nullable = false)
-    @NotBlank(message="Event description can't be blank")
     @Size(max=200, message="The event description must not exceed 200 characters.")
     private String eventDescription;
 

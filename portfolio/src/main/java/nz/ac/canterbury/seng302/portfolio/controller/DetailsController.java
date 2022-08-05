@@ -61,19 +61,26 @@ public class DetailsController extends PageController {
     ) throws Exception {
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateEventForm(eventForm);
+        populateProjectDetailsModel(model, id, thisUser);
+
+        /* Return the name of the Thymeleaf template */
+        return PROJECT_DETAILS_TEMPLATE_NAME;
+    }
+
+    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) throws Exception {
         /* Add project details to the model */
-        Project project = projectService.getProjectById(id);
+        Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
 
-        labelUtils.refreshProjectSprintLabels(id);
+        labelUtils.refreshProjectSprintLabels(parentProjectId);
 
         // Gets the sprint list and sort it based on the sprint start date
-        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(parentProjectId);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
         // Gets the event list and sort it based on the event start date
-        List<Event> eventList = eventService.getEventByParentProjectId(id);
+        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         eventList.sort(Comparator.comparing(Event::getEventStartDate));
         model.addAttribute("events", eventList);
 
@@ -83,9 +90,6 @@ public class DetailsController extends PageController {
         model.addAttribute("user", thisUser.getFullName());
 
         model.addAttribute("tab", 0);
-
-        /* Return the name of the Thymeleaf template */
-        return PROJECT_DETAILS_TEMPLATE_NAME;
     }
 
     /**
@@ -118,11 +122,14 @@ public class DetailsController extends PageController {
         @AuthenticationPrincipal AuthState principal,
         @PathVariable("project_id") int projectID,
         @Valid EventForm eventForm,
-        BindingResult bindingResult
+        BindingResult bindingResult,
+        Model model
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         // Initial checks that the data has some integrity (The data isn't null, etc.)
         if (bindingResult.hasErrors()) {
+            PrincipalData thisUser = PrincipalData.from(principal);
+            populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
 

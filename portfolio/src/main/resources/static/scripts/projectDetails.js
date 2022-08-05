@@ -102,7 +102,7 @@ function displayRemainingCharacters(input, display) {
         } else if (minLength !== null && inputLength < minLength) {
             // (Optional) Not enough characters
             display.classList.add('text-danger');
-            display.textContent = '<' + (minLength - inputLength);
+            display.textContent = '< ' + (minLength - inputLength);
         } else {
             display.classList.remove('text-danger');
             display.textContent = remainingChars;
