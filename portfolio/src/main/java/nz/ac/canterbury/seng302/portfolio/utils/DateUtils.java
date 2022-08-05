@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -20,8 +21,19 @@ public class DateUtils {
 
     private static final String BACKEND_DATE_FORMAT = "yyyy-MM-dd";
     private static final String DISPLAY_DATE_FORMAT = "dd/MMM/yyyy";
+    private static final String DISPLAY_DATE_TIME_FORMAT = "dd/MMM/yyyy";
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
+    // Using a singleton pattern, because SonarLint doesn't like it when a static
+    // utility class get initialized, but `DatesExpressionDialect` NEEDS an instance.
+    private static DateUtils singleton = null;
+
+    public static DateUtils getInstance() {
+        if (singleton == null)
+            singleton = new DateUtils();
+        return singleton;
+    }
 
     /**
      * Converts a Date object to a String with dd/MMM/yyyy format.
@@ -30,6 +42,15 @@ public class DateUtils {
      */
     public static String toDisplayString(Date date) {
         return new SimpleDateFormat(DISPLAY_DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Converts a Date object to a String with dd/MMM/yyyy HH:mm:ss format.
+     * @param date Date to be converted
+     * @return Date as a String
+     */
+    public static String toDisplayDateTimeString(Date date) {
+        return new SimpleDateFormat(DISPLAY_DATE_TIME_FORMAT).format(date);
     }
 
     /**
@@ -55,4 +76,13 @@ public class DateUtils {
         return new SimpleDateFormat(BACKEND_DATE_FORMAT).format(date);
     }
 
+    /**
+     * Checks whether the first date given is the day after the second date given
+     */
+    public static boolean isDayAfter(Date dayAfter, Date dayBefore) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(dayBefore);
+        c.add(Calendar.DATE, 1);    // Add n days to the date
+        return c.getTime().equals(dayAfter);
+    }
 }
