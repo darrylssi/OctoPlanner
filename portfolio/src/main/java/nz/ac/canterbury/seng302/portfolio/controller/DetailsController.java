@@ -66,7 +66,16 @@ public class DetailsController extends PageController {
         /* Return the name of the Thymeleaf template */
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
-
+    
+    /**
+     * <p>Pre-populates all the data needed in the model</p>
+     * 
+     * Note: You should ONLY DEFINE MODEL ATTRIBUTES IN HERE!
+     * @param model The model we'll be blessing with knowledge
+     * @param parentProjectId   The ID of this project page
+     * @param thisUser          The currently logged in user
+     * @throws Exception    Gotta stop doing this, honestly
+     */
     private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) throws Exception {
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
@@ -117,6 +126,15 @@ public class DetailsController extends PageController {
         }
     }
 
+    /**
+     * Endpoint for adding events to the database, or conveying errors
+     * to the user
+     * @param projectID The project this event will be bound to
+     * @param eventForm The form submitted by our lovely customers
+     * @param bindingResult Any errors that came up during validation
+     * @return  Either redirects them back to the project page, or renders the project page with errors.
+     * @throws Exception We've gotta find a better way of conveying "not found" then basic Exceptions
+     */
     @PostMapping("/project/{project_id}/add-event")
     public String postAddEvent(
         @AuthenticationPrincipal AuthState principal,
@@ -138,7 +156,10 @@ public class DetailsController extends PageController {
         return "redirect:.";
     }
 
-
+    /**
+     * Pre-populates the event form with default values, if they don't already exist
+     * @param eventForm The eventForm object from your endpoint args
+     */
     private void prePopulateEventForm(EventForm eventForm) {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
@@ -149,6 +170,7 @@ public class DetailsController extends PageController {
         if (eventForm.getEndTime() == null)
             eventForm.setEndTime(Date.from(inOneMinute));
     }
+
     /**
      * Deletes an event and redirects back to the project view
      * @param principal used to check if the user is authorised to delete events

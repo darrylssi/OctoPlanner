@@ -6,6 +6,12 @@ import javax.validation.constraints.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+/**
+ * <p>EventForm class that's given to the user inside templates.</p>
+ * 
+ * This proxy exists for security reasons, as directly giving Event objects from the
+ * database flags Sonarqube errors.
+ */
 public class EventForm {
     @NotNull
     @NotBlank(message="Event name cannot be blank")
@@ -20,7 +26,6 @@ public class EventForm {
     private Date startTime;
 
     @NotNull
-    
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'hh:mm")
     private Date endTime;
 
