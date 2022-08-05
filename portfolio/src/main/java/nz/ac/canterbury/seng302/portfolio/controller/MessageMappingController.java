@@ -1,19 +1,30 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.EventMessage;
 import nz.ac.canterbury.seng302.portfolio.utils.EventMessageOutput;
 import nz.ac.canterbury.seng302.portfolio.utils.Message;
 import nz.ac.canterbury.seng302.portfolio.utils.OutputMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class MessageMappingController {
 
     EventMessageOutput eventMessageOutput;
+    @Autowired
+    EventService eventService;
+    @Autowired
+    SprintService sprintService;
 
     /**
      * Websocket sending example
@@ -33,17 +44,25 @@ public class MessageMappingController {
      * @return An output that gets sent to the endpoint in the @SendTo parameter
      */
     @MessageMapping("/events")
-    @SendTo("/topic/messages")
+    @SendTo("/topic/events")
     public EventMessageOutput sendEventData(EventMessage eventMessage) throws Exception {
+        Event updatedEvent = eventService.getEventById(eventMessage.getId());
+
+        //Add event info to message output
         eventMessageOutput = new EventMessageOutput();
-        eventMessageOutput.setParentProjectId(0);
+        eventMessageOutput.setParentProjectId(updatedEvent.getParentProjectId());
         eventMessageOutput.setId(eventMessage.getId());
-        eventMessageOutput.setName(eventMessage.getName());
-        eventMessageOutput.setStartDate(eventMessage.getStartDate());
-        eventMessageOutput.setEndDate(eventMessage.getEndDate());
-        eventMessageOutput.setDescription(eventMessage.getDescription());
-        eventMessageOutput.setSprintIds(eventMessage.getSprintIds());
-        eventMessageOutput.setColour(eventMessage.getColour());
+        eventMessageOutput.setName(updatedEvent.getEventName());
+        eventMessageOutput.setStartDate(updatedEvent.getEventStartDate());
+        eventMessageOutput.setEndDate(updatedEvent.getEventEndDate());
+        eventMessageOutput.setDescription(updatedEvent.getEventDescription());
+
+        List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProjectId());
+        eventMessageOutput.setStartColour(updatedEvent.determineColour(sprints, false));
+        eventMessageOutput.setEndColour(updatedEvent.determineColour(sprints, true));
+        sprints.sort(Comparator.comparing(Sprint::getSprintEndDate));
+
+//        eventMessageOutput.setSprintIds(eventMessage.getSprintIds());
         return eventMessageOutput;
     }
 

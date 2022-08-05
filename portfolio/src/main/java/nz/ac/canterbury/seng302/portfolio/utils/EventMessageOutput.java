@@ -9,10 +9,11 @@ public class EventMessageOutput {
     private int parentProjectId;
     private String name;
     private String description;
-    private ArrayList<Integer> sprintIds;
+    private ArrayList<String> sprintIds;
     private Date startDate;
     private Date endDate;
-    private String colour;
+    private String startColour;
+    private String endColour;
 
     public void setId(int id) {
         this.id = id;
@@ -46,12 +47,12 @@ public class EventMessageOutput {
         this.description = newDescription;
     }
 
-    public List<Integer> getSprintIds() {
+    public List<String> getSprintIds() {
         return sprintIds;
     }
 
-    public void setSprintIds(List<Integer> sprintIds) {
-        this.sprintIds = (ArrayList<Integer>)sprintIds;
+    public void setSprintIds(List<String> sprintIds) {
+        this.sprintIds = (ArrayList<String>)sprintIds;
     }
 
     public Date getEndDate() {
@@ -70,11 +71,19 @@ public class EventMessageOutput {
         this.startDate = startDate;
     }
 
-    public String getColour() {
-        return colour;
+    public void setStartColour(String startColour) {
+        this.startColour = startColour;
     }
 
-    public void setColour(String colour) {
-        this.colour = colour;
+    public void setEndColour(String endColour) {
+        this.endColour = endColour;
+    }
+
+    public String getStartColour() {
+        return startColour;
+    }
+
+    public String getEndColour() {
+        return endColour;
     }
 }
