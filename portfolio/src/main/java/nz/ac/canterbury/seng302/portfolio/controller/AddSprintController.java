@@ -37,6 +37,9 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    private static final String ADD_SPRINT_TEMPLATE = "addSprint";
+    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
+
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
             "#5aff15",
@@ -109,7 +112,7 @@ public class AddSprintController extends PageController {
         model.addAttribute("maxDate", DateUtils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
-        return "addSprint";
+        return ADD_SPRINT_TEMPLATE;
     }
 
     /**
@@ -173,7 +176,7 @@ public class AddSprintController extends PageController {
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("invalidName", invalidName.getFirstError());
 
-            return "addSprint";
+            return ADD_SPRINT_TEMPLATE;
         }
 
         // Adding the new sprint object
@@ -186,7 +189,7 @@ public class AddSprintController extends PageController {
         sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
-        return "redirect:../project/" + parentProject.getId();
+        return REDIRECT_TO_PROJECT + parentProject.getId();
     }
 
     /**

@@ -1,5 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+/**
+ * Contains literal values that will be shared across Portfolio classes.
+ */
 public class GlobalVars {
 
     private GlobalVars() {}
@@ -8,6 +11,11 @@ public class GlobalVars {
 
     public static final int MIN_NAME_LENGTH = 2;
     public static final int MAX_NAME_LENGTH = 32;
+
+    public static final int MIN_PASSWORD_LENGTH = 7;
+    public static final int MAX_PASSWORD_LENGTH = 20;
+
+    public static final int MAX_USERNAME_LENGTH = 20;
 
     public static final int COLOUR_LENGTH = 7;
 
