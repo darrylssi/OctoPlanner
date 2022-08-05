@@ -29,7 +29,7 @@ function connect() {
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
+        stompClient.subscribe('/topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
         stompClient.subscribe(BASE_URL + 'topic/messages', function(eventMessageOutput) {
@@ -56,6 +56,8 @@ function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
     stompClient.send(BASE_URL + "app/ws", {},
             JSON.stringify({'from':user, 'text':" was here"}));
+    stompClient.send("/app/ws", {},
+    JSON.stringify({'from':user, 'text':" was here"}));
 }
 
 /**
