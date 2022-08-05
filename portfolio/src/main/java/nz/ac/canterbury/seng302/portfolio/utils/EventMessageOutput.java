@@ -10,8 +10,8 @@ public class EventMessageOutput {
     private String name;
     private String description;
     private ArrayList<String> sprintIds;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private String startColour;
     private String endColour;
 
@@ -55,19 +55,19 @@ public class EventMessageOutput {
         this.sprintIds = (ArrayList<String>)sprintIds;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 

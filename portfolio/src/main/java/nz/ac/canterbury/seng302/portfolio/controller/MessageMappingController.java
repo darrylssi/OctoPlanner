@@ -4,10 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.EventMessage;
-import nz.ac.canterbury.seng302.portfolio.utils.EventMessageOutput;
-import nz.ac.canterbury.seng302.portfolio.utils.Message;
-import nz.ac.canterbury.seng302.portfolio.utils.OutputMessage;
+import nz.ac.canterbury.seng302.portfolio.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -53,8 +50,8 @@ public class MessageMappingController {
         eventMessageOutput.setParentProjectId(updatedEvent.getParentProjectId());
         eventMessageOutput.setId(eventMessage.getId());
         eventMessageOutput.setName(updatedEvent.getEventName());
-        eventMessageOutput.setStartDate(updatedEvent.getEventStartDate());
-        eventMessageOutput.setEndDate(updatedEvent.getEventEndDate());
+        eventMessageOutput.setStartDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventStartDate()));
+        eventMessageOutput.setEndDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventEndDate()));
         eventMessageOutput.setDescription(updatedEvent.getEventDescription());
 
         List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProjectId());
