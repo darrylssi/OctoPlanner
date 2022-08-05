@@ -32,7 +32,7 @@ function connect() {
         stompClient.subscribe('/topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
-        stompClient.subscribe(BASE_URL + 'topic/messages', function(eventMessageOutput) {
+        stompClient.subscribe('/topic/events', function(eventMessageOutput) {
             showEventMessageData(JSON.parse(eventMessageOutput.body));
         });
     });
@@ -56,6 +56,7 @@ function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
     stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
+    sendUpdateEventData();
 }
 
 /**
@@ -113,8 +114,8 @@ function testUpdateEvent() {
         startDateString: '12/Jan/2022 00:00',
         endDateString: '26/Jan/2022 00:00',
         description: 'this event has been updated',
-        startColor: "#2c2c2c2c",
-        endColor: '#ff00ff4c',
+        startColour: "#2c2c2c2c",
+        endColour: '#ff00ff4c',
         id: 1
     }
     console.log(eventMessage);
@@ -140,15 +141,15 @@ function sendUpdateEventData() {
 
     //
     eventMessage = {
-        sprintIds: sprintIdsForEvent,
-        name: document.getElementById('event-name'),
-        startDateString: document.getElementById('event-date').innerText.substring(0, 17),
-        endDateString: document.getElementById('event-date').innerText.substring(20),
-        description: document.getElementById('event-description').innerText,
-        color: document.getElementById('event-box-' + eventMessage.id).style.background,
+//        sprintIds: sprintIdsForEvent,
+//        name: document.getElementById('event-name'),
+//        startDateString: document.getElementById('event-date').innerText.substring(0, 17),
+//        endDateString: document.getElementById('event-date').innerText.substring(20),
+//        description: document.getElementById('event-description').innerText,
+//        color: '#9966ff2c',
         id: eventId
     }
-    stompClient.send(BASE_URL + "app/events", {}, JSON.stringify(eventMessage));
+    stompClient.send("/app/events", {}, JSON.stringify(eventMessage));
 }
 
 /**
@@ -170,7 +171,7 @@ function createEventDisplay(eventMessage, parent) {
     let newEvent = document.createElement("div");
     newEvent.setAttribute("id", "event-" + eventMessage.id);
     newEvent.setAttribute("class", "event-box");
-    newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColor + ', ' + eventMessage.endColor);
+    newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
     newEvent.innerHTML = eventTemplate;
     parent.appendChild(newEvent);
     newEvent.getElementsByClassName("event")[0].setAttribute('data-bs-original-title', eventMessage.description);
