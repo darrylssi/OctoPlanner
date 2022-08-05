@@ -9,11 +9,13 @@
     <link th:href="|../styles/main.css|" rel="stylesheet" />
     <link th:href="|../styles/modals.css|" rel="stylesheet" />
     <link th:href="|../styles/reskinBootstrap.css|" rel="stylesheet" />
+
 </head>
 <body onload="connect()"> <!-- Immediately connect to WebSocket -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <!--/*
+
+<!--/*
         JS files are static, and thus don't know anything about the project (i.e. the base URL).
         This code sets a global variable inside this template (which does know the base URL),
         which the imported script can access.
@@ -244,19 +246,37 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="datetime-local" class="form-control" th:classappend="${startDateError} ? is-invalid : '' " id="eventStartTime" th:required="required" aria-describedby="eventStartFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
-                                <label for="eventStartTime">Start Time</label>
-                                <div id="eventStartFeedback" class="invalid-feedback" th:text="${startDateError}"></div>
+                                <input type="date"  class="form-control" th:classappend="${startDateError} ? is-invalid : '' " id="eventStartDate" th:required="required" aria-describedby="eventStartDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="eventStartDate">Start Date</label>
+                                <div id="eventStartDateFeedback" class="invalid-feedback" th:text="${startDateError}"></div>
+                                <script>
+                                    document.getElementById('eventStartDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
                             </div>
-
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="time" value="09:00" class="form-control" th:classappend="${startTimeError} ? is-invalid : '' " id="eventStartTime" th:required="required" aria-describedby="eventStartTimeFeedback">
+                                <label for="eventStartTime">Start Time</label>
+                                <div id="eventStartTimeFeedback" class="invalid-feedback" th:text="${startTimeError}"></div>
+                            </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="datetime-local" class="form-control" th:classappend="${endDateError} ? is-invalid : '' " id="eventEndTime" required aria-describedby="eventEndFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
-                                <label for="eventEndTime">End Time</label>
-                                <div id="eventEndFeedback" class="invalid-feedback" th:text="${endDateError}"></div>
+                                <input type="date" class="form-control" th:classappend="${endDateError} ? is-invalid : '' " id="eventEndDate" required aria-describedby="eventEndDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="eventEndDate">End Date</label>
+                                <div id="eventEndDateFeedback" class="invalid-feedback" th:text="${endDateError}"></div>
+                                <script>
+                                    document.getElementById('eventEndDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
                             </div>
-
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3 has-validation">
+                                <input type="time" value="17:00" class="form-control" th:classappend="${endTimeError} ? is-invalid : '' " id="eventEndTime" required aria-describedby="eventEndDateFeedback">
+                                <label for="eventEndTime">End Time</label>
+                                <div id="eventEndTimeFeedback" class="invalid-feedback" th:text="${endTimeError}"></div>
+                            </div>
                         </div>
                         <div class="col-1">
                             <button type="button" class="btn btn-primary btn-lg">Save</button>
@@ -295,11 +315,20 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="datetime-local" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' " id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
-                                <label for="deadlineTime">Date and Time</label>
-                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
+                                <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' " id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="deadlineDate">Date</label>
+                                <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
+                                <script>
+                                    document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
                             </div>
-
+                        </div>
+                        <div class = "col">
+                            <div class="form-floating mb-3">
+                                <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' " id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="deadlineTime">Time</label>
+                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                            </div>
                         </div>
                         <div class="col-1">
                             <button type="button" class="btn btn-primary btn-lg">Save</button>
