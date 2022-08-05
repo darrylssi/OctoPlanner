@@ -33,7 +33,7 @@ function connect() {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
         stompClient.subscribe('/topic/events', function(eventMessageOutput) {
-            showEventMessageData(JSON.parse(eventMessageOutput.body));
+            updateEvent(JSON.parse(eventMessageOutput.body));
         });
     });
 }
@@ -89,8 +89,9 @@ function updateEvent(eventMessage) {
             eventName = event.querySelector('#event-name');
             eventName.innerHTML = eventMessage.name;
             eventDates = event.querySelector('#event-date');
-            eventDates.innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
+            eventDates.innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
             event.setAttribute('data-bs-original-title', eventMessage.description);
+            event_lists[i].querySelector('#event-box-' + eventMessage.id).setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
         } else {
             //event is not displayed in this area and needs to be created
             createEventDisplay(eventMessage, event_lists[i]);
@@ -104,66 +105,16 @@ function updateEvent(eventMessage) {
           }
       }
     }
-// generate/update/delete relevant event instances
-}
-
-function testUpdateEvent() {
-    eventMessage = {
-        sprintIds: ['events-37-inside', 'events-37-outside',  'events-39-inside', 'events-39-outside'],
-        name: 'Updated Event',
-        startDateString: '12/Jan/2022 00:00',
-        endDateString: '26/Jan/2022 00:00',
-        description: 'this event has been updated',
-        startColour: "#2c2c2c2c",
-        endColour: '#ff00ff4c',
-        id: 1
-    }
-    console.log(eventMessage);
-    updateEvent(eventMessage);
 }
 
 /**
  * Sends a data message to a WebSocket endpoint using attributes from the HTML elements
  */
 function sendUpdateEventData() {
-    eventId = 1;
-
-    // Gets all the sprint ids that exist in the project details page
-    allSprintIds = document.getElementsByClassName('event-list-container');
-    sprintIdsForEvent = [];         // sprints ids for the given specific event
-    for (let i = 0; i < allSprintIds.length; i++) {
-        event = allSprintIds[i].querySelector('#event-' + eventId);
-        // checks if the event exist in this current sprint container. If it exists, then it is added to the sprints ids list
-        if (event !== null) {
-            sprintIdsForEvent.push(allSprintIds[i]);
-        }
-    }
-
-    //
     eventMessage = {
-//        sprintIds: sprintIdsForEvent,
-//        name: document.getElementById('event-name'),
-//        startDateString: document.getElementById('event-date').innerText.substring(0, 17),
-//        endDateString: document.getElementById('event-date').innerText.substring(20),
-//        description: document.getElementById('event-description').innerText,
-//        color: '#9966ff2c',
-        id: eventId
+        id: 1
     }
     stompClient.send("/app/events", {}, JSON.stringify(eventMessage));
-}
-
-/**
- * Updates an HTML element to display a received WebSocket message
- * @param eventMessage JSON object received from the WebSocket
- */
-function showEventMessageData(eventMessage) {
-
-    const eventResponse = document.getElementById('eventResponse');
-    const p = document.createElement('p');
-    p.style.wordWrap = 'break-word';
-    p.appendChild(document.createTextNode(eventMessage.id + eventMessage.sprintIds + " " + eventMessage.name + " "
-        + eventMessage.startDate + " - " + eventMessage.endDate));
-    eventResponse.appendChild(p);
 }
 
 function createEventDisplay(eventMessage, parent) {
@@ -176,5 +127,5 @@ function createEventDisplay(eventMessage, parent) {
     parent.appendChild(newEvent);
     newEvent.getElementsByClassName("event")[0].setAttribute('data-bs-original-title', eventMessage.description);
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
-    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
+    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
 }
