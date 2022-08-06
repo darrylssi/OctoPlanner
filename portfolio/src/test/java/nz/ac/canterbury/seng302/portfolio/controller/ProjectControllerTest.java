@@ -112,7 +112,7 @@ class ProjectControllerTest {
                         .param("projectStartDate", "2021-06-20")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")));
+                .andExpect(content().string(containsString("The project name must be between 2 and 32 characters.")));
     }
 
     @Test

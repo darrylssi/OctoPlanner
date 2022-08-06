@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -37,10 +36,9 @@ public class EditProjectController extends PageController {
 
     @Autowired
     private ProjectService projectService;
+
     @Autowired
     private SprintService sprintService;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
 
     /**
      * Show the edit-project page.
