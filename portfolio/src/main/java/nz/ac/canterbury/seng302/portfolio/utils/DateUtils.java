@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
+
 /**
  * Used by Project and Sprint to convert dates to yyyy-MM-dd format and vice versa
  * that is required by the date type input field.
@@ -16,9 +19,9 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
-    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
-    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
+    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat(DATE_FORMAT);
+    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat(DISPLAY_DATE_FORMAT);
+    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat(DATETIME_FORMAT);
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
