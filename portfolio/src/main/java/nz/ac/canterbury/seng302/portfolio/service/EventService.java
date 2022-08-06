@@ -3,11 +3,15 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
 public class EventService {
+
     @Autowired
     private EventRepository repository;
 
@@ -39,12 +43,12 @@ public class EventService {
     /**
      * Get event by id
      */
-    public Event getEventById(Integer id) throws Exception {
+    public Event getEventById(Integer id) throws ResponseStatusException {
         Event event = repository.findEventById(id);
         if (event != null) {
             return event;
         } else {
-            throw new Exception("Event not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found.");
         }
     }
 

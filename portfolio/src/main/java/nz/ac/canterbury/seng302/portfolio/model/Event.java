@@ -1,14 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-
 
 /**
  * Represents an event object. Event colour should be determined based on what it is being displayed with.
@@ -22,7 +18,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    // Is this necessary for an event?
     @Column
     private int parentProjectId;
 
@@ -61,11 +56,11 @@ public class Event {
         this.eventEndDate = eventEndDate;
     }
 
-    @Override
     /**
      * Returns a string listing the attributes of the event in the form "Event[x, x, x]".
      * @return said string
      */
+    @Override
     public String toString() {
         return String.format(
                 "Event[id=%d, parentProjectId='%d', eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
@@ -182,8 +177,7 @@ public class Event {
             comparisonDate = eventEndDate;
         }
 
-        for(int i = 0; i < sprints.size(); i++) {
-            Sprint checkedSprint = sprints.get(i);
+        for (Sprint checkedSprint : sprints) {
             Date sprintStart = checkedSprint.getSprintStartDate();
             Date sprintEnd = checkedSprint.getSprintEndDate();
 
