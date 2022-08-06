@@ -21,7 +21,7 @@ public class DateUtils {
 
     private static final String BACKEND_DATE_FORMAT = "yyyy-MM-dd";
     private static final String DISPLAY_DATE_FORMAT = "dd/MMM/yyyy";
-    private static final String DISPLAY_DATE_TIME_FORMAT = "dd/MMM/yyyy";
+    private static final String DISPLAY_DATE_TIME_FORMAT = "dd/MMM/yyyy HH:mm";
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 

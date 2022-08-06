@@ -26,11 +26,13 @@ import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
@@ -70,7 +72,6 @@ public class DetailsController extends PageController {
     /**
      * <p>Pre-populates all the data needed in the model</p>
      * 
-     * Note: You should ONLY DEFINE MODEL ATTRIBUTES IN HERE!
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
      * @param thisUser          The currently logged in user
@@ -143,14 +144,24 @@ public class DetailsController extends PageController {
         BindingResult bindingResult,
         Model model
     ) throws Exception {
+        PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        // Initial checks that the data has some integrity (The data isn't null, etc.)
+        ValidationError generalErrors = null;
+        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
-            PrincipalData thisUser = PrincipalData.from(principal);
+            populateProjectDetailsModel(model, projectID, thisUser);
+            return PROJECT_DETAILS_TEMPLATE_NAME;
+        }
+        // Check that the dates are correct
+        Project parentProject = projectService.getProjectById(projectID);
+        generalErrors = ValidationUtils.validateEventDates(eventForm.getStartTime(), eventForm.getEndTime(), parentProject);
+        if (generalErrors.isError()) {
+            model.addAttribute("event-form-error", generalErrors.getErrorMessages());
             populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
 
+        // Data is valid, add it to database
         Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.getStartTime(), eventForm.getEndTime());
         eventService.saveEvent(event);
         return "redirect:.";

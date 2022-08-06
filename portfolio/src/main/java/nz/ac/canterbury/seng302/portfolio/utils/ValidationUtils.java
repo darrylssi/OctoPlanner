@@ -1,10 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import org.springframework.stereotype.Component;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -41,19 +43,17 @@ public class ValidationUtils {
     public static ValidationError validateSprintDates(int id, Date start, Date end,
                                                Project parentProject, List<Sprint> sprintList) {
         // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError error = new ValidationError();
 
         // Checks if the sprint's start date is after the sprint's end date
         // Does this first so that future checks can assume this is true
         if (start.after(end)) {
-            error.setErrorFlag(true);
             error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checks that the sprint dates are within the project dates
         if (datesOutsideProject(start, end,
                 parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Sprint dates must be within project date range: " +
                     parentProject.getStartDateString() + " - " + parentProject.getEndDateString());
         }
@@ -62,7 +62,6 @@ public class ValidationUtils {
         for (Sprint other : sprintList) {
             if (!sprintDatesOverlap(start, end, other) // Sprint dates overlap
                     && (other.getId() != id)){        // Sprint isn't checking against itself
-                error.setErrorFlag(true);
                 error.addErrorMessage("Sprint dates must not overlap with other sprints. Dates are overlapping with "
                         + other.getStartDateString() + " - " + other.getEndDateString());
             }
@@ -86,18 +85,16 @@ public class ValidationUtils {
      */
     public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
         // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError error = new ValidationError();
 
         // Checks if the project's start date is after the project's end date
         if (start.after(end)) {
-            error.setErrorFlag(true);
             error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checking against sprint dates
         for (Sprint sprint : sprintList) {
             if (datesOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
-                error.setErrorFlag(true);
                 error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
                         " is outside the project dates");
@@ -109,7 +106,6 @@ public class ValidationUtils {
         startCal.add(Calendar.YEAR, -1);
         Date earliestStart = startCal.getTime();
         if (start.before(earliestStart)) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Project cannot be set to start more than a year before it was " +
                     "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")");
         }
@@ -129,24 +125,23 @@ public class ValidationUtils {
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateEventDates(Date start, Date end, Project parentProject) {
-        // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError errors = new ValidationError();
 
         // Checks if the event's start date is after the project's end date
         if (start.after(end)) {
-            error.setErrorFlag(true);
-            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
+            errors.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
+        } else if (ChronoUnit.SECONDS.between(start.toInstant(), end.toInstant()) < 60) {
+            errors.addErrorMessage("Event must occur for at least 1 minute");
         }
 
         // Checks that the event's dates are within the project dates
         if (datesOutsideProject(start, end,
                 parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
-            error.setErrorFlag(true);
-            error.addErrorMessage("Event dates must be within project date range: " +
-                    parentProject.getStartDateString() + " - " + parentProject.getEndDateString());
+            errors.addErrorMessage(String.format("Event dates must be within project date range: %s - %s",
+                    parentProject.getStartDateString(),  parentProject.getEndDateString()));
         }
 
-        return error;
+        return errors;
     }
 
     /**
@@ -196,11 +191,9 @@ public class ValidationUtils {
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
-        // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError error = new ValidationError();
 
         if (name == null) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Must enter a sprint name");
             return error;
         }
@@ -210,7 +203,6 @@ public class ValidationUtils {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Name can only have alphanumeric and . - _ characters");
         }
 
