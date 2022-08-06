@@ -295,12 +295,12 @@
                 New Deadline
             </div>
             <div class="card-body">
-                <form class="container-fluid">
+                <form th:action="@{{id}/add-deadline(id = ${project.getId()})}" method="post" class="container-fluid" th:object="${deadline}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="deadlineNameInput" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback">
-                                <label for="deadlineNameInput">Name</label>
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="deadlineName" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback">
+                                <label for="deadlineName">Name</label>
                                 <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
                         </div>
@@ -331,7 +331,7 @@
                             </div>
                         </div>
                         <div class="col-1">
-                            <button type="button" class="btn btn-primary btn-lg">Save</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Save</button>
                         </div>
                     </div>
                 </form>

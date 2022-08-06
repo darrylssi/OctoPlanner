@@ -2,10 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -13,6 +10,7 @@ import java.util.Date;
  * Represents a deadline object.
  * Deadline objects are stored in a table called Deadline, as it is an @Entity.
  */
+@Entity
 public class Deadline {
 
     @Id
@@ -23,11 +21,11 @@ public class Deadline {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
+    @Size(min=2, max=32, message="The deadline name must be between 2 and 32 characters.")
     private String deadlineName;
 
     @Column (nullable = false)
-    @Size(max=200, message="The event description must not exceed 200 characters.")
+    @Size(max=200, message="The deadline description must not exceed 200 characters.")
     private String deadlineDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"

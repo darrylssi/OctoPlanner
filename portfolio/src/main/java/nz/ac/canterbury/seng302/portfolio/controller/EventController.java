@@ -42,7 +42,7 @@ public class EventController extends PageController {
         EventForm eventForm,
         TimeZone timeZone,
         Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         // Get a timezoned "right now" for the current user
         Instant rightNow = ZonedDateTime.now(timeZone.toZoneId()).toInstant();
@@ -55,7 +55,7 @@ public class EventController extends PageController {
             eventForm.setEndDate(Date.from(inOneMinute));
         }
         Project parentProject = projectService.getProjectById(projectID);
-        // TODO Andrew: Once Jacque's validation utils are merged, check that
+        // TODO Andrew: Once Jacques' validation utils are merged, check that
         // the event takes place inside the project properly
         Date earliestDate = parentProject.getProjectStartDate();
         Date latestDate = parentProject.getProjectEndDate();
@@ -71,7 +71,7 @@ public class EventController extends PageController {
         @PathVariable("project_id") int projectID,
         @Valid EventForm eventForm,
         BindingResult bindingResult
-    ) throws Exception {
+    ){
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         // Initial return so I don't have to also null test
         if (bindingResult.hasErrors()) {

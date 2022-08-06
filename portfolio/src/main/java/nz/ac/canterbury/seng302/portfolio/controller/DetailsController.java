@@ -1,10 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,8 @@ public class DetailsController extends PageController {
     @Autowired
     private EventService eventService;
     @Autowired
+    private DeadlineService deadlineService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     @GetMapping("/project/{id}")
@@ -45,7 +45,7 @@ public class DetailsController extends PageController {
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 Model model
-    ) throws Exception {
+    ){
         PrincipalData thisUser = PrincipalData.from(principal);
 
         /* Add project details to the model */
@@ -54,15 +54,20 @@ public class DetailsController extends PageController {
 
         labelUtils.refreshProjectSprintLabels(id);
 
-        // Gets the sprint list and sort it based on the sprint start date
+        // Gets the sprint list and sorts it based on the sprint start date
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event list and sort it based on the event start date
+        // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(id);
         eventList.sort(Comparator.comparing(Event::getEventStartDate));
         model.addAttribute("events", eventList);
+
+        // Gets the deadline list and sorts it based on the deadline date
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(id);
+        deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
+        model.addAttribute("deadlines", deadlineList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
