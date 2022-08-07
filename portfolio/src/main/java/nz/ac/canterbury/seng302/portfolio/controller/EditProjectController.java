@@ -99,13 +99,16 @@ public class EditProjectController extends PageController {
         ValidationError dateOutOfRange = ValidationUtils.validateProjectDates(projectStartDate, projectEndDate,
                 newProject.getProjectCreationDate(), sprintList);
 
+        ValidationError invalidName = ValidationUtils.validateName(projectName);
+
         /* Return editProject template with user input */
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", projectDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
+            model.addAttribute("invalidName", invalidName.getFirstError());
             return "editProject";
         }
 
