@@ -61,7 +61,7 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     document.getElementById("editEventStartTime").setAttribute("value", eventStartDate);
     document.getElementById("editEventEndTime").setAttribute("value", eventEndDate);
     document.getElementById("form").action="/edit-event/" + eventId;
-    sendEditingEventMessage(eventName);
+    sendEditingEventMessage(eventId);
 }
 
 /** Remove the edit form from any event it is attached to */

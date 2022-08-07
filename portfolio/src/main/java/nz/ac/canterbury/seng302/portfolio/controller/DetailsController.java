@@ -68,6 +68,7 @@ public class DetailsController extends PageController {
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
+        model.addAttribute("userId", thisUser.getID());
 
         model.addAttribute("tab", 0);
 
