@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ public class DetailsController extends PageController {
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
         model.addAttribute("parentProjectId", id);
+        model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
+        model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
 
         labelUtils.refreshProjectSprintLabels(id);
 

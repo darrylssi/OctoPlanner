@@ -377,7 +377,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
+                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${projectStartDate}" th:max="${projectEndDate}"
                                        th:name="milestoneDate" th:value="${milestoneDate}">
                                 <label for="milestoneDate">Date</label>
                                 <div id="milestoneDateFeedback" class="invalid-feedback" th:text="${milestoneDateError}"></div>
