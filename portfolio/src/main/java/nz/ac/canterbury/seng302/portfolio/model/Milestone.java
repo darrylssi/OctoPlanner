@@ -7,7 +7,10 @@ import java.util.Date;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
-
+/**
+ * Represents a milestone object.
+ * Milestone objects are stored in a table called Milestone, as it is an @Entity.
+ */
 @Entity
 public class Milestone {
 

@@ -15,6 +15,10 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.web.bind.annotation.RequestParam;
 
+
+/**
+ * Controller to handle requests related to milestones.
+ */
 @Controller
 public class MilestoneController extends PageController {
 
@@ -24,6 +28,15 @@ public class MilestoneController extends PageController {
     @Autowired
     private MilestoneService milestoneService;
 
+    /**
+     * Post request to add milestones to a project.
+     * @param principal Authenticated user
+     * @param projectId ID of the project the milestone will be added to
+     * @param milestoneName Name of the milestone
+     * @param milestoneDate Date of the milestone
+     * @param milestoneDescription Description of the milestone
+     * @return Project details page
+     */
     @PostMapping("/project/{project_id}/add-milestone")
     public String postAddEvent(
             @AuthenticationPrincipal AuthState principal,
