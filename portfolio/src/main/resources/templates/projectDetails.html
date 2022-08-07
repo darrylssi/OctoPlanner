@@ -179,7 +179,7 @@
         <b>[ This project has no sprints ]</b>
     </div>
     <div class="row">
-        <div class="col-2">
+        <div class="col-auto">
         <a th:href="|../add-sprint/${project.getId}|" th:if="${canEdit}" class="btn btn-primary btn-lg">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -187,7 +187,7 @@
             Add Sprint
         </a>
         </div>
-        <div class="col-2">
+        <div class="col-auto">
             <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-calendar-event" viewBox="0 0 16 16">
                     <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
@@ -196,12 +196,20 @@
                 Add Event
             </button>
         </div>
-        <div class="col-2">
+        <div class="col-auto">
             <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
                     <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
                 </svg>
                 Add Deadline
+            </button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addMilestoneForm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trophy" viewBox="0 0 16 16">
+                    <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z"/>
+                </svg>
+                Add Milestone
             </button>
         </div>
     </div>
@@ -328,6 +336,50 @@
                                 <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' " id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
                                 <label for="deadlineTime">Time</label>
                                 <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-primary btn-lg">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Milestone Form -->
+    <div class="collapse" id="addMilestoneForm">
+        <div class="card">
+            <div class="card-header">
+                New Milestone
+            </div>
+            <div class="card-body">
+                <form class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="milestoneNameInput" placeholder="Name" th:required="required" aria-describedby="milestoneNameFeedback">
+                                <label for="milestoneNameInput">Name</label>
+                                <div id="milestoneNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="milestoneDescriptionInput" placeholder="Description">
+                                <label for="milestoneDescriptionInput">Description</label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="milestoneDate">Date</label>
+                                <div id="milestoneDateFeedback" class="invalid-feedback" th:text="${milestoneDateError}"></div>
+                                <script>
+                                    document.getElementById('milestoneDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
                             </div>
                         </div>
                         <div class="col-1">
