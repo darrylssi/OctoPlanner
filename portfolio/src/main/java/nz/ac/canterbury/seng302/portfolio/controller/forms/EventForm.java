@@ -6,6 +6,8 @@ import javax.validation.constraints.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 /**
  * <p>EventForm class that's given to the user inside templates.</p>
  * 
@@ -15,20 +17,24 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class EventForm {
     @NotNull
     @NotBlank(message="Event name cannot be blank")
-    @Size(min = 2, max = 32, message = "The event name must be between 2-32 characters")
+    @Size(min=MAX_NAME_LENGTH,
+            max=MAX_NAME_LENGTH,
+            message="The event name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
     private String name;
 
-    @Size(max = 200, message = "The event description must not exceed 200 characters")
+    @Size(max=MAX_DESC_LENGTH,
+            message="The event description must not exceed "+MAX_DESC_LENGTH+" characters")
     private String description;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'hh:mm")
+    @DateTimeFormat(pattern=DATETIME_ISO_FORMAT)
     private Date startTime;
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'hh:mm")
+    @DateTimeFormat(pattern=DATETIME_ISO_FORMAT)
     private Date endTime;
 
+    
     public String getName() {
         return name;
     }

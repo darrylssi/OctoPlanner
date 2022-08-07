@@ -206,9 +206,8 @@
 <!--/* Clipping off the offset (The +1200 at the end) because HTML forms don't accept them */-->
 <div th:if="${canEdit}" class="collapse" id="addEventForm"
 th:classappend="${#fields.hasErrors('eventForm.*') ? 'show' : null}"
-th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
-         projectStart=${#dates.format(project.getProjectStartDate, DATE_FORMAT)},
-         projectEnd=${#dates.format(project.getProjectEndDate, DATE_FORMAT)}">
+th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFormat)},
+         projectEnd=${#dates.format(project.getProjectEndDate, datetimeISOFormat)}">
 <div class="card">
     <div class="card-header">
         New Event
@@ -218,7 +217,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:field="*{name}" minlength="2" maxlength="32" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="eventNameInput" placeholder="Name" th:required="required" aria-describedby="eventNameFeedback">
+                        <input type="text" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="eventNameInput" placeholder="Name" th:required="required" aria-describedby="eventNameFeedback">
                         <label for="eventNameInput">Name</label>
                         <span class="input-group-text input-group-append remaining-chars-field">...</span>
                     </div>
@@ -226,7 +225,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:field="*{description}" maxlength="200" class="form-control" id="eventDescriptionInput" placeholder="Description">
+                        <input type="text" th:field="*{description}" th:maxlength="${maxNameLen}" class="form-control" id="eventDescriptionInput" placeholder="Description">
                         <label for="eventDescriptionInput">Description</label>
                         <span class="input-group-text input-group-append remaining-chars-field">...</span>
                     </div>
