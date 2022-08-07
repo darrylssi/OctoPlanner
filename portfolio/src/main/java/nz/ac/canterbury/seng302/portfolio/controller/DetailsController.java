@@ -46,19 +46,19 @@ public class DetailsController extends PageController {
      * @param id ID of the project to be shown
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
-     * @throws Exception When project does not exist
      */
     @GetMapping("/project/{id}")
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 Model model
-    ) throws Exception {
+    ) {
         PrincipalData thisUser = PrincipalData.from(principal);
 
         /* Add project details to the model */
         Project project = projectService.getProjectById(id);
         model.addAttribute("project", project);
+        model.addAttribute("parentProjectId", id);
 
         labelUtils.refreshProjectSprintLabels(id);
 

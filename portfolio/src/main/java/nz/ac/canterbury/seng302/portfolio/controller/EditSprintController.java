@@ -91,7 +91,7 @@ public class EditSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         Project parentProject = projectService.getProjectById(projectId);

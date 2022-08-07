@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
+
 import javax.validation.Valid;
 import java.util.*;
 
@@ -58,7 +59,7 @@ public class AddSprintController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Getting project object by using project id */
@@ -127,7 +128,6 @@ public class AddSprintController extends PageController {
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
-     * @throws Exception if project not found or a date cannot be parsed
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
@@ -140,7 +140,7 @@ public class AddSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         // Getting project object by project id

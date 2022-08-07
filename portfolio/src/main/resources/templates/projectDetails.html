@@ -354,18 +354,21 @@
                 New Milestone
             </div>
             <div class="card-body">
-                <form class="container-fluid">
+                <form class="container-fluid" th:action="@{/project/{id}/add-milestone(id = ${parentProjectId})}"
+                      method="post" th:object="${milestone}" modelAttribute="milestone">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="milestoneNameInput" placeholder="Name" th:required="required" aria-describedby="milestoneNameFeedback">
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="milestoneNameInput" placeholder="Name" th:required="required" aria-describedby="milestoneNameFeedback"
+                                       th:name="milestoneName" th:value="${milestoneName}">
                                 <label for="milestoneNameInput">Name</label>
                                 <div id="milestoneNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
                         </div>
                         <div class="col-10">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="milestoneDescriptionInput" placeholder="Description">
+                                <input type="text" class="form-control" id="milestoneDescriptionInput" placeholder="Description"
+                                       th:name="milestoneDescription" th:value="${milestoneDescription}">
                                 <label for="milestoneDescriptionInput">Description</label>
                             </div>
 
@@ -374,7 +377,8 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
+                                       th:name="milestoneDate" th:value="${milestoneDate}">
                                 <label for="milestoneDate">Date</label>
                                 <div id="milestoneDateFeedback" class="invalid-feedback" th:text="${milestoneDateError}"></div>
                                 <script>
@@ -383,7 +387,7 @@
                             </div>
                         </div>
                         <div class="col-1">
-                            <button type="button" class="btn btn-primary btn-lg">Save</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Save</button>
                         </div>
                     </div>
                 </form>

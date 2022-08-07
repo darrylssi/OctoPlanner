@@ -42,13 +42,13 @@ public class MonthlyCalendarController extends PageController {
      * @param id Current project id
      * @param model Used to display the current attributes being passed to the html page
      * @return The monthly calendar page
-     * @throws Exception if the project id is invalid
      */
     @GetMapping("/monthlyCalendar/{id}")
     public String getMonthlyCalendar(
-                                    @AuthenticationPrincipal AuthState principal,
-                                    @PathVariable(name="id") int id,
-                                    Model model) throws Exception {
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="id") int id,
+            Model model
+    ) {
         // Get the current project id
         Project project = projectService.getProjectById(id);
 
