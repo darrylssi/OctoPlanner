@@ -145,7 +145,7 @@ public class ValidationUtils {
 
     /**
      * Checks whether the name contains only valid characters
-     * @param name Sprint name to be tested
+     * @param name Project/Sprint name to be tested
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
