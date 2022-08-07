@@ -5,7 +5,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 
 /**
@@ -14,6 +15,8 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
  */
 @Entity
 public class Event {
+
+    public static final String DEFAULT_COLOUR = "#ff3823";
 
     /** The id of this event. This id should be unique between all events.*/
     @Id
@@ -25,20 +28,21 @@ public class Event {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
+            message="The event name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String eventName;
 
     @Column (nullable = false)
-    @Size(max=200, message="The event description must not exceed 200 characters.")
+    @Size(max=MAX_DESC_LENGTH, message="The event description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String eventDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern=DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern=DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
@@ -58,6 +62,7 @@ public class Event {
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
     }
+
 
     /**
      * Returns a string listing the attributes of the event in the form "Event[x, x, x]".
@@ -180,8 +185,7 @@ public class Event {
             comparisonDate = eventEndDate;
         }
 
-        for(int i = 0; i < sprints.size(); i++) {
-            Sprint checkedSprint = sprints.get(i);
+        for (Sprint checkedSprint : sprints) {
             Date sprintStart = checkedSprint.getSprintStartDate();
             Date sprintEnd = checkedSprint.getSprintEndDate();
 
@@ -192,6 +196,6 @@ public class Event {
             }
         }
 
-        return "#ff3823";             // Default colour
+        return DEFAULT_COLOUR;
     }
 }

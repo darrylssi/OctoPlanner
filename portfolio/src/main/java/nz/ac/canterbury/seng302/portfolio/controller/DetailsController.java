@@ -40,6 +40,14 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    /**
+     * Get request to view project details page.
+     * @param principal Authenticated user
+     * @param id ID of the project to be shown
+     * @param model Parameters sent to thymeleaf template
+     * @return Project details page
+     * @throws Exception When project does not exist
+     */
     @GetMapping("/project/{id}")
     public String details(
                 @AuthenticationPrincipal AuthState principal,

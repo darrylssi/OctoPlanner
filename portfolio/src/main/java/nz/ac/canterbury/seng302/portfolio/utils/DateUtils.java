@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
+
 /**
  * Used by Project and Sprint to convert dates to yyyy-MM-dd format and vice versa
  * that is required by the date type input field.
@@ -68,8 +71,8 @@ public class DateUtils {
 
     /**
      * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date Date object to be converted to String
-     * @return String object
+     * @param date String to be converted to Date
+     * @return Date object
      */
     public static String toString(Date date) {
         return backendDateFormat.format(date);
