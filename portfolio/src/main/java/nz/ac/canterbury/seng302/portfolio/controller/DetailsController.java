@@ -1,10 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,8 @@ public class DetailsController extends PageController {
     private SprintService sprintService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private DeadlineService deadlineService;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -71,6 +71,11 @@ public class DetailsController extends PageController {
         List<Event> eventList = eventService.getEventByParentProjectId(id);
         eventList.sort(Comparator.comparing(Event::getEventStartDate));
         model.addAttribute("events", eventList);
+
+        // Gets the deadline list and sort it based on the deadline date
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(id);
+        deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
+        model.addAttribute("deadlines", deadlineList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);

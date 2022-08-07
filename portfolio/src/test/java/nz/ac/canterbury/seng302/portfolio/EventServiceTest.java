@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+/**
+ * Holds unit tests for the EventService class.
+ */
 @SpringBootTest
 public class EventServiceTest {
     @Autowired
