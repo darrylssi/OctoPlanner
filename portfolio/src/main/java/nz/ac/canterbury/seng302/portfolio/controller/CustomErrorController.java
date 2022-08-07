@@ -18,7 +18,7 @@ public class CustomErrorController implements ErrorController {
         ModelAndView modelAndView = new ModelAndView();
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         if (status != null) {
-            Integer statusCode = Integer.valueOf(status.toString());
+            int statusCode = Integer.parseInt(status.toString());
             // Remove the code number from the string
             String error = HttpStatus.valueOf(statusCode).toString().split(" ")[1];
             //Swap the underscores for spaces and make title case

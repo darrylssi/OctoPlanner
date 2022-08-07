@@ -1,48 +1,47 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.ClaimDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
 import javax.validation.constraints.*;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 
 /**
- *
+ * Represents a user object.
  */
 public class User {
 
-    @Size(min = 2, max = 15, message = "Username must be between 2 to 15 characters")
+    @Size(min = MIN_NAME_LENGTH, max = MAX_USERNAME_LENGTH,
+            message = "Username must be between " + MIN_NAME_LENGTH + " to " + MAX_USERNAME_LENGTH + " characters.")
     private String username;
 
-    @Size(min = 2, max = 20, message = "First name must be between 2 to 20 characters")
+    @Size(min = MIN_NAME_LENGTH, max = MAX_DESC_LENGTH,
+            message = "First name must be between " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.")
     private String firstName;
 
-    @Size(max = 20, message = "Middle name must have less than 20 characters")
+    @Size(max = MAX_NAME_LENGTH, message = "Middle name must have less than " + MAX_NAME_LENGTH + " characters.")
     private String middleName;
 
-    @Size(min = 2, max = 20, message = "Last name must be between 2 to 20 characters")
+    @Size(min = MIN_NAME_LENGTH, max = MAX_NAME_LENGTH,
+            message = "Last name must be between " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.")
     private String lastName;
 
-    @Size(max = 20, message = "Nickname must have less than 20 characters")
+    @Size(max = MAX_NAME_LENGTH, message = "Nickname must have less than " + MAX_NAME_LENGTH + " characters.")
     private String nickname;
 
-    @Size(max = 20, message = "Personal pronouns must have less than 20 characters")
+    @Size(max = MAX_NAME_LENGTH, message = "Personal pronouns must have less than " + MAX_NAME_LENGTH + " characters.")
     private String personalPronouns;
 
-    @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
+    @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH,
+            message = "Password must be between " + MIN_PASSWORD_LENGTH + " to " + MAX_PASSWORD_LENGTH + " characters.")
     private String password;
 
-    @Size(min = 7, max = 20, message = "Password must be between 7 to 20 characters")
+    @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH,
+            message = "Password must be between " + MIN_PASSWORD_LENGTH + " to " + MAX_PASSWORD_LENGTH + " characters")
     private String confirmPassword;
-
-    private boolean passwordsEqual;
 
     @Email(message = "Email should be valid")
     private String email;
 
-    @Size(max = 200, message = "Bio must have less than 200 characters")
+    @Size(max = MAX_DESC_LENGTH, message = "Bio must have less than 200 characters")
     private String bio;
 
     public User() {}
@@ -143,7 +142,7 @@ public class User {
 
     @AssertTrue(message = "Passwords do not match")
     public boolean isPasswordsEqual() {
-        return (password == null) ? false : password.equals(confirmPassword);
+        return password != null && password.equals(confirmPassword);
     }
 
 
