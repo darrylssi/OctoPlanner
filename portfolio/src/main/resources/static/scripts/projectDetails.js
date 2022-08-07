@@ -47,29 +47,47 @@ function deleteEvent(eventId) {
     deleteRequest.send();
 }
 
-/** Inserts the event edit form directly below the event being edited */
+/**
+ * Inserts/expands the event edit form directly below the event being edited.
+ * This function adds forms into the page only as they are needed.
+ */
 function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
-    // Quick check that the form isn't already on the page. If it is, remove it
-    const eventForm = document.getElementById("editEventForm");
-    if (eventForm) {
-        const eventBox = eventForm.parentNode;
-        eventBox.removeChild(eventForm);
-        // If this is true, the user clicked the edit button on the event that was showing the form.
-        if (eventBox.id == 'event-box-' + eventBoxId) {
-            return;
-        }
+    /* Search for the edit form */
+    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+
+    /* Collapse element and take no further action if the selected form is open */
+    if (editForm != null && editForm.classList.contains("show")) {
+        new bootstrap.Collapse(editForm).hide();
+        return;
     }
 
-    // Insert elements into form
-    let editForm = document.createElement("div");
-    editForm.setAttribute("id", "editEventForm");
-    editForm.innerHTML = editFormTemplate;
-    document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
-    document.getElementById("edit-event-form-header").innerHTML = "Editing " + eventName;
-    document.getElementById("editEventNameInput").setAttribute("value", eventName);
-    document.getElementById("editEventDescriptionInput").setAttribute("value", eventDescription);
-    document.getElementById("editEventStartDate").setAttribute("value", eventStartDate.substring(0, 10));
-    document.getElementById("editEventStartTime").setAttribute("value", eventStartDate.substring(11, 16));
-    document.getElementById("editEventEndDate").setAttribute("value", eventEndDate.substring(0, 10));
-    document.getElementById("editEventEndTime").setAttribute("value", eventEndDate.substring(11, 16));
+    /* Collapse any collapsible elements already on the page */
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    for (let element of collapseElementList) {
+        new bootstrap.Collapse(element).hide();
+    }
+
+    /* Create element if not seen before */
+    if (editForm == null) {
+        editForm = document.createElement("div");
+        editForm.setAttribute("id", "editEventForm-" + eventBoxId);
+        editForm.setAttribute("class", "editEventForm collapse");
+        editForm.innerHTML = editFormTemplate;
+        document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
+
+        /* Set internal attributes of form.  */
+        editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
+        editForm.querySelector("#editEventNameInput").setAttribute("value", eventName);
+        editForm.querySelector("#editEventDescriptionInput").setAttribute("value", eventDescription);
+        editForm.querySelector("#editEventStartDate").setAttribute("value", eventStartDate.substring(0, 10));
+        editForm.querySelector("#editEventStartTime").setAttribute("value", eventStartDate.substring(11, 16));
+        editForm.querySelector("#editEventEndDate").setAttribute("value", eventEndDate.substring(0, 10));
+        editForm.querySelector("#editEventEndTime").setAttribute("value", eventEndDate.substring(11, 16));
+    }
+
+    /* Get this form to show after a delay that allows any other forms open to collapse */
+    setTimeout((formId) => {
+        let shownForm = document.getElementById(formId)
+        new bootstrap.Collapse(shownForm).show();
+    }, 300, "editEventForm-" + eventBoxId);
 }
