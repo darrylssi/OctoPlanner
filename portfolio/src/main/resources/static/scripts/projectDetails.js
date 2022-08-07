@@ -57,7 +57,7 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
 
     /* Collapse element and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        new bootstrap.Collapse(editForm).hide();
+        hideEditEvent(eventBoxId);
         return;
     }
 
@@ -75,7 +75,7 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.innerHTML = editFormTemplate;
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
 
-        /* Set internal attributes of form.  */
+        /* Set internal attributes of form and link cancel button */
         editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
         editForm.querySelector("#editEventNameInput").setAttribute("value", eventName);
         editForm.querySelector("#editEventDescriptionInput").setAttribute("value", eventDescription);
@@ -83,6 +83,7 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.querySelector("#editEventStartTime").setAttribute("value", eventStartDate.substring(11, 16));
         editForm.querySelector("#editEventEndDate").setAttribute("value", eventEndDate.substring(0, 10));
         editForm.querySelector("#editEventEndTime").setAttribute("value", eventEndDate.substring(11, 16));
+        editForm.querySelector("#cancel").onclick = function () {hideEditEvent(eventBoxId);};
     }
 
     /* Get this form to show after a delay that allows any other forms open to collapse */
@@ -90,4 +91,12 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         let shownForm = document.getElementById(formId)
         new bootstrap.Collapse(shownForm).show();
     }, 300, "editEventForm-" + eventBoxId);
+}
+
+/** Exposes an easier access point for the cancel button */
+function hideEditEvent(eventBoxId) {
+    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    if (editForm) { // Just in case
+        new bootstrap.Collapse(editForm).hide();
+    }
 }
