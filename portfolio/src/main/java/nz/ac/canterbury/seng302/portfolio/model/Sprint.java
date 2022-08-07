@@ -7,6 +7,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
+
 /**
  * Represents a sprint object. Sprints must have a parent project object that they are a part of.
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
@@ -21,7 +24,8 @@ public class Sprint {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The sprint name must be between 2 and 32 characters.")
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
+            message="The sprint name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     @NotBlank(message="Sprint name is required.")
     private String sprintName;
 
@@ -29,20 +33,20 @@ public class Sprint {
     private String sprintLabel;
 
     @Column (nullable = false)
-    @Size(max=200, message="The sprint description must not exceed 200 characters.")
+    @Size(max=MAX_DESC_LENGTH, message="The sprint description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String sprintDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern=DATE_FORMAT)
     private Date sprintStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern=DATE_FORMAT)
     private Date sprintEndDate;
 
     @Column (nullable = false)
-    @Size(min=7, max=7)
+    @Size(min=COLOUR_LENGTH, max=COLOUR_LENGTH)
     private String sprintColour;
 
     public Sprint() {}

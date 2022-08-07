@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
@@ -32,8 +31,6 @@ public class EventController extends PageController {
 
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private SprintService sprintService;
 
     @GetMapping("/project/{project_id}/add-event")
     public String getAddEvent(
