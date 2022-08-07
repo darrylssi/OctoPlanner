@@ -1,6 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio.controller.forms;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.validation.constraints.*;
 
@@ -25,15 +31,45 @@ public class EventForm {
     @Size(max=MAX_DESC_LENGTH,
             message="The event description must not exceed "+MAX_DESC_LENGTH+" characters")
     private String description;
+    
+    // Due to Firefox's lack of <input type="datetime"> support,
+    // we store this as two separate fields: Date and Time
+    @NotNull
+    @DateTimeFormat(pattern=DATE_FORMAT)
+    private LocalDate startDate;
+
+    @NotNull
+    @DateTimeFormat(pattern="HH:mm")
+    private LocalTime startTime;
 
     @NotNull
     @DateTimeFormat(pattern=DATETIME_ISO_FORMAT)
-    private Date startTime;
+    private LocalDate endDate;
 
     @NotNull
-    @DateTimeFormat(pattern=DATETIME_ISO_FORMAT)
-    private Date endTime;
+    @DateTimeFormat(pattern="HH:mm")
+    private LocalTime endTime;
 
+    // https://stackoverflow.com/a/23885950
+    /**
+     * Creates a Date object from the startDate & startTime fields
+     * @param userTimeZone The timezone ID of where the user is
+     * @return A Date object of when the event starts
+     */
+    public Date endDatetimeToDate(ZoneId userTimeZone) {
+        LocalDateTime datetime = LocalDateTime.of(startDate, startTime);
+        return Date.from(datetime.atZone(userTimeZone).toInstant());
+    }
+
+    /**
+     * Creates a Date object from the endDate & endTime fields
+     * @param userTimeZone The timezone ID of where the user is
+     * @return A Date object of when the event ends
+     */
+    public Date startDatetimeToDate(ZoneId userTimeZone) {
+        LocalDateTime datetime = LocalDateTime.of(endDate, endTime);
+        return Date.from(datetime.atZone(userTimeZone).toInstant());
+    }
     
     public String getName() {
         return name;
@@ -47,24 +83,42 @@ public class EventForm {
         return description;
     }
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Date getStartTime() {
-        return startTime;
-    }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
 
 }

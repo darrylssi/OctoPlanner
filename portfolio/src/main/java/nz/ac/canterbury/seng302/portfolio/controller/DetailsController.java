@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -156,6 +157,7 @@ public class DetailsController extends PageController {
         @PathVariable("project_id") int projectID,
         @Valid EventForm eventForm,
         BindingResult bindingResult,
+        ZoneOffset userTimezone,
         Model model
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
@@ -165,8 +167,8 @@ public class DetailsController extends PageController {
             populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
-
-        Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.getStartTime(), eventForm.getEndTime());
+        
+        Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
         eventService.saveEvent(event);
         return "redirect:.";
     }
@@ -179,11 +181,13 @@ public class DetailsController extends PageController {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
         // If field isn't filled (because we just loaded the page), use this default value
-        if (eventForm.getStartTime() == null)
+        if (eventForm.getStartTime() == null) {
             eventForm.setStartTime(Date.from(rightNow));
+        }
         // Default the value to 1 minute in the future
-        if (eventForm.getEndTime() == null)
+        if (eventForm.getEndTime() == null) {
             eventForm.setEndTime(Date.from(inOneMinute));
+        }
     }
 
     /**
