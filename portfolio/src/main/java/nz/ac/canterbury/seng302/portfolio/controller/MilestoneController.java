@@ -38,7 +38,7 @@ public class MilestoneController extends PageController {
      * @return Project details page
      */
     @PostMapping("/project/{project_id}/add-milestone")
-    public String postAddEvent(
+    public String postAddMilestone(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @RequestParam(name="milestoneName") String milestoneName,
@@ -53,7 +53,7 @@ public class MilestoneController extends PageController {
         Milestone milestone = new Milestone();
 
         // Set details of new milestone object
-        milestone.setParentProjectId(parentProject.getId());
+        milestone.setParentProject(parentProject);
         milestone.setMilestoneName(milestoneName);
         milestone.setMilestoneDate(DateUtils.toDate(milestoneDate));
         milestone.setMilestoneDescription(milestoneDescription);

@@ -18,8 +18,9 @@ public class Milestone {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column
-    private int parentProjectId;
+    @ManyToOne
+    @JoinColumn(name="project_id", nullable = false)
+    private Project parentProject;
 
     @Column(nullable = false)
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
@@ -39,13 +40,11 @@ public class Milestone {
 
     /**
      * A constructor which set the given user data to the specified variables
-     * @param parentProjectId Gets the project id
      * @param milestoneName Gets the milestone name given by user
      * @param milestoneDescription Gets the milestone description given by the user
      * @param milestoneDate Gets the milestone date as a Date object
      */
-    public Milestone(int parentProjectId, String milestoneName,  String milestoneDescription, Date milestoneDate) {
-        this.parentProjectId = parentProjectId;
+    public Milestone(String milestoneName,  String milestoneDescription, Date milestoneDate) {
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
         this.milestoneDate = milestoneDate;
@@ -57,14 +56,6 @@ public class Milestone {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getParentProjectId() {
-        return parentProjectId;
-    }
-
-    public void setParentProjectId(int parentProjectId) {
-        this.parentProjectId = parentProjectId;
     }
 
     public String getMilestoneName() {
@@ -89,5 +80,13 @@ public class Milestone {
 
     public void setMilestoneDate(Date milestoneDate) {
         this.milestoneDate = milestoneDate;
+    }
+
+    public Project getParentProject() {
+        return parentProject;
+    }
+
+    public void setParentProject(Project parentProject) {
+        this.parentProject = parentProject;
     }
 }

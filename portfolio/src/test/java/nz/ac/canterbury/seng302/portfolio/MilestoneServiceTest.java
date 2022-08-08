@@ -18,6 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+
+/**
+ * Holds unit tests for the MilestoneService class.
+ */
 @SpringBootTest
 class MilestoneServiceTest {
 
@@ -29,9 +33,10 @@ class MilestoneServiceTest {
 
     private Milestone milestone;
 
+    // Set up a test milestone object to be used on all tests.
     @BeforeEach
     void setup() {
-        milestone = new Milestone(0, "milestone", "description", new Date());
+        milestone = new Milestone("milestone", "description", new Date());
     }
 
     @Test
@@ -45,9 +50,7 @@ class MilestoneServiceTest {
     void getMilestoneInvalidId_thenThrowException() {
         when(milestoneRepository.findMilestoneById(1))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Milestone not found."));
-        Exception exception = assertThrows(ResponseStatusException.class, () -> {
-            milestoneService.getMilestoneById(1);
-        });
+        Exception exception = assertThrows(ResponseStatusException.class, () -> milestoneService.getMilestoneById(1));
         assertTrue(exception.getMessage().contains("Milestone not found"));
     }
 
