@@ -1,5 +1,3 @@
-import "./croppie.js";
-
 // for image compression
 const MAX_WIDTH = 3000;
 const MAX_HEIGHT = 3000;
