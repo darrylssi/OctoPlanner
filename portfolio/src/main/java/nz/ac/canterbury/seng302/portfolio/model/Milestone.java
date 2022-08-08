@@ -16,10 +16,11 @@ public class Milestone {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="milestone_id")
     private int id;
 
     @ManyToOne
-    @JoinColumn(name="project_id", nullable = false)
+    @JoinColumn(name="id", nullable = false)
     private Project parentProject;
 
     @Column(nullable = false)
