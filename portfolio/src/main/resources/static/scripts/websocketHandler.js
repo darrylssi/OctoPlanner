@@ -33,7 +33,7 @@ function connect() {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
         stompClient.subscribe(BASE_URL + 'topic/editing-event', function(message) {
-            showEditMessage(JSON.parse(message.body));
+            handleEventMessage(JSON.parse(message.body));
         });
     });
 }
@@ -69,6 +69,12 @@ function sendEditingEventMessage(eventId) {
     JSON.stringify({'from':user, 'content':content}));
 }
 
+function sendStopEditingMessage(eventId) {
+    let user = document.getElementById('user').getAttribute('data-name');
+    stompClient.send(BASE_URL + "app/ws/editing-event", {},
+    JSON.stringify({'from':user, 'content':eventId}));
+}
+
 /**
  * Updates an HTML element to display a received WebSocket message
  * @param messageOutput JSON object received from the WebSocket
@@ -82,30 +88,44 @@ function showMessageOutput(messageOutput) {
     response.appendChild(p);
 }
 
+// holds event ids and setTimeout functions in a key/value pair mapping
+const eventTimeouts = new Map();
+
+/**
+ * Decides whether the event message means to show editing or hide editing.
+ * @param editMessage JSON object received from the WebSocket
+ */
+function handleEventMessage(editMessage) {
+    if (editMessage.content.split(',').length == 2) {
+        showEditingMessage(editMessage);
+    } else {
+        hideEditMessage(editMessage.content);
+    }
+}
+
 /**
  * Shows editing-event notifications on the page
  * @param editMessage JSON object received from the WebSocket
  */
-function showEditMessage(editMessage) {
+function showEditingMessage(editMessage) { // TODO make a better message template or something
     const eventId = editMessage.content.split(',')[0]; // couldn't seem to substitute these directly into the template string
     const username = editMessage.from;
-    const userId = editMessage.content.split(',')[1]; // TODO make a better message template or something
-    const docUserId = document.getElementById("userId").getAttribute('data-name');
-
-    console.log(eventId);
-    console.log(username);
-    console.log(userId);
-    console.log(docUserId);
+    const userId = editMessage.content.split(',')[1]; // the id of the user editing the event
+    const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
 
     if (userId != docUserId) {
-        const response = document.getElementById('response');
-        const p = document.createElement('p');
-        p.style.wordWrap = 'break-word';
-        p.appendChild(document.createTextNode(editMessage.from +
-            " is editing event \"" + editMessage.content + "\""));
-        response.appendChild(p);
+    // TODO kept for testing purposes
+//        const response = document.getElementById('response');
+//        const p = document.createElement('p');
+//        p.style.wordWrap = 'break-word';
+//        p.appendChild(document.createTextNode(editMessage.from +
+//            " is editing event \"" + editMessage.content + "\""));
+//        response.appendChild(p);
 
         /* Shows a message that the given user is editing the event with the given id, and shows the spinner*/
+        // stops any existing timeouts so that the message is shown for the full length
+        stopEventTimeout(eventId);
+
         // locate the correct editing box
         const editingEventBoxId = `event-${eventId}-editing-box`;
         const editingEventTextBoxId = `event-${eventId}-editing-text`;
@@ -116,5 +136,36 @@ function showEditMessage(editMessage) {
         // update the text and make it visible
         editingEventTextBox.innerHTML = `${username} is editing this event`;
         editingEventBox.style.visibility = "visible";
+
+        // TODO hide it after 8s
+         eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(eventId)}, 8000))
+         console.log(eventTimeouts);
     }
 }
+
+/* Hides the editing message for the specified event and clears the timer running for it */
+function hideEditMessage(eventId) {
+    const editingEventBoxId = `event-${eventId}-editing-box`;
+    const editingEventBox = document.getElementById(editingEventBoxId);
+    editingEventBox.style.visibility = "hidden";
+    stopEventTimeout(eventId);
+}
+
+/* Stops the timeout for the specified event, if it exists */
+function stopEventTimeout(eventId) {
+    if (eventTimeouts.has(eventId)) {
+        clearTimeout(eventTimeouts.get(eventId));
+    }
+}
+
+// TODO ideas pad
+// will need to regularly send editing messages when a user has the edit form open, and stop doing that when they close it
+// also only need one regularly sent edit message, as only one event can be edited at a time
+
+// will also need to send a STOP message when the edit thing is closed, or when one is opened
+// stop message will need to include just the event id, and can then hide the editing thingy for that event
+
+// need to store key (eventid) value (timeout) pairs in a map, with one for each event that is being edited
+// no need to delete things from here, I think?
+// when receive an editing message: reset the timeout
+// when receive a stop message: stop the timeout and directly hide the event
