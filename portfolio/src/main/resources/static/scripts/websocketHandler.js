@@ -128,12 +128,8 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
     newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
 
-    let canEdit = document.getElementById('canEdit').getAttribute('data-Edit');
-    console.log("can edit:  " + canEdit);
     if (canEdit == false) {
-//        newEvent.getElementsByClassName('event-right').style.visibility = "hidden";
-//        newEvent.querySelector('.event-right').style.visibility = 'hidden';
-//        newEvent.querySelector('.event-right').display = "none";
+        newEvent.querySelector('.event-right').style.visibility = 'hidden';
     }
 
 }

@@ -22,6 +22,7 @@
     */-->
     <script th:inline="javascript">
             var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ]]*/ "/";
+            var canEdit = /*[[ ${canEdit} ]]*/;
     </script>
     <script th:src="|../scripts/projectDetails.js|"></script>
 
