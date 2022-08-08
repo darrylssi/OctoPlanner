@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
- *
+ * Controller to register new users.
  */
 @Controller
 public class RegisterController {

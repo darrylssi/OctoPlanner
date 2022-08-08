@@ -32,6 +32,7 @@
         <label for="projectName" class="required">Project Name</label> <br/>
         <input id="projectName" type="text" th:field="*{projectName}">
         <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
+        <span th:text="${invalidName}" th:class="error"></span>
         <br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
