@@ -1,4 +1,6 @@
 let stompClient = null;
+const EVENT_EDIT_MESSAGE_TIMEOUT = 8000; // timeout period for event editing messages in ms
+//const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
 
 /**
  * Sets html elements according to whether a WebSocket has been connected to or not
@@ -69,10 +71,17 @@ function sendEditingEventMessage(eventId) {
     JSON.stringify({'from':user, 'content':content}));
 }
 
+/**
+ * Sends a websocket message saying that a user has stopped editing an event
+ * Won't send anything if eventId is undefined
+ */
 function sendStopEditingMessage(eventId) {
-    let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send(BASE_URL + "app/ws/editing-event", {},
-    JSON.stringify({'from':user, 'content':eventId}));
+    if (previousEvent != undefined) {
+        console.log('sending stop message');
+        let user = document.getElementById('user').getAttribute('data-name');
+        stompClient.send(BASE_URL + "app/ws/editing-event", {},
+        JSON.stringify({'from':user, 'content':eventId}));
+    }
 }
 
 /**
@@ -97,8 +106,10 @@ const eventTimeouts = new Map();
  */
 function handleEventMessage(editMessage) {
     if (editMessage.content.split(',').length == 2) {
+        console.log('got show message ' + editMessage.content);
         showEditingMessage(editMessage);
     } else {
+        console.log('got stop message ' + editMessage.content);
         hideEditMessage(editMessage.content);
     }
 }
@@ -123,6 +134,7 @@ function showEditingMessage(editMessage) { // TODO make a better message templat
 //        response.appendChild(p);
 
         /* Shows a message that the given user is editing the event with the given id, and shows the spinner*/
+
         // stops any existing timeouts so that the message is shown for the full length
         stopEventTimeout(eventId);
 
@@ -137,9 +149,8 @@ function showEditingMessage(editMessage) { // TODO make a better message templat
         editingEventTextBox.innerHTML = `${username} is editing this event`;
         editingEventBox.style.visibility = "visible";
 
-        // TODO hide it after 8s
+        // Hide it after 8s
          eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(eventId)}, 8000))
-         console.log(eventTimeouts);
     }
 }
 

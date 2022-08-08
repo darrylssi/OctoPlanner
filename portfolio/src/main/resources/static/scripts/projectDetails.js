@@ -47,9 +47,18 @@ function deleteEvent(eventId) {
     deleteRequest.send();
 }
 
+// the previous event being edited by THIS user (only one can be edited at a time)
+// had to be a var because using let gave a redefinition error
+var previousEvent;
+
 /** Inserts the event edit form directly below the event being edited */
 function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eventEndDate) {
+    // send a stop message for the previous event, if there was one, and set this to be the previous event
+    sendStopEditingMessage(previousEvent);
+    console.log(previousEvent);
+
     hideEditEvent();
+    previousEvent = eventId;
     const eventBox = document.getElementById("event-" + eventId);
     let editForm = document.createElement("div");
     editForm.setAttribute("id", "editEventForm");
@@ -70,6 +79,7 @@ function hideEditEvent() {
     if (eventForm) {
         eventForm.parentNode.removeChild(eventForm);
     }
+    sendStopEditingMessage(previousEvent);
 }
 
 // function toggleSendingEditMessages(eventName) {
