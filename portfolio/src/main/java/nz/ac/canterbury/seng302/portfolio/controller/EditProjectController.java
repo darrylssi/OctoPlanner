@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -37,10 +36,9 @@ public class EditProjectController extends PageController {
 
     @Autowired
     private ProjectService projectService;
+
     @Autowired
     private SprintService sprintService;
-    @Autowired
-    private UserAccountClientService userAccountClientService;
 
     /**
      * Show the edit-project page.
@@ -101,13 +99,16 @@ public class EditProjectController extends PageController {
         ValidationError dateOutOfRange = ValidationUtils.validateProjectDates(projectStartDate, projectEndDate,
                 newProject.getProjectCreationDate(), sprintList);
 
+        ValidationError invalidName = ValidationUtils.validateName(projectName);
+
         /* Return editProject template with user input */
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("project", project);
             model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", projectDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
+            model.addAttribute("invalidName", invalidName.getFirstError());
             return "editProject";
         }
 

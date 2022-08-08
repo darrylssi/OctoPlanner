@@ -44,7 +44,7 @@ public class EventServiceTest {
     }
 
     @Test
-    void getSprintValidId_thenReturnSprint() throws Exception {
+    void getEventValidId_thenReturnEvent() throws Exception {
         when(eventRepository.findEventById(ID))
                 .thenReturn(event);
 
@@ -52,7 +52,7 @@ public class EventServiceTest {
     }
 
     @Test
-    void getSprintInvalidId_thenThrowException() {
+    void getEventInvalidId_thenThrowException() {
         // TODO: We've really gotta stop throwing base Exceptions. Maybe try optionals or something
         when(eventRepository.findEventById(ID+1)).thenReturn(null);
         Exception e = assertThrows(Exception.class, () -> {
@@ -63,7 +63,7 @@ public class EventServiceTest {
     }
 
     @Test
-    void saveSprint() {
+    void saveEvent() {
         when(eventRepository.save(event)).thenReturn(event);
         eventService.saveEvent(event);
         verify(eventRepository, times(1)).save(event);

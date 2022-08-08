@@ -187,7 +187,7 @@ public class ValidationUtils {
 
     /**
      * Checks whether the name contains only valid characters
-     * @param name The sprint name to be tested
+     * @param name Project/Sprint name to be tested
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
@@ -199,7 +199,7 @@ public class ValidationUtils {
         }
 
         /* string can only have alphanumeric and _ , . - ( ) symbols */
-        String regex = "^([a-zA-Z0-9\\s\\-._]){2,}$";
+        String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {

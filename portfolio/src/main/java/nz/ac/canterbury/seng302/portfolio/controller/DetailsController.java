@@ -3,9 +3,12 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.validation.Valid;
 
@@ -31,6 +34,7 @@ import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -54,15 +58,24 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    @GetMapping("/project/{id}/")
+    /**
+     * Get request to view project details page.
+     * @param principal Authenticated user
+     * @param id ID of the project to be shown
+     * @param model Parameters sent to thymeleaf template
+     * @return Project details page
+     * @throws Exception When project does not exist
+     */
+    @GetMapping("/project/{id}")
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 EventForm eventForm,
+                TimeZone userTimezone,
                 Model model
     ) throws Exception {
         PrincipalData thisUser = PrincipalData.from(principal);
-        prePopulateEventForm(eventForm);
+        prePopulateEventForm(eventForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
 
         /* Return the name of the Thymeleaf template */
@@ -78,6 +91,12 @@ public class DetailsController extends PageController {
      * @throws Exception    Gotta stop doing this, honestly
      */
     private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) throws Exception {
+        // Give the template validation info, so the browser can let the user know.
+        // Have to enter these one-by-one because Thymeleaf struggles to access utility classes
+        model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
+        model.addAttribute("maxNameLen", GlobalVars.MAX_NAME_LENGTH);
+        model.addAttribute("maxDescLen", GlobalVars.MAX_DESC_LENGTH);
+        model.addAttribute("datetimeISOFormat", GlobalVars.DATETIME_ISO_FORMAT);
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
@@ -142,6 +161,7 @@ public class DetailsController extends PageController {
         @PathVariable("project_id") int projectID,
         @Valid EventForm eventForm,
         BindingResult bindingResult,
+        TimeZone userTimezone,
         Model model
     ) throws Exception {
         PrincipalData thisUser = PrincipalData.from(principal);
@@ -154,15 +174,14 @@ public class DetailsController extends PageController {
         }
         // Check that the dates are correct
         Project parentProject = projectService.getProjectById(projectID);
-        generalErrors = ValidationUtils.validateEventDates(eventForm.getStartTime(), eventForm.getEndTime(), parentProject);
+        generalErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
         if (generalErrors.isError()) {
             model.addAttribute("event-form-error", generalErrors.getErrorMessages());
             populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
-
         // Data is valid, add it to database
-        Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.getStartTime(), eventForm.getEndTime());
+        Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
         eventService.saveEvent(event);
         return "redirect:.";
     }
@@ -171,15 +190,19 @@ public class DetailsController extends PageController {
      * Pre-populates the event form with default values, if they don't already exist
      * @param eventForm The eventForm object from your endpoint args
      */
-    private void prePopulateEventForm(EventForm eventForm) {
+    private void prePopulateEventForm(EventForm eventForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
         // If field isn't filled (because we just loaded the page), use this default value
-        if (eventForm.getStartTime() == null)
-            eventForm.setStartTime(Date.from(rightNow));
+        if (eventForm.getStartTime() == null) {
+            eventForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
+            eventForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
+        }
         // Default the value to 1 minute in the future
-        if (eventForm.getEndTime() == null)
-            eventForm.setEndTime(Date.from(inOneMinute));
+        if (eventForm.getEndTime() == null) {
+            eventForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
+            eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
+        }
     }
 
     /**

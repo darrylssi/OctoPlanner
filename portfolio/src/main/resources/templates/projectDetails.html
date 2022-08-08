@@ -181,13 +181,21 @@
                 Add Sprint
             </a>
         </div>
+        <div class="col-2-2">
+                    <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-calendar-event" viewBox="0 0 16 16">
+                            <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                        </svg>
+                        Add Event
+                    </button>
+        </div>
         <div class="col-2">
-            <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-calendar-event" viewBox="0 0 16 16">
-                    <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+            <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
+                    <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
                 </svg>
-                Add Event
+                Add Deadline
             </button>
         </div>
     </div>
@@ -196,12 +204,11 @@
     Add Event Form
     */-->
 <!--/* Clipping off the offset (The +1200 at the end) because HTML forms don't accept them */-->
-<div th:if="${canEdit}" class="collapse" id="addEventForm"
+<div th:if="${canEdit}"
 th:classappend="${#fields.hasErrors('eventForm.*') ? 'show' : null}"
-th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
-         projectStart=${#dates.format(project.getProjectStartDate, DATE_FORMAT)},
-         projectEnd=${#dates.format(project.getProjectEndDate, DATE_FORMAT)}">
-<div class="card">
+th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFormat)},
+         projectEnd=${#dates.format(project.getProjectEndDate, datetimeISOFormat)}">
+<div class="card collapse" id="addEventForm">
     <div class="card-header">
         New Event
     </div>
@@ -210,7 +217,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:field="*{name}" minlength="2" maxlength="32" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="eventNameInput" placeholder="Name" th:required="required" aria-describedby="eventNameFeedback">
+                        <input type="text" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="eventNameInput" placeholder="Name" th:required="required" aria-describedby="eventNameFeedback">
                         <label for="eventNameInput">Name</label>
                         <span class="input-group-text input-group-append remaining-chars-field">...</span>
                     </div>
@@ -218,7 +225,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:field="*{description}" maxlength="200" class="form-control" id="eventDescriptionInput" placeholder="Description">
+                        <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" id="eventDescriptionInput" placeholder="Description">
                         <label for="eventDescriptionInput">Description</label>
                         <span class="input-group-text input-group-append remaining-chars-field">...</span>
                     </div>
@@ -229,19 +236,27 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
             <div class="row">
                 <div class="col">
                     <div class="form-floating mb-3">
-                        <input type="datetime-local" th:field="*{startTime}" class="form-control" id="eventStartTime" th:required="required" aria-describedby="eventStartFeedback" th:min="${projectStart}" th:max="${projectEnd}">
+                        <input type="date" th:field="*{startDate}" class="form-control" id="eventStartDate" aria-describedby="eventStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                        <label for="eventStartDate">Start Date</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating mb-3">
+                        <input type="time" th:field="*{startTime}" class="form-control" id="eventStartTime" aria-describedby="eventStartTimeFeedback" required>
                         <label for="eventStartTime">Start Time</label>
                     </div>
-                    <small th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="text-danger" />
-
                 </div>
                 <div class="col">
                     <div class="form-floating mb-3 has-validation">
-                        <input type="datetime-local" th:field="*{endTime}" class="form-control" id="eventEndTime" required aria-describedby="eventEndFeedback" th:min="${projectStart}" th:max="${projectEnd}">
+                        <input type="date" th:field="*{endDate}" class="form-control" id="eventEndDate" aria-describedby="eventEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                        <label for="eventEndDate">End Date</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating mb-3 has-validation">
+                        <input type="time" th:field="*{endTime}" class="form-control" id="eventEndTime" aria-describedby="eventEndDateFeedback" required>
                         <label for="eventEndTime">End Time</label>
                     </div>
-                    <small th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="text-danger" />
-
                 </div>
                 <div class="col-1">
                     <button type="submit" class="btn btn-primary btn-lg">Save</button>
@@ -249,6 +264,59 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
             </div>
         </form>
     </div>
+</div>
+    <!-- Add Deadline Form -->
+    <div class="collapse" id="addDeadlineForm">
+        <div class="card">
+            <div class="card-header">
+                New Deadline
+            </div>
+            <div class="card-body">
+                <form class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="deadlineNameInput" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback">
+                                <label for="deadlineNameInput">Name</label>
+                                <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="deadlineDescriptionInput" placeholder="Description">
+                                <label for="deadlineDescriptionInput">Description</label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' " id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="deadlineDate">Date</label>
+                                <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
+                                <script>
+                                    document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
+                            </div>
+                        </div>
+                        <div class = "col">
+                            <div class="form-floating mb-3">
+                                <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' " id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
+                                <label for="deadlineTime">Time</label>
+                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-primary btn-lg">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    
     <!-- Jacques' WebSocket Nuclear Testing Ground -->
     <div>
         <!-- just put th:if="${canEdit} in the div if you want it to be teacher only -->
@@ -265,10 +333,10 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
 </div>
 <script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event
-    let projectStart = /*[[${#dates.format(project.getProjectStartDate, 'yyyy-MM-dd''T''hh:mm')}]]*/ null;
-    let projectEnd = /*[[${#dates.format(project.getProjectEndDate, 'yyyy-MM-dd''T''hh:mm')}]]*/ null;
+    let projectStart = /*[[${#dates.format(project.getProjectStartDate, datetimeISOFormat)}]]*/ null;
+    let projectEnd = /*[[${#dates.format(project.getProjectEndDate, datetimeISOFormat)}]]*/ null;
     const editFormTemplate = `
-    <div id="editEventForm">
+    <div id="editEventForm" class="editEventForm">
         <div class="card">
             <div class="card-header" id="edit-event-form-header"></div>
             <div class="card-body">
@@ -278,7 +346,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">
                                 <label for="editEventNameInput">Name</label>
-                                <div id="editEventNameFeedback" class="text-danger"></div>
+                                <div id="editEventNameFeedback" class="invalid-feedback"></div>
                             </div>
                         </div>
                         <div class="col-10">
@@ -293,14 +361,14 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
                             <div class="form-floating mb-3">
                                 <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="${projectStart}" max="${projectEnd}">
                                 <label for="editEventStartTime">Start Time</label>
-                                <div id="editEventStartFeedback" class="text-danger"></div>
+                                <div id="editEventStartFeedback" class="invalid-feedback"></div>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="${projectStart}" max="${projectEnd}">
                                 <label for="editEventEndTime">End Time</label>
-                                <div id="editEventEndFeedback" class="text-danger"></div>
+                                <div id="editEventEndFeedback" class="invalid-feedback"></div>
                             </div>
                         </div>
                     </div>
@@ -310,7 +378,7 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
                             <button type="button" class="btn btn-outline-secondary btn-lg" onclick=hideEditEvent()>Cancel</button>
                         </div>
                         <div class="col-2">
-                            <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                            <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save</button>
                         </div>
                     </div>
                 </form>
@@ -319,7 +387,6 @@ th:with="DATE_FORMAT=${'yyyy-MM-dd''T''hh:mm'},
     </div>
     `;
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 <!--/*
     JS files are static, and thus don't know anything about the project (i.e. the base URL).
     This code sets a global variable inside this template (which does know the base URL),
