@@ -64,7 +64,7 @@ public class DetailsController extends PageController {
      * @return Project details page
      * @throws Exception When project does not exist
      */
-    @GetMapping("/project/{id}")
+    @GetMapping("/project/{id}/")
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
@@ -79,6 +79,17 @@ public class DetailsController extends PageController {
         /* Return the name of the Thymeleaf template */
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
+
+        /**
+     Redirects so any project page URL gets a slash on the end
+     */
+    @GetMapping("/project/{id}")
+    public String detailsRedirect(
+                @PathVariable(name="id") int id
+    ) {
+        return "redirect:" + id + '/';
+    }
+    
     
     /**
      * <p>Pre-populates all the data needed in the model</p>
