@@ -68,7 +68,9 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         delay = 300;
     }
     for (let element of collapseElementList) {
-        new bootstrap.Collapse(element).hide();
+        if (element.id.indexOf("editEventForm") != -1) {
+            new bootstrap.Collapse(element).hide();
+        }
     }
 
     /* Create element if not seen before */
