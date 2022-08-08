@@ -54,9 +54,8 @@ public class DeadlineService {
 
     /**
      * Gets all the deadlines that belong to a given project.
-     *
      */
-    public List<Deadline> getDeadlinesOfProjectById(Integer id) {
+    public List<Deadline> getDeadlinesInProject(Integer id) {
         return repository.findDeadlineByParentProjectId(id);
     }
 

@@ -1,48 +1,41 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.TransactionSystemException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Holds unit tests for the Event class.
  */
 @SpringBootTest
 class EventTests {
-    private static List<Sprint> sprintList = new ArrayList<Sprint>();
+    private static List<Sprint> sprintList = new ArrayList<>();
 
     private String defaultEventColour = "#ff3823";
 
     /* Some helper functions for creation of events */
-    private Event createEventOutsideSprints() throws Exception {
+    private Event createEventOutsideSprints() {
         Date eventStartDate = DateUtils.toDate("2022-02-25");
         Date eventEndDate = DateUtils.toDate("2022-02-26");
         int parentProjId = 5;
         return new Event(parentProjId, "Outside sprints", "", eventStartDate, eventEndDate);
     }
 
-    private Event createEventInsideSprint() throws Exception {
+    private Event createEventInsideSprint() {
         Date eventStartDate = DateUtils.toDate("2022-02-06");
         Date eventEndDate = DateUtils.toDate("2022-02-06");
         int parentProjId = 5;
         return new Event(parentProjId, "Inside sprints", "", eventStartDate, eventEndDate);
     }
 
-    private Event createEventSpanningSprints() throws Exception {
+    private Event createEventSpanningSprints() {
         Date eventStartDate = DateUtils.toDate("2022-02-06");
         Date eventEndDate = DateUtils.toDate("2022-03-06");
         int parentProjId = 5;
@@ -67,7 +60,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventWithoutSprintHasDefaultColour() throws Exception {
+    void checkEventWithoutSprintHasDefaultColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Event event = createEventOutsideSprints();
 
@@ -76,7 +69,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventInSprintInheritsColour() throws Exception {
+    void checkEventInSprintInheritsColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
@@ -86,7 +79,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventStartingInSprintInheritsStartColour() throws Exception {
+    void checkEventStartingInSprintInheritsStartColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
@@ -97,7 +90,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventStartOfSprintInheritsColour() throws Exception {
+    void checkEventStartOfSprintInheritsColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
@@ -109,7 +102,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventFinishingInSprintHasSprintEndColour() throws Exception {
+    void checkEventFinishingInSprintHasSprintEndColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(1);
         Event event = createEventOutsideSprints();
@@ -120,7 +113,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventEndOfSprintInheritsColour() throws Exception {
+    void checkEventEndOfSprintInheritsColour() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Sprint sprint = sprintList.get(0);
         Event event = createEventInsideSprint();
@@ -132,7 +125,7 @@ class EventTests {
     }
 
     @Test
-    void checkEventSpanningSprintsInheritsBothColours() throws Exception {
+    void checkEventSpanningSprintsInheritsBothColours() {
         // Sprint list has five sprints with dates 05/month/2022 -- 24/month/2022 and months Feb -- Jul
         Event event = createEventSpanningSprints();
 
