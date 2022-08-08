@@ -8,8 +8,8 @@ function setConnected(connected) {
     // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
     // TODO check these lines before merging to master!
 
-    document.getElementById('connect').disabled = connected;
-    document.getElementById('disconnect').disabled = !connected;
+//    document.getElementById('connect').disabled = connected;
+//    document.getElementById('disconnect').disabled = !connected;
     //document.getElementById('conversationDiv').style.visibility
     //    = connected ? 'visible' : 'hidden';
 
@@ -35,6 +35,7 @@ function connect() {
         stompClient.subscribe('/topic/events', function(eventMessageOutput) {
             updateEvent(JSON.parse(eventMessageOutput.body));
         });
+        sendEventUpdates();
     });
 }
 
@@ -97,16 +98,6 @@ function updateEvent(eventMessage) {
 }
 
 /**
- * Sends a data message to a WebSocket endpoint using attributes from the HTML elements
- */
-function sendUpdateEventData() {
-    eventMessage = {
-        id: 1
-    }
-    stompClient.send("/app/events", {}, JSON.stringify(eventMessage));
-}
-
-/**
 * Creates a new event display object and puts it into the correct place in the DOM
 * @param eventMessage the message sent by websockets containing event info to be displayed
 * @param parent the parent object for the event to be displayed in
@@ -132,4 +123,14 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
         newEvent.querySelector('.event-right').style.visibility = 'hidden';
     }
 
+}
+
+/**
+* Checks if there is an event that has been updated and sends a websocket message if there is
+*/
+function sendEventUpdates() {
+    console.log('sending event update for ' + eventId);
+    if (eventId !== -1){
+        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+    }
 }

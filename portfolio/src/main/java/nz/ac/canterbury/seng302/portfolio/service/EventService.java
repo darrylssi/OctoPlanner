@@ -69,8 +69,8 @@ public class EventService {
      * Otherwise, updates the event with the given ID.
      * @param event event to be added to the database
      */
-    public void saveEvent(Event event) {
-        repository.save(event);
+    public Event saveEvent(Event event) {
+        return repository.save(event);
     }
 
 }

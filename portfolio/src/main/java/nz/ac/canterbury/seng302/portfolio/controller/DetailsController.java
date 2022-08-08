@@ -56,6 +56,8 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    private int currentUpdatedEventId = -1;
+
     /**
      * Get request to view project details page.
      * @param principal Authenticated user
@@ -89,11 +91,11 @@ public class DetailsController extends PageController {
     ) {
         return "redirect:" + id + '/';
     }
-    
-    
+
+
     /**
      * <p>Pre-populates all the data needed in the model</p>
-     * 
+     *
      * Note: You should ONLY DEFINE MODEL ATTRIBUTES IN HERE!
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
@@ -129,6 +131,8 @@ public class DetailsController extends PageController {
         model.addAttribute("user", thisUser.getFullName());
 
         model.addAttribute("tab", 0);
+        model.addAttribute("eventId", currentUpdatedEventId);
+        currentUpdatedEventId = -1;
     }
 
     /**
@@ -181,9 +185,10 @@ public class DetailsController extends PageController {
             populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
-        
+
         Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
-        eventService.saveEvent(event);
+        Event savedEvent = eventService.saveEvent(event);
+        currentUpdatedEventId = savedEvent.getId();
         return "redirect:.";
     }
 

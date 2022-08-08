@@ -175,7 +175,7 @@
         <b>[ This project has no sprints ]</b>
     </div>
     <div class="row">
-        <div class="col-2">
+        <div class="col">
             <a th:if="${canEdit}" th:href="|../../add-sprint/${project.getId}|">
             <button class="btn btn-primary btn-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
@@ -184,7 +184,7 @@
                 Add Sprint
             </a>
         </div>
-        <div class="col-2-2">
+        <div class="col">
                     <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-calendar-event" viewBox="0 0 16 16">
                             <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
@@ -193,7 +193,7 @@
                         Add Event
                     </button>
         </div>
-        <div class="col-2">
+        <div class="col">
             <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
                     <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
@@ -419,6 +419,8 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFo
 */-->
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
+    var canEdit = /*[[ ${canEdit} ]]*/;
+    var eventId = /*[[ ${eventId} ]]*/;
 
     // Bind a 'characters remaining' display to their output
     for (const parent of document.getElementsByClassName('limited-text-input')) {
