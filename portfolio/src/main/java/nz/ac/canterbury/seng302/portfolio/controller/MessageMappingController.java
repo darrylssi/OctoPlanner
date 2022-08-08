@@ -64,38 +64,47 @@ public class MessageMappingController {
         eventMessageOutput.setEndColour(updatedEvent.determineColour(sprints, true) + "4c");
         sprints.sort(Comparator.comparing(Sprint::getSprintEndDate));
 
+        List<Event> events = eventService.getAllEvents();
+        events.sort(Comparator.comparing(Event::getEventStartDate));
+
         ArrayList<String> sprintIds = new ArrayList<>();
+        ArrayList<String> eventIds = new ArrayList<>();
         if(sprints.get(0).getSprintStartDate().after(updatedEvent.getEventStartDate())) {
             sprintIds.add(FIRST_OUTSIDE_BOX_ID);
         }
 
+        //get list of all event box ids to include the event on the project details page
         for (int i = 0; i < sprints.size(); i++) {
-            if(sprints.get(i).getSprintStartDate().after(updatedEvent.getEventStartDate())){
-                //sprint starts after event starts
-                if(updatedEvent.getEventEndDate().after(sprints.get(i).getSprintStartDate())){
-                    //event ends after sprint starts. include this sprint id
-                    sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+            if(timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+                    updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())){
+                sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+                for (int j = 0; j < events.size(); j++) {
+                    if(!events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate())){
+                        continue;
+                    }
+                    if (timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+                            events.get(j).getEventStartDate(), events.get(j).getEventEndDate())){
+                        eventIds.add(String.valueOf(events.get(j).getId()));
+                        break;
+                    }
                 }
-                if(updatedEvent.getEventEndDate().after(sprints.get(i).getSprintEndDate())) {
-                    //event ends after end of sprint. include the outside id for this sprint
-                    sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                }
-            } else {
-                //event starts after sprint starts
-                if(sprints.get(i).getSprintEndDate().after(updatedEvent.getEventStartDate())){
-                    //sprint ends after event starts. include this sprint id
-                    sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                }
-                if(updatedEvent.getEventEndDate().after(sprints.get(i).getSprintEndDate()) &&
-                        sprints.size() >= i+1 && sprints.get(i+1).getSprintEndDate().after(updatedEvent.getEventStartDate())) {
-                    //event ends after sprint ends and starts before next sprint starts. include the outside id for this sprint
-                    sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                }
+            }
+            if((sprints.size() > i+1) && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
+                    updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
+                sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
             }
         }
 
         eventMessageOutput.setSprintIds(sprintIds);
+        eventMessageOutput.setEventIds(eventIds);
         return eventMessageOutput;
+    }
+
+    private boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
+        if (startA.after(startB)){
+            return startA.before(endB);
+        }
+        return startB.before(endA);
     }
 
 

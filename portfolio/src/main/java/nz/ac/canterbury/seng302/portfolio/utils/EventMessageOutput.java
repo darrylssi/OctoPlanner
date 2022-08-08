@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EventMessageOutput {
@@ -8,7 +7,8 @@ public class EventMessageOutput {
     private int parentProjectId;
     private String name;
     private String description;
-    private ArrayList<String> sprintIds;
+    private List<String> sprintIds;
+    private List<String> eventIds;
     private String startDate;
     private String endDate;
     private String startColour;
@@ -51,7 +51,15 @@ public class EventMessageOutput {
     }
 
     public void setSprintIds(List<String> sprintIds) {
-        this.sprintIds = (ArrayList<String>)sprintIds;
+        this.sprintIds = sprintIds;
+    }
+
+    public List<String> getEventIds() {
+        return eventIds;
+    }
+
+    public void setEventIds(List<String> eventIds) {
+        this.eventIds = eventIds;
     }
 
     public String getEndDate() {
