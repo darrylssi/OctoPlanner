@@ -27,6 +27,7 @@ public class MessageMappingController {
     private static final String INSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-inside";
     private static final String OUTSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-outside";
     private static final String FIRST_OUTSIDE_BOX_ID = "events-firstOutside";
+    private static final String EVENT_ID_FORMAT = "event-box-%d";
 
     /**
      * Websocket sending example
@@ -79,19 +80,29 @@ public class MessageMappingController {
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())){
                 sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
                 for (int j = 0; j < events.size(); j++) {
-                    if(!events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate())){
-                        continue;
-                    }
-                    if (timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+                    if(events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate()) &&
+                            timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
                             events.get(j).getEventStartDate(), events.get(j).getEventEndDate())){
-                        eventIds.add(String.valueOf(events.get(j).getId()));
+                        eventIds.add(String.format(EVENT_ID_FORMAT, events.get(j).getId()));
                         break;
+                    } else if (j+1 == events.size()){
+                        eventIds.add("-1");
                     }
                 }
             }
             if((sprints.size() > i+1) && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
                 sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+                for (int j = 0; j < events.size(); j++) {
+                    if(events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate())
+                    && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
+                            events.get(j).getEventStartDate(), events.get(j).getEventEndDate())){
+                        eventIds.add(String.format(EVENT_ID_FORMAT, events.get(j).getId()));
+                        break;
+                    } else if (j+1 == events.size()){
+                        eventIds.add("-1");
+                    }
+                }
             }
         }
 
@@ -100,11 +111,19 @@ public class MessageMappingController {
         return eventMessageOutput;
     }
 
+    /**
+     * Takes the start and ends of two time periods and checks whether they overlap
+     * @param startA the start time of the first time period
+     * @param endA the end time of the first time period
+     * @param startB the start time of the second time period
+     * @param endB the end time of the second time period
+     * @return true if the time periods overlap
+     */
     private boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
-        if (startA.after(startB)){
-            return startA.before(endB);
+        if (!startA.before(startB)){
+            return !startA.after(endB);
         }
-        return startB.before(endA);
+        return !endA.before(startB);
     }
 
 
