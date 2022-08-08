@@ -3,10 +3,12 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.validation.Valid;
 
@@ -67,10 +69,11 @@ public class DetailsController extends PageController {
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 EventForm eventForm,
+                TimeZone userTimezone,
                 Model model
     ) throws Exception {
         PrincipalData thisUser = PrincipalData.from(principal);
-        prePopulateEventForm(eventForm);
+        prePopulateEventForm(eventForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
 
         /* Return the name of the Thymeleaf template */
@@ -157,7 +160,7 @@ public class DetailsController extends PageController {
         @PathVariable("project_id") int projectID,
         @Valid EventForm eventForm,
         BindingResult bindingResult,
-        ZoneOffset userTimezone,
+        TimeZone userTimezone,
         Model model
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
@@ -177,16 +180,18 @@ public class DetailsController extends PageController {
      * Pre-populates the event form with default values, if they don't already exist
      * @param eventForm The eventForm object from your endpoint args
      */
-    private void prePopulateEventForm(EventForm eventForm) {
+    private void prePopulateEventForm(EventForm eventForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
         // If field isn't filled (because we just loaded the page), use this default value
         if (eventForm.getStartTime() == null) {
-            eventForm.setStartTime(Date.from(rightNow));
+            eventForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
+            eventForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
         }
         // Default the value to 1 minute in the future
         if (eventForm.getEndTime() == null) {
-            eventForm.setEndTime(Date.from(inOneMinute));
+            eventForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
+            eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
     }
 

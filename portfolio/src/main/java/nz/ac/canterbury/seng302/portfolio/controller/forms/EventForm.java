@@ -12,6 +12,8 @@ import javax.validation.constraints.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
@@ -23,7 +25,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 public class EventForm {
     @NotNull
     @NotBlank(message="Event name cannot be blank")
-    @Size(min=MAX_NAME_LENGTH,
+    @Size(min=MIN_NAME_LENGTH,
             max=MAX_NAME_LENGTH,
             message="The event name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
     private String name;
@@ -43,7 +45,7 @@ public class EventForm {
     private LocalTime startTime;
 
     @NotNull
-    @DateTimeFormat(pattern=DATETIME_ISO_FORMAT)
+    @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate endDate;
 
     @NotNull
@@ -56,9 +58,8 @@ public class EventForm {
      * @param userTimeZone The timezone ID of where the user is
      * @return A Date object of when the event starts
      */
-    public Date endDatetimeToDate(ZoneId userTimeZone) {
-        LocalDateTime datetime = LocalDateTime.of(startDate, startTime);
-        return Date.from(datetime.atZone(userTimeZone).toInstant());
+    public Date startDatetimeToDate(TimeZone userTimeZone) {
+        return DateUtils.localDateAndTimeToDate(startDate, startTime, userTimeZone);
     }
 
     /**
@@ -66,9 +67,9 @@ public class EventForm {
      * @param userTimeZone The timezone ID of where the user is
      * @return A Date object of when the event ends
      */
-    public Date startDatetimeToDate(ZoneId userTimeZone) {
-        LocalDateTime datetime = LocalDateTime.of(endDate, endTime);
-        return Date.from(datetime.atZone(userTimeZone).toInstant());
+    public Date endDatetimeToDate(TimeZone userTimeZone) {
+        return DateUtils.localDateAndTimeToDate(endDate, endTime, userTimeZone);
+
     }
     
     public String getName() {
