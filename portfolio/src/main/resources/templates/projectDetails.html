@@ -344,70 +344,69 @@
 
 <script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event
-    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/;
-    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/;
-    const editFormTemplate = '' +
-    '<div class="card">' +
-    '    <div class="card-header" id="edit-event-form-header"></div>' +
-    '    <div class="card-body">' +
-    '        <form class="container-fluid">' +
-    '            <div class="row">' +
-    '                <div class="col">' +
-    '                    <div class="form-floating mb-3">' +
-    '                        <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">' +
-    '                        <label for="editEventNameInput">Name</label>' +
-    '                        <div id="editEventNameFeedback" class="invalid-feedback"></div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="col-10">' +
-    '                    <div class="form-floating mb-3">' +
-    '                        <input type="text" class="form-control" id="editEventDescriptionInput">' +
-    '                        <label for="editEventDescriptionInput">Description</label>' +
-    '                    </div>' +
-    '                </div>' +
-    '            </div>' +
-    '            <div class="row">' +
-    '                <div class="col">' +
-    '                    <div class="form-floating mb-3">' +
-    '                        <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
-    '                        <label for="editEventStartDate">Start Date</label>' +
-    '                        <div id="editEventStartDateFeedback" class="invalid-feedback"></div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="col">' +
-    '                    <div class="form-floating mb-3">' +
-    '                        <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback">' +
-    '                        <label for="editEventStartTime">Start Time</label>' +
-    '                        <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="col">' +
-    '                    <div class="form-floating mb-3 has-validation">' +
-    '                        <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
-    '                        <label for="editEventEndDate">End Date</label>' +
-    '                        <div id="editEventEndDateFeedback" class="invalid-feedback"></div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="col">' +
-    '                    <div class="form-floating mb-3 has-validation">' +
-    '                        <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '">' +
-    '                        <label for="editEventEndTime">End Time</label>' +
-    '                        <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>' +
-    '                    </div>' +
-    '                </div>' +
-    '            </div>' +
-    '            <div class="row">' +
-    '                <div class="col"></div>' +
-    '                <div class="col-2">' +
-    '                    <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons">Cancel</button>' +
-    '                </div>' +
-    '                <div class="col-2">' +
-    '                    <button type="button" class="btn btn-primary btn-lg buttons">Save Changes</button>' +
-    '                </div>' +
-    '            </div>' +
-    '        </form>' +
-    '    </div>' +
-    '</div>';
+    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/ null;
+    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/ null;
+    const editFormTemplate = `
+    <div class="card">
+        <div class="card-header" id="edit-event-form-header"></div>
+        <div class="card-body">
+            <form class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">
+                            <label for="editEventNameInput">Name</label>
+                            <div id="editEventNameFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-10">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editEventDescriptionInput">
+                            <label for="editEventDescriptionInput">Description</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <label for="editEventStartDate">Start Date</label>
+                            <div id="editEventStartDateFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback">
+                            <label for="editEventStartTime">Start Time</label>
+                            <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <label for="editEventEndDate">End Date</label>
+                            <div id="editEventEndDateFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <label for="editEventEndTime">End Time</label>
+                            <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col col-md-4 col-lg-2">
+                        <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons">Cancel</button>
+                    </div>
+                    <div class="col col-md-3 col-lg-2">
+                        <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>`;
 </script>
 <!--/*
     JS files are static, and thus don't know anything about the project (i.e. the base URL).

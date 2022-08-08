@@ -54,6 +54,7 @@ function deleteEvent(eventId) {
 function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     /* Search for the edit form */
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    let delay = 0;
 
     /* Collapse element and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -63,6 +64,9 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
 
     /* Collapse any collapsible elements already on the page */
     let collapseElementList = document.getElementsByClassName("collapse show");
+    if (collapseElementList.length > 0) {
+        delay = 300;
+    }
     for (let element of collapseElementList) {
         new bootstrap.Collapse(element).hide();
     }
@@ -90,7 +94,8 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
         new bootstrap.Collapse(shownForm).show();
-    }, 300, "editEventForm-" + eventBoxId);
+        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
+    }, delay, "editEventForm-" + eventBoxId);
 }
 
 /** Exposes an easier access point for the cancel button */
