@@ -92,7 +92,7 @@ public class EventController extends PageController {
         } else if (eventForm.getEndDate().after(parentProject.getProjectEndDate())) {
             bindingResult.rejectValue("endDate", "Event can't end after the project");
         }
-        
+
         // Now that we've added more error, do it again.
         if (bindingResult.hasErrors()) {
             return ADD_EVENT_FORM_TEMPLATE;
