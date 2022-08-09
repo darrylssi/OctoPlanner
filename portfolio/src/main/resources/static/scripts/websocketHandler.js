@@ -115,7 +115,10 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
     } else {
         parent.insertBefore(newEvent, parent.querySelector("#" + nextEvent));
     }
-    newEvent.getElementsByClassName("event")[0].setAttribute('data-bs-original-title', eventMessage.description);
+    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
+    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
+    newEvent.getElementsByClassName("event")[0].data-placement = "top";
+
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
     newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
 
