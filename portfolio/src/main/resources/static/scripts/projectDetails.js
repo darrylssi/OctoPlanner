@@ -1,6 +1,6 @@
-let previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
+var previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
 const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
-let sendEditMessageInterval; //
+let sendEditMessageInterval;
 
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
