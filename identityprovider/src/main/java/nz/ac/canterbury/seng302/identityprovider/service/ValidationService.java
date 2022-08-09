@@ -265,12 +265,11 @@ public class ValidationService {
                     .build();
         }
 
-        //String regex = "^(.+)/(.+)(,(.+)/(.+))$";
-        String regex = "^([a-zA-Z]+/)+[a-zA-Z]+(,\s*([a-zA-Z]+/)+[a-zA-Z]+)*$|^$";
+        String regex = "^[a-zA-Z]+/+[a-zA-Z]+(,\s*[a-zA-Z]+/+[a-zA-Z]+)*+$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(pronouns);
 
-        if(!matcher.matches()) {    // If pronouns don't match regex
+        if(pronouns.length() != 0 && !matcher.matches()) {    // If pronouns don't match regex
             return ValidationError.newBuilder()
                     .setFieldName("PersonalPronouns")
                     .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
