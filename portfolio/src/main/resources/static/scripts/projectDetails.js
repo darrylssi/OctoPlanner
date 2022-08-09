@@ -71,8 +71,10 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     /* If the previous form is open, send the stop message but let collapseall take care of it
        so that the delay still works */
     if (previousEditForm != null && previousEditForm.classList.contains("show")) {
-        stopEditing();
         delay = EDIT_FORM_CLOSE_DELAY;
+        if (previousEvent !== eventId) { // avoids flickering when you click on a different box for the same event
+            stopEditing();
+        }
     }
 
     /* Set the previous event values */
