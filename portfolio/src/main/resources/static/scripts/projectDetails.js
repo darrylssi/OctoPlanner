@@ -1,7 +1,3 @@
-var previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
-const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
-let sendEditMessageInterval;
-
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -51,17 +47,10 @@ function deleteEvent(eventId) {
     deleteRequest.send();
 }
 
- /**
-  * Inserts/expands the event edit form directly below the event being edited.
-  * This function adds forms into the page only as they are needed.
-  * Also sends and initial editing websocket message, plus another every {@link EVENT_EDIT_MESSAGE_FREQUENCY} ms
-  * @param eventId the id of the event to show the form for
-  * @param eventBoxId the id of the event box to put the form in
-  * @param eventName name of event being edited
-  * @param eventDescription description of event being edited
-  * @param eventStartDate start date of event being edited
-  * @param eventEndDate end date of event being edited
-  */
+/**
+ * Inserts/expands the event edit form directly below the event being edited.
+ * This function adds forms into the page only as they are needed.
+ */
 function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     /* Search for the edit form */
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
@@ -111,24 +100,12 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
     }, delay, "editEventForm-" + eventBoxId);
 }
 
-
-/**
- * Remove the edit form from any event it is attached to.
- * Can send a stop editing messages & cease sending repeated editing messages if sendStop is true.
- * @param eventBoxId the ID of the event box with the open edit form
- * @param sendStop if true, send a stop editing websocket message, and also stop sending repeated edit messages
- */
-function hideEditEvent(eventBoxId/*, sendStop=false*/) {
-    const editForm = document.getElementById("editEventForm-" + eventBoxId);
-    if (eventForm) {
+/** Exposes an easier access point for the cancel button */
+function hideEditEvent(eventBoxId) {
+    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-//    if (sendStop) {
-//        if (sendEditMessageInterval) {
-//            clearInterval(sendEditMessageInterval);
-//        }
-//        sendStopEditingMessage(previousEvent);
-//    }
 }
 
 /**
