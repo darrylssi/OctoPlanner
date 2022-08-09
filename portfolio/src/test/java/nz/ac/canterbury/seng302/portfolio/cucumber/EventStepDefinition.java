@@ -1,78 +1,77 @@
 package nz.ac.canterbury.seng302.portfolio.cucumber;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsNot.not;
+
+import java.text.SimpleDateFormat;
+
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import org.springframework.boot.test.context.SpringBootTest;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
-import nz.ac.canterbury.seng302.portfolio.factory.WithMockCustomUserSecurityContextFactory;
-import nz.ac.canterbury.seng302.portfolio.model.User;
-import nz.ac.canterbury.seng302.portfolio.utils.RoleUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import io.cucumber.spring.CucumberContextConfiguration;
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 
 /**
- * Contains Cucumber acceptance tests for events.
- *
- * Tests the event controller to make sure that added events redirect properly and provide the correct message.
+ * Class containing the step definitions for the account_credited Cucumber
+ * feature
  */
-public class EventStepDefinition {
-
-    private User user;
-    private Map<String, Object> sessionAttributes;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    private MvcResult result;
+@SpringBootTest
+public class EventStepDefinition extends RunCucumberTest {
 
     private static final int ID = 1;
-    private String name;
-    private String startDate;
-    private String endDate;
-    private String description;
+    private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat dateTimeFormatter;
+    private Project parentProject;
+    private Event event;
 
-    @Given("the user has a role of {string}")
-    public void the_user_has_a_role_of(String sRole) {
-        user = new User("username", "firstName", "middleName", "lastName", "nickname", "personalPronouns",
-                "password", "confirmPassword", "email", "bio");
-        UserRole role = RoleUtils.fromString(sRole);    // If this fails, check the spelling
-        var auth = new WithMockCustomUserSecurityContextFactory().createSecurityContext(role, ID);
-        sessionAttributes = Map.of("SPRING_SECURITY_CONTEXT", auth);
+    public EventStepDefinition() {
+        this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        this.dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
-    @When("the user creates an event with {string}, {string}, {string}, {string}")
-    public void the_user_creates_an_event_with(String name, String startDate, String endDate, String description) throws Exception {
-        result = this.mockMvc.perform(post("/add-event/0").sessionAttrs(sessionAttributes)
-                        .param("eventName", name)
-                        .param("eventDescription", description)
-                        .param("eventStartDate", startDate)
-                        .param("eventEndDate", endDate))
-                .andReturn();
+    @Given("the parent project starts at {string} and ends on {string}")
+    public void the_parent_project_has_an_id_of(String startDate_s, String endDate_s) throws Exception {
+        var projStartDate = this.dateFormatter.parse(startDate_s);
+        var projEndDate = this.dateFormatter.parse(endDate_s);
+
+        parentProject = new Project("name", "desc", projStartDate, projEndDate);
     }
 
-    @Then("an event called {string} exists with {string}, {string}, {string}")
-    public void an_event_called_exists_with(String name, String startDate, String endDate, String description) throws Exception {
-        this.mockMvc.perform(post("/add-event/0").sessionAttrs(sessionAttributes)
-                        .param("eventName", name)
-                        .param("eventDescription", description)
-                        .param("eventStartDate", startDate)
-                        .param("eventEndDate", endDate))
-                .andExpect(status().is3xxRedirection());
+    @When("the user creates an event called {string}, starting at {string}, ending on {string}, with a description {string}")
+    public void the_user_creates_an_event_called_starting_at_ending_on_with_a_description(
+            String name, String startDate, String endDate, String description) throws Exception {
+        event = new Event();
+        event.setEventName(name);
+        event.setEventDescription(description);
+        event.setStartDate(dateTimeFormatter.parse(startDate));
+        event.setEndDate(dateTimeFormatter.parse(endDate));
     }
 
-    @Then("{string} message should be displayed")
-    public void message_should_be_displayed(String message) {
-        assertEquals(message, String.valueOf(result.getResponse().getStatus()));
+    @Then("an event called {string} exists starting at {string}, ending at {string}, with a description {string}")
+    public void an_event_called_exists_starting_at_ending_on_with_a_description(
+        String name, String startDate, String endDate, String description
+    ) {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        var errors = validator.validate(event);
+        assertThat(errors, is(empty()));
+    }
+
+    @Then("creating the event should fail")
+    public void adding_event_should_fail() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        var errors = validator.validate(event);
+        assertThat(errors, is(not(empty())));
     }
 
 }

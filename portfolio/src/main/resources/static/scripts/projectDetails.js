@@ -108,3 +108,46 @@ function hideEditEvent(eventBoxId) {
         new bootstrap.Collapse(editForm).hide();
     }
 }
+
+/**
+ * Binds an event to the input, such that the remaining length is displayed.
+ * 
+ * @param {HTMLInputElement} input An `<input type="text" maxlength=...>` element,
+ *                                  with an optional `minlength` element
+ * @param {Element} display The element that'll display the output (Note: Will overwrite
+ *                                  any inner HTML)
+ * @throws {EvalError} If any of the above requirements are broken
+ */
+function displayRemainingCharacters(input, display) {
+    if (
+        input.tagName.toLowerCase() !== 'input'
+        || input.getAttribute('type') !== 'text'
+        || !input.hasAttribute('maxlength')
+    ) {
+        console.error(input);
+        throw new EvalError(
+            '`input` doesn\'t look like `<input type="text" maxlength=...>'
+        );
+    }
+    const event = () => {
+        const maxLength = input.getAttribute('maxlength');
+        const minLength = input.getAttribute('minlength');
+        const inputLength = input.value.length;
+        const remainingChars = maxLength - inputLength;
+        if (remainingChars <= 0) {
+            // Too many characters
+            display.classList.add('text-danger');
+            display.textContent = remainingChars;
+        } else if (minLength !== null && inputLength < minLength) {
+            // (Optional) Not enough characters
+            display.classList.add('text-danger');
+            display.textContent = '< ' + (minLength - inputLength);
+        } else {
+            display.classList.remove('text-danger');
+            display.textContent = remainingChars;
+        }
+    }
+    // Bind the event, then give it a kick to initialise the display
+    input.addEventListener("input", event);
+    event();
+}

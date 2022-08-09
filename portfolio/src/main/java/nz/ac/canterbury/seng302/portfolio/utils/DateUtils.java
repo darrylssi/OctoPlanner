@@ -6,8 +6,12 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -102,4 +106,17 @@ public class DateUtils {
         return c.getTime().equals(dayAfter);
     }
 
+    // https://stackoverflow.com/a/23885950
+    /**
+     * <p>Combines a LocalDate and a LocalTime into a Date object, normalized by the given's timezone</p>
+     * Note: To get a user's timezone, add a <code>TimeZone</code> argument in the Controller method
+     * @param date The date specified
+     * @param time The time of day specified
+     * @param userTimeZone The timezone this occurs in
+     * @return A Date object of the date + time, according to the timezone
+     */
+    public static Date localDateAndTimeToDate(LocalDate date, LocalTime time, TimeZone usersTimezone) {
+        LocalDateTime datetime = LocalDateTime.of(date, time);
+        return Date.from(datetime.atZone(usersTimezone.toZoneId()).toInstant());
+    }
 }

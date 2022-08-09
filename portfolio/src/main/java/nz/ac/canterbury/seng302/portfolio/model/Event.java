@@ -1,7 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +31,7 @@ public class Event {
     private int parentProjectId;
 
     @Column(nullable = false)
+    @NotBlank(message="Event name cannot be blank")
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
             message="The event name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String eventName;
@@ -74,10 +78,10 @@ public class Event {
                 id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-/**
- * Sets the value of the event id 
- * @param id the value to set the id to
- */
+    /**
+     * Sets the value of the event id 
+     * @param id the value to set the id to
+     */
     public void setId(int id) {
         this.id = id;
     }
@@ -87,7 +91,7 @@ public class Event {
      * @return event's id
      */
     public int getId(){
-        return  id;
+        return id;
     }
 
     /**
