@@ -1,3 +1,6 @@
+let previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
+// had to be a var because using let gave a redefinition error TODO
+
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -47,17 +50,17 @@ function deleteEvent(eventId) {
     deleteRequest.send();
 }
 
-// the previous event being edited by THIS user (only one can be edited at a time)
-// had to be a var because using let gave a redefinition error
-var previousEvent;
-
-/** Inserts the event edit form directly below the event being edited */
+/**
+ * Inserts the event edit form directly below the event being edited.
+ * Also sends an editing event websocket message.
+ * @param eventId the id of the event to show the form for
+ * @param eventName name of event being edited
+ * @param eventDescription description of event being edited
+ * @param eventStartDate start date of event being edited
+ * @param eventEndDate end date of event being edited
+ */
 function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eventEndDate) {
-    // send a stop message for the previous event, if there was one, and set this to be the previous event
-    sendStopEditingMessage(previousEvent);
-    console.log(previousEvent);
-
-    hideEditEvent();
+    hideEditEvent(eventId !== previousEvent);
     previousEvent = eventId;
     const eventBox = document.getElementById("event-" + eventId);
     let editForm = document.createElement("div");
@@ -73,13 +76,18 @@ function showEditEvent(eventId, eventName, eventDescription, eventStartDate, eve
     sendEditingEventMessage(eventId);
 }
 
-/** Remove the edit form from any event it is attached to */
-function hideEditEvent() {
+/**
+ * Remove the edit form from any event it is attached to
+ * @param sendStop if true, send a stop editing websocket message also
+ */
+function hideEditEvent(sendStop=false) {
     const eventForm = document.getElementById("editEventForm");
     if (eventForm) {
         eventForm.parentNode.removeChild(eventForm);
     }
-    sendStopEditingMessage(previousEvent);
+    if (sendStop) {
+        sendStopEditingMessage(previousEvent);
+    }
 }
 
 // function toggleSendingEditMessages(eventName) {
