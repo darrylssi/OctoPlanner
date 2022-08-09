@@ -27,7 +27,7 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockPrincipal(value=TEACHER, id=EditUserControllerTest.USER_ID)    // Make our mocked user be the one we're editing
-public class EditUserControllerTest {
+class EditUserControllerTest {
 
     static final int USER_ID=1;
     final Logger logger = LoggerFactory.getLogger(EditUserControllerTest.class);
@@ -60,14 +60,14 @@ public class EditUserControllerTest {
     }
 
     @Test
-    public void deletePhotoServiceGivesFailure_thenShowMessage() throws Exception {
+    void deletePhotoServiceGivesFailure_thenShowMessage() throws Exception {
         /* Given: The delete service returns a failure */
         DeleteUserProfilePhotoResponse noPhotoResponse = DeleteUserProfilePhotoResponse.newBuilder()
                 .setIsSuccess(false)
                 .setMessage("No profile photo uploaded")
                 .build();
         when(userAccountService.deleteUserProfilePhoto(USER_ID)).thenReturn(noPhotoResponse);
-        /**
+        /*
          * When: The controller attempts to delete a photo
          * Then: The page displays the message from the service
          */
@@ -78,14 +78,14 @@ public class EditUserControllerTest {
     }
 
     @Test
-    public void deleteExistingPhoto_getRedirected() throws Exception {
+    void deleteExistingPhoto_getRedirected() throws Exception {
         /* Given: The delete service returns a success */
         DeleteUserProfilePhotoResponse successResponse = DeleteUserProfilePhotoResponse.newBuilder()
                 .setIsSuccess(true)
                 .build();
         when(userAccountService.deleteUserProfilePhoto(USER_ID)).thenReturn(successResponse);
 
-        /**
+        /*
          * When: The controller attempts to delete a photo
          * Then: The user is redirected to their profile
          */

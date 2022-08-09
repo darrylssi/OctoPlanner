@@ -18,6 +18,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${base-url}")
     private String baseURL;
 
+    private static final String LOGIN = "/login";
+
     @Override
     protected void configure(HttpSecurity security) throws Exception
     {
@@ -26,7 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/login", "/register", "/")    // The way of accessing /static is not great
+                    .antMatchers(HttpMethod.GET, LOGIN, "/register", "/")    // The way of accessing /static is not great
                     .permitAll()
                     .and()
                 .authorizeRequests()
@@ -39,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .invalidateHttpSession(true)
                 .deleteCookies("lens-session-token")
-                .logoutSuccessUrl("/login");
+                .logoutSuccessUrl(LOGIN);
 
         // Disable basic http security
         security
@@ -53,8 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception
-    {
-        web.ignoring().antMatchers("/login", "/styles/**", "/img/**", "/register", "/");
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers(LOGIN, "/styles/**", "/img/**", "/register", "/");
     }
 }

@@ -20,7 +20,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
 
 @SpringBootTest
-public class EventServiceTest {
+class EventServiceTest {
 
     private static final int ID = 1;
 
@@ -44,7 +44,7 @@ public class EventServiceTest {
     }
 
     @Test
-    void getEventValidId_thenReturnEvent() throws Exception {
+    void getEventValidId_thenReturnEvent() {
         when(eventRepository.findEventById(ID))
                 .thenReturn(event);
 
@@ -55,9 +55,7 @@ public class EventServiceTest {
     void getEventInvalidId_thenThrowException() {
         // TODO: We've really gotta stop throwing base Exceptions. Maybe try optionals or something
         when(eventRepository.findEventById(ID+1)).thenReturn(null);
-        Exception e = assertThrows(Exception.class, () -> {
-            eventService.getEventById(ID + 1);
-        });
+        Exception e = assertThrows(Exception.class, () -> eventService.getEventById(ID + 1));
         String expectedMessage = "Event not found.";
         assertThat(e.getMessage(), containsString(expectedMessage));
     }

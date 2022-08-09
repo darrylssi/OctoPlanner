@@ -1,9 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -42,11 +40,11 @@ public class Event {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
