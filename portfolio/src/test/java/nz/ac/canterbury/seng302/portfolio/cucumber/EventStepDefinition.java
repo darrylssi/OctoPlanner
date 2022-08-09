@@ -21,7 +21,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Class containing the step definitions for the account_credited Cucumber feature
+ * Contains Cucumber acceptance tests for events.
+ *
+ * Tests the event controller to make sure that added events redirect properly and provide the correct message.
  */
 public class EventStepDefinition {
 
