@@ -52,7 +52,7 @@ function deleteEvent(eventId) {
 }
 
  /**
- * Inserts/expands the event edit form directly below the event being edited.
+  * Inserts/expands the event edit form directly below the event being edited.
   * This function adds forms into the page only as they are needed.
   * Also sends and initial editing websocket message, plus another every {@link EVENT_EDIT_MESSAGE_FREQUENCY} ms
   * @param eventId the id of the event to show the form for
@@ -62,7 +62,7 @@ function deleteEvent(eventId) {
   * @param eventStartDate start date of event being edited
   * @param eventEndDate end date of event being edited
   */
-function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
+function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     /* Search for the edit form */
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
     let delay = 0;
@@ -111,23 +111,24 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     }, delay, "editEventForm-" + eventBoxId);
 }
 
+
 /**
  * Remove the edit form from any event it is attached to.
  * Can send a stop editing messages & cease sending repeated editing messages if sendStop is true.
  * @param eventBoxId the ID of the event box with the open edit form
  * @param sendStop if true, send a stop editing websocket message, and also stop sending repeated edit messages
  */
-function hideEditEvent(eventBoxId, sendStop=false) {
+function hideEditEvent(eventBoxId/*, sendStop=false*/) {
     const editForm = document.getElementById("editEventForm-" + eventBoxId);
     if (eventForm) {
         new bootstrap.Collapse(editForm).hide();
     }
-    if (sendStop) {
-        if (sendEditMessageInterval) {
-            clearInterval(sendEditMessageInterval);
-        }
-        sendStopEditingMessage(previousEvent);
-    }
+//    if (sendStop) {
+//        if (sendEditMessageInterval) {
+//            clearInterval(sendEditMessageInterval);
+//        }
+//        sendStopEditingMessage(previousEvent);
+//    }
 }
 
 /**
