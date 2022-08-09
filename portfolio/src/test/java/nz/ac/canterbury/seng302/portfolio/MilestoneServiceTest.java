@@ -60,5 +60,4 @@ class MilestoneServiceTest {
         milestoneService.saveMilestone(milestone);
         verify(milestoneRepository, times(1)).save(milestone);
     }
-
 }

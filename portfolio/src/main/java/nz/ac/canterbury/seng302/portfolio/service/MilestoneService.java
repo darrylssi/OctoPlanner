@@ -29,11 +29,9 @@ public class MilestoneService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Milestone not found.");
         }
-
     }
 
     public void saveMilestone(Milestone milestone) {
         repository.save(milestone);
     }
-
 }
