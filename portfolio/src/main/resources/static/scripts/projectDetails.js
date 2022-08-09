@@ -1,3 +1,8 @@
+var previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
+var previousEventBox; // same but for the eventbox
+const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
+let sendEditMessageInterval;
+const EDIT_FORM_CLOSE_DELAY = 300;
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -51,27 +56,32 @@ function deleteEvent(eventId) {
  * Inserts/expands the event edit form directly below the event being edited.
  * This function adds forms into the page only as they are needed.
  */
-function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
-    /* Search for the edit form */
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     let delay = 0;
 
-    /* Collapse element and take no further action if the selected form is open */
+    /* Search for the edit form */
+    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    let previousEditForm = document.getElementById("editEventForm-" + previousEventBox);
+
+    /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
         hideEditEvent(eventBoxId);
         return;
     }
+    /* If the previous form is open, send the stop message but let collapseall take care of it
+       so that the delay still works */
+    if (previousEditForm != null && previousEditForm.classList.contains("show")) {
+        stopEditing();
+        delay = EDIT_FORM_CLOSE_DELAY;
+    }
+
+    /* Set the previous event values */
+    previousEvent = eventId;
+    previousEventBox = eventBoxId;
 
     /* Collapse any collapsible elements already on the page */
-    let collapseElementList = document.getElementsByClassName("collapse show");
-    if (collapseElementList.length > 0) {
-        delay = 300;
-    }
-    for (let element of collapseElementList) {
-        if (element.id.indexOf("editEventForm") != -1) {
-            new bootstrap.Collapse(element).hide();
-        }
-    }
+    const delayNew = collapseAllEditEventForms();
+    delay = (delay === 0) ? delayNew : delay; // this is so that delay is still set if the previous form is open
 
     /* Create element if not seen before */
     if (editForm == null) {
@@ -92,6 +102,13 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.querySelector("#cancel").onclick = function () {hideEditEvent(eventBoxId);};
     }
 
+    /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
+    sendEditingEventMessage(eventId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    if (sendEditMessageInterval) { // reset interval
+        clearInterval(sendEditMessageInterval);
+    }
+    sendEditMessageInterval = setInterval(function() {sendEditingEventMessage(eventId)}, EVENT_EDIT_MESSAGE_FREQUENCY)
+
     /* Get this form to show after a delay that allows any other forms open to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
@@ -100,12 +117,45 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
     }, delay, "editEventForm-" + eventBoxId);
 }
 
-/** Exposes an easier access point for the cancel button */
+/**
+ * Collapse the edit form for the specified event box.
+ * Accessed directly by the cancel button.
+ * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
+ * @param eventBoxId the ID of the event box to hide the form from
+ */
 function hideEditEvent(eventBoxId) {
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
+    stopEditing()
+}
+
+/**
+ * Sends a stop editing message for the previously edited event, and stops any repeating edit messages from being sent.
+ */
+function stopEditing() {
+    if (sendEditMessageInterval) {
+        clearInterval(sendEditMessageInterval);
+    }
+    sendStopEditingMessage(previousEvent);
+}
+
+/**
+ * Take a wild guess what this one does.
+ * Hint: it has something to do with collapsing all edit event forms.
+ * @return delay in ms to open form. Set to {@link EDIT_FORM_CLOSE_DELAY} if there are forms to close, else 0.
+ */
+function collapseAllEditEventForms() {
+    let delay;
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    delay = ((collapseElementList.length > 0) ? EDIT_FORM_CLOSE_DELAY : 0);
+    for (let element of collapseElementList) {
+        if (element.id.indexOf("editEventForm") != -1) {
+            new bootstrap.Collapse(element).hide();
+        }
+    }
+    return delay;
 }
 
 /**
