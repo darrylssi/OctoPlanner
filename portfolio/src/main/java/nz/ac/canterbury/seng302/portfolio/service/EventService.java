@@ -6,6 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+/**
+ * Service class holding methods used to access the underlying event repository methods,
+ * which actually touch the database.
+ *
+ * Service methods need to be written manually, unlike repository methods, and should deal with errors (mainly items
+ * not being found).
+ */
 @Service
 public class EventService {
     @Autowired
