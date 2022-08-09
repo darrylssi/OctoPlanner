@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class SprintServiceTest {
+class SprintServiceTest {
 
     @Autowired
     private SprintService sprintService;
@@ -34,7 +34,7 @@ public class SprintServiceTest {
     }
 
     @Test
-    void getSprintValidId_thenReturnSprint() throws Exception {
+    void getSprintValidId_thenReturnSprint() {
         when(sprintRepository.findSprintById(1))
                 .thenReturn(sprint1);
 
@@ -43,9 +43,7 @@ public class SprintServiceTest {
 
     @Test
     void getSprintInvalidId_thenThrowException() {
-        Exception e = assertThrows(ResponseStatusException.class, () -> {
-            sprintService.getSprintById(2);
-        });
+        Exception e = assertThrows(ResponseStatusException.class, () -> sprintService.getSprintById(2));
         String expectedMessage = "Sprint not found.";
         assertTrue(e.getMessage().contains(expectedMessage));
     }

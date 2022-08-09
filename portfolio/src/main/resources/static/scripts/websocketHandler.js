@@ -5,14 +5,7 @@ let stompClient = null;
  * @param connected Boolean if a connection has been established to a WebSocket
  */
 function setConnected(connected) {
-    // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
-    // TODO check these lines before merging to master!
-
-    document.getElementById('connect').disabled = connected;
-    document.getElementById('disconnect').disabled = !connected;
-    //document.getElementById('conversationDiv').style.visibility
-    //    = connected ? 'visible' : 'hidden';
-
+    // Currently, does not contain any elements that need to be set according to the connected status
     let response = document.getElementById('response');
     if (response !== null ) {
         response.innerHTML = '';

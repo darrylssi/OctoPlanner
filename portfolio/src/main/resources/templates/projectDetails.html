@@ -310,20 +310,6 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFo
 
         </div>
     </div>
-    
-    <!-- Jacques' WebSocket Nuclear Testing Ground -->
-    <div>
-        <!-- just put th:if="${canEdit} in the div if you want it to be teacher only -->
-        <div id="user" th:data-name="${user}" value="${user}" />
-        <br />
-        <div id="conversationDiv">
-            <button id="sendMessage" onclick="sendMessage();">Send Websocket Message</button>
-            <button id="connect" onclick="connect();">Connect</button>
-            <button id="disconnect" onclick="disconnect();">Disconnect</button>
-            <p id="response"></p>
-        </div>
-    </div>
-    <!-- Other End Of Jacques' WebSocket Nuclear Testing Ground -->
 </div>
 <script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event

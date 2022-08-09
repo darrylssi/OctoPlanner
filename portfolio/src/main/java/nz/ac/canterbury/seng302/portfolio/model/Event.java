@@ -40,11 +40,11 @@ public class Event {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
