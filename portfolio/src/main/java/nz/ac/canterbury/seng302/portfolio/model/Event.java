@@ -1,9 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -26,9 +24,9 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    // Is this necessary for an event?
-    @Column
-    private int parentProjectId;
+    @ManyToOne
+    @JoinColumn(name = "parent_project_id", nullable = false)
+    private Project parentProject;
 
     @Column(nullable = false)
     @NotBlank(message="Event name cannot be blank")
@@ -42,31 +40,28 @@ public class Event {
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
 
     /**
      * A constructor which set the given user data to the specified variables
-     * @param parentProjectId Gets the project id
      * @param eventName Gets the event name given by user
      * @param eventDescription Gets the event description given by the user
      * @param eventStartDate Gets the event start date as a Date object
      * @param eventEndDate Gets the event end date as a Date object
      */
-    public Event(int parentProjectId, String eventName,  String eventDescription, Date eventStartDate, Date eventEndDate) {
-        this.parentProjectId = parentProjectId;
+    public Event(String eventName,  String eventDescription, Date eventStartDate, Date eventEndDate) {
         this.eventName = eventName;
         this.eventDescription = eventDescription;
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
     }
-
 
     /**
      * Returns a string listing the attributes of the event in the form "Event[x, x, x]".
@@ -75,8 +70,8 @@ public class Event {
     @Override
     public String toString() {
         return String.format(
-                "Event[id=%d, parentProjectId='%d', eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
-                id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
+                "Event[id=%d, eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
+                id, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
     /**
@@ -93,22 +88,6 @@ public class Event {
      */
     public int getId(){
         return id;
-    }
-
-    /**
-     * Sets the parent project id
-     * @param id Gets the Project's id
-     */
-    public void setParentProjectId(int id) {
-        this.parentProjectId = id;
-    }
-
-    /**
-     * Gets the parent project id
-     * @return project's id
-     */
-    public int getParentProjectId() {
-        return parentProjectId;
     }
 
     /**
@@ -173,6 +152,14 @@ public class Event {
      */
     public void setEndDate(Date newEndDate) {
         this.eventEndDate = newEndDate;
+    }
+
+    public Project getParentProject() {
+        return parentProject;
+    }
+
+    public void setParentProject(Project parentProject) {
+        this.parentProject = parentProject;
     }
 
     /**

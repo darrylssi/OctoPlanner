@@ -3,9 +3,19 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
+/**
+ * Service class holding methods used to access the underlying event repository methods,
+ * which actually touch the database.
+ *
+ * Service methods need to be written manually, unlike repository methods, and should deal with errors (mainly items
+ * not being found).
+ */
 @Service
 public class EventService {
     @Autowired
@@ -39,12 +49,12 @@ public class EventService {
     /**
      * Get event by id
      */
-    public Event getEventById(Integer id) throws Exception {
+    public Event getEventById(Integer id) throws ResponseStatusException {
         Event event = repository.findEventById(id);
         if (event != null) {
             return event;
         } else {
-            throw new Exception("Event not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found.");
         }
     }
 

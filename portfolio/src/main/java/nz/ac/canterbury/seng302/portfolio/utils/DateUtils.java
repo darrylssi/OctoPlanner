@@ -23,10 +23,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 @Component
 public class DateUtils {
 
-    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat(DATE_FORMAT);
-    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat(DISPLAY_DATE_FORMAT);
-    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat(DATETIME_FORMAT);
-
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     // Using a singleton pattern, because SonarLint doesn't like it when a static
@@ -40,13 +36,14 @@ public class DateUtils {
     }
 
     private DateUtils() {}
+
     /**
      * Converts a Date object to a String with dd/MMM/yyyy format.
      * @param date Date to be converted
      * @return Date as a String
      */
     public static String toDisplayString(Date date) {
-        return displayDateFormat.format(date);
+        return new SimpleDateFormat(DISPLAY_DATE_FORMAT).format(date);
     }
 
     /**
@@ -55,7 +52,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayDateTimeString(Date date) {
-        return displayDateTimeFormat.format(date);
+        return new SimpleDateFormat(DISPLAY_DATETIME_FORMAT).format(date);
     }
 
     /**
@@ -65,7 +62,7 @@ public class DateUtils {
      */
     public static Date toDate(String date) {
         try {
-            return backendDateFormat.parse(date);
+            return new SimpleDateFormat(DATE_FORMAT).parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }
@@ -74,11 +71,25 @@ public class DateUtils {
 
     /**
      * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date String to be converted to Date
-     * @return Date object
+     * @param date Date object to be converted to String
+     * @return String object
      */
     public static String toString(Date date) {
-        return backendDateFormat.format(date);
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
+     * @param date String to be converted to a Date
+     * @return Date object of the corresponding string
+     */
+    public static Date toDateTime(String date) {
+        try {
+            return new SimpleDateFormat(DATETIME_ISO_FORMAT).parse(date);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
+        }
+        return null;
     }
 
     /**
@@ -97,7 +108,7 @@ public class DateUtils {
      * Note: To get a user's timezone, add a <code>TimeZone</code> argument in the Controller method
      * @param date The date specified
      * @param time The time of day specified
-     * @param userTimeZone The timezone this occurs in
+     * @param usersTimezone The timezone this occurs in
      * @return A Date object of the date + time, according to the timezone
      */
     public static Date localDateAndTimeToDate(LocalDate date, LocalTime time, TimeZone usersTimezone) {
