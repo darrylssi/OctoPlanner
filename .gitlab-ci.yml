@@ -131,4 +131,5 @@ deploy-production-portfolio:
       - portfolio/build/libs
   only:
     - tags
-    - master
+  except:    # Combining an 'only' with a negated 'except' is equivalent to a logical 'and'
+    - /^master-.*/    # RegEx to match any string that doesn't start with master-
