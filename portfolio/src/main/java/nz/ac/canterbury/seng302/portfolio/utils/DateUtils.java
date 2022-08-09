@@ -23,11 +23,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 @Component
 public class DateUtils {
 
-    private static final SimpleDateFormat backendDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat backendDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-    private static final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd/MMM/yyyy");
-    private static final SimpleDateFormat displayDateTimeFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm");
-
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     // Using a singleton pattern, because SonarLint doesn't like it when a static
@@ -90,7 +85,7 @@ public class DateUtils {
      */
     public static Date toDateTime(String date) {
         try {
-            return backendDateTimeFormat.parse(date);
+            return new SimpleDateFormat(DATETIME_ISO_FORMAT).parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
         }
