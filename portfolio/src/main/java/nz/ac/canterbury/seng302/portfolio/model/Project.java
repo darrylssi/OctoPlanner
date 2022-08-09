@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.Set;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -40,6 +41,9 @@ public class Project {
     @Column (nullable = false)
     @DateTimeFormat(pattern = DATE_FORMAT)
     private Date projectCreationDate;
+
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Event> events;
 
     protected Project() {
         this.projectCreationDate = new Date();
