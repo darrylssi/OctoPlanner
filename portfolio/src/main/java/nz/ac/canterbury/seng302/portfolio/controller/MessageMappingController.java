@@ -48,7 +48,7 @@ public class MessageMappingController {
      */
     @MessageMapping("/events")
     @SendTo("/topic/events")
-    public EventMessageOutput sendEventData(EventMessage eventMessage) throws Exception {
+    public EventMessageOutput sendEventData(EventMessage eventMessage) {
         Event updatedEvent;
         try {
             updatedEvent = eventService.getEventById(eventMessage.getId());
@@ -61,14 +61,14 @@ public class MessageMappingController {
 
         //Add event info to message output
         eventMessageOutput = new EventMessageOutput();
-        eventMessageOutput.setParentProjectId(updatedEvent.getParentProjectId());
+        eventMessageOutput.setParentProjectId(updatedEvent.getParentProject().getId());
         eventMessageOutput.setId(eventMessage.getId());
         eventMessageOutput.setName(updatedEvent.getEventName());
         eventMessageOutput.setStartDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventStartDate()));
         eventMessageOutput.setEndDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventEndDate()));
         eventMessageOutput.setDescription(updatedEvent.getEventDescription());
 
-        List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProjectId());
+        List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProject().getId());
         eventMessageOutput.setStartColour(updatedEvent.determineColour(sprints, false) + "4c");
         eventMessageOutput.setEndColour(updatedEvent.determineColour(sprints, true) + "4c");
         sprints.sort(Comparator.comparing(Sprint::getSprintEndDate));
@@ -87,30 +87,14 @@ public class MessageMappingController {
             if(timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())){
                 sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                for (int j = 0; j < events.size(); j++) {
-                    if(events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate()) &&
-                            timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
-                            events.get(j).getEventStartDate(), events.get(j).getEventEndDate())){
-                        eventIds.add(String.format(EVENT_ID_FORMAT, events.get(j).getId()));
-                        break;
-                    } else if (j+1 == events.size()){
-                        eventIds.add("-1");
-                    }
-                }
+                eventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
+                        sprints.get(i).getSprintEndDate(), updatedEvent.getEventStartDate()));
             }
             if((sprints.size() > i+1) && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
                 sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                for (int j = 0; j < events.size(); j++) {
-                    if(events.get(j).getEventStartDate().after(updatedEvent.getEventStartDate())
-                    && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
-                            events.get(j).getEventStartDate(), events.get(j).getEventEndDate())){
-                        eventIds.add(String.format(EVENT_ID_FORMAT, events.get(j).getId()));
-                        break;
-                    } else if (j+1 == events.size()){
-                        eventIds.add("-1");
-                    }
-                }
+                eventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
+                        sprints.get(i+1).getSprintStartDate(), updatedEvent.getEventStartDate()));
             }
         }
 
@@ -132,6 +116,17 @@ public class MessageMappingController {
             return !startA.after(endB);
         }
         return !endA.before(startB);
+    }
+
+    private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd, Date eventStartDate){
+        for (Event event : events) {
+            if (event.getEventStartDate().after(eventStartDate) &&
+                    timesOverlap(periodStart, periodEnd,
+                            event.getEventStartDate(), event.getEventEndDate())) {
+                return (String.format(EVENT_ID_FORMAT, event.getId()));
+            }
+        }
+        return "-1";
     }
 
 
