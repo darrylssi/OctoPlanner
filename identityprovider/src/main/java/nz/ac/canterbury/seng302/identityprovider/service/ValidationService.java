@@ -22,6 +22,7 @@ public class ValidationService {
     private UserRepository repository;
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
+    private static final String USERNAME = "Username";  // Save the field name as a string constant
 
     /**
      * Validates the fields in a register request
@@ -33,14 +34,14 @@ public class ValidationService {
 
         if (request.getUsername().isBlank()) {  // Checks that the username field isn't empty
             ValidationError error = ValidationError.newBuilder()
-                    .setFieldName("Username")
+                    .setFieldName(USERNAME)
                     .setErrorText("Username cannot be empty")
                     .build();
             errors.add(error);
         } else if (request.getUsername().length() < 2 ||  // First name isn't too short
             request.getUsername().length() > 15) { // First name isn't too long
         ValidationError error = ValidationError.newBuilder()
-                .setFieldName("Username")
+                .setFieldName(USERNAME)
                 .setErrorText("Username must be between 2 to 15 characters")
                 .build();
         errors.add(error);
@@ -48,7 +49,7 @@ public class ValidationService {
         // Checks that the username isn't already in the database
         else if (repository.findByUsername(request.getUsername()) != null) {
             ValidationError error = ValidationError.newBuilder()
-                    .setFieldName("Username")
+                    .setFieldName(USERNAME)
                     .setErrorText("Username is already in use")
                     .build();
             errors.add(error);

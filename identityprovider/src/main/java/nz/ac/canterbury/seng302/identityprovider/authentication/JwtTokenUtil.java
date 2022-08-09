@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.identityprovider.authentication;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import nz.ac.canterbury.seng302.identityprovider.model.User;
@@ -112,7 +111,7 @@ public class JwtTokenUtil implements Serializable {
 			getClaimAsDTO("nbf", claims),
 			getClaimAsDTO("exp", claims),
 			getClaimAsDTO("iat", claims)
-		).filter(Objects::nonNull).collect(Collectors.toList());
+		).filter(Objects::nonNull).toList();
 	}
 
 	/**
