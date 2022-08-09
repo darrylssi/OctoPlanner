@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 @Controller
 public class LoginController {
+
+    private static final String LOGIN_PAGE = "login";
 
     @Autowired
     private AuthenticateClientService authenticateClientService;
@@ -52,7 +53,7 @@ public class LoginController {
                     .orElse("-1");
             return "redirect:./users/" + userId;
         }
-        return "login";
+        return LOGIN_PAGE;
     }
 
     /**
@@ -86,14 +87,14 @@ public class LoginController {
             loginReply = authenticateClientService.authenticate(username, password);
         } catch (StatusRuntimeException e){
             model.addAttribute("loginMessage", "Error connecting to Identity Provider...");
-            return "login";
+            return LOGIN_PAGE;
         }
         if (loginReply.getSuccess()) {
             createCookie(request, response, loginReply);
             return "redirect:./users/" + loginReply.getUserId();
         }
         model.addAttribute("loginMessage", loginReply.getMessage());
-        return "login";
+        return LOGIN_PAGE;
     }
 
 

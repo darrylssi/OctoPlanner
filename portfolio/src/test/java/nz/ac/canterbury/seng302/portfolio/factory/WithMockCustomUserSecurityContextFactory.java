@@ -32,17 +32,15 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
 
     /**
      * <p>
-     * Given {@link WithMockPrincipal}'s role, builds an AuthState object, and
+     * Given the provided role & user ID, builds an AuthState object, and
      * makes a security context with said AuthState as the principal.
      * </p>
-     * This context gets set for the controller tests, so the
-     * AuthenticationPrincipal annotations can use something.
+     * This overload is used for creating mock SecurityContexts directly,
+     * or on-the-fly. If you simply want a test to be run with TEACHER permissions,
+     * use {@link WithMockPrincipal}
      */
-    @Override
-    public SecurityContext createSecurityContext(WithMockPrincipal annotation) {
+    public SecurityContext createSecurityContext(UserRole role, int id) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        UserRole role = annotation.value();
-        int id = annotation.id();
 
         if (role == UNRECOGNIZED) {
             throw new IllegalArgumentException(
@@ -53,7 +51,21 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
         context.setAuthentication(authentication);
 
         return context;
+    }
 
+    /**
+     * <p>
+     * Given {@link WithMockPrincipal}'s role, builds an AuthState object, and
+     * makes a security context with said AuthState as the principal.
+     * </p>
+     * This context gets set for the controller tests, so the
+     * AuthenticationPrincipal annotations can use something.
+     */
+    @Override
+    public SecurityContext createSecurityContext(WithMockPrincipal annotation) {
+        UserRole role = annotation.value();
+        int id = annotation.id();
+        return createSecurityContext(role, id);
     }
 
     /**
@@ -63,7 +75,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
      * @param role The role of the user
      * @return A built AuthState object.
      */
-    private static AuthState buildAuthState(int id, UserRole role) {
+    public static AuthState buildAuthState(int id, UserRole role) {
         String roleString = role.toString().toLowerCase(Locale.ROOT);
 
         return AuthState.newBuilder()
@@ -79,7 +91,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
                 .build();
     }
 
-    private static ClaimDTO makeClaimDTO(String key, String value) {
+    public static ClaimDTO makeClaimDTO(String key, String value) {
         return ClaimDTO.newBuilder()
                 .setType(key)
                 .setValue(value)

@@ -22,11 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import javax.validation.Valid;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Controller for the add sprint details page
@@ -41,12 +37,15 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    // Provide a list of colours that are noticably different for the system to cycle through
-    private final List<String> SPRINT_COLOURS = Arrays.asList(
-            "#320d6d",
+    private static final String ADD_SPRINT_TEMPLATE = "addSprint";
+    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
+
+    // Provide a list of colours that are noticeably different for the system to cycle through
+    private static final List<String> SPRINT_COLOURS = Arrays.asList(
+            "#5aff15",
             "#b83daf",
             "#449dd1",
-            "#52ffb8");
+            "#d6871f");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -113,7 +112,7 @@ public class AddSprintController extends PageController {
         model.addAttribute("maxDate", DateUtils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
-        return "addSprint";
+        return ADD_SPRINT_TEMPLATE;
     }
 
     /**
@@ -149,20 +148,22 @@ public class AddSprintController extends PageController {
 
         // Getting sprint list containing all the sprints
         List<Sprint> sprintList = sprintService.getSprintsInProject(sprint.getParentProjectId());
-        sprintList.sort((s1, s2) -> { return s1.getSprintEndDate().compareTo(s2.getSprintEndDate()); });
+        sprintList.sort(Comparator.comparing(Sprint::getSprintEndDate));
 
         // Fetch system colour for sprint
         int colourIndex = sprintList.size() % SPRINT_COLOURS.size();
         String sprintColour = SPRINT_COLOURS.get(colourIndex);
-        if (sprintColour == sprintList.get(sprintList.size() - 1).getSprintColour()) {
+        if (!sprintList.isEmpty() && sprintColour.equals(sprintList.get(sprintList.size() - 1).getSprintColour())) {
             sprintColour = SPRINT_COLOURS.get((colourIndex + 1) % SPRINT_COLOURS.size());
         }
 
-        ValidationError dateOutOfRange = getValidationError(sprintStartDate, sprintEndDate,
+        ValidationError dateOutOfRange = getDateValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintList);
 
+        ValidationError invalidName = getNameValidationError(sprintName);
+
         // Checking it there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
             model.addAttribute("parentProjectId", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectName", parentProject.getProjectName());
@@ -173,7 +174,9 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintEndDate", sprintEndDate);
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            return "addSprint";
+            model.addAttribute("invalidName", invalidName.getFirstError());
+
+            return ADD_SPRINT_TEMPLATE;
         }
 
         // Adding the new sprint object
@@ -186,7 +189,7 @@ public class AddSprintController extends PageController {
         sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
-        return "redirect:../project/" + parentProject.getId();
+        return REDIRECT_TO_PROJECT + parentProject.getId();
     }
 
     /**
@@ -198,7 +201,7 @@ public class AddSprintController extends PageController {
      * @param sprintList A list of sprints in the same project
      * @return A validation error object, with a boolean error flag and a string list of error messages
      */
-    static ValidationError getValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
+    static ValidationError getDateValidationError(@RequestParam(name = "sprintStartDate") String sprintStartDate,
                                               @RequestParam(name = "sprintEndDate") String sprintEndDate,
                                               @PathVariable("id") int id, Project parentProject, List<Sprint> sprintList) {
         Date start = DateUtils.toDate(sprintStartDate);
@@ -207,5 +210,15 @@ public class AddSprintController extends PageController {
         return ValidationUtils.validateSprintDates(id, start, end,
                 parentProject, sprintList);
     }
+
+    /**
+     * Checks whether the sprint name is valid
+     * @param sprintName Sprint name to be tested
+     * @return A validation error object, with a boolean error flag and a string list of error messages
+     */
+    static ValidationError getNameValidationError(String sprintName) {
+        return ValidationUtils.validateName(sprintName);
+    }
+
 
 }

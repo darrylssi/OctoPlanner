@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
- *
+ * Controller to register new users.
  */
 @Controller
 public class RegisterController {
@@ -31,13 +31,15 @@ public class RegisterController {
 
     @Autowired LoginController loginController;
 
+    private static final String REGISTER_PAGE = "register";
+
     /**
      * Displays the Registration form page
      * @return Registration page
      */
     @GetMapping("/register")
     public String register(User user) {
-        return "register";
+        return REGISTER_PAGE;
     }
 
     @PostMapping("/register")
@@ -59,7 +61,7 @@ public class RegisterController {
     ) {
         UserRegisterResponse registerReply;
         if (result.hasErrors()) {
-            return "register";
+            return REGISTER_PAGE;
         }
         try {
             registerReply = userAccountClientService.register(username, password, firstName,
@@ -75,10 +77,10 @@ public class RegisterController {
             }
         } catch (StatusRuntimeException e){
             model.addAttribute("IdPErrorMessage", "Error connecting to Identity Provider...");
-            return "register";
+            return REGISTER_PAGE;
         }
 
         model.addAttribute("registerMessage", registerReply.getMessage());
-        return "register";
+        return REGISTER_PAGE;
     }
 }

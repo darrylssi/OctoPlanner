@@ -19,6 +19,10 @@ import java.util.Date;
 @Controller
 public abstract class PageController {
 
+    private static final String ERROR = "error";
+    private static final String STATUS = "status";
+    private static final String FEEDBACK = "feedback";
+
     /**
      * Adds error information to the model
      *
@@ -33,21 +37,21 @@ public abstract class PageController {
         model.addAttribute("path", sourcePage);
 
         /* Handle various types of error */
-        switch(err) {
-            case NOT_FOUND:
-                model.addAttribute("error", "Page not found");
-                model.addAttribute("status", "404");
-                model.addAttribute("message", "The page you attempted to access does not exist");
-                break;
-            case ACCESS_DENIED:
-                model.addAttribute("error", "Access Denied");
-                model.addAttribute("status", "403");
-                model.addAttribute("message", "You do not have permission to view this page");
-                break;
-            case UNKNOWN_CLIENT:
-                model.addAttribute("error", "Unknown Client Error");
-                model.addAttribute("status", "400");
-                break;
+        switch (err) {
+            case NOT_FOUND -> {
+                model.addAttribute(ERROR, "Page not found");
+                model.addAttribute(STATUS, "404");
+                model.addAttribute(FEEDBACK, "We couldn't find the page you're looking for");
+            }
+            case ACCESS_DENIED -> {
+                model.addAttribute(ERROR, "Access Denied");
+                model.addAttribute(STATUS, "403");
+                model.addAttribute(FEEDBACK, "You do not have permission to view this page");
+            }
+            case UNKNOWN_CLIENT -> {
+                model.addAttribute(ERROR, "Unknown Client Error");
+                model.addAttribute(STATUS, "400");
+            }
         }
     }
 
