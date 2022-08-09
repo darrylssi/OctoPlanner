@@ -118,7 +118,7 @@
                                     <span class="spinner-border spinner-border-sm"></span>
                                     <span class="fst-italic">USER is editing this event</span>
                                 </span>
-                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]], [[*{getId}]])">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                                     </svg>
@@ -152,7 +152,7 @@
                             <span class="spinner-border spinner-border-sm"></span>
                             <span class="fst-italic">USER is editing this event</span>
                         </span>
-                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]], [[*{getId}]])">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                             </svg>
@@ -313,24 +313,24 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFo
 </div>
 <script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event
-    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/ null;
-    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/ null;
+    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 10)}]]*/;
+    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,10)}]]*/;
     const editFormTemplate = `
     <div class="card">
         <div class="card-header" id="edit-event-form-header"></div>
         <div class="card-body">
-            <form class="container-fluid">
+            <form id="form" class="container-fluid" method="post" modelAttribute="event">
                 <div class="row">
                     <div class="col">
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback">
+                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback" name="eventName">
                             <label for="editEventNameInput">Name</label>
                             <div id="editEventNameFeedback" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="col-10">
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="editEventDescriptionInput">
+                            <input type="text" class="form-control" id="editEventDescriptionInput" name="eventDescription">
                             <label for="editEventDescriptionInput">Description</label>
                         </div>
                     </div>
@@ -338,28 +338,28 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFo
                 <div class="row">
                     <div class="col">
                         <div class="form-floating mb-3">
-                            <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="` + projectStart + `" max="` + projectEnd + `" name="eventStartDate">
                             <label for="editEventStartDate">Start Date</label>
                             <div id="editEventStartDateFeedback" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3">
-                            <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback">
+                            <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback" name="eventStartTime">
                             <label for="editEventStartTime">Start Time</label>
                             <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3 has-validation">
-                            <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="` + projectStart + `" max="` + projectEnd + `" name="eventEndDate">
                             <label for="editEventEndDate">End Date</label>
                             <div id="editEventEndDateFeedback" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3 has-validation">
-                            <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '" name="eventEndTime">
                             <label for="editEventEndTime">End Time</label>
                             <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>
                         </div>
@@ -370,7 +370,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, datetimeISOFo
                         <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons">Cancel</button>
                     </div>
                     <div class="col col-md-3 col-lg-2">
-                        <button type="button" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                     </div>
                 </div>
             </form>

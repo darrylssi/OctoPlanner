@@ -51,7 +51,7 @@ function deleteEvent(eventId) {
  * Inserts/expands the event edit form directly below the event being edited.
  * This function adds forms into the page only as they are needed.
  */
-function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
+function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate, eventId) {
     /* Search for the edit form */
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
     let delay = 0;
@@ -80,6 +80,7 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.setAttribute("class", "editEventForm collapse");
         editForm.innerHTML = editFormTemplate;
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
+        document.getElementById("form").action="/edit-event/" + eventId;
 
         /* Set internal attributes of form and link cancel button */
         editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
