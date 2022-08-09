@@ -10,6 +10,9 @@
 */bin/
 .jpb/
 
+# Cucumber output
+**/target
+
 # Other
 *.db
 .env
