@@ -20,7 +20,7 @@ public class Milestone {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name="id", nullable = false)
+    @JoinColumn(name="parent_project_id", nullable = false)
     private Project parentProject;
 
     @Column(nullable = false)
