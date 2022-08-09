@@ -6,6 +6,8 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 
 /**
  * Represents an event object. Event colour should be determined based on what it is being displayed with.
@@ -13,6 +15,8 @@ import java.util.List;
  */
 @Entity
 public class Event {
+
+    public static final String DEFAULT_COLOUR = "#ff3823";
 
     /** The id of this event. This id should be unique between all events.*/
     @Id
@@ -24,20 +28,21 @@ public class Event {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
+            message="The event name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String eventName;
 
     @Column (nullable = false)
-    @Size(max=200, message="The event description must not exceed 200 characters.")
+    @Size(max=MAX_DESC_LENGTH, message="The event description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String eventDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern=DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern=DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
@@ -190,6 +195,6 @@ public class Event {
             }
         }
 
-        return "#ff3823";             // Default colour
+        return DEFAULT_COLOUR;
     }
 }

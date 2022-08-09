@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
+
 /**
  * Used by Project and Sprint to convert dates to yyyy-MM-dd format and vice versa
  * that is required by the date type input field.

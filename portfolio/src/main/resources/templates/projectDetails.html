@@ -57,7 +57,7 @@
     <hr/>
     <!-- The first events outside the sprint -->
     <div class="event-list-container outside-event">
-        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId}"
+        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId} + '-before'"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
             <span th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                 <div class="event-left">
@@ -69,7 +69,7 @@
                     <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                 </div>
                 <div class="event-right">
-                    <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                    <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-before']], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                         </svg>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="break"></div>
                 <div th:class="event-list-container">
-                    <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId}"
+                    <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId} + '-in-' + *{getId}"
                             th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
                         <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                             <div class="event-left">
@@ -125,7 +125,7 @@
                                     <span class="spinner-border spinner-border-sm"></span>
                                     <span class="fst-italic">USER is editing this event</span>
                                 </span>
-                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                                     </svg>
@@ -143,7 +143,7 @@
         </div>
         <!-- The events outside the sprint -->
         <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId}"
+            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId} + '-after-' + *{getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
                 <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                     <div class="event-left">
@@ -156,10 +156,10 @@
                     </div>
                     <div class="event-right">
                         <span class="me-2">
-                                    <span class="spinner-border spinner-border-sm"></span>
-                                    <span class="fst-italic">USER is editing this event</span>
-                                </span>
-                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span class="fst-italic">USER is editing this event</span>
+                        </span>
+                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                             </svg>
@@ -344,62 +344,69 @@
 <script th:inline="javascript">
     //th:action="@{../edit-event/1)}" method="post" th:object="${event}"
     // Included to allow the javascript to "paste" this under the necessary event
-    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/;
-    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/;
-    const editFormTemplate = '' +
-    '<div id="editEventForm" class="editEventForm">' +
-    '    <div class="card">' +
-    '        <div class="card-header" id="edit-event-form-header"></div>' +
-    '        <div class="card-body">' +
-    '            <form id="form" class="container-fluid" method="post" modelAttribute="event">' +
-    '                <div class="row">' +
-    '                    <div class="col">' +
-    '                        <div class="form-floating mb-3">' +
-    '                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback"' +
-    '                               name="eventName">' +
-    '                            <label for="editEventNameInput">Name</label>' +
-    '                            <div id="editEventNameFeedback" class="invalid-feedback"></div>' +
-    '                        </div>' +
-    '                    </div>' +
-    '                    <div class="col-10">' +
-    '                        <div class="form-floating mb-3">' +
-    '                            <input type="text" class="form-control" id="editEventDescriptionInput"' +
-    '                               name="eventDescription">' +
-    '                            <label for="editEventDescriptionInput">Description</label>' +
-    '                        </div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="row">' +
-    '                    <div class="col">' +
-    '                        <div class="form-floating mb-3">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartFeedback" min="' + projectStart + '" max="' + projectEnd + '"' +
-        '                               name="eventStartDate">' +
-    '                            <label for="editEventStartTime">Start Time</label>' +
-    '                            <div id="editEventStartFeedback" class="invalid-feedback"></div>' +
-    '                        </div>' +
-    '                    </div>' +
-    '                    <div class="col">' +
-    '                        <div class="form-floating mb-3 has-validation">' +
-    '                            <input type="datetime-local" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndFeedback" min="' + projectStart + '" max="' + projectEnd + '"' +
-        '                               name="eventEndDate">' +
-    '                            <label for="editEventEndTime">End Time</label>' +
-    '                            <div id="editEventEndFeedback" class="invalid-feedback"></div>' +
-    '                        </div>' +
-    '                    </div>' +
-    '                </div>' +
-    '                <div class="row">' +
-    '                    <div class="col-9"></div>' +
-    '                    <div class="col-1">' +
-    '                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick=hideEditEvent()>Cancel</button>' +
-    '                    </div>' +
-    '                    <div class="col-2">' +
-    '                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save</button>' +
-    '                    </div>' +
-    '                </div>' +
-    '            </form>' +
-    '        </div>' +
-    '    </div>' +
-    '</div>';
+    let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/ null;
+    let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/ null;
+    const editFormTemplate = `
+    <div class="card">
+        <div class="card-header" id="edit-event-form-header"></div>
+        <div class="card-body">
+            <form id="form" class="container-fluid" method="post" modelAttribute="event">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editEventNameInput" required aria-describedby="editEventNameFeedback" name="eventName">
+                            <label for="editEventNameInput">Name</label>
+                            <div id="editEventNameFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-10">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editEventDescriptionInput" name="eventDescription">
+                            <label for="editEventDescriptionInput">Description</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" min="' + projectStart + '" max="' + projectEnd + '" name="eventStartDate">
+                            <label for="editEventStartDate">Start Date</label>
+                            <div id="editEventStartDateFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="time" class="form-control" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback">
+                            <label for="editEventStartTime">Start Time</label>
+                            <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" class="form-control" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" min="' + projectStart + '" max="' + projectEnd + '" name="eventEndDate">
+                            <label for="editEventEndDate">End Date</label>
+                            <div id="editEventEndDateFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="time" class="form-control" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" min="' + projectStart + '" max="' + projectEnd + '">
+                            <label for="editEventEndTime">End Time</label>
+                            <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col col-md-4 col-lg-2">
+                        <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons">Cancel</button>
+                    </div>
+                    <div class="col col-md-3 col-lg-2">
+                        <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>`;
 </script>
 <!--/*
     JS files are static, and thus don't know anything about the project (i.e. the base URL).

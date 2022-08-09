@@ -1,12 +1,9 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.model.SprintRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.builder.MockUserResponseBuilder;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
@@ -27,20 +23,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockPrincipal(TEACHER)
 class ProjectControllerTest {
 
-    final Logger logger = LoggerFactory.getLogger(ProjectControllerTest.class);
-
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private SprintRepository sprintRepository;
 
     @MockBean
     private UserAccountClientService mockedGrpcUserAccount;
@@ -112,7 +102,18 @@ class ProjectControllerTest {
                         .param("projectStartDate", "2021-06-20")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Project name cannot be more than 50 characters")));
+                .andExpect(content().string(containsString("The project name must be between 2 and 32 characters.")));
+    }
+
+    @Test
+    void postProjectWithSymbolName_thenShowError() throws Exception {
+        this.mockMvc.perform(post("/edit-project/0")
+                        .param("projectName", "A@!#@#!")
+                        .param("projectDescription", "desc")
+                        .param("projectStartDate", "2021-06-20")
+                        .param("projectEndDate", "2022-03-05"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters.")));
     }
 
     @Test

@@ -21,6 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Controller to handle requests for editing a user.
+ */
 @Controller
 public class EditUserController extends PageController{
 
@@ -68,6 +71,14 @@ public class EditUserController extends PageController{
         }
     }
 
+    /**
+     * Get user details from the database
+     * @param principal Authenticated user
+     * @param id ID of the user to be edited
+     * @param user User object
+     * @param model Parameters sent to thymeleaf
+     * @return Edit user template
+     */
     @GetMapping("/users/{id}/edit")
     public String edit(
             @AuthenticationPrincipal AuthState principal,
@@ -79,6 +90,22 @@ public class EditUserController extends PageController{
         return EDIT_USER_TEMPLATE;
     }
 
+    /**
+     * Post request to edit a user.
+     * @param user User object
+     * @param principal Authenticated user
+     * @param id ID of the use to be edited
+     * @param result Holds validation errors
+     * @param firstName (New) First name
+     * @param middleName (New) Middle name
+     * @param lastName (New) Last name
+     * @param nickname (New) Nickname
+     * @param bio (New) Bio
+     * @param personalPronouns (New) Personal pronouns
+     * @param email (New) Email
+     * @param model Parameters sent to the thymeleaf template
+     * @return User profile if all details are valid, otherwise edit user template
+     */
     @PostMapping(value = "/users/{id}/edit", params = {"firstName", "middleName", "lastName",
             "nickname", "bio", "personalPronouns", "email"})
     public String edit(
@@ -122,6 +149,18 @@ public class EditUserController extends PageController{
         return EDIT_USER_TEMPLATE;
     }
 
+    /**
+     * Post request to change a user's password
+     * @param user User object
+     * @param id ID of the user to change password of
+     * @param principal Authenticated user
+     * @param result Holds validation errors
+     * @param oldPassword Old password of the user
+     * @param newPassword New password of the user
+     * @param confirmPassword To confirm new password, should be the same as new password.
+     * @param model Parameters sent to thymeleaf template
+     * @return User profile if no errors, otherwise edit user template
+     */
     @PostMapping(value = "/users/{id}/edit", params = {"oldPassword", "password",
             "confirmPassword"})
     public String changePassword(
