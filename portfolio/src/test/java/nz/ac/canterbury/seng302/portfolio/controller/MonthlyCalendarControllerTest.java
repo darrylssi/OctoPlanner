@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,8 +44,8 @@ class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
-    void getMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception {
-        Mockito.when(projectService.getProjectById(-1)).thenThrow(new Exception("Project not found"));
+    void getMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() {
+        Mockito.when(projectService.getProjectById(-1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         try{
             mockMvc.perform(get("/monthlyCalendar/-1"));
         } catch (Exception e) {

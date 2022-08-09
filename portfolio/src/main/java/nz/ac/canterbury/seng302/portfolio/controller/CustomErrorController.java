@@ -12,6 +12,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 public class CustomErrorController implements ErrorController {
+
+    private static final String FEEDBACK = "feedback";
     
     @RequestMapping("/error")
     public ModelAndView handleError(HttpServletRequest request) {
@@ -25,13 +27,13 @@ public class CustomErrorController implements ErrorController {
             error = StringUtils.capitalize(error.replace('_', ' ').toLowerCase());
     
             if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                modelAndView.addObject("feedback", "We couldn't find the page you're looking for");
+                modelAndView.addObject(FEEDBACK, "We couldn't find the page you're looking for");
             } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
-                modelAndView.addObject("feedback", "You do not have permission to view this page");
+                modelAndView.addObject(FEEDBACK, "You do not have permission to view this page");
             } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-                modelAndView.addObject("feedback", "The server wasn't able to complete that request");
+                modelAndView.addObject(FEEDBACK, "The server wasn't able to complete that request");
             } else {
-                modelAndView.addObject("feedback", "An unexpected error occurred");
+                modelAndView.addObject(FEEDBACK, "An unexpected error occurred");
             }
             modelAndView.addObject("status", status);
             modelAndView.addObject("error", error);
@@ -40,7 +42,4 @@ public class CustomErrorController implements ErrorController {
         return modelAndView;
     }
 
-    public String getErrorPath() {
-        return "/error";
-    }
 }

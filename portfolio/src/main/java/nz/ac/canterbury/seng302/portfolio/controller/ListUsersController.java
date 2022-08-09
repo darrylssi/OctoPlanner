@@ -47,6 +47,8 @@ public class ListUsersController extends PageController {
     private static final String DEFAULT_ORDER_COLUMN = "name";
     private static final boolean DEFAULT_IS_ASCENDING = true;
 
+    private static final String USERS_PATH = "users";
+
     private static final Pair<String, Boolean> DEFAULT_COOKIE_VALUE_PAIR = Pair.of(DEFAULT_ORDER_COLUMN, DEFAULT_IS_ASCENDING);
 
     @Autowired
@@ -77,7 +79,6 @@ public class ListUsersController extends PageController {
         } catch (IllegalArgumentException e) {
             // The orderBy column in the cookie is invalid, delete it
             clearPageOrdering(sThisUserID, response);
-            // TODO Andrew: Throw a 400 error once George's branch is merged
             throw e;
         }
 
@@ -93,7 +94,7 @@ public class ListUsersController extends PageController {
 
         model.addAttribute("page", page);
         model.addAttribute("orderBy", orderBy);
-        model.addAttribute("users", users.getUsersList());
+        model.addAttribute(USERS_PATH, users.getUsersList());
         model.addAttribute("dir", isAscending);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
@@ -106,7 +107,7 @@ public class ListUsersController extends PageController {
 
         model.addAttribute("tab", 1);
 
-        return "users";
+        return USERS_PATH;
     }
 
 
@@ -120,7 +121,7 @@ public class ListUsersController extends PageController {
     @PostMapping("/users")
     public String changeUserListOrdering(
         @RequestParam(name="page", defaultValue="1") int page,
-        @RequestParam(name="orderBy", required=true) String orderBy,
+        @RequestParam(name="orderBy") String orderBy,
         @AuthenticationPrincipal AuthState principal,
         HttpServletRequest request,
         HttpServletResponse response
@@ -199,7 +200,7 @@ public class ListUsersController extends PageController {
         String cookieName = COOKIE_NAME_PREFIX + userId;
         Cookie cookie = new Cookie(cookieName, orderBy + COOKIE_VALUE_SEPARATOR + strDirection);
         cookie.setMaxAge(365 * 24 * 60 * 60);   // Expire in a year
-        cookie.setPath(baseURL + "users");
+        cookie.setPath(baseURL + USERS_PATH);
         response.addCookie(cookie);
     }
 

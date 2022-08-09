@@ -311,26 +311,18 @@
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
-
-        <!-- Jacques' WebSocket Nuclear Testing Ground -->
-        <div>
-            <!-- just put th:if="${canEdit} in the div if you want it to be teacher only -->
-            <div id="user" th:data-name="${user}" value="${user}" />
-            <div id="userId" th:data-name="${userId}" value="${userId"} /> <!-- there must be a better way of doing this -->
-            <br />
-            <div id="conversationDiv">
-                <button id="sendMessage" onclick="sendMessage();">Send Websocket Message</button>
-                <button id="connect" onclick="connect();">Connect</button>
-                <button id="disconnect" onclick="disconnect();">Disconnect</button>
-                <p id="response"></p>
-            </div>
-        </div>
-        <!-- Other End Of Jacques' WebSocket Nuclear Testing Ground -->
     </div>
-    <script th:inline="javascript">
+</div>
+
+<!-- Used for event editing popups -->
+<div>
+    <div id="user" th:data-name="${user}" value="${user}" />
+    <div id="userId" th:data-name="${userId}" value="${userId"} /> <!-- there must be a better way of doing this -->
+</div>
+
+<script th:inline="javascript">
     // Included to allow the javascript to "paste" this under the necessary event
     let projectStart = /*[[${project.getProjectStartDate.toString.substring(0, 16)}]]*/ null;
     let projectEnd = /*[[${project.getProjectEndDate.toString.substring(0,16)}]]*/ null;
@@ -396,12 +388,12 @@
         </div>
     </div>`;
 </script>
-    <!--/*
-        JS files are static, and thus don't know anything about the project (i.e. the base URL).
-        This code sets a global variable inside this template (which does know the base URL),
-        which the imported script can access.
-    */-->
-    <script th:inline="javascript">
+<!--/*
+    JS files are static, and thus don't know anything about the project (i.e. the base URL).
+    This code sets a global variable inside this template (which does know the base URL),
+    which the imported script can access.
+*/-->
+<script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
 
     // Bind a 'characters remaining' display to their output

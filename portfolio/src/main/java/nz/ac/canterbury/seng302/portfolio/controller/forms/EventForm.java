@@ -1,15 +1,15 @@
 package nz.ac.canterbury.seng302.portfolio.controller.forms;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.TimeZone;
-
-import javax.validation.constraints.*;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
