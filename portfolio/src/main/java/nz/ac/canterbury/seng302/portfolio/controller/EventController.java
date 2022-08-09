@@ -141,7 +141,9 @@ public class EventController extends PageController {
             @RequestParam(name = "eventName") String name,
             @RequestParam(name = "eventDescription") String description,
             @RequestParam(name = "eventStartDate") String startDate,
-            @RequestParam(name = "eventEndDate") String endDate
+            @RequestParam(name = "eventStartTime") String startTime,
+            @RequestParam(name = "eventEndDate") String endDate,
+            @RequestParam(name = "eventEndTime") String endTime
     ) throws Exception {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         Event event = eventService.getEventById(eventId);
@@ -149,8 +151,8 @@ public class EventController extends PageController {
         // Set new event details
         event.setEventName(name);
         event.setEventDescription(description);
-        event.setStartDate(DateUtils.toDateTime(startDate));
-        event.setEndDate(DateUtils.toDateTime(endDate));
+        event.setStartDate(DateUtils.toDateTime(startDate + 'T' + startTime));
+        event.setEndDate(DateUtils.toDateTime(endDate + 'T' + endTime));
 
         eventService.saveEvent(event);
 
