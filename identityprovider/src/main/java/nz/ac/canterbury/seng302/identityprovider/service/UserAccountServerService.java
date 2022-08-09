@@ -256,9 +256,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 logger.error("Register user {} : {} - {}",
                         request.getUsername(), error.getFieldName(), error.getErrorText());
                 bld.add(error.getErrorText());
-                String logOutput = String.format("Register user %s : %s - %s",
-                        request.getUsername(), error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
             }
 
             reply
@@ -388,6 +385,46 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         return users.subList(fromIndex, toIndex);
     }
 
+    /**
+     * <p>Holds shared functionality for adding/deleting user roles.</p>
+     *
+     * Sends a succesful reply if the operation was successful
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
+    private void modifyUserRole(
+            ModifyRoleOfUserRequest request,
+            StreamObserver<UserRoleChangeResponse> responseObserver,
+            boolean delete) {
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+
+        try {
+            boolean success = false;
+            String successMessage = "Role successfully added";
+            String failMessage = "Couldn't add role: User already had this role.";
+
+            if (delete) {
+                success = userService.removeRoleFromUser(userId, role);
+                successMessage = "Role successfully removed";
+                failMessage = "Couldn't remove role: User didn't have this role";
+            } else {
+                success = userService.addRoleToUser(userId, role);
+            }
+
+            reply.setIsSuccess(success);
+            if (success)
+                reply.setMessage(successMessage);
+            else
+                reply.setMessage(failMessage);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
+        }
+    }
+
 
     /**
      * <p>Assigns a role to the given user.</p>
@@ -398,25 +435,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public void addRoleToUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("addRoleToUser() has been called");
-
-        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
-        int userId = request.getUserId();
-        UserRole role = request.getRole();
-        try {
-            // If the user didn't have this role, add it and return true
-            // Otherwise does nothing, returning false.
-            boolean success = userService.addRoleToUser(userId, role);
-            reply.setIsSuccess(success);
-            if (success)
-                reply.setMessage("Role successfully add");
-            else
-                reply.setMessage("Couldn't add role: User already had this role.");
-            responseObserver.onNext(reply.build());
-            responseObserver.onCompleted();
-        } catch (NoSuchElementException e) {
-            // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
-        }
+        modifyUserRole(request, responseObserver, false);
     }
 
     /**
@@ -428,25 +447,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public void removeRoleFromUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("removeRoleFromUser() has been called");
-
-        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
-        int userId = request.getUserId();
-        UserRole role = request.getRole();
-        try {
-            // If the user had this role, remove it and return true
-            // Otherwise does nothing, returning false.
-            boolean success = userService.removeRoleFromUser(userId, role);
-            reply.setIsSuccess(success);
-            if (success)
-                reply.setMessage("Role successfully removed");
-            else
-                reply.setMessage("Couldn't remove role: User didn't have this role");
-            responseObserver.onNext(reply.build());
-            responseObserver.onCompleted();
-        } catch (NoSuchElementException e) {
-            // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
-        }
+        modifyUserRole(request, responseObserver, true);
     }
 
     /**
@@ -465,8 +466,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                String logOutput = String.format("Edit user %s : %s - %s", request.getUserId(), error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
+                logger.error("Edit user {} : {} - {}",
+                        request.getUserId(), error.getFieldName(), error.getErrorText());
             }
 
             reply
@@ -512,9 +513,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                String logOutput = String.format("Change password of user %s : %s - %s", request.getUserId(),
-                        error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
+                logger.error("Change password of user {} : {} - {}",
+                        request.getUserId(), error.getFieldName(), error.getErrorText());
             }
 
             reply
