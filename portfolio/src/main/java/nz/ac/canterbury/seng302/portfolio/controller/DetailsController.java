@@ -230,6 +230,7 @@ public class DetailsController extends PageController {
         }
         try {
             eventService.deleteEvent(eventId);
+            currentUpdatedEventId = eventId;
             return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

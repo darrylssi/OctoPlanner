@@ -49,7 +49,15 @@ public class MessageMappingController {
     @MessageMapping("/events")
     @SendTo("/topic/events")
     public EventMessageOutput sendEventData(EventMessage eventMessage) throws Exception {
-        Event updatedEvent = eventService.getEventById(eventMessage.getId());
+        Event updatedEvent;
+        try {
+            updatedEvent = eventService.getEventById(eventMessage.getId());
+        } catch (Exception e){
+            eventMessageOutput = new EventMessageOutput();
+            eventMessageOutput.setSprintIds(new ArrayList<>());
+            eventMessageOutput.setId(eventMessage.getId());
+            return eventMessageOutput;
+        }
 
         //Add event info to message output
         eventMessageOutput = new EventMessageOutput();
