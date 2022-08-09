@@ -1,7 +1,6 @@
 let stompClient = null;
 const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
-const EVENT_EDIT_MESSAGE_TIMEOUT = 8000; // timeout period for event editing messages in ms
-//TODO const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
+const EVENT_EDIT_MESSAGE_TIMEOUT = 8000; // hide editing event messages after this many ms
 
 /**
  * Sets html elements according to whether a WebSocket has been connected to or not
@@ -187,15 +186,3 @@ function stopEventTimeout(eventId) {
         clearTimeout(eventTimeouts.get(eventId));
     }
 }
-
-// TODO ideas pad
-// will need to regularly send editing messages when a user has the edit form open, and stop doing that when they close it
-// also only need one regularly sent edit message, as only one event can be edited at a time
-
-// will also need to send a STOP message when the edit thing is closed, or when one is opened
-// stop message will need to include just the event id, and can then hide the editing thingy for that event
-
-// need to store key (eventid) value (timeout) pairs in a map, with one for each event that is being edited
-// no need to delete things from here, I think?
-// when receive an editing message: reset the timeout
-// when receive a stop message: stop the timeout and directly hide the event
