@@ -71,7 +71,9 @@ function sendEditEventViaAjax(elem, e) {
         } else {
             const errors = editRequest.responseText.split('\n');
             for (const errorMsg of errors) {
+                // Add one list item per error
                 const errorItem = document.createElement('li');
+                errorItem.classList.add("text-danger");
                 errorItem.textContent = errorMsg;
                 errorListElem.appendChild(errorItem);
             }

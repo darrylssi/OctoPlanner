@@ -199,7 +199,7 @@
     */-->
 <!--/* Clipping off the offset (The +1200 at the end) because HTML forms don't accept them */-->
 <div th:if="${canEdit}"
-th:classappend="${#fields.hasErrors('eventForm.*') ? 'show' : null}"
+th:classappend="${#fields.hasErrors('eventForm.*') OR eventFormError != null ? 'show' : null}"
 th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
          projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
 <div class="card collapse" id="addEventForm">
@@ -252,10 +252,13 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <label for="eventEndTime">End Time</label>
                     </div>
                 </div>
-                <div class="col-1">
+                <div class="col">
                     <button type="submit" class="btn btn-primary btn-lg">Save</button>
                 </div>
             </div>
+            <ul th:if="${eventFormError}">
+                <li th:each="errMsg: ${eventFormError}" th:text="${errMsg}" class="text-danger"></li>
+            </ul>
         </form>
     </div>
 </div>
