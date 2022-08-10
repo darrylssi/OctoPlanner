@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
+import java.util.Date;
 import java.util.List;
 
 public class EventMessageOutput {
@@ -10,8 +11,10 @@ public class EventMessageOutput {
     private List<String> sprintIds;
     private List<String> eventIds;
     private List<String> eventBoxIds;
-    private String startDate;
-    private String endDate;
+    private Date startDate;
+    private Date endDate;
+    private String startDateString;
+    private String endDateString;
     private String startColour;
     private String endColour;
 
@@ -71,20 +74,36 @@ public class EventMessageOutput {
         this.eventBoxIds = eventBoxIds;
     }
 
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public String getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
+    }
+
+    public String getEndDateString() {
+        return endDateString;
+    }
+
+    public String getStartDateString() {
+        return startDateString;
+    }
+
+    public void setEndDateString(String endDateString) {
+        this.endDateString = endDateString;
+    }
+
+    public void setStartDateString(String startDateString) {
+        this.startDateString = startDateString;
     }
 
     public void setStartColour(String startColour) {

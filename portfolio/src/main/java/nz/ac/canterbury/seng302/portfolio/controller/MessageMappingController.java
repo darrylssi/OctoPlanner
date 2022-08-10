@@ -93,8 +93,10 @@ public class MessageMappingController {
         eventMessageOutput.setParentProjectId(updatedEvent.getParentProject().getId());
         eventMessageOutput.setId(eventMessage.getId());
         eventMessageOutput.setName(updatedEvent.getEventName());
-        eventMessageOutput.setStartDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventStartDate()));
-        eventMessageOutput.setEndDate(DateUtils.toDisplayDateTimeString(updatedEvent.getEventEndDate()));
+        eventMessageOutput.setEndDate(updatedEvent.getEventEndDate());
+        eventMessageOutput.setStartDate(updatedEvent.getEventStartDate());
+        eventMessageOutput.setStartDateString(DateUtils.toDisplayDateTimeString(updatedEvent.getEventStartDate()));
+        eventMessageOutput.setEndDateString(DateUtils.toDisplayDateTimeString(updatedEvent.getEventEndDate()));
         eventMessageOutput.setDescription(updatedEvent.getEventDescription());
 
         List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProject().getId());

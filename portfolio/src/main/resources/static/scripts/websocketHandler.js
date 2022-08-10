@@ -217,7 +217,7 @@ function createEventDisplay(eventMessage, parent, idIndex) {
 
 
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
-    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
+    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
 
     if (canEdit === false) {
         newEvent.querySelector('.event-right').style.visibility = 'hidden';
