@@ -55,6 +55,15 @@ function deleteEvent(eventId) {
 /**
  * Inserts/expands the event edit form directly below the event being edited.
  * This function adds forms into the page only as they are needed.
+ *
+ * Also deals with the websocket part of editing events. This function will send an initial editing message and
+ * set up repeating edit messages.
+ * @param eventId id of the event the message should show for
+ * @param eventBoxId id of the event box to display the form at
+ * @param eventName name of the edited event
+ * @param eventDescription description of the edited event
+ * @param eventStartDate start date of the edited event
+ * @param eventEndDate end date of the edited event
  */
 function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     /* Search for the edit form */
