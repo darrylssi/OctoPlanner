@@ -32,14 +32,12 @@ public class EventController extends PageController {
     private EventService eventService;
 
     /**
-     * Post request for editing an event with a given ID.
-     * @param principal The authenticated user.
-     * @param eventId ID of the event to be edited.
-     * @param name New name of the event, if changed.
-     * @param description New description of the event, if changed.
-     * @param startDate New start date and time of the event, if changed.
-     * @param endDate New end date and time of the event, if changed.
-     * @return Project details page.
+     * 
+     * @param eventForm The form submitted by the user
+     * @param bindingResult Any errors that occured while constraint checking the form
+     * @param userTimeZone  The timezone the user's based in
+     * @return  A response of either 200 (success), 401 (unauthenticated),
+     *          or 400 (Given event failed validation, replies with what errors occured)
      */
     @PostMapping("/project/{project_id}/edit-event/{event_id}")
     @ResponseBody
@@ -61,15 +59,19 @@ public class EventController extends PageController {
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: bindingResult.getAllErrors()) {
-                errors.add(err.toString());
+                errors.add(err.getDefaultMessage());
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
         // Validation round 2: Do our custom errors pass?
-        var generalErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimeZone), eventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        if (generalErrors.isError()) {
+        var dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimeZone), eventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
+        var nameError = ValidationUtils.validateName(eventForm.getName());
+        if (dateErrors.isError() || nameError.isError()) {
             StringJoiner errors = new StringJoiner("\n");
-            for (var err: generalErrors.getErrorMessages()) {
+            for (var err: dateErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: nameError.getErrorMessages()) {
                 errors.add(err);
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);

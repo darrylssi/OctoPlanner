@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
-import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
@@ -198,7 +197,7 @@ public class ValidationUtils {
             return error;
         }
 
-        /* string can only have alphanumeric and _ , . - ( ) symbols */
+        /* string can only have alphanumeric and _ . - symbols */
         String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);

@@ -175,7 +175,8 @@ public class DetailsController extends PageController {
     ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError generalErrors = null;
+        ValidationError dateErrors = null;
+        ValidationError nameErrors = null;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             populateProjectDetailsModel(model, projectID, thisUser);
@@ -183,9 +184,12 @@ public class DetailsController extends PageController {
         }
         // Check that the dates are correct
         Project parentProject = projectService.getProjectById(projectID);
-        generalErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
-        if (generalErrors.isError()) {
-            model.addAttribute("eventFormError", generalErrors.getErrorMessages());
+        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
+        nameErrors = ValidationUtils.validateName(eventForm.getName());
+        if (dateErrors.isError()) {
+            // Merge both errors into one
+            nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
+            model.addAttribute("eventFormError", dateErrors.getErrorMessages());
             populateProjectDetailsModel(model, projectID, thisUser);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
