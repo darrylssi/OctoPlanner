@@ -48,6 +48,40 @@ function deleteEvent(eventId) {
 }
 
 /**
+ * Submits the `edit-event` request in Javascript, because the form doesn't
+ * exist until it's spawned via Javascript, and this is the only way to convey errors.
+ * @param {HTMLFormElement} elem 
+ * @param {Event} e 
+ */
+function sendEditEventViaAjax(elem, e) {
+    e.preventDefault();
+
+    // Delete any pre-existing errors
+    const errorListElem = elem.querySelector("#errors");
+    errorListElem.innerHTML = '';
+    const formData = new FormData(elem);
+    const url = "./edit-event/" + elem.querySelector("#editEventId").value;
+    const editRequest = new XMLHttpRequest();
+    editRequest.open("POST", url);
+
+    editRequest.onload = () => {
+        if (editRequest.status == 200) {
+            // Success
+            window.location.reload()
+        } else {
+            const errors = editRequest.responseText.split('\n');
+            for (const errorMsg of errors) {
+                const errorItem = document.createElement('li');
+                errorItem.textContent = errorMsg;
+                errorListElem.appendChild(errorItem);
+            }
+        }
+    }
+    editRequest.send(formData);
+
+}
+
+/**
  * Inserts/expands the event edit form directly below the event being edited.
  * This function adds forms into the page only as they are needed.
  */
@@ -79,11 +113,13 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.setAttribute("id", "editEventForm-" + eventBoxId);
         editForm.setAttribute("class", "editEventForm collapse");
         editForm.innerHTML = editFormTemplate;
+        const formElem = editForm.querySelector("#form");
+        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
-        document.getElementById("form").action="/edit-event/" + eventId;
 
         /* Set internal attributes of form and link cancel button */
         editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
+        editForm.querySelector("#editEventId").setAttribute("value", eventId);
         editForm.querySelector("#editEventNameInput").setAttribute("value", eventName);
         editForm.querySelector("#editEventDescriptionInput").setAttribute("value", eventDescription);
         editForm.querySelector("#editEventStartDate").setAttribute("value", eventStartDate.substring(0, 10));
