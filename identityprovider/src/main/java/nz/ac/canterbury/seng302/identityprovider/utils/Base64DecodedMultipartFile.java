@@ -13,7 +13,6 @@ import java.util.Arrays;
  * Only intended to be used to upload user profile photos in EditUserController, hence some methods aren't
  * properly implemented.
  * Copied & adapted from https://stackoverflow.com/questions/18381928/how-to-convert-byte-array-to-multipartfile
- * TODO find a way to put this in shared so the file isn't duplicated in two different places
  * Only used for running tests of the user profile photo upload
  * Look at "gradle mark project as library"?
  */
