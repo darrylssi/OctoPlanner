@@ -63,7 +63,7 @@
                     <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                 </div>
                 <div class="event-right" th:if="${canEdit}">
-                    <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
+                    <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
                         <span class="spinner-border spinner-border-sm"></span>
                         <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                     </span>
@@ -120,7 +120,7 @@
                                 <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                             </div>
                             <div class="event-right" th:if="${canEdit}">
-                                <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
+                                <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
                                     <span class="spinner-border spinner-border-sm"></span>
                                     <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                                 </span>
@@ -155,7 +155,7 @@
                         <span hidden="hidden" th:text="*{getEventDescription}" id="event-description"></span>
                     </div>
                     <div class="event-right" th:if="${canEdit}">
-                        <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
+                        <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
                             <span class="spinner-border spinner-border-sm"></span>
                             <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                         </span>
