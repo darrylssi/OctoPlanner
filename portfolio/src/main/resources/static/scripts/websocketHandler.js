@@ -57,7 +57,7 @@ function sendMessage() {
  * Sends a message to a WebSocket endpoint using data from an HTML element
  */
 function sendEditingEventMessage(eventId) {
-    console.log("SENDING EDITING MESSAGE FOR EVENT " + eventId)
+    console.log("SENDING EDITING MESSAGE FOR EVENT: " + eventId)
     let user = document.getElementById('user').getAttribute('data-name');
     let userId = document.getElementById('userId').getAttribute('data-name');
     let content = `${eventId},${userId}`;
@@ -97,7 +97,7 @@ function showMessageOutput(messageOutput) {
  */
 function handleEventMessage(editMessage) {
     if (editMessage.content.split(',').length === 2) {
-        console.log('GOT SHOW MESSAGE ' + editMessage.content);
+        console.log('GOT EDITING MESSAGE ' + editMessage.content);
         showEditingMessage(editMessage);
     } else {
         console.log('GOT STOP MESSAGE ' + editMessage.content);
@@ -138,7 +138,6 @@ function showEditingMessage(editMessage) {
         }
 
         // Hide it after 8s
-        console.log("SETTING TIMEOUT FOR EVENT:" + eventId + " AND MESSAGE: " + editMessage.content);
         eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(editMessage)}, EVENT_EDIT_MESSAGE_TIMEOUT));
     }
 }
@@ -156,7 +155,6 @@ function hideEditMessage(message) {
 
 
         const editingEventBoxId = `event-${eventId}-editing-box`;
-        console.log("HIDING EDIT MESSAGE FOR EVENT: " + eventId + " LOOKING FOR CLASS: " + editingEventBoxId);
         const editingEventBoxes = document.getElementsByClassName(editingEventBoxId);
         for (const eventBox of editingEventBoxes) {
             if (eventBox) {
