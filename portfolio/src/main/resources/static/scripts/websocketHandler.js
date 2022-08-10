@@ -206,7 +206,7 @@ function createEventDisplay(eventMessage, parent, idIndex) {
     if(eventMessage.eventIds[idIndex] === '-1') {
         parent.appendChild(newEvent);
     } else {
-        parent.insertBefore(newEvent, parent.getElementsByClassName(nextEvent)[0]);
+        parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.eventIds[idIndex])[0]);
     }
     newEvent.getElementsByClassName("event")[0].setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
     newEvent.getElementsByClassName("event")[0].setAttribute("data-bs-original-title", eventMessage.description);
@@ -219,7 +219,7 @@ function createEventDisplay(eventMessage, parent, idIndex) {
     if (canEdit == false) {
         newEvent.querySelector('.event-right').style.visibility = 'hidden';
     } else {
-        const editFunctionString = 'showEditEvent("' + eventMessage.eventBoxIds[idIndex] + '","' + eventMessage.name +'","'+ eventMessage.description +'","'+ eventMessage.startDate +'","'+ eventMessage.endDate +'",'+ eventMessage.id+')';
+        const editFunctionString = 'showEditEvent('+ eventMessage.id+',"'+ eventMessage.eventBoxIds[idIndex] + '","' + eventMessage.name +'","'+ eventMessage.description +'","'+ eventMessage.startDate +'","'+ eventMessage.endDate +'")';
         newEvent.getElementsByClassName('edit-button')[0].setAttribute('onclick', editFunctionString );
     }
 
