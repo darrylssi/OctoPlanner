@@ -209,9 +209,12 @@ function createEventDisplay(eventMessage, parent, idIndex) {
         parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.eventIds[idIndex])[0]);
     }
     newEvent.getElementsByClassName("event")[0].setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
-    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
-    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
-    newEvent.getElementsByClassName("event")[0].data-placement = "top";
+//    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
+//    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
+//    newEvent.getElementsByClassName("event")[0].data-placement = "top";
+
+    newEvent.querySelector("#editing-box").setAttribute("class", 'event-' + eventMessage.id + '-editing-box');
+    newEvent.querySelector("#editing-text").setAttribute("class", 'event-' + eventMessage.id + '-editing-text');
 
 
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;

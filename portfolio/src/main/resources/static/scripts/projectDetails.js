@@ -47,7 +47,7 @@ function deleteEvent(eventId) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Reload the page to get the updated list of events after the delete
-        window.location.reload();
+        window.location.replace(BASE_URL + "project/0/?eventId=" + eventId);
     }
     deleteRequest.send();
 }
