@@ -24,10 +24,7 @@ function connect() {
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/messages', function(messageOutput) {
-            showMessageOutput(JSON.parse(messageOutput.body));
-        });
-        stompClient.subscribe(BASE_URL + 'topic/editing-event', function(message) {
+        stompClient.subscribe('/topic/editing-event', function(message) {
             handleEventMessage(JSON.parse(message.body));
         });
     });
@@ -47,21 +44,12 @@ function disconnect() {
 /**
  * Sends a message to a WebSocket endpoint using data from an HTML element
  */
-function sendMessage() {
-    let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send("/app/ws", {},
-    JSON.stringify({'from':user, 'text':" was here"}));
-}
-
-/**
- * Sends a message to a WebSocket endpoint using data from an HTML element
- */
 function sendEditingEventMessage(eventId) {
     console.log("SENDING EDITING MESSAGE FOR EVENT: " + eventId)
     let user = document.getElementById('user').getAttribute('data-name');
     let userId = document.getElementById('userId').getAttribute('data-name');
     let content = `${eventId},${userId}`;
-    stompClient.send(BASE_URL + "app/ws/editing-event", {},
+    stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'content':content}));
 }
 
@@ -73,7 +61,7 @@ function sendStopEditingMessage(eventId) {
     if (previousEvent !== undefined) {
         console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
         let user = document.getElementById('user').getAttribute('data-name');
-        stompClient.send(BASE_URL + "app/ws/editing-event", {},
+        stompClient.send("/app/ws", {},
         JSON.stringify({'from':user, 'content':eventId}));
     }
 }
