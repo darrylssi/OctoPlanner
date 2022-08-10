@@ -199,8 +199,8 @@ function updateEvent(eventMessage) {
 */
 function createEventDisplay(eventMessage, parent, idIndex) {
     let newEvent = document.createElement("div");
-    newEvent.setAttribute("id", "event-box-" + eventMessage.id);
-    newEvent.setAttribute("class", "event-box");
+    newEvent.setAttribute("class", "event-box event-box-" + eventMessage.id);
+    newEvent.setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
     newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
     newEvent.innerHTML = eventTemplate;
     if(eventMessage.eventIds[idIndex] === '-1') {
@@ -208,7 +208,6 @@ function createEventDisplay(eventMessage, parent, idIndex) {
     } else {
         parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.eventIds[idIndex])[0]);
     }
-    newEvent.getElementsByClassName("event")[0].setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
 //    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
 //    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
 //    newEvent.getElementsByClassName("event")[0].data-placement = "top";
