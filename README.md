@@ -15,8 +15,8 @@ Basic project template using `gradle`, `Spring Boot`, `Thymeleaf` and `Gitlab CI
 - `portfolio/` - The Portfolio module is another fully fledged Java application running Spring Boot. It also uses gRPC to communicate with other modules.
 
 
-## How to run
-The project can be run from the terminal. Otherwise, the project must be imported into an IDE that supports Gradle, such as IntelliJ. The steps for importing and setting up the project in both cases are given below.
+## How to run locally
+The project can be run from the terminal. Otherwise, the project must be imported into an IDE that supports Gradle, such as IntelliJ. The steps for importing and setting up the project in both cases are given below. When running locally like this, the application uses H2 in-memory database.
 
 ### Importing into IntelliJ
 Importing into IntelliJ takes the following steps:
@@ -38,20 +38,6 @@ To import from the terminal, follow these steps:
   - Run `git clone https://eng-git.canterbury.ac.nz/seng302-2022/team-800.git`
 
 To build the application from the terminal, follow steps 1, 2, and 3 (shared, IDP, and portfolio module) below.
-
-### Accessing the running application
-  - Open a browser and paste "http://localhost:9000/login" URL to start
-  - Click "Register" button to register the user
-  - After registering, in login page, login using your registered username and password
-  - Click "Edit Profile" to edit the profile details
-  - Click "Users" to check the users registered 
-  - Click on image button on top right to open the drop down menu, and select "Profile" or "Logout" to go to the respective page.
-  - Click "Project Details" to open the default project
-  - Click on pencil shaped button under image button to edit the project details
-  - Click on "+ Add Sprint" to add a sprint to the project
-  - On each sprint, there is pencil shaped button to edit the sprint details
-  - On each sprint, there is bin shaped button to delete the sprint 
-
 
 ### 1 - Generating Java dependencies from the `shared` class library
 The `shared` class library is a dependency of the two main applications, so before you will be able to build either `portfolio` or `identityprovider`, you must make sure the shared library files are available via the local maven repository.
@@ -108,6 +94,35 @@ gradlew bootRun
 ```
 
 By default, the Portfolio will run on local port 9000 (`http://localhost:9000`)
+
+### Accessing the running application
+  - Open a browser and paste "http://localhost:9000/login" URL to start
+  - Click "Register" button to register the user
+  - After registering, in login page, login using your registered username and password
+  - Click "Edit Profile" to edit the profile details
+  - Click "Users" to check the users registered 
+  - Click on image button on top right to open the drop down menu, and select "Profile" or "Logout" to go to the respective page.
+  - Click "Project Details" to open the default project
+  - Click on pencil shaped button under image button to edit the project details
+  - Click on "+ Add Sprint" to add a sprint to the project
+  - On each sprint, there is pencil shaped button to edit the sprint details
+  - On each sprint, there is bin shaped button to delete the sprint.
+
+#### Accessing the database
+In the event that you need to access one of the in-memory databases, make sure you have the correct module running, navigate to `url` for the appropriate module, and make sure the `JDBC_URL`, `username`, and `password` match the values here.
+
+**IdentityProvider**\
+url: `localhost:8081/h2-console`\
+file: `jdbc:h2:file:./data/userdb`\
+username: `sa`\
+password: leave blank
+
+**Portfolio**\
+_To access this, you will need to be logged into portfolio - otherwise you get redirected to login_
+url: `localhost:9000/h2-console`\
+file: `jdbc:h2:file:./data/userdb`\
+username: `sa`\
+password: leave blank
 
 ## User Manual
 
