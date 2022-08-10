@@ -64,16 +64,15 @@ public class DetailsController extends PageController {
      * @param id ID of the project to be shown
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
-     * @throws Exception When project does not exist
      */
-    @GetMapping("/project/{id}")
+    @GetMapping("/project/{id}/")
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 EventForm eventForm,
                 TimeZone userTimezone,
                 Model model
-    ) throws Exception {
+    ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateEventForm(eventForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
@@ -81,6 +80,17 @@ public class DetailsController extends PageController {
         /* Return the name of the Thymeleaf template */
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
+
+        /**
+     Redirects so any project page URL gets a slash on the end
+     */
+    @GetMapping("/project/{id}")
+    public String detailsRedirect(
+                @PathVariable(name="id") int id
+    ) {
+        return "redirect:" + id + '/';
+    }
+    
     
     /**
      * <p>Pre-populates all the data needed in the model</p>
@@ -88,9 +98,8 @@ public class DetailsController extends PageController {
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
      * @param thisUser          The currently logged in user
-     * @throws Exception    Gotta stop doing this, honestly
      */
-    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) throws Exception {
+    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
         // Give the template validation info, so the browser can let the user know.
         // Have to enter these one-by-one because Thymeleaf struggles to access utility classes
         model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
@@ -153,7 +162,6 @@ public class DetailsController extends PageController {
      * @param eventForm The form submitted by our lovely customers
      * @param bindingResult Any errors that came up during validation
      * @return  Either redirects them back to the project page, or renders the project page with errors.
-     * @throws Exception We've gotta find a better way of conveying "not found" then basic Exceptions
      */
     @PostMapping("/project/{project_id}/add-event")
     public String postAddEvent(
@@ -181,7 +189,8 @@ public class DetailsController extends PageController {
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
         // Data is valid, add it to database
-        Event event = new Event(projectID, eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
+        Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
+        event.setParentProject(parentProject);
         eventService.saveEvent(event);
         return "redirect:.";
     }

@@ -28,7 +28,7 @@ public class DateUtils {
 
     private static final String BACKEND_DATE_FORMAT = DATE_FORMAT;
     private static final String DISPLAYED_DATE_FORMAT = DISPLAY_DATE_FORMAT;
-    private static final String DISPLAYED_DATE_TIME_FORMAT = DATETIME_FORMAT;
+    private static final String DISPLAYED_DATE_TIME_FORMAT = DISPLAY_DATETIME_FORMAT;
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -76,11 +76,25 @@ public class DateUtils {
 
     /**
      * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date String to be converted to Date
-     * @return Date object
+     * @param date Date object to be converted to String
+     * @return String object
      */
     public static String toString(Date date) {
-        return new SimpleDateFormat(BACKEND_DATE_FORMAT).format(date);
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
+     * @param date String to be converted to a Date
+     * @return Date object of the corresponding string
+     */
+    public static Date toDateTime(String date) {
+        try {
+            return new SimpleDateFormat(DATETIME_ISO_FORMAT).parse(date);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
+        }
+        return null;
     }
 
     /**
@@ -99,7 +113,7 @@ public class DateUtils {
      * Note: To get a user's timezone, add a <code>TimeZone</code> argument in the Controller method
      * @param date The date specified
      * @param time The time of day specified
-     * @param userTimeZone The timezone this occurs in
+     * @param usersTimezone The timezone this occurs in
      * @return A Date object of the date + time, according to the timezone
      */
     public static Date localDateAndTimeToDate(LocalDate date, LocalTime time, TimeZone usersTimezone) {

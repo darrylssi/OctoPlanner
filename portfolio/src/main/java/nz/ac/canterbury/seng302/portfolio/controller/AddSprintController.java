@@ -58,7 +58,7 @@ public class AddSprintController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Getting project object by using project id */
@@ -127,7 +127,6 @@ public class AddSprintController extends PageController {
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
-     * @throws Exception if project not found or a date cannot be parsed
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
@@ -140,7 +139,7 @@ public class AddSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         // Getting project object by project id
@@ -213,7 +212,7 @@ public class AddSprintController extends PageController {
 
     /**
      * Checks whether the sprint name is valid
-     * @param sprintName Sprint name to be tested
+     * @param sprintName The sprint name to be tested
      * @return A validation error object, with a boolean error flag and a string list of error messages
      */
     static ValidationError getNameValidationError(String sprintName) {
