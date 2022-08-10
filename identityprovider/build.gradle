@@ -107,6 +107,10 @@ jacocoTestReport {
     }
 }
 
+tasks.named('sonarqube').configure {
+    dependsOn test
+}
+
 // Sonarqube specific configuration (task)
 sonarqube {
     properties {
