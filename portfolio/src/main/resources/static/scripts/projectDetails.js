@@ -80,7 +80,7 @@ function showEditEvent(eventBoxId, eventName, eventDescription, eventStartDate, 
         editForm.setAttribute("class", "editEventForm collapse");
         editForm.innerHTML = editFormTemplate;
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
-        document.getElementById("form").action="/edit-event/" + eventId;
+        document.getElementById("form").action="../../edit-event/" + eventId;
 
         /* Set internal attributes of form and link cancel button */
         editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
