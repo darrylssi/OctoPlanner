@@ -186,7 +186,7 @@ public class DetailsController extends PageController {
         Project parentProject = projectService.getProjectById(projectID);
         dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
         nameErrors = ValidationUtils.validateName(eventForm.getName());
-        if (dateErrors.isError()) {
+        if (dateErrors.isError() || nameErrors.isError()) {
             // Merge both errors into one
             nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
             model.addAttribute("eventFormError", dateErrors.getErrorMessages());
