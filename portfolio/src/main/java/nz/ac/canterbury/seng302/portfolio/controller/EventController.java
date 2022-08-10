@@ -52,8 +52,8 @@ public class EventController extends PageController {
         event.setStartDate(DateUtils.toDateTime(startDate + 'T' + startTime));
         event.setEndDate(DateUtils.toDateTime(endDate + 'T' + endTime));
 
-        eventService.saveEvent(event);
+        Event savedEvent = eventService.saveEvent(event);
 
-        return REDIRECT_TO_PROJECT + event.getParentProject().getId();
+        return REDIRECT_TO_PROJECT + event.getParentProject().getId() + "?eventId=" + savedEvent.getId();
     }
 }

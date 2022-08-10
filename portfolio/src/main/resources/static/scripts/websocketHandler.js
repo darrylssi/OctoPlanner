@@ -78,8 +78,8 @@ function updateEvent(eventMessage) {
 // check each event list container to see if it has the event in it / should have the event in it
     for (let i = 0; i < event_lists.length; i++) {
           //check if event is there, then remove event if it exists
-          event = event_lists[i].querySelector('#event-box-' + eventMessage.id);
-          if (event !== null) {
+          event = event_lists[i].getElementsByClassName('event-box-' + eventMessage.id)[0];
+          if (event !== undefined) {
             event.remove();
           }
           // check if event list container is in the list of ids the event should be displayed in
@@ -106,11 +106,11 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
     if(nextEvent === '-1') {
         parent.appendChild(newEvent);
     } else {
-        parent.insertBefore(newEvent, parent.querySelector("#" + nextEvent));
+        parent.insertBefore(newEvent, parent.getElementsByClassName(nextEvent)[0]);
     }
-    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
-    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
-    newEvent.getElementsByClassName("event")[0].data-placement = "top";
+    newEvent.getElementsByClassName("event")[0].setAttribute("data-bs-original-title", eventMessage.description);
+    newEvent.getElementsByClassName("event")[0].setAttribute('data-toggle', "tooltip");
+    newEvent.getElementsByClassName("event")[0].setAttribute('data-placement', 'top');
 
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
     newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;

@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.validation.Valid;
@@ -19,11 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
@@ -56,8 +53,6 @@ public class DetailsController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    private int currentUpdatedEventId = -1;
-
     /**
      * Get request to view project details page.
      * @param principal Authenticated user
@@ -69,13 +64,14 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
+                @RequestParam(name = "eventId") Optional<Integer> eventId,
                 EventForm eventForm,
                 TimeZone userTimezone,
                 Model model
     ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateEventForm(eventForm, userTimezone.toZoneId());
-        populateProjectDetailsModel(model, id, thisUser);
+        populateProjectDetailsModel(model, id, thisUser, eventId.orElse(-1));
 
         /* Return the name of the Thymeleaf template */
         return PROJECT_DETAILS_TEMPLATE_NAME;
@@ -100,7 +96,7 @@ public class DetailsController extends PageController {
      * @param parentProjectId   The ID of this project page
      * @param thisUser          The currently logged in user
      */
-    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
+    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser, int eventId) {
         // Give the template validation info, so the browser can let the user know.
         // Have to enter these one-by-one because Thymeleaf struggles to access utility classes
         model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
@@ -129,8 +125,7 @@ public class DetailsController extends PageController {
         model.addAttribute("user", thisUser.getFullName());
 
         model.addAttribute("tab", 0);
-        model.addAttribute("eventId", currentUpdatedEventId);
-        currentUpdatedEventId = -1;
+        model.addAttribute("eventId", eventId);
     }
 
     /**
@@ -179,15 +174,14 @@ public class DetailsController extends PageController {
         // Initial checks that the data has some integrity (The data isn't null, etc.)
         if (bindingResult.hasErrors()) {
             PrincipalData thisUser = PrincipalData.from(principal);
-            populateProjectDetailsModel(model, projectID, thisUser);
+            populateProjectDetailsModel(model, projectID, thisUser, -1);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
         
         Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
         event.setParentProject(projectService.getProjectById(projectID));
         Event savedEvent = eventService.saveEvent(event);
-        currentUpdatedEventId = savedEvent.getId();
-        return "redirect:.";
+        return "redirect:.?eventId=" + savedEvent.getId();
     }
 
     /**
@@ -228,7 +222,6 @@ public class DetailsController extends PageController {
         }
         try {
             eventService.deleteEvent(eventId);
-            currentUpdatedEventId = eventId;
             return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

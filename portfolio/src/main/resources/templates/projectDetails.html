@@ -50,7 +50,7 @@
     <hr/>
     <!-- The first events outside the sprint -->
     <div class="event-list-container outside-event" th:id="'events-firstOutside'" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)}">
-        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId} + '-before'"
+        <div th:class="'event-box event-box-' + ${event.getId}" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId} + '-before'"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
             <span th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                 <div class="event-left">
@@ -103,7 +103,7 @@
                 </div>
                 <div class="break"></div>
                 <div th:class="event-list-container" th:id="|events-${sprint.getId}-inside|">
-                    <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId} + '-in-' + *{getId}"
+                    <div th:class="'event-box event-box-' + ${event.getId}" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId} + '-in-' + *{getId}"
                             th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
                         <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                             <div class="event-left">
@@ -138,7 +138,7 @@
         </div>
         <!-- The events outside the sprint -->
         <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})" th:id="|events-${sprint.getId}-outside|">
-            <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId} + '-after-' + *{getId}"
+            <div th:class="'event-box event-box-' + ${event.getId}" th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))" th:id="'event-box-' + ${event.getId} + '-after-' + *{getId}"
                  th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
                 <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                     <div class="event-left">
