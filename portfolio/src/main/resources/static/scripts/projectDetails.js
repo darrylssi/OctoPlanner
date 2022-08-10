@@ -57,11 +57,10 @@ function deleteEvent(eventId) {
  * This function adds forms into the page only as they are needed.
  */
 function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
-    let delay = 0;
-
     /* Search for the edit form */
     let editForm = document.getElementById("editEventForm-" + eventBoxId);
     let previousEditForm = document.getElementById("editEventForm-" + previousEventBox);
+    let delay = 0;
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -92,6 +91,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
         editForm.setAttribute("class", "editEventForm collapse");
         editForm.innerHTML = editFormTemplate;
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
+        document.getElementById("form").action="/edit-event/" + eventId;
 
         /* Set internal attributes of form and link cancel button */
         editForm.querySelector("#edit-event-form-header").innerHTML = "Editing " + eventName;
