@@ -16,7 +16,7 @@ Basic project template using `gradle`, `Spring Boot`, `Thymeleaf` and `Gitlab CI
 
 Both the Portfolio and IdentityProvider modules generally follow a Model-View-Controller structure. Both have `model` and `controller` subfolders, as well as utilising `authentication`, `utils`, and `service` packages. The Portfolio module also has a `customthymeleaf` subfolder. The purposes of each of these packages is listed below:
 - `model` - represent the data entities such as Users, Sprints, Projects, Events, etc.
-- `controller` - Handle the requests made to various related endpoints
+- `controller` - handle the requests made to various related endpoints
 - `authentication` - authenticate the user and make sure that the application is treating them correctly for what their role is the entire time
 - `utils` - provide common functionality such as converting dates between string type and date type
 - `service` - to allow communication (by gRPC) between Portfolio and the IdP
