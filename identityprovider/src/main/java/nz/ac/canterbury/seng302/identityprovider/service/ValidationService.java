@@ -254,9 +254,13 @@ public class ValidationService {
     }
 
     /**
-     * Checks that pronouns contain a "/" using regex
+     * Checks that pronouns match the pronoun pattern using regex.
+     * Namely:
+     * - A set of pronouns in this pattern is "pn/pn{/pn}"
+     * - The check ensures that the string matches the form "set{, set{, set}}"
+     * In this, {} denotes optional parts.
      * @param pronouns A string containing the pronouns to validate
-     * @return True or false whether a "/" is found in the string
+     * @return True or false whether the string matches the pronoun format
      */
     private ValidationError validatePronouns(String pronouns) {
         if (pronouns.length() > 20) { // Personal pronouns are too long
