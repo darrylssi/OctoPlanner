@@ -208,7 +208,7 @@ function createEventDisplay(eventMessage, parent, idIndex) {
     } else {
         parent.insertBefore(newEvent, parent.getElementsByClassName(nextEvent)[0]);
     }
-    newEvent.getElementsByClassName("event")[0].setAttribute("id", eventMessage.eventBoxIds[idIndex]);
+    newEvent.getElementsByClassName("event")[0].setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
     newEvent.getElementsByClassName("event")[0].setAttribute("data-bs-original-title", eventMessage.description);
     newEvent.getElementsByClassName("event")[0].setAttribute('data-toggle', "tooltip");
     newEvent.getElementsByClassName("event")[0].setAttribute('data-placement', 'top');

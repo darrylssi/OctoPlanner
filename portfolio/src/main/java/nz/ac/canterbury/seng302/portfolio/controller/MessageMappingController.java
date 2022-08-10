@@ -10,12 +10,10 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -56,9 +54,9 @@ public class MessageMappingController {
     private static final String OUTSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-outside";
     private static final String FIRST_OUTSIDE_BOX_ID = "events-firstOutside";
     private static final String EVENT_ID_FORMAT = "event-box-%d";
-    private static final String EVENT_FIRST_ID_FORMAT = "event-box-%d-before";
-    private static final String EVENT_IN_ID_FORMAT = "event-box-%d-in-%d";
-    private static final String EVENT_AFTER_ID_FORMAT = "event-box-%d-after-%d";
+    private static final String EVENT_FIRST_ID_FORMAT = "%d-before";
+    private static final String EVENT_IN_ID_FORMAT = "%d-in-%d";
+    private static final String EVENT_AFTER_ID_FORMAT = "%d-after-%d";
 
 
     /**
