@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.identityprovider.authentication;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import nz.ac.canterbury.seng302.identityprovider.model.User;
@@ -27,7 +26,7 @@ public class JwtTokenUtil implements Serializable {
 	private JwtTokenUtil() {}
 
 	private static final long serialVersionUID = -2550185165626007488L;
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60L;
 
 	public static final String ROLE_CLAIM_TYPE = "role";
 	public static final String NAME_CLAIM_TYPE = "name";
@@ -112,7 +111,7 @@ public class JwtTokenUtil implements Serializable {
 			getClaimAsDTO("nbf", claims),
 			getClaimAsDTO("exp", claims),
 			getClaimAsDTO("iat", claims)
-		).filter(Objects::nonNull).collect(Collectors.toList());
+		).filter(Objects::nonNull).toList();
 	}
 
 	/**

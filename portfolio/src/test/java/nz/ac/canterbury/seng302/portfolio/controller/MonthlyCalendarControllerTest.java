@@ -44,13 +44,10 @@ class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
-    void getMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() {
+    void getMonthlyCalendar_whenGivenInvalidProjectId_returnNotFoundErrorMessage() throws Exception{
         Mockito.when(projectService.getProjectById(-1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
-        try{
-            mockMvc.perform(get("/monthlyCalendar/-1"));
-        } catch (Exception e) {
-            Assertions.assertEquals("Request processing failed; nested exception is java.lang.Exception: Project not found", e.getMessage());
-        }
+        mockMvc.perform(get("/monthlyCalendar/-1"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

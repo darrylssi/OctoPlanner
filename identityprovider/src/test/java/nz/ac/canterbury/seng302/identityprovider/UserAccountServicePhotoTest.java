@@ -97,9 +97,9 @@ class UserAccountServicePhotoTest {
     }
 
     /**
-     * Encodes some text into a multipart file in base64 format. Should come out as a .txt... TODO
+     * Encodes some text into a multipart file in base64 format. Returns a TXT
      * @param text some text that will be encoded into a MultipartFile
-     * @return MultipartFile with this string enclosed
+     * @return MultipartFile (a TXT) with this string enclosed
      */
     MultipartFile getMultipartFileFromString(String text) {
         return new Base64DecodedMultipartFile(BASE64_PREFIX_TXT + DatatypeConverter.printBase64Binary(text.getBytes(StandardCharsets.UTF_8)));

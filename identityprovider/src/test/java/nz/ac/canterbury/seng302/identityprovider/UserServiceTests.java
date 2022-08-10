@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 
 @SpringBootTest
 @DirtiesContext
-public class UserServiceTests {
+class UserServiceTests {
 
     @Autowired
     private UserService userService;
@@ -41,14 +41,14 @@ public class UserServiceTests {
     }
 
     @Test
-    public void test_SearchByUsername() {
+    void test_SearchByUsername() {
         when(userRepository.findByUsername(testUsername))
                 .thenReturn(testUser);
         assertThat(userService.getUserByUsername(testUsername)).isNotNull().isEqualTo(testUser);
     }
 
     @Test
-    public void test_UserCanBeGivenARole() {
+    void test_UserCanBeGivenARole() {
         when(userRepository.findById(userID))
                 .thenReturn(testUser);
         // When: A user is given the 'TEACHER' role
@@ -59,7 +59,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void test_UserCanHaveRoleRemoved() {
+    void test_UserCanHaveRoleRemoved() {
         when(userRepository.findById(userID))
                 .thenReturn(testUser);
         // When: We take away their 'STUDENT' role
@@ -70,7 +70,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void test_CantRemoveRoleFromNonexistentUser() {
+    void test_CantRemoveRoleFromNonexistentUser() {
         // When: We take away their 'STUDENT' role
         assertThrows(NoSuchElementException.class, () -> 
             userService.removeRoleFromUser(userID, UserRole.STUDENT)

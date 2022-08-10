@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest
 class EventServiceTest {
@@ -36,7 +37,6 @@ class EventServiceTest {
     void setUp() {
         event = new Event();
         event.setId(ID);
-        event.setParentProjectId(1);
         event.setEventName("Test Event");
         event.setEventDescription("Testing patience, once course at a time");
         event.setStartDate(new Date());
@@ -53,9 +53,8 @@ class EventServiceTest {
 
     @Test
     void getEventInvalidId_thenThrowException() {
-        // TODO: We've really gotta stop throwing base Exceptions. Maybe try optionals or something
         when(eventRepository.findEventById(ID+1)).thenReturn(null);
-        Exception e = assertThrows(Exception.class, () -> eventService.getEventById(ID + 1));
+        Exception e = assertThrows(ResponseStatusException.class, () -> eventService.getEventById(ID + 1));
         String expectedMessage = "Event not found.";
         assertThat(e.getMessage(), containsString(expectedMessage));
     }

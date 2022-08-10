@@ -11,6 +11,13 @@ import java.util.List;
 
 // more info here https://codebun.com/spring-boot-crud-application-using-thymeleaf-and-spring-data-jpa/
 
+/**
+ * Service class holding methods used to access the underlying project repository methods,
+ * which actually touch the database.
+ *
+ * Service methods need to be written manually, unlike repository methods, and should deal with errors (mainly items
+ * not being found).
+ */
 @Service
 public class ProjectService {
     @Autowired
