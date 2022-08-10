@@ -712,7 +712,7 @@ class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("PersonalPronouns")
-                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun{/pronoun}\" (you can add up to 3 sets with format \"set{, set{, set}}\"), where {} denotes an optional part")
                 .build();
 
         assertFalse(response.getIsSuccess());
@@ -1193,7 +1193,7 @@ class UserAccountServiceTest {
 
         ValidationError error = ValidationError.newBuilder()
                 .setFieldName("PersonalPronouns")
-                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
+                .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun{/pronoun}\" (you can add up to 3 sets with format \"set{, set{, set}}\"), where {} denotes an optional part")
                 .build();
 
         assertFalse(response.getIsSuccess());
