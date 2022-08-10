@@ -54,6 +54,6 @@ public class EventController extends PageController {
 
         Event savedEvent = eventService.saveEvent(event);
 
-        return REDIRECT_TO_PROJECT + event.getParentProject().getId() + "?eventId=" + savedEvent.getId();
+        return REDIRECT_TO_PROJECT + event.getParentProject().getId() + "/?eventId=" + savedEvent.getId();
     }
 }

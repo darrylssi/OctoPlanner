@@ -85,7 +85,7 @@ function updateEvent(eventMessage) {
           // check if event list container is in the list of ids the event should be displayed in
           idIndex = eventMessage.sprintIds.indexOf(event_lists[i].id);
         if(idIndex != -1) {
-            createEventDisplay(eventMessage, event_lists[i], eventMessage.eventIds[idIndex]);
+            createEventDisplay(eventMessage, event_lists[i], idIndex);
         }
     }
 }
@@ -96,18 +96,18 @@ function updateEvent(eventMessage) {
 * @param parent the parent object for the event to be displayed in
 * @param nextEvent the id of the event that the new event should be inserted before. -1 if no following event
 */
-function createEventDisplay(eventMessage, parent, nextEvent) {
-    console.log('creating event');
+function createEventDisplay(eventMessage, parent, idIndex) {
     let newEvent = document.createElement("div");
     newEvent.setAttribute("id", "event-box-" + eventMessage.id);
     newEvent.setAttribute("class", "event-box");
     newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
     newEvent.innerHTML = eventTemplate;
-    if(nextEvent === '-1') {
+    if(eventMessage.eventIds[idIndex] === '-1') {
         parent.appendChild(newEvent);
     } else {
         parent.insertBefore(newEvent, parent.getElementsByClassName(nextEvent)[0]);
     }
+    newEvent.getElementsByClassName("event")[0].setAttribute("id", eventMessage.eventBoxIds[idIndex]);
     newEvent.getElementsByClassName("event")[0].setAttribute("data-bs-original-title", eventMessage.description);
     newEvent.getElementsByClassName("event")[0].setAttribute('data-toggle', "tooltip");
     newEvent.getElementsByClassName("event")[0].setAttribute('data-placement', 'top');
@@ -117,6 +117,9 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
 
     if (canEdit == false) {
         newEvent.querySelector('.event-right').style.visibility = 'hidden';
+    } else {
+        const editFunctionString = 'showEditEvent("' + eventMessage.eventBoxIds[idIndex] + '","' + eventMessage.name +'","'+ eventMessage.description +'","'+ eventMessage.startDate +'","'+ eventMessage.endDate +'",'+ eventMessage.id+')';
+        newEvent.getElementsByClassName('edit-button')[0].setAttribute('onclick', editFunctionString );
     }
 
 }
@@ -125,7 +128,6 @@ function createEventDisplay(eventMessage, parent, nextEvent) {
 * Checks if there is an event that has been updated and sends a websocket message if there is
 */
 function sendEventUpdates() {
-    console.log('sending event update for ' + eventId);
     if (eventId !== -1){
         stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
     }

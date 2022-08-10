@@ -28,6 +28,10 @@ public class MessageMappingController {
     private static final String OUTSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-outside";
     private static final String FIRST_OUTSIDE_BOX_ID = "events-firstOutside";
     private static final String EVENT_ID_FORMAT = "event-box-%d";
+    private static final String EVENT_FIRST_ID_FORMAT = "event-box-%d-before";
+    private static final String EVENT_IN_ID_FORMAT = "event-box-%d-in-%d";
+    private static final String EVENT_AFTER_ID_FORMAT = "event-box-%d-after-%d";
+
 
     /**
      * Websocket sending example
@@ -78,8 +82,12 @@ public class MessageMappingController {
 
         ArrayList<String> sprintIds = new ArrayList<>();
         ArrayList<String> eventIds = new ArrayList<>();
+        ArrayList<String> eventBoxIds = new ArrayList<>();
         if(sprints.get(0).getSprintStartDate().after(updatedEvent.getEventStartDate())) {
             sprintIds.add(FIRST_OUTSIDE_BOX_ID);
+            eventIds.add(getNextEvent(events, updatedEvent.getParentProject().getProjectStartDate(),
+                    sprints.get(0).getSprintStartDate(), updatedEvent.getEventStartDate()));
+            eventBoxIds.add(String.format(EVENT_FIRST_ID_FORMAT, updatedEvent.getId()));
         }
 
         //get list of all event box ids to include the event on the project details page
@@ -89,17 +97,20 @@ public class MessageMappingController {
                 sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
                 eventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
                         sprints.get(i).getSprintEndDate(), updatedEvent.getEventStartDate()));
+                eventBoxIds.add(String.format(EVENT_IN_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
             }
             if((sprints.size() > i+1) && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
                 sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
                 eventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
                         sprints.get(i+1).getSprintStartDate(), updatedEvent.getEventStartDate()));
+                eventBoxIds.add(String.format(EVENT_AFTER_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
             }
         }
 
         eventMessageOutput.setSprintIds(sprintIds);
         eventMessageOutput.setEventIds(eventIds);
+        eventMessageOutput.setEventBoxIds(eventBoxIds);
         return eventMessageOutput;
     }
 

@@ -49,7 +49,7 @@
     </div>
     <hr/>
     <!-- The first events outside the sprint -->
-    <div class="event-list-container outside-event">
+    <div class="event-list-container outside-event" id="events-firstOutside">
         <div th:class="'event-box event-box-' + ${event.getId}" th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})" th:id="'event-box-' + ${event.getId} + '-before'"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
             <span th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">

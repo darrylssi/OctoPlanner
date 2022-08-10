@@ -9,6 +9,7 @@ public class EventMessageOutput {
     private String description;
     private List<String> sprintIds;
     private List<String> eventIds;
+    private List<String> eventBoxIds;
     private String startDate;
     private String endDate;
     private String startColour;
@@ -60,6 +61,14 @@ public class EventMessageOutput {
 
     public void setEventIds(List<String> eventIds) {
         this.eventIds = eventIds;
+    }
+
+    public List<String> getEventBoxIds() {
+        return eventBoxIds;
+    }
+
+    public void setEventBoxIds(List<String> eventBoxIds) {
+        this.eventBoxIds = eventBoxIds;
     }
 
     public String getEndDate() {
