@@ -254,9 +254,13 @@ public class ValidationService {
     }
 
     /**
-     * Checks that pronouns contain a "/" using regex
+     * Checks that pronouns match the pronoun pattern using regex.
+     * Namely:
+     * - A set of pronouns in this pattern is "pn/pn{/pn}"
+     * - The check ensures that the string matches the form "set{, set{, set}}"
+     * In this, {} denotes optional parts.
      * @param pronouns A string containing the pronouns to validate
-     * @return True or false whether a "/" is found in the string
+     * @return True or false whether the string matches the pronoun format
      */
     private ValidationError validatePronouns(String pronouns) {
         if (pronouns.length() > 20) { // Personal pronouns are too long
@@ -266,14 +270,14 @@ public class ValidationService {
                     .build();
         }
 
-        String regex = "^[a-zA-Z]+/+[a-zA-Z]+(,\s*[a-zA-Z]+/+[a-zA-Z]+)*+$";
+        String regex = "^([a-zA-Z]+/){1,2}[a-zA-Z]+(,\s([a-zA-Z]+/){1,2}[a-zA-Z]+)?$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(pronouns);
 
         if(pronouns.length() != 0 && !matcher.matches()) {    // If pronouns don't match regex
             return ValidationError.newBuilder()
                     .setFieldName("PersonalPronouns")
-                    .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun\"")
+                    .setErrorText("Personal pronouns must be in the format \"pronoun/pronoun{/pronoun}\" (you can add up to 3 sets with format \"set{, set{, set}}\"), where {} denotes an optional part")
                     .build();
         }
         return null;
