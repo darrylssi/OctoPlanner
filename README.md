@@ -14,7 +14,13 @@ Basic project template using `gradle`, `Spring Boot`, `Thymeleaf` and `Gitlab CI
 - `identityprovider/` - The Identity Provider (IdP) is built with Spring Boot, and uses gRPC to communicate with other modules. The IdP is where we will store user information (such as usernames, passwords, names, ids, etc.).
 - `portfolio/` - The Portfolio module is another fully fledged Java application running Spring Boot. It also uses gRPC to communicate with other modules.
 
-Both the Portfolio and IdentityProvider modules generally follow a Model-View-Controller structure. Both have `model` and `controller` subfolders, as well as utilising `authentication`, `utils`, and `service` packages. The Portfolio module also has a `customthymeleaf` subfolder to allow us to access certain features of the utilities from the thymeleaf front-end.
+Both the Portfolio and IdentityProvider modules generally follow a Model-View-Controller structure. Both have `model` and `controller` subfolders, as well as utilising `authentication`, `utils`, and `service` packages. The Portfolio module also has a `customthymeleaf` subfolder. The purposes of each of these packages is listed below:
+- `model` - represent the data entities such as Users, Sprints, Projects, Events, etc.
+- `controller` - Handle the requests made to various related endpoints
+- `authentication` - authenticate the user and make sure that the application is treating them correctly for what their role is the entire time
+- `utils` - provide common functionality such as converting dates between string type and date type
+- `service` - to allow communication (by gRPC) between Portfolio and the IdP
+- `customthymeleaf` - to allow us to access certain features of the utilities from the thymeleaf front-end.
 
 ## Running on the VM
 Commits to dev and tagged commits to master deploy to the VM, accessible at https://csse-s302g8.canterbury.ac.nz/test/portfolio/ and https://csse-s302g8.canterbury.ac.nz/prod/portfolio respectively. They use the MariaDB database. More information on this topic, including how to access it, can be found here: https://eng-git.canterbury.ac.nz/seng302-2022/team-800/-/wikis/Working-with-the-VM.
