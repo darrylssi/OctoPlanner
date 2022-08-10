@@ -3,12 +3,21 @@ package nz.ac.canterbury.seng302.portfolio.service;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 // more info here https://codebun.com/spring-boot-crud-application-using-thymeleaf-and-spring-data-jpa/
 
+/**
+ * Service class holding methods used to access the underlying project repository methods,
+ * which actually touch the database.
+ *
+ * Service methods need to be written manually, unlike repository methods, and should deal with errors (mainly items
+ * not being found).
+ */
 @Service
 public class ProjectService {
     @Autowired
@@ -18,19 +27,18 @@ public class ProjectService {
      * Get list of all projects
      */
     public List<Project> getAllProjects() {
-        List<Project> list = (List<Project>) repository.findAll();
-        return list;
+        return (List<Project>) repository.findAll();
     }
 
     /**
      * Get project by id
      */
-    public Project getProjectById(Integer id) throws Exception {
+    public Project getProjectById(Integer id) throws ResponseStatusException {
         Project project = repository.findProjectById(id);
         if (project != null) {
             return project;
         } else {
-            throw new Exception("Project not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found.");
         }
 
     }

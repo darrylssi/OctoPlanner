@@ -37,12 +37,15 @@ public class AddSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
+    private static final String ADD_SPRINT_TEMPLATE = "addSprint";
+    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
+
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
-            "#320d6d",
+            "#5aff15",
             "#b83daf",
             "#449dd1",
-            "#52ffb8");
+            "#d6871f");
 
     /**
      * Form to add new sprints to a project. Fields are pre-filled with default values to be edited
@@ -55,7 +58,7 @@ public class AddSprintController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Getting project object by using project id */
@@ -109,7 +112,7 @@ public class AddSprintController extends PageController {
         model.addAttribute("maxDate", DateUtils.toString(project.getProjectEndDate()));
 
         /* Return the name of the Thymeleaf template */
-        return "addSprint";
+        return ADD_SPRINT_TEMPLATE;
     }
 
     /**
@@ -124,7 +127,6 @@ public class AddSprintController extends PageController {
      * @param result The result object that allows for input validation
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
-     * @throws Exception if project not found or a date cannot be parsed
      */
     @PostMapping("/add-sprint/{id}")
     public String sprintSave(
@@ -137,7 +139,7 @@ public class AddSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) throws Exception {
+    ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         // Getting project object by project id
@@ -173,7 +175,7 @@ public class AddSprintController extends PageController {
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("invalidName", invalidName.getFirstError());
 
-            return "addSprint";
+            return ADD_SPRINT_TEMPLATE;
         }
 
         // Adding the new sprint object
@@ -186,7 +188,7 @@ public class AddSprintController extends PageController {
         sprint.setSprintColour(sprintColour);
 
         sprintService.saveSprint(sprint);
-        return "redirect:../project/" + parentProject.getId();
+        return REDIRECT_TO_PROJECT + parentProject.getId();
     }
 
     /**
@@ -210,7 +212,7 @@ public class AddSprintController extends PageController {
 
     /**
      * Checks whether the sprint name is valid
-     * @param sprintName Sprint name to be tested
+     * @param sprintName The sprint name to be tested
      * @return A validation error object, with a boolean error flag and a string list of error messages
      */
     static ValidationError getNameValidationError(String sprintName) {

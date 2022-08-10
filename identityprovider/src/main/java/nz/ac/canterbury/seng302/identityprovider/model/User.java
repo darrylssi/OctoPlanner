@@ -13,7 +13,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int ID;
+    private int id;
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
@@ -48,15 +48,15 @@ public class User {
         this.bio = bio;
         this.personalPronouns = personalPronouns;
         this.email = email;
-        this.roles = new HashSet<UserRole>();
+        this.roles = new HashSet<>();
     }
 
     public int getID() {
-        return this.ID;
+        return this.id;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public void setID(int id) {
+        this.id = id;
     }
 
     public String getUsername() {

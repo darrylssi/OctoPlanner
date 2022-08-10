@@ -19,12 +19,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
@@ -38,8 +36,10 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     private static final Logger logger = LoggerFactory.getLogger(UserAccountServerService.class);
 
-
-    private static final String USER_PHOTO_SUFFIX = "_photo.";
+    private static final String USER_PHOTO_FILENAME = "_photo.";
+    private static final String USER_PHOTO_FORMAT = "jpg";
+    private static final String USER_PHOTO_SUFFIX = USER_PHOTO_FILENAME + USER_PHOTO_FORMAT;
+    private static final int USER_PHOTO_DIMENSIONS = 200;
 
     private static final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
 
@@ -59,7 +59,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private ValidationService validator;
 
     /**
-     * Creates a request to upload a profile photo for a user, following these tutorials:
+     * Creates a request to upload a profile photo for a user, following this tutorial:
      * https://www.vinsguru.com/grpc-file-upload-client-streaming/ so far it's just copied from this one
      * @param responseObserver Observable stream of messages
      * @return FileUploadStatusResponse with the status of the upload
@@ -67,58 +67,108 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public StreamObserver<UploadUserProfilePhotoRequest> uploadUserProfilePhoto(StreamObserver<FileUploadStatusResponse> responseObserver) {
         return new StreamObserver<>() {
-            // upload context variables
-            OutputStream writer;
+            // declare upload context variables
+            ByteArrayOutputStream byteWriter = new ByteArrayOutputStream();
             FileUploadStatus status = FileUploadStatus.IN_PROGRESS; // different to the tutorial
-            String fileName;
-            String fileExtension;
+            String fileName; // file name of the image, e.g. "5_photo."
+            String fileExtension; // this is the type of file uploaded - we only save JPGs, so don't use this to save!
+            String filePath; // the actual path to save the image to, including the file name and type (.JPG)
 
+            /**
+             * Processes a file upload request, and saves the file contents to a ByteArrayOutputStream
+             * so that it can be verified before being saved.
+             * @param userProfilePhotoUploadRequest the file upload request object
+             */
             @Override
             public void onNext(UploadUserProfilePhotoRequest userProfilePhotoUploadRequest) {
                 try {
                     if (userProfilePhotoUploadRequest.hasMetaData()) {
-                        writer = getFilePath(userProfilePhotoUploadRequest);
-                        fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
+                        fileName = userProfilePhotoUploadRequest.getMetaData().getUserId() + USER_PHOTO_FILENAME;
                         fileExtension = userProfilePhotoUploadRequest.getMetaData().getFileType().strip();
+                        filePath = getFilePath(userProfilePhotoUploadRequest);
+                        logger.info("Got upload profile request for user with id {}, filetype of {}", userProfilePhotoUploadRequest.getMetaData().getUserId(), fileExtension);
                     } else {
-                        writeFile(writer, userProfilePhotoUploadRequest.getFileContent());
+                        writeFile(byteWriter, userProfilePhotoUploadRequest.getFileContent());
                     }
                 } catch (IOException e) {
                     this.onError(e);
                 }
-
             }
 
+            /**
+             * Called when an error is encountered while uploading an image.
+             * Sets the status of the upload to failed and calls onCompleted.
+             * @param t the thrown exception which caused the error
+             */
             @Override
             public void onError(Throwable t) {
+                logger.error("Error uploading profile photo: {}", t.getMessage());
                 status = FileUploadStatus.FAILED;
                 this.onCompleted();
             }
 
+            /**
+             * Called when the file upload stops, either because it completed or an error was encountered.
+             * Checks the validity of the image and saves it to a file if it is valid.
+             * If the image can't be read, the upload fails.
+             * Creates a file upload response to send back to the user with a success/fail message.
+             */
             @Override
             public void onCompleted() {
-                closeFile(writer);
+                FileUploadStatusResponse.Builder response = FileUploadStatusResponse.newBuilder();
 
-                status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
-                FileUploadStatusResponse response = FileUploadStatusResponse.newBuilder()
-                        .setStatus(status)
-                        .build();
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(byteWriter.toByteArray());
 
-                // convert from PNG to JPG if necessary
-                if (status == FileUploadStatus.SUCCESS) {
-                    if (fileExtension.equalsIgnoreCase("png")) {
-                        convertPngToJpg(fileName);
-                    } else if (!fileExtension.equalsIgnoreCase("jpeg")) {
-                        // delete the file if its extension is invalid
-                        // note that "jpeg" is used because this is the file type, regardless of if the extension is "jpg" or "jpeg"
-                        deleteInvalidFile(fileName + fileExtension);
+                try {
+                    BufferedImage image = ImageIO.read(inputStream);
+
+                    if (image.getWidth() == USER_PHOTO_DIMENSIONS && image.getHeight() == USER_PHOTO_DIMENSIONS) {
+                        ImageIO.write(image, "jpg", new File(filePath));
+                        logger.info("Saved profile image {} with dimensions {} x {}", filePath, image.getWidth(), image.getHeight());
+                        status = FileUploadStatus.SUCCESS;
+                    } else { // invalid
+                        logger.info("Image {} has invalid dimensions {} x {} and was not saved", filePath, image.getWidth(), image.getHeight());
+                        response.setMessage(String.format("Image has invalid dimensions %d x %d when they must be %d x %<d", image.getWidth(), image.getHeight(), USER_PHOTO_DIMENSIONS));
+                        status = FileUploadStatus.FAILED;
                     }
+                } catch (IOException | NullPointerException e) { // thrown by ImageIO.read and .write - will happen if the file isn't an image
+                    logger.error(String.format("Error reading or writing uploaded image: %s", Arrays.toString(e.getStackTrace())));
+                    response.setMessage("Error saving image: could not read image from file. Make sure the image is not corrupted.");
+                    status = FileUploadStatus.FAILED;
                 }
 
-                responseObserver.onNext(response);
+                closeFile(byteWriter);
+
+                status = FileUploadStatus.IN_PROGRESS.equals(status) ? FileUploadStatus.SUCCESS : status;
+
+                if (status == FileUploadStatus.SUCCESS) {
+                    deleteIncorrectPhotoFileType(fileName, fileExtension);
+                    response.setMessage("Successfully uploaded profile photo.");
+                }
+
+                response.setStatus(status);
+                responseObserver.onNext(response.build());
                 responseObserver.onCompleted();
             }
         };
+    }
+
+    /**
+     * Attempts to delete any uploaded file that was somehow saved that is not a jpg.
+     * @param fileName the saved file name WITHOUT extension, e.g. "5_photo."
+     * @param originalFileExtension the original filetype of the upload - could be png, zip, pdf, jpg, or anything else
+     */
+    private void deleteIncorrectPhotoFileType(String fileName, String originalFileExtension) {
+        // JPEG, not JPG, is what the file type is set as in the upload
+        if (!originalFileExtension.equalsIgnoreCase("jpeg")) {
+            try {
+                Boolean success = Files.deleteIfExists(profileImageFolder.resolve(fileName + originalFileExtension));
+                logger.info("Attempted to delete potentially invalid file \"{}{}\". File detected and deleted: {}",
+                        fileName, originalFileExtension, success);
+            } catch (IOException e) {
+                logger.info("Error deleting invalid file \"{}\": {}", fileName + originalFileExtension, e.getMessage());
+            }
+        }
     }
 
     /**
@@ -127,26 +177,28 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      */
     @Override
     public void deleteUserProfilePhoto(DeleteUserProfilePhotoRequest request, StreamObserver<DeleteUserProfilePhotoResponse> responseObserver) {
-        logger.info("Received request to delete profile photo");
         DeleteUserProfilePhotoResponse.Builder reply = DeleteUserProfilePhotoResponse.newBuilder();
         String filename = request.getUserId() + USER_PHOTO_SUFFIX;
 
         try {
-            if (Files.exists(profileImageFolder.resolve(filename + "jpg"))) {
+            if (Files.exists(profileImageFolder.resolve(filename))) {
                 // Left as a deleteIfExists in case of two nearly simultaneous requests
-                Files.deleteIfExists(profileImageFolder.resolve(filename + "jpg"));
+                Files.deleteIfExists(profileImageFolder.resolve(filename));
                 reply
                         .setIsSuccess(true)
                         .setMessage("User photo deleted successfully");
+                logger.info("Deleted profile photo for user {}", request.getUserId());
             } else {
                 reply
                         .setIsSuccess(false)
                         .setMessage("User does not have a profile photo uploaded");
+                logger.info("Didn't delete profile photo for user {} as they do not have one", request.getUserId());
             }
         } catch (IOException err) {
             reply
                     .setIsSuccess(false)
                     .setMessage("Unable to delete user photo: " + err.getMessage());
+            logger.error("Error deleting photo for user {}: {}", request.getUserId(), err.getStackTrace());
         }
 
         responseObserver.onNext(reply.build());
@@ -154,72 +206,18 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Sets the path of the file to be uploaded to data/photos/USERID_photo.FILETYPE
-     * Copied from tutorial; see above.
-     * @param request A request object containing the user ID and the file type
-     * @return Output stream
-     * @throws IOException When there is an error in creating the output stream
+     * Gets the path, in the user profile photos folder, for the photo in the provided upload request.
+     * The file type is always set to JPG, per USER_PHOTO_FORMAT, regardless of what type the initial file is.
+     * @param request A request object containing the user ID and the file's information
+     * @return a string object representing the path to the photo in the request
      */
-    private OutputStream getFilePath(UploadUserProfilePhotoRequest request) throws IOException {
-        // convert .jpeg into .jpg, else you'd get two separate files
-        String extension = request.getMetaData().getFileType();
-        var fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX + (extension.equalsIgnoreCase("jpeg") ? "jpg" : extension);
-
-        // delete the file if it already exists
-        Files.deleteIfExists(profileImageFolder.resolve(fileName));
-
-        return Files.newOutputStream(profileImageFolder.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    private String getFilePath(UploadUserProfilePhotoRequest request) {
+        String fileName = request.getMetaData().getUserId() + USER_PHOTO_SUFFIX;
+        return profileImageFolder.resolve(fileName).toString();
     }
 
     /**
-     * Takes a .png file existing in the profileImageFolder folder and replaces it with (converts it to) a .jpg file.
-     * Code pretty much copied from https://mkyong.com/java/convert-png-to-jpeg-image-file-in-java/
-     * @param fileName a String of the input and output file. File assumed to be a png.
-     */
-    private void convertPngToJpg(String fileName) {
-        try {
-            Path source = profileImageFolder.resolve(fileName + "png");
-            Path target = profileImageFolder.resolve(fileName + "jpg");
-            BufferedImage originalImage = ImageIO.read(source.toFile());
-
-            BufferedImage newImage = new BufferedImage(
-                    originalImage.getWidth(),
-                    originalImage.getHeight(),
-                    BufferedImage.TYPE_INT_RGB
-            );
-
-            newImage.createGraphics()
-                    .drawImage(originalImage,
-                            0,
-                            0,
-                            Color.WHITE,
-                            null);
-
-            ImageIO.write(newImage, "jpg", target.toFile());
-            Files.deleteIfExists(source);
-        } catch (IOException e) {
-            logger.info("Error converting \"{}\" from PNG to JPG: {}", fileName + ".png", e.getMessage());
-        }
-    }
-
-    /**
-     * Deletes the specified file from the profileImageFolder if it exists.
-     * This method shouldn't really be called, because files can only get here through the Portfolio module and
-     * the controller for the edit profile page, which should reject everything that isn't a JPG or PNG.
-     * Still, this provides a fail-safe in the event a file gets through that shouldn't.
-     * @param fileNameAndExtension a String of the filename and its extension, e.g. "totally-a-photo.zip"
-     */
-    private void deleteInvalidFile(String fileNameAndExtension) {
-        logger.info("Detected a profile photo upload of invalid type: \"{}\". Deleting file.", fileNameAndExtension);
-        try {
-            Files.deleteIfExists(profileImageFolder.resolve(fileNameAndExtension));
-        } catch (IOException e) {
-            logger.info("Error deleting invalid file \"{}\": {}", fileNameAndExtension, e.getMessage());
-        }
-    }
-
-    /**
-     * Writes the file content. Copied from tutorial; see above.
+     * Writes the file content to the OutputStream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      * @param content File content
      * @throws IOException When there is an error writing the content to the output stream
@@ -230,14 +228,14 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     }
 
     /**
-     * Closes the output stream. Copied from tutorial; see above.
+     * Closes the output stream. Copied from tutorial; see uploadUserProfilePhoto.
      * @param writer Output stream
      */
     private void closeFile(OutputStream writer) {
         try {
             writer.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error closing writer during photo upload: {}", (Object) e.getStackTrace());
         }
     }
 
@@ -255,12 +253,9 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                logger.error(String.format("Register user %s : %s - %s",
-                        request.getUsername(), error.getFieldName(), error.getErrorText()));
-                bld.add(error.getErrorText());
-                String logOutput = String.format("Register user %s : %s - %s",
+                logger.error("Register user {} : {} - {}",
                         request.getUsername(), error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
+                bld.add(error.getErrorText());
             }
 
             reply
@@ -390,6 +385,46 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         return users.subList(fromIndex, toIndex);
     }
 
+    /**
+     * <p>Holds shared functionality for adding/deleting user roles.</p>
+     *
+     * Sends a succesful reply if the operation was successful
+     * Gives a Status.NOT_FOUND error if the user ID is invalid
+     */
+    private void modifyUserRole(
+            ModifyRoleOfUserRequest request,
+            StreamObserver<UserRoleChangeResponse> responseObserver,
+            boolean delete) {
+        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
+        int userId = request.getUserId();
+        UserRole role = request.getRole();
+
+        try {
+            boolean success = false;
+            String successMessage = "Role successfully added";
+            String failMessage = "Couldn't add role: User already had this role.";
+
+            if (delete) {
+                success = userService.removeRoleFromUser(userId, role);
+                successMessage = "Role successfully removed";
+                failMessage = "Couldn't remove role: User didn't have this role";
+            } else {
+                success = userService.addRoleToUser(userId, role);
+            }
+
+            reply.setIsSuccess(success);
+            if (success)
+                reply.setMessage(successMessage);
+            else
+                reply.setMessage(failMessage);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException e) {
+            // The user ID pointing to a non-existent user
+            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
+        }
+    }
+
 
     /**
      * <p>Assigns a role to the given user.</p>
@@ -400,25 +435,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public void addRoleToUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("addRoleToUser() has been called");
-
-        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
-        int userId = request.getUserId();
-        UserRole role = request.getRole();
-        try {
-            // If the user didn't have this role, add it and return true
-            // Otherwise does nothing, returning false.
-            boolean success = userService.addRoleToUser(userId, role);
-            reply.setIsSuccess(success);
-            if (success)
-                reply.setMessage("Role successfully add");
-            else
-                reply.setMessage("Couldn't add role: User already had this role.");
-            responseObserver.onNext(reply.build());
-            responseObserver.onCompleted();
-        } catch (NoSuchElementException e) {
-            // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
-        }
+        modifyUserRole(request, responseObserver, false);
     }
 
     /**
@@ -430,25 +447,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     @Override
     public void removeRoleFromUser(ModifyRoleOfUserRequest request, StreamObserver<UserRoleChangeResponse> responseObserver) {
         logger.info("removeRoleFromUser() has been called");
-
-        UserRoleChangeResponse.Builder reply = UserRoleChangeResponse.newBuilder();
-        int userId = request.getUserId();
-        UserRole role = request.getRole();
-        try {
-            // If the user had this role, remove it and return true
-            // Otherwise does nothing, returning false.
-            boolean success = userService.removeRoleFromUser(userId, role);
-            reply.setIsSuccess(success);
-            if (success)
-                reply.setMessage("Role successfully removed");
-            else
-                reply.setMessage("Couldn't remove role: User didn't have this role");
-            responseObserver.onNext(reply.build());
-            responseObserver.onCompleted();
-        } catch (NoSuchElementException e) {
-            // The user ID pointing to a non-existent user
-            responseObserver.onError(Status.NOT_FOUND.withDescription("User with that ID doesn't exist").asRuntimeException());
-        }
+        modifyUserRole(request, responseObserver, true);
     }
 
     /**
@@ -467,8 +466,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                String logOutput = String.format("Edit user %s : %s - %s", request.getUserId(), error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
+                logger.error("Edit user {} : {} - {}",
+                        request.getUserId(), error.getFieldName(), error.getErrorText());
             }
 
             reply
@@ -514,9 +513,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         if(!errors.isEmpty()) { // If there are errors in the request
 
             for (ValidationError error : errors) {
-                String logOutput = String.format("Change password of user %s : %s - %s", request.getUserId(),
-                        error.getFieldName(), error.getErrorText());
-                logger.error(logOutput);
+                logger.error("Change password of user {} : {} - {}",
+                        request.getUserId(), error.getFieldName(), error.getErrorText());
             }
 
             reply

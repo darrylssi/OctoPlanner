@@ -5,14 +5,7 @@ let stompClient = null;
  * @param connected Boolean if a connection has been established to a WebSocket
  */
 function setConnected(connected) {
-    // Kept these lines in as they may be useful in future for connecting/disconnecting in a better way
-    // TODO check these lines before merging to master!
-
-    //document.getElementById('connect').disabled = connected;
-    //document.getElementById('disconnect').disabled = !connected;
-    //document.getElementById('conversationDiv').style.visibility
-    //    = connected ? 'visible' : 'hidden';
-
+    // Currently, does not contain any elements that need to be set according to the connected status
     let response = document.getElementById('response');
     if (response !== null ) {
         response.innerHTML = '';
@@ -29,7 +22,7 @@ function connect() {
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe(BASE_URL + 'topic/messages', function(messageOutput) {
+        stompClient.subscribe('/topic/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -51,7 +44,7 @@ function disconnect() {
  */
 function sendMessage() {
     let user = document.getElementById('user').getAttribute('data-name');
-    stompClient.send(BASE_URL + "app/ws", {},
+    stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'text':" was here"}));
 }
 

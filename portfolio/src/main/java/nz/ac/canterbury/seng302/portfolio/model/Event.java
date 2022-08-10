@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 
 /**
@@ -16,65 +17,67 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 @Entity
 public class Event {
 
+    public static final String DEFAULT_COLOUR = "#ff3823";
+
     /** The id of this event. This id should be unique between all events.*/
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    // Is this necessary for an event?
-    @Column
-    private int parentProjectId;
+    @ManyToOne
+    @JoinColumn(name = "parent_project_id", nullable = false)
+    private Project parentProject;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The event name must be between 2 and 32 characters.")
+    @NotBlank(message="Event name cannot be blank")
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
+            message="The event name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String eventName;
 
     @Column (nullable = false)
-    @Size(max=200, message="The event description must not exceed 200 characters.")
+    @Size(max=MAX_DESC_LENGTH, message="The event description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String eventDescription;
 
     // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern= DISPLAY_DATETIME_FORMAT)
     private Date eventEndDate;
 
     public Event() {}
 
     /**
      * A constructor which set the given user data to the specified variables
-     * @param parentProjectId Gets the project id
      * @param eventName Gets the event name given by user
      * @param eventDescription Gets the event description given by the user
      * @param eventStartDate Gets the event start date as a Date object
      * @param eventEndDate Gets the event end date as a Date object
      */
-    public Event(int parentProjectId, String eventName,  String eventDescription, Date eventStartDate, Date eventEndDate) {
-        this.parentProjectId = parentProjectId;
+    public Event(String eventName,  String eventDescription, Date eventStartDate, Date eventEndDate) {
         this.eventName = eventName;
         this.eventDescription = eventDescription;
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
     }
 
-    @Override
     /**
      * Returns a string listing the attributes of the event in the form "Event[x, x, x]".
      * @return said string
      */
+    @Override
     public String toString() {
         return String.format(
-                "Event[id=%d, parentProjectId='%d', eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
-                id, parentProjectId, eventName, eventStartDate, eventEndDate, eventDescription);
+                "Event[id=%d, eventName='%s', eventStartDate='%s', eventEndDate='%s', eventDescription='%s']",
+                id, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
     /**
-    * Sets the value of the event id
-    * @param id the value to set the id to
-    */
+     * Sets the value of the event id 
+     * @param id the value to set the id to
+     */
     public void setId(int id) {
         this.id = id;
     }
@@ -84,23 +87,7 @@ public class Event {
      * @return event's id
      */
     public int getId(){
-        return  id;
-    }
-
-    /**
-     * Sets the parent project id
-     * @param id Gets the Project's id
-     */
-    public void setParentProjectId(int id) {
-        this.parentProjectId = id;
-    }
-
-    /**
-     * Gets the parent project id
-     * @return project's id
-     */
-    public int getParentProjectId() {
-        return parentProjectId;
+        return id;
     }
 
     /**
@@ -167,10 +154,18 @@ public class Event {
         this.eventEndDate = newEndDate;
     }
 
+    public Project getParentProject() {
+        return parentProject;
+    }
+
+    public void setParentProject(Project parentProject) {
+        this.parentProject = parentProject;
+    }
+
     /**
      * Determines the correct colour for this event based on the list of sprints.
      * Specifically, this function returns the colour of the first sprint it finds which
-     * overlaps the start date of the event (or end date if the end paramter is true).
+     * overlaps the start date of the event (or end date if the end parameter is true).
      * If it finds no sprint, it returns the default colour determined by the system.
      * @param sprints a List object of sprints to choose a colour from.
      * @param end {boolean} fetch the colour at the end of the event, instead of the start.
@@ -181,8 +176,7 @@ public class Event {
             comparisonDate = eventEndDate;
         }
 
-        for(int i = 0; i < sprints.size(); i++) {
-            Sprint checkedSprint = sprints.get(i);
+        for (Sprint checkedSprint : sprints) {
             Date sprintStart = checkedSprint.getSprintStartDate();
             Date sprintEnd = checkedSprint.getSprintEndDate();
 
@@ -193,6 +187,6 @@ public class Event {
             }
         }
 
-        return "#ff3823";             // Default colour
+        return DEFAULT_COLOUR;
     }
 }

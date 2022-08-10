@@ -6,7 +6,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.Set;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
+/**
+ * Represents a project object. Project objects are stored in a table called Project, as it is an @Entity.
+ */
 @Entity // this is an entity, assumed to be in a table called Project
 @Table (name = "Project")
 public class Project {
@@ -15,25 +21,29 @@ public class Project {
     private int id;
 
     @Column (nullable = false)
-    @Size (max = 50, message = "Project name cannot be more than 50 characters")
-    @NotBlank (message = "Project name is required")
+    @Size (min = MIN_NAME_LENGTH, max = MAX_NAME_LENGTH,
+            message = "The project name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
+    @NotBlank (message = "Project name is required.")
     private String projectName;
 
     @Column (nullable = false)
-    @Size (max = 200, message = "Description cannot be more than 200 characters.")
+    @Size (max = 200, message = "Description cannot be more than " + MAX_DESC_LENGTH + " characters.")
     private String projectDescription;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = DATE_FORMAT)
     private Date projectStartDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = DATE_FORMAT)
     private Date projectEndDate;
 
     @Column (nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = DATE_FORMAT)
     private Date projectCreationDate;
+
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Event> events;
 
     protected Project() {
         this.projectCreationDate = new Date();

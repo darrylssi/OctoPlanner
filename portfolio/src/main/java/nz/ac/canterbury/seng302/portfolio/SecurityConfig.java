@@ -19,6 +19,8 @@ public class SecurityConfig {
     @Value("${base-url}")
     private String baseURL;
 
+    private static final String LOGIN = "/login";
+
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity security) throws Exception
     {
@@ -27,7 +29,7 @@ public class SecurityConfig {
         security
             .addFilterBefore(new JwtAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/login", "/register", "/")    // The way of accessing /static is not great
+                    .antMatchers(HttpMethod.GET, LOGIN, "/register", "/")    // The way of accessing /static is not great
                     .permitAll()
                     .and()
                 .authorizeRequests()
@@ -40,12 +42,12 @@ public class SecurityConfig {
                 .permitAll()
                 .invalidateHttpSession(true)
                 .deleteCookies("lens-session-token")
-                .logoutSuccessUrl("/login");
+                .logoutSuccessUrl(LOGIN);
 
         // Disable basic http security
         security
             .httpBasic().disable();
-        // Redirect to login if unauthenticated
+        // Redirect to login page if unauthenticated
         security
             .formLogin().loginPage(baseURL + "login");
 
@@ -57,6 +59,6 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers("/login", "/styles/**", "/img/**", "/register", "/");
+        return (web) -> web.ignoring().antMatchers(LOGIN, "/styles/**", "/img/**", "/register", "/");
     }
 }
