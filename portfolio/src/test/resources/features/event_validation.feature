@@ -17,12 +17,12 @@ Feature: Events
     Then creating the event should fail
 
     Examples:
-      | ParentStart  | ParentEnd    | EventStart         | EventEnd           | Name                                   | Desc             |
-      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "qwertyuiopasdfghjklzxcvbnmqwertyuiop" | "Name too long"  |
-      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "a" | "Name too short" |
-      # TODO: Get the validator to check these work, because the basic "javax.validation" methods don't cut it.
-      # | "2022-01-01" | "2022-12-31" | "2021-02-20 12:30" | "2022-02-20 13:00" | "Fail"                                 | "Starts before project"   |
-      # | "2022-01-01" | "2022-12-31" | "2021-02-20 12:30" | "2021-02-20 13:00" | "Fail"                                 | "Entirely before project" |
-      # | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2023-02-20 13:00" | "Fail"                                 | "Ends after project"      |
-      # | "2022-01-01" | "2022-12-31" | "2023-02-20 12:30" | "2023-02-20 13:00" | "Fail"                                 | "Entirely after project"  |
-      # | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "F"                                    | "Name too short"          |
+      | ParentStart  | ParentEnd    | EventStart         | EventEnd           | Name                                   | Desc                         |
+      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "qwertyuiopasdfghjklzxcvbnmqwertyuiop" | "Name too long"              |
+      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "F"                                    | "Name too short"             |
+      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2022-02-20 13:00" | "      "                               | "Name is blank"              |
+      | "2022-01-01" | "2022-12-31" | "2021-02-20 12:30" | "2022-02-20 13:00" | "F"                                    | "Starts before project"      |
+      | "2022-01-01" | "2022-12-31" | "2021-02-20 12:30" | "2021-02-20 13:00" | "F"                                    | "Entirely before project"    |
+      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2023-02-20 13:00" | "F"                                    | "Ends after project"         |
+      | "2022-01-01" | "2022-12-31" | "2023-02-20 12:30" | "2023-02-20 13:00" | "F"                                    | "Entirely after project"     |
+      | "2022-01-01" | "2022-12-31" | "2022-02-20 12:30" | "2023-01-20 13:00" | "F"                                    | "Event starts after it ends" |
