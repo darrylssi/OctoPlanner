@@ -1,6 +1,6 @@
 let stompClient = null;
 const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
-const EVENT_EDIT_MESSAGE_TIMEOUT = 8000; // hide editing event messages after this many ms
+const EVENT_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing event messages after this many ms
 
 /**
  * Sets html elements according to whether a WebSocket has been connected to or not
@@ -138,7 +138,8 @@ function showEditingMessage(editMessage) {
         }
 
         // Hide it after 8s
-        eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(eventId)}, EVENT_EDIT_MESSAGE_TIMEOUT));
+        console.log("SETTING TIMEOUT FOR EVENT:" + eventId + " AND MESSAGE: " + editMessage.content);
+        eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(editMessage)}, EVENT_EDIT_MESSAGE_TIMEOUT));
     }
 }
 
@@ -151,8 +152,11 @@ function hideEditMessage(message) {
     // this check is so that if you are editing an event that someone else is editing, you don't hide their message
     // when you close your form. Their message would reappear without this anyway but it avoids confusion.
     if (document.getElementById('user').getAttribute('data-name') !== message.from) {
-        const eventId = message.content;
+        const eventId = (message.content.split(',').length === 2) ? message.content.split(',')[0] : message.content;
+
+
         const editingEventBoxId = `event-${eventId}-editing-box`;
+        console.log("HIDING EDIT MESSAGE FOR EVENT: " + eventId + " LOOKING FOR CLASS: " + editingEventBoxId);
         const editingEventBoxes = document.getElementsByClassName(editingEventBoxId);
         for (const eventBox of editingEventBoxes) {
             if (eventBox) {

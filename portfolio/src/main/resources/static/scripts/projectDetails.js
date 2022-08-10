@@ -1,6 +1,6 @@
 var previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
 var previousEventBox; // same but for the eventbox
-const EVENT_EDIT_MESSAGE_FREQUENCY = 3000; // how often editing messages are sent while someone is editing an event
+const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 
@@ -130,7 +130,7 @@ function hideEditEvent(eventBoxId) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    stopEditing()
+    stopEditing();
 }
 
 /**
@@ -153,7 +153,7 @@ function collapseAllEditEventForms() {
     let collapseElementList = document.getElementsByClassName("collapse show");
     delay = ((collapseElementList.length > 0) ? EDIT_FORM_CLOSE_DELAY : 0);
     for (let element of collapseElementList) {
-        if (element.id.indexOf("editEventForm") != -1) {
+        if (element.id.indexOf("editEventForm") !== -1) {
             new bootstrap.Collapse(element).hide();
         }
     }
