@@ -46,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // Disable basic http security
         security
             .httpBasic().disable();
-        // Redirect to login if unauthenticated
+        // Redirect to login page if unauthenticated
         security
             .formLogin().loginPage(baseURL + "login");
 
