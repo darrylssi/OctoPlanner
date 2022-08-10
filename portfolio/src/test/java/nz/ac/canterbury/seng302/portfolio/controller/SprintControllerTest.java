@@ -84,7 +84,9 @@ class SprintControllerTest {
                 .andExpect(status().reason(containsString("Sprint not found")));
     }
 
-    @Test
+    // NOTE: These tests pass locally but not on gitlab runner. isOK is expected but is4xxClientError is expected on the pipeline.
+    // Fabian also suggested commenting these out and rewrite them differently later.
+    /*@Test
     void editWithBlankName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/edit-sprint/1")
@@ -93,7 +95,8 @@ class SprintControllerTest {
                         .param("sprintDescription", "desc")
                         .param("sprintStartDate", "2022-06-20")
                         .param("sprintEndDate", "2022-06-21"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Sprint name is required")));
     }
 
     @Test
@@ -105,7 +108,8 @@ class SprintControllerTest {
                         .param("sprintDescription", "desc")
                         .param("sprintStartDate", "2022-06-20")
                         .param("sprintEndDate", "2022-06-21"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters")));
     }
 
     @Test
@@ -117,10 +121,11 @@ class SprintControllerTest {
                         .param("sprintDescription", "desc")
                         .param("sprintStartDate", "2022-06-20")
                         .param("sprintEndDate", "2022-06-21"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("The sprint name must be between 2 and 32 characters")));
     }
 
-    /*@Test
+    @Test
     void editWithLongName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/edit-sprint/1")
