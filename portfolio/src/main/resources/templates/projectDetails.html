@@ -260,56 +260,6 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         </form>
     </div>
 </div>
-    <!-- Add Deadline Form -->
-    <div class="collapse" id="addDeadlineForm">
-        <div class="card">
-            <div class="card-header">
-                New Deadline
-            </div>
-            <div class="card-body">
-                <form class="container-fluid">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' " id="deadlineNameInput" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback">
-                                <label for="deadlineNameInput">Name</label>
-                                <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
-                            </div>
-                        </div>
-                        <div class="col-10">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="deadlineDescriptionInput" placeholder="Description">
-                                <label for="deadlineDescriptionInput">Description</label>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' " id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
-                                <label for="deadlineDate">Date</label>
-                                <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
-                                <script>
-                                    document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
-                                </script>
-                            </div>
-                        </div>
-                        <div class = "col">
-                            <div class="form-floating mb-3">
-                                <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' " id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback" th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}">
-                                <label for="deadlineTime">Time</label>
-                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <button type="button" class="btn btn-primary btn-lg">Save</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Used for event editing popups -->
