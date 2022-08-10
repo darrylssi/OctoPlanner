@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
@@ -91,7 +92,7 @@ public class EditSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) throws Exception {
+    ) throws ResponseStatusException {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         Project parentProject = projectService.getProjectById(projectId);
