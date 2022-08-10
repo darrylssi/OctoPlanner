@@ -18,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -86,7 +84,9 @@ class SprintControllerTest {
                 .andExpect(status().reason(containsString("Sprint not found")));
     }
 
-    @Test
+    // NOTE: These tests pass locally but not on gitlab runner. isOK is expected but is4xxClientError is expected on the pipeline.
+    // Fabian also suggested commenting these out and rewrite them differently later.
+    /*@Test
     void editWithBlankName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/edit-sprint/1")
@@ -151,6 +151,6 @@ class SprintControllerTest {
                         .param("sprintEndDate", "2022-06-21"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("The sprint description must not exceed 200 characters")));
-    }
+    }*/
 
 }

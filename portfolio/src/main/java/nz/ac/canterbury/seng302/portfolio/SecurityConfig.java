@@ -3,25 +3,26 @@ package nz.ac.canterbury.seng302.portfolio;
 import nz.ac.canterbury.seng302.portfolio.authentication.JwtAuthenticationFilter;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
     @Value("${base-url}")
     private String baseURL;
 
     private static final String LOGIN = "/login";
 
-    @Override
-    protected void configure(HttpSecurity security) throws Exception
+    @Bean
+    protected SecurityFilterChain filterChain(HttpSecurity security) throws Exception
     {
 
         // Force authentication for all endpoints except /login and /register
@@ -52,10 +53,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // let the H2 console embed itself in a frame
         security.headers().frameOptions().sameOrigin();
+
+        return security.build();
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(LOGIN, "/styles/**", "/img/**", "/register", "/");
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().antMatchers(LOGIN, "/styles/**", "/img/**", "/register", "/");
     }
 }
