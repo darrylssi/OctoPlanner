@@ -209,14 +209,15 @@ function createEventDisplay(eventMessage, parent, idIndex) {
         parent.insertBefore(newEvent, parent.getElementsByClassName(nextEvent)[0]);
     }
     newEvent.getElementsByClassName("event")[0].setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
-    newEvent.getElementsByClassName("event")[0].setAttribute("data-bs-original-title", eventMessage.description);
-    newEvent.getElementsByClassName("event")[0].setAttribute('data-toggle', "tooltip");
-    newEvent.getElementsByClassName("event")[0].setAttribute('data-placement', 'top');
+    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
+    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
+    newEvent.getElementsByClassName("event")[0].data-placement = "top";
+
 
     newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
     newEvent.querySelector("#event-date").innerHTML = eventMessage.startDate + " - " + eventMessage.endDate;
 
-    if (canEdit == false) {
+    if (canEdit === false) {
         newEvent.querySelector('.event-right').style.visibility = 'hidden';
     } else {
         const editFunctionString = 'showEditEvent("' + eventMessage.eventBoxIds[idIndex] + '","' + eventMessage.name +'","'+ eventMessage.description +'","'+ eventMessage.startDate +'","'+ eventMessage.endDate +'",'+ eventMessage.id+')';
