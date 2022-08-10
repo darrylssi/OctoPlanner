@@ -77,7 +77,7 @@ public class EditProjectController extends PageController {
      * @param projectEndDate (New) project end date
      * @param projectDescription (New) project description
      * @return Details page
-     * @throws Exception If the date cannot be parsed
+     * @throws ResponseStatusException If the date cannot be parsed
      */
     @PostMapping("/edit-project/{id}")
     public String projectSave(
@@ -90,7 +90,7 @@ public class EditProjectController extends PageController {
             @RequestParam(value="projectEndDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date projectEndDate,
             @RequestParam(value="projectDescription") String projectDescription,
             Model model
-    ) throws Exception {
+    ) throws ResponseStatusException {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         Project newProject = projectService.getProjectById(id);

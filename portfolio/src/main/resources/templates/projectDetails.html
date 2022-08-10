@@ -26,12 +26,12 @@
 <div id="deleteModal" class="modal">
     <div class="modal-content container">
         <div class="row">
-        <div class="modal-title"></div></div>
+            <div class="modal-title"></div></div>
         <br/>
         <div class="row">
             <div class="col-2">
-        <button onclick="hideModal()" class="btn btn-neutral btn-lg">Cancel</button>
-                </div><div class="col">
+                <button onclick="hideModal()" class="btn btn-neutral btn-lg">Cancel</button>
+            </div><div class="col">
             <button id="deleteButton" class="btn btn-primary btn-lg">Delete</button>
         </div>
         </div>
@@ -41,16 +41,16 @@
 <div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
-            <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
-                </svg>
-            </a>
+        <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+            </svg>
+        </a>
     </div>
     <hr/>
     <!-- The first events outside the sprint -->
     <div class="event-list-container outside-event">
-        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}" th:id="'event-box-' + ${event.getId} + '-before'"
+        <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})" th:id="'event-box-' + ${event.getId} + '-before'"
              th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'" th:each="event: ${events}">
             <span th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                 <div class="event-left">
@@ -62,7 +62,11 @@
                     <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                 </div>
                 <div class="event-right" th:if="${canEdit}">
-                    <button class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-before']], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]], [[*{getId}]])">
+                    <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
+                        <span class="spinner-border spinner-border-sm"></span>
+                        <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
+                    </span>
+                    <button class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getId} + '-before']], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                         </svg>
@@ -89,9 +93,9 @@
                 </div>
                 <div>
                     <a th:href="|../../edit-sprint/${sprint.getId}|" class="edit-button" th:if="${canEdit}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
-                            </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                        </svg>
                     </a>
                     <br/>
                     <button th:if="${canEdit}" class="delete-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getSprintName()}" th:onclick="showDeleteSprintModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'))" >
@@ -103,7 +107,7 @@
                 <div class="break"></div>
                 <div th:class="event-list-container">
                     <div th:class="event-box" th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}" th:each="event: ${events}" th:id="'event-box-' + ${event.getId} + '-in-' + *{getId}"
-                            th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
+                         th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
                         <div th:id="'event-' + *{getId}" class="event" th:object="${event}" data-toggle="tooltip" data-placement="top" th:title="${event.getEventDescription()}">
                             <div class="event-left">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
@@ -114,11 +118,11 @@
                                 <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                             </div>
                             <div class="event-right">
-                                <span class="me-2">
+                                <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
                                     <span class="spinner-border spinner-border-sm"></span>
-                                    <span class="fst-italic">USER is editing this event</span>
+                                    <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                                 </span>
-                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]], [[*{getId}]])">
+                                <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getId} + '-in-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                                     </svg>
@@ -148,11 +152,11 @@
                         <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate())} - ${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate())}|" ></span>
                     </div>
                     <div class="event-right">
-                        <span class="me-2">
+                        <span class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
                             <span class="spinner-border spinner-border-sm"></span>
-                            <span class="fst-italic">USER is editing this event</span>
+                            <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                         </span>
-                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]], [[*{getId}]])">
+                        <button th:if="${canEdit}" class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[*{getId}  + '-after-' + ${sprint.getId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                             </svg>
@@ -173,11 +177,11 @@
     </div>
     <div class="flex-row">
         <a th:if="${canEdit}" th:href="|../../add-sprint/${project.getId}|">
-        <button class="btn btn-primary btn-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-            </svg>
-            Add Sprint
+            <button class="btn btn-primary btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                Add Sprint
         </a>
         <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addEventForm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-calendar-event" viewBox="0 0 16 16">
@@ -185,12 +189,6 @@
                 <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
             </svg>
             Add Event
-        </button>
-        <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
-                <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
-            </svg>
-            Add Deadline
         </button>
     </div>
 
