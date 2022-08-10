@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import org.springframework.stereotype.Component;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,10 @@ import java.util.regex.Pattern;
 @Component
 public class ValidationUtils {
 
+    // Private constructor to hide the implicit public one
     private ValidationUtils() {}
+
+    public static final String DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
 
     /**
      * Validates that a sprint's start and end dates are valid. The checks are:
@@ -38,19 +42,17 @@ public class ValidationUtils {
     public static ValidationError validateSprintDates(int id, Date start, Date end,
                                                Project parentProject, List<Sprint> sprintList) {
         // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError error = new ValidationError();
 
         // Checks if the sprint's start date is after the sprint's end date
         // Does this first so that future checks can assume this is true
         if (start.after(end)) {
-            error.setErrorFlag(true);
-            error.addErrorMessage("Start date must always be before end date");
+            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checks that the sprint dates are within the project dates
-        if (sprintsOutsideProject(start, end,
+        if (datesOutsideProject(start, end,
                 parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Sprint dates must be within project date range: " +
                     parentProject.getStartDateString() + " - " + parentProject.getEndDateString());
         }
@@ -59,7 +61,6 @@ public class ValidationUtils {
         for (Sprint other : sprintList) {
             if (!sprintDatesOverlap(start, end, other) // Sprint dates overlap
                     && (other.getId() != id)){        // Sprint isn't checking against itself
-                error.setErrorFlag(true);
                 error.addErrorMessage("Sprint dates must not overlap with other sprints. Dates are overlapping with "
                         + other.getStartDateString() + " - " + other.getEndDateString());
             }
@@ -83,18 +84,16 @@ public class ValidationUtils {
      */
     public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
         // Initial error flag = false (no errors yet)
-        ValidationError error = new ValidationError(false);
+        ValidationError error = new ValidationError();
 
         // Checks if the project's start date is after the project's end date
         if (start.after(end)) {
-            error.setErrorFlag(true);
-            error.addErrorMessage("Start date must always be before end date");
+            error.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
         }
 
         // Checking against sprint dates
         for (Sprint sprint : sprintList) {
-            if (sprintsOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
-                error.setErrorFlag(true);
+            if (datesOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
                 error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
                         " is outside the project dates");
@@ -106,7 +105,6 @@ public class ValidationUtils {
         startCal.add(Calendar.YEAR, -1);
         Date earliestStart = startCal.getTime();
         if (start.before(earliestStart)) {
-            error.setErrorFlag(true);
             error.addErrorMessage("Project cannot be set to start more than a year before it was " +
                     "created (cannot start before " + DateUtils.toDisplayString(earliestStart) + ")");
         }
@@ -115,16 +113,60 @@ public class ValidationUtils {
     }
 
     /**
-     * Checks whether a sprint's dates are within a project's dates
-     * @param sprintStart The sprint's start date to validate
-     * @param sprintEnd The sprint's end date to validate
-     * @param projectStart The project's start date to validate
-     * @param projectEnd The project's end date to validate
-     * @return True if sprint dates are outside project dates, otherwise false
+     * Validates that an event's start and end dates are valid. The checks are:
+     * <ul>
+     *     <li>Event's start date is before the end date</li>
+     *     <li>Event dates are within project dates</li>
+     * </ul>
+     * @param start The event's start date
+     * @param end The event's end date
+     * @param parentProject The project that the event belongs to
+     * @return A ValidationError with a boolean error flag and a list of error messages
      */
-    public static boolean sprintsOutsideProject(Date sprintStart, Date sprintEnd, Date projectStart, Date projectEnd) {
-        if (sprintStart.before(projectStart)) { return true; }
-        else return sprintEnd.after(projectEnd);
+    public static ValidationError validateEventDates(Date start, Date end, Project parentProject) {
+        ValidationError errors = new ValidationError();
+
+        // Checks if the event's start date is after the project's end date
+        if (start.after(end)) {
+            errors.addErrorMessage(DATES_IN_WRONG_ORDER_MESSAGE);
+        } else if (ChronoUnit.SECONDS.between(start.toInstant(), end.toInstant()) < 60) {
+            errors.addErrorMessage("Event must occur for at least 1 minute");
+        }
+
+        // Checks that the event's dates are within the project dates
+        if (datesOutsideProject(start, end,
+                parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
+            errors.addErrorMessage(String.format("Event dates must be within project date range: %s - %s",
+                    parentProject.getStartDateString(),  parentProject.getEndDateString()));
+        }
+
+        return errors;
+    }
+
+    /**
+     * Checks whether a given start and end date are within a project's dates (or any two given dates)
+     * @param startDate The start date to validate
+     * @param endDate The end date to validate
+     * @param projectStart The project's start date to test against
+     * @param projectEnd The project's end date to test against
+     * @return True if given dates are outside the project dates, otherwise false
+     */
+    public static boolean datesOutsideProject(Date startDate, Date endDate, Date projectStart, Date projectEnd) {
+        if (startDate.before(projectStart)) { return true; }
+        else return endDate.after(projectEnd);
+    }
+
+    /**
+     * Checks whether a given date is within a project's dates (or any two given dates)
+     * @param date The date to validate
+     * @param projectStart The project's start date to test against
+     * @param projectEnd The project's end date to test against
+     * @return True if the given date is outside the project dates, otherwise false
+     */
+    public static boolean dateOutsideProject(Date date, Date projectStart, Date projectEnd) {
+        // TODO use this for milestones & deadlines because they only have one date to check
+        if (date.before(projectStart)) { return true; }
+        else return date.after(projectEnd);
     }
 
     /**
@@ -142,23 +184,25 @@ public class ValidationUtils {
         else return start.after(other.getSprintEndDate());
     }
 
-
     /**
      * Checks whether the name contains only valid characters
      * @param name Project/Sprint name to be tested
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
+        ValidationError error = new ValidationError();
 
-        ValidationError error = new ValidationError(false);
+        if (name == null) {
+            error.addErrorMessage("Must enter a sprint name");
+            return error;
+        }
 
-        /* string can only have alphanumeric and _ , . - ( ) symbols */
+        /* string can only have alphanumeric and _ . - symbols */
         String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
         if(!matcher.matches()) {
-            error.setErrorFlag(true);
-            error.addErrorMessage("Name can only have alphanumeric and . - _ characters.");
+            error.addErrorMessage("Name can only have alphanumeric and . - _ characters");
         }
 
         return error;

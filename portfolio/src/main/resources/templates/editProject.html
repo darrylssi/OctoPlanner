@@ -32,7 +32,9 @@
         <label for="projectName" class="required">Project Name</label> <br/>
         <input id="projectName" type="text" th:field="*{projectName}">
         <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
-        <span th:text="${invalidName}" th:class="error"></span>
+        <ul th:if="${invalidName}">
+            <li th:each="nameError: ${invalidName}" th:text="${nameError}" th:class="error"></li>
+        </ul>
         <br/>
         <div class="horizontal-group">
             <div class="horizontal-group-element" >
@@ -51,9 +53,9 @@
                 <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
             </div>
         </div>
-<div>
-    <p th:text="${invalidDateRange}" th:class="error"></p>
-</div>
+<ul th:if="${invalidDateRange}">
+    <li th:each="dateError: ${invalidDateRange}" th:text="${dateError}" th:class="error"></li>
+</ul>
 <br/>
 <div class="buttons">
     <a th:href="|../project/${id}|" class="btn btn-neutral btn-lg">

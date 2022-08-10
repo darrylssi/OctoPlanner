@@ -11,11 +11,14 @@ public class ValidationError {
     private boolean errorFlag; // True if there is an error, false if not
     private final List<String> errorMessages;
 
-    public ValidationError(Boolean errorFlag) {
-        this.errorFlag = errorFlag;
+    public ValidationError() {
+        this.errorFlag = false;
         this.errorMessages = new ArrayList<>();
     }
-
+    /**
+     * Checks if there are any errors
+     * @return `true` if an error was added (without being manually set to false)
+     */
     public boolean isError() {
         return errorFlag;
     }
@@ -29,10 +32,11 @@ public class ValidationError {
     }
 
     /**
-     * Adds a string error message to the list of error messages.
+     * <p>Adds an error message to the list of error messages, and sets the errorFlag to `true`</p>
      * @param errorMessage an error message as a string
      */
     public void addErrorMessage(String errorMessage) {
+        this.errorFlag = true;
         this.errorMessages.add(errorMessage);
     }
 
@@ -41,7 +45,7 @@ public class ValidationError {
      * @return first error message if errorFlag is true, else an empty string ("")
      */
     public String getFirstError() {
-        if ( errorFlag ) {
+        if ( !errorMessages.isEmpty() && errorFlag ) {
             return errorMessages.get(0);
         } else {
             return "";

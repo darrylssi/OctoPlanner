@@ -101,7 +101,7 @@ public class AddSprintController extends PageController {
         c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
 
         // Checks that the default end date is within the project dates
-        if (ValidationUtils.sprintsOutsideProject(sprintStart, c.getTime(),
+        if (ValidationUtils.datesOutsideProject(sprintStart, c.getTime(),
                 project.getProjectStartDate(), project.getProjectEndDate())){
             sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
         } else {
