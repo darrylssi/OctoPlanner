@@ -28,7 +28,7 @@ junit-portfolio:
     - ./gradlew test
   artifacts:
     reports:
-      junit: build/jacoco/test-report.xml
+      junit: portfolio/build/jacoco/test-report.xml
     expire_in: 5min
 
 junit-identityprovider:
@@ -38,7 +38,7 @@ junit-identityprovider:
     - ./gradlew test
   artifacts:
     reports:
-      junit: build/jacoco/test-report.xml
+      junit: identityprovider/build/jacoco/test-report.xml
     expire_in: 5min
 
 publish-protos-to-maven-local:
