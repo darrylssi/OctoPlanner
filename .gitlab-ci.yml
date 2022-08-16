@@ -21,17 +21,25 @@ tag-checker:
   only:
     - tags
 
-junit-porfolio:
+junit-portfolio:
   stage: test
   script:
     - cd portfolio
     - ./gradlew test
+  artifacts:
+    reports:
+      junit: build/jacoco/test-report.xml
+    expire_in: 5min
 
 junit-identityprovider:
   stage: test
   script:
     - cd identityprovider
     - ./gradlew test
+  artifacts:
+    reports:
+      junit: build/jacoco/test-report.xml
+    expire_in: 5min
 
 publish-protos-to-maven-local:
   stage: publishProtosToLocalMavenRepo
