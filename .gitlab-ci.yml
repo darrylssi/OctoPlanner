@@ -13,6 +13,9 @@ sonarqube-report:
     - ./gradlew sonarqube
     - cd ../portfolio
     - ./gradlew sonarqube
+  dependencies:
+    - junit-portfolio
+    - junit-identityprovider
 
 tag-checker:
   stage: tagChecking
@@ -27,8 +30,8 @@ junit-portfolio:
     - cd portfolio
     - ./gradlew test
   artifacts:
-    reports:
-      junit: portfolio/build/jacoco/test-report.xml
+    paths:
+      - portfolio/build/jacoco/test-report.xml
     expire_in: 5min
 
 junit-identityprovider:
@@ -37,8 +40,8 @@ junit-identityprovider:
     - cd identityprovider
     - ./gradlew test
   artifacts:
-    reports:
-      junit: identityprovider/build/jacoco/test-report.xml
+    paths:
+      - identityprovider/build/jacoco/test-report.xml
     expire_in: 5min
 
 publish-protos-to-maven-local:
