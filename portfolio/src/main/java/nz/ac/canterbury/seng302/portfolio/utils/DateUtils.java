@@ -75,6 +75,20 @@ public class DateUtils {
     }
 
     /**
+     * Converts a String to a DateTime in yyyy--MM-dd HH:mm format.
+     * @param dateTime String to be converted to DateTime
+     * @return DateTime object
+     */
+    public static Date toDateTime(String dateTime) {
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateTime);
+        } catch (ParseException e) {
+            logger.error(String.format("Error parsing date: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    /**
      * Converts a Date object to a String with yyyy-MM-dd format.
      * @param date Date object to be converted to String
      * @return String object

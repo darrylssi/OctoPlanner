@@ -1,21 +1,25 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Holds unit tests for the Event class.
  */
 @SpringBootTest
 class EventTests {
+    private static List<Sprint> sprintList = new ArrayList<>();
     private static final List<Sprint> sprintList = new ArrayList<>();
 
     private final String defaultEventColour = "#ff3823";

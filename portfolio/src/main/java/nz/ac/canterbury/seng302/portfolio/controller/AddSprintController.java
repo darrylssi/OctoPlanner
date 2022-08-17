@@ -58,7 +58,7 @@ public class AddSprintController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("id") int id,
             Model model
-    ) {
+    ){
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         /* Getting project object by using project id */
@@ -139,7 +139,7 @@ public class AddSprintController extends PageController {
             @Valid @ModelAttribute("sprint") Sprint sprint,
             BindingResult result,
             Model model
-    ) {
+    ){
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         // Getting project object by project id
@@ -218,6 +218,5 @@ public class AddSprintController extends PageController {
     static ValidationError getNameValidationError(String sprintName) {
         return ValidationUtils.validateName(sprintName);
     }
-
 
 }
