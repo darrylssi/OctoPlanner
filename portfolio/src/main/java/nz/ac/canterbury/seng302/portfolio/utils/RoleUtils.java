@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
@@ -73,5 +74,8 @@ public class RoleUtils {
     public static UserRole fromString(String sRole) {
         return UserRole.valueOf(sRole.toUpperCase(Locale.ROOT));
     }
-    
+
+    public static boolean canAddRoles(List<UserRole> acceptableRoles, List<UserRole> userRoles) {
+        return !userRoles.containsAll(acceptableRoles);
+    }
 }
