@@ -37,7 +37,6 @@ public class RoleUtils {
             case TEACHER -> "Teacher";
             case COURSE_ADMINISTRATOR -> "Course Admin";
             case UNRECOGNIZED -> "Unrecognized (!!! this shouldn't be here !!!)";
-            default -> throw new IllegalArgumentException(role.toString() + " hasn't been registered in `RoleUtils.toName()`, add it please thanks");
         };
     }
 
@@ -71,16 +70,21 @@ public class RoleUtils {
         return hasRoleOfAtLeast(userRoles, targetRole);
     }
 
+    /**
+     * Gets a UserRole from a string
+     * @param sRole a string representing a UserRole
+     * @return the UserRole that correlates to the string
+     */
     public static UserRole fromString(String sRole) {
         return UserRole.valueOf(sRole.toUpperCase(Locale.ROOT));
     }
 
     /**
-     * Checks whether the logged-in user on the list of users page is able to add a role to a specific user.
+     * Checks if there are any roles that can be added to a user that they don't already have.
      * Intended to be used in the Thymeleaf template to govern the displaying of the add roles button.
-     * @param acceptableRoles the list of roles that the logged-in user has
-     * @param userRoles the roles of the user that may be edited (not the one logged-in)
-     * @return true if the logged-in user can add roles, false if the user already has all roles that could be added
+     * @param acceptableRoles the roles that the current user is able to add
+     * @param userRoles the roles that the user being edited currently has
+     * @return false if the user already has all roles that can be added
      */
     public static boolean canAddRoles(List<UserRole> acceptableRoles, List<UserRole> userRoles) {
         return !userRoles.containsAll(acceptableRoles);
