@@ -62,10 +62,38 @@ function addRole(userId, role) {
     patchRequest.send();
 }
 
-/** Toggles the dropdown with the associated id
- *
+/**
+ * Toggles the dropdown with the associated id
  * @param elementId the id of the dropdown to be toggled
  */
 function toggleRoleList(elementId) {
+    hideAllRoleDropdowns();
     document.getElementById(elementId).classList.toggle("show");
+}
+
+/**
+ * Does what it says on the tin - hides all add role dropdowns when called.
+ */
+function hideAllRoleDropdowns() {
+    const dropdowns = document.getElementsByClassName("user-role-dropdown");
+    for (const item of dropdowns) {
+        item.classList.remove("show");
+    }
+}
+
+/**
+ * Returns true if there is a role in acceptableRoles that is not within targetUserRoles.
+ * This would be used to check whether the add roles button should be visible, but you can't call JS from a th:if
+ * statement. So, TODO remove this if it is not usable.
+ * @param acceptableRoles
+ * @param targetUserRoles
+ * @return true if an element in acceptableRoles is not in targetRoles, else false
+ */
+function canAddRole(acceptableRoles, targetUserRoles) {
+    for (const item of acceptableRoles) {
+        if (!item in targetUserRoles) {
+            return true;
+        }
+    }
+    return false;
 }
