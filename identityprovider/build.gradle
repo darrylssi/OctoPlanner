@@ -91,13 +91,13 @@ jacocoTestReport {
     }
 }
 
-// Sonarqube specific configuration (task)
 sonarqube {
     properties {
         property "sonar.projectKey", "team-800-identityprovider"
         property "sonar.projectName", "team 800 - identityprovider"
         property "sonar.sourceEncoding", "UTF-8"
         property "sonar.host.url", "https://sonarqube.csse.canterbury.ac.nz"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/jacoco/test-report.xml"
         property "sonar.login", "$System.env.SONARQUBE_KEY"
     }
 }
