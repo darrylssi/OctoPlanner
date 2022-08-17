@@ -214,29 +214,4 @@ public class DetailsController extends PageController {
         }
     }
 
-    /**
-     * Deletes an event and redirects back to the project view
-     * @param principal used to check if the user is authorised to delete events
-     * @param eventId the id of the event to be deleted
-     * @return a redirect to the project view
-     */
-    @DeleteMapping("/delete-event/{eventId}")
-    @ResponseBody
-    public ResponseEntity<String> deleteEvent(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name="eventId") int eventId
-    ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete events
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
-        try {
-            eventService.deleteEvent(eventId);
-            return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
 }
