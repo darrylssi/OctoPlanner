@@ -13,6 +13,9 @@ import java.util.Date;
 @Entity
 public class Deadline {
 
+    public static final String DEFAULT_COLOUR = "#ff3823";
+
+    /** The id of this deadline. This id should be unique between all deadlines.*/
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -21,17 +24,18 @@ public class Deadline {
     private int parentProjectId;
 
     @Column(nullable = false)
-    @Size(min=2, max=32, message="The deadline name must be between 2 and 32 characters.")
+    @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
+            message="The deadline name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String deadlineName;
 
     @Column (nullable = false)
-    @Size(max=200, message="The deadline description must not exceed 200 characters.")
+    @Size(max=MAX_DESC_LENGTH, message="The deadline description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String deadlineDescription;
 
-    // This is "org.springframework.format.annotation.DateTimeFormat"
     @Column (nullable = false)
-    @DateTimeFormat(pattern="dd/MMM/yyyy HH:mm:ss")
+    @DateTimeFormat(pattern=DATETIME_FORMAT)
     private Date deadlineDate;
+
 
     public Deadline() {}
 
@@ -47,6 +51,18 @@ public class Deadline {
         this.deadlineName = deadlineName;
         this.deadlineDescription = deadlineDescription;
         this.deadlineDate = deadlineDate;
+    }
+
+
+    /**
+     * Returns a string listing the attributes of the deadline in the form "Deadline[x, x, x]".
+     * @return said string
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "Deadline[id=%d, parentProjectId='%d', deadlineName='%s', deadlineDate='%s', deadlineDescription='%s']",
+                id, parentProjectId, deadlineName, deadlineDate, deadlineDescription);
     }
 
     public int getId() {
@@ -87,5 +103,28 @@ public class Deadline {
 
     public void setDeadlineDate(Date deadlineDate) {
         this.deadlineDate = deadlineDate;
+
+    /**
+     * Determines the correct colour for this deadline based on the list of sprints.
+     * Specifically, this function returns the colour of the first sprint it finds which
+     * contains the date of the deadline. If it finds no sprint, it returns the default colour
+     * determined by the system.
+     * @param sprints a List object of sprints to choose a colour from.
+     */
+    public String determineColour(List<Sprint> sprints) {
+        Date comparisonDate = deadlineDate;
+
+        for (Sprint checkedSprint : sprints) {
+            Date sprintStart = checkedSprint.getSprintStartDate();
+            Date sprintEnd = checkedSprint.getSprintEndDate();
+
+            /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
+            if ((sprintStart.before(comparisonDate) || sprintStart.equals(comparisonDate)) &&
+                    (sprintEnd.after(comparisonDate) || sprintEnd.equals(comparisonDate))) {
+                return checkedSprint.getSprintColour();
+            }
+        }
+
+        return DEFAULT_COLOUR;
     }
 }

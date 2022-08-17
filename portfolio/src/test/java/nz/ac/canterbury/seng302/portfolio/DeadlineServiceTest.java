@@ -18,26 +18,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+/**
+ * Holds unit tests for the DeadlineService class.
+ */
 @SpringBootTest
-class DeadlineServiceTest {
+public class DeadlineServiceTest {
+
     @Autowired
     private DeadlineService deadlineService;
-
     @MockBean
     private DeadlineRepository deadlineRepository;
 
     private Deadline deadline;
 
     @BeforeEach
-    void setup() {
-        deadline = new Deadline(0, "deadline", "description", new Date());
+    void setUp() {
+        deadline1 = new Deadline(0, "name", "description", new Date());
     }
 
     @Test
-    void getDeadlineValidId_thenReturnDeadline() {
+    void getDeadlineValidId_thenReturnDeadline() throws Exception {
         when(deadlineRepository.findDeadlineById(1))
                 .thenReturn(deadline);
-        assertThat(deadlineService.getDeadlineById(1)).isEqualTo(deadline);
+
+        assertThat(deadlineService.getDeadlineById(1)).isEqualTo(deadline1);
     }
 
     @Test
