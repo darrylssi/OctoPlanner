@@ -75,9 +75,18 @@ public class DateUtils {
     }
 
     /**
-     * Converts a String to a DateTime in yyyy--MM-dd HH:mm format.
-     * @param dateTime String to be converted to DateTime
-     * @return DateTime object
+     * Converts a Date object to a String with yyyy-MM-dd format.
+     * @param date Date object to be converted to String
+     * @return String object
+     */
+    public static String toString(Date date) {
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Converts a String to a Date in yyyy--MM-dd HH:mm format.
+     * @param dateTime String to be converted to Date
+     * @return Date object
      */
     public static Date toDateTime(String dateTime) {
         try {
@@ -88,28 +97,6 @@ public class DateUtils {
         return null;
     }
 
-    /**
-     * Converts a Date object to a String with yyyy-MM-dd format.
-     * @param date Date object to be converted to String
-     * @return String object
-     */
-    public static String toString(Date date) {
-        return new SimpleDateFormat(DATE_FORMAT).format(date);
-    }
-
-    /**
-     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
-     * @param date String to be converted to a Date
-     * @return Date object of the corresponding string
-     */
-    public static Date toDateTime(String date) {
-        try {
-            return new SimpleDateFormat(DATETIME_ISO_FORMAT).parse(date);
-        } catch (ParseException e) {
-            logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
-        }
-        return null;
-    }
 
     /**
      * Checks whether the first date given is the day after the second date given

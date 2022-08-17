@@ -1,7 +1,23 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.service.*;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,39 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.validation.Valid;
-import nz.ac.canterbury.seng302.portfolio.model.Deadline;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.service.*;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 /**
@@ -79,7 +63,6 @@ public class DetailsController extends PageController {
                 TimeZone userTimezone,
                 Model model
     ){
-    ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateEventForm(eventForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
@@ -88,9 +71,9 @@ public class DetailsController extends PageController {
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
 
-        /**
-     Redirects so any project page URL gets a slash on the end
-     */
+    /**
+     * Redirects so any project page URL gets a slash on the end
+     * */
     @GetMapping("/project/{id}")
     public String detailsRedirect(
                 @PathVariable(name="id") int id
@@ -120,17 +103,17 @@ public class DetailsController extends PageController {
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
         // Gets the sprint list and sorts it based on the sprint start date
-        List<Sprint> sprintList = sprintService.getSprintsInProject(id);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(parentProjectId);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
         // Gets the event list and sorts it based on the event start date
-        List<Event> eventList = eventService.getEventByParentProjectId(id);
+        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         eventList.sort(Comparator.comparing(Event::getEventStartDate));
         model.addAttribute("events", eventList);
 
         // Gets the deadline list and sorts it based on the deadline date
-        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(id);
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
         deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
         model.addAttribute("deadlines", deadlineList);
 
@@ -187,8 +170,8 @@ public class DetailsController extends PageController {
     ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError dateErrors = null;
-        ValidationError nameErrors = null;
+        ValidationError dateErrors;
+        ValidationError nameErrors;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             populateProjectDetailsModel(model, projectID, thisUser);

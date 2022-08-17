@@ -74,82 +74,42 @@ public class Event {
                 id, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-    /**
-     * Sets the value of the event id 
-     * @param id the value to set the id to
-     */
     public void setId(int id) {
         this.id = id;
     }
 
-    /**
-     * Gets the event id
-     * @return event's id
-     */
     public int getId(){
         return id;
     }
 
-    /**
-     * Gets the event name
-     * @return event's name
-     */
     public String getEventName() {
         return eventName;
     }
 
-    /**
-     * Sets the event name
-     * @param newName Gets the event name given by user
-     */
     public void setEventName(String newName) {
         this.eventName = newName;
     }
 
-    /**
-     * Gets the event description
-     * @return event's description
-     */
     public String getEventDescription(){
         return eventDescription;
     }
 
-    /**
-     * Sets the event Description
-     * @param newDescription Gets the event description given by the user
-     */
     public void setEventDescription(String newDescription) {
         this.eventDescription = newDescription;
     }
 
-    /**
-     * Gets the event start date
-     * @return event's start date
-     */
     public Date getEventStartDate() {
         return eventStartDate;
     }
 
-    /**
-     * Sets the event start date
-     * @param newStartDate The event start date given by the user
-     */
     public void setStartDate(Date newStartDate) {
         this.eventStartDate = newStartDate;
     }
 
-    /**
-     * Gets the event end date
-     * @return event's end date
-     */
     public Date getEventEndDate() {
         return eventEndDate;
     }
 
-    /**
-     * Sets the event end date
-     * @param newEndDate The event end date given by user
-     */
     public void setEndDate(Date newEndDate) {
         this.eventEndDate = newEndDate;
     }

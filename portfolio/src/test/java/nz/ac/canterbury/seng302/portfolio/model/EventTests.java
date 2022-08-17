@@ -8,10 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -19,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @SpringBootTest
 class EventTests {
-    private static List<Sprint> sprintList = new ArrayList<>();
     private static final List<Sprint> sprintList = new ArrayList<>();
 
     private final String defaultEventColour = "#ff3823";
