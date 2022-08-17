@@ -20,6 +20,7 @@ public class GlobalVars {
     public static final int COLOUR_LENGTH = 7;
 
     public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
     public static final String DISPLAY_DATE_FORMAT = "dd/MMM/yyyy";
     public static final String DISPLAY_DATETIME_FORMAT = "dd/MMM/yyyy HH:mm:ss";
     public static final String DATETIME_ISO_FORMAT = "yyyy-MM-dd'T'hh:mm";  // Format accepted by browsers

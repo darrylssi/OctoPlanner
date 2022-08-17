@@ -18,42 +18,40 @@ import static org.mockito.Mockito.*;
  * Holds unit tests for the EventService class.
  */
 @SpringBootTest
-public class EventServiceTest {
+class EventServiceTest {
     @Autowired
     private EventService eventService;
 
     @MockBean
     private EventRepository eventRepository;
 
-    private Event event1;
+    private Event event;
 
     @BeforeEach
     void setUp() {
-        event1 = new Event(0, "name", "description", new Date(), new Date());
+        event = new Event("name", "description", new Date(), new Date());
     }
 
     @Test
-    void getEventValidId_thenReturnEvent() throws Exception {
+    void getEventValidId_thenReturnEvent() {
         when(eventRepository.findEventById(1))
-                .thenReturn(event1);
+                .thenReturn(event);
 
-        assertThat(eventService.getEventById(1)).isEqualTo(event1);
+        assertThat(eventService.getEventById(1)).isEqualTo(event);
     }
 
     @Test
     void getEventInvalidId_thenThrowException() {
-        Exception e = assertThrows(Exception.class, () -> {
-            eventService.getEventById(2);
-        });
+        Exception e = assertThrows(Exception.class, () -> eventService.getEventById(2));
         String expectedMessage = "Event not found.";
         assertTrue(e.getMessage().contains(expectedMessage));
     }
 
     @Test
     void saveEvent() {
-        when(eventRepository.save(event1)).thenReturn(event1);
-        eventService.saveEvent(event1);
-        verify(eventRepository, times(1)).save(event1);
+        when(eventRepository.save(event)).thenReturn(event);
+        eventService.saveEvent(event);
+        verify(eventRepository, times(1)).save(event);
     }
 
 }

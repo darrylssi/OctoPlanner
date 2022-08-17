@@ -5,6 +5,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
+
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Represents a deadline object.
@@ -103,6 +106,7 @@ public class Deadline {
 
     public void setDeadlineDate(Date deadlineDate) {
         this.deadlineDate = deadlineDate;
+    }
 
     /**
      * Determines the correct colour for this deadline based on the list of sprints.
@@ -112,15 +116,14 @@ public class Deadline {
      * @param sprints a List object of sprints to choose a colour from.
      */
     public String determineColour(List<Sprint> sprints) {
-        Date comparisonDate = deadlineDate;
 
-        for (Sprint checkedSprint : sprints) {
+            for (Sprint checkedSprint : sprints) {
             Date sprintStart = checkedSprint.getSprintStartDate();
             Date sprintEnd = checkedSprint.getSprintEndDate();
 
             /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
-            if ((sprintStart.before(comparisonDate) || sprintStart.equals(comparisonDate)) &&
-                    (sprintEnd.after(comparisonDate) || sprintEnd.equals(comparisonDate))) {
+            if ((sprintStart.before(deadlineDate) || sprintStart.equals(deadlineDate)) &&
+                    (sprintEnd.after(deadlineDate) || sprintEnd.equals(deadlineDate))) {
                 return checkedSprint.getSprintColour();
             }
         }

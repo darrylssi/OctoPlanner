@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
  * Holds unit tests for the DeadlineService class.
  */
 @SpringBootTest
-public class DeadlineServiceTest {
+class DeadlineServiceTest {
 
     @Autowired
     private DeadlineService deadlineService;
@@ -33,15 +33,15 @@ public class DeadlineServiceTest {
 
     @BeforeEach
     void setUp() {
-        deadline1 = new Deadline(0, "name", "description", new Date());
+        deadline = new Deadline(0, "name", "description", new Date());
     }
 
     @Test
-    void getDeadlineValidId_thenReturnDeadline() throws Exception {
+    void getDeadlineValidId_thenReturnDeadline() {
         when(deadlineRepository.findDeadlineById(1))
                 .thenReturn(deadline);
 
-        assertThat(deadlineService.getDeadlineById(1)).isEqualTo(deadline1);
+        assertThat(deadlineService.getDeadlineById(1)).isEqualTo(deadline);
     }
 
     @Test
