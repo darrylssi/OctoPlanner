@@ -75,6 +75,13 @@ public class RoleUtils {
         return UserRole.valueOf(sRole.toUpperCase(Locale.ROOT));
     }
 
+    /**
+     * Checks whether the logged-in user on the list of users page is able to add a role to a specific user.
+     * Intended to be used in the Thymeleaf template to govern the displaying of the add roles button.
+     * @param acceptableRoles the list of roles that the logged-in user has
+     * @param userRoles the roles of the user that may be edited (not the one logged-in)
+     * @return true if the logged-in user can add roles, false if the user already has all roles that could be added
+     */
     public static boolean canAddRoles(List<UserRole> acceptableRoles, List<UserRole> userRoles) {
         return !userRoles.containsAll(acceptableRoles);
     }
