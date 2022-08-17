@@ -1,8 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
+
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
@@ -15,16 +13,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.*;
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = DetailsController.class)
+@WebMvcTest(controllers = EventController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class DetailsControllerTest {
+public class EventControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,29 +31,24 @@ class DetailsControllerTest {
     @MockBean
     EventService eventService;
     @MockBean
-    SprintService sprintService;
-    @MockBean
-    ProjectService projectService;
-    @MockBean
-    private SprintLabelService labelUtils;
-    @MockBean
     private UserAccountClientService userAccountClientService;
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void deleteSprintAsTeacher_get200Response() throws Exception {
-        Mockito.doNothing().when(sprintService).deleteSprint(anyInt());
-        mockMvc.perform(delete("/delete-sprint/1"))
+    void deleteEventAsTeacher_get200Response() throws Exception {
+        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
+        mockMvc.perform(delete("/delete-event/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Sprint deleted."));
+                .andExpect(content().string("Event deleted."));
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteSprintAsStudent_get401Response() throws Exception {
-        Mockito.doNothing().when(sprintService).deleteSprint(anyInt());
-        mockMvc.perform(delete("/delete-sprint/1"))
+    void deleteEventAsStudent_get401Response() throws Exception {
+        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
+        mockMvc.perform(delete("/delete-event/1"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("User not authorised."));
     }
+
 }
