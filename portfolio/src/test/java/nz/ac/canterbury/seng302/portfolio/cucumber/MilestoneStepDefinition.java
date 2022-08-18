@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.cucumber;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class MilestoneStepDefinition extends RunCucumberTest{
@@ -42,17 +42,18 @@ public class MilestoneStepDefinition extends RunCucumberTest{
         milestone.setMilestoneDescription(description);
     }
 
-    @Then("a milestone called {string} exists on {string}, with a description {string}")
-    public void a_milestone_called_exists_on_with_a_description(
-            String name, String date, String description) {
+    @Then("there are no errors in creating the milestone")
+    public void there_are_no_errors_in_creating_the_milestone() {
         var javaxErrors = checkJavaxConstraints();
         assertThat(javaxErrors, is(empty()));
     }
 
-    @Then("creating the milestone should fail")
-    public void creating_the_milestone_should_fail() {
+    @Then("creating the milestone should have {string}")
+    public void creating_the_milestone_should_have_error(
+            String errorMessage) {
         var javaxErrors = checkJavaxConstraints();
         assertThat(javaxErrors, is(not(empty())));
+        assertTrue(javaxErrors.contains(errorMessage));
     }
 
 }
