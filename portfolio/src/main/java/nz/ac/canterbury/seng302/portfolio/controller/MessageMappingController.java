@@ -119,14 +119,14 @@ public class MessageMappingController {
 
         //get list of all event box ids to include the event on the project details page
         for (int i = 0; i < sprints.size(); i++) {
-            if(timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+            if(DateUtils.timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())){
                 sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
                 eventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
                         sprints.get(i).getSprintEndDate(), updatedEvent.getEventStartDate()));
                 eventBoxIds.add(String.format(EVENT_IN_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
             }
-            if((sprints.size() > i+1) && timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
+            if((sprints.size() > i+1) && DateUtils.timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
                 sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
                 eventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
@@ -141,25 +141,10 @@ public class MessageMappingController {
         return eventMessageOutput;
     }
 
-    /**
-     * Takes the start and ends of two time periods and checks whether they overlap
-     * @param startA the start time of the first time period
-     * @param endA the end time of the first time period
-     * @param startB the start time of the second time period
-     * @param endB the end time of the second time period
-     * @return true if the time periods overlap
-     */
-    private boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
-        if (!startA.before(startB)){
-            return !startA.after(endB);
-        }
-        return !endA.before(startB);
-    }
-
     private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd, Date eventStartDate){
         for (Event event : events) {
             if (event.getEventStartDate().after(eventStartDate) &&
-                    timesOverlap(periodStart, periodEnd,
+                    DateUtils.timesOverlap(periodStart, periodEnd,
                             event.getEventStartDate(), event.getEventEndDate())) {
                 return (String.format(EVENT_ID_FORMAT, event.getId()));
             }
