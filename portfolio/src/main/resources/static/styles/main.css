@@ -148,7 +148,7 @@ body {
     justify-content: center;
     align-items: center;
 }
-.edit-event-button, .edit-deadline-button {
+.edit-event-button, .edit-deadline-button, .edit-milestone-button {
     height: 30px !important;
     width: 30px !important;
 }
@@ -165,7 +165,7 @@ body {
     background-color: var(--primary);
 }
 
-.delete-event-button, .delete-deadline-button {
+.delete-event-button, .delete-deadline-button, .delete-milestone-button {
     height: 30px !important;
     width: 30px !important;
 }
@@ -199,25 +199,25 @@ button {
     cursor:pointer;
 }
 
-.event button, .deadline button {
+.event button, .deadline button, .milestone button {
     display: inline-block;
 }
 
-.event-left, .deadline-left {
+.event-left, .deadline-left, .milestone-left {
     float: left;
     margin-top: 2px;
 }
 
-.event-left span, .deadline-left span {
+.event-left span, .deadline-left span, .milestone-left span {
     line-height: 100%;
     vertical-align: middle;
 }
 
-.event-right, .deadline-right {
+.event-right, .deadline-right, .milestone-right {
     float: right;
 }
 
-.event-box, .deadline-box {
+.event-box, .deadline-box, .milestone-box {
     padding: 5px;
     border-radius: 5px;
     margin: 5px;
@@ -225,28 +225,28 @@ button {
     flex-direction: column;
 }
 
-.event-list-container, .deadline-list-container {
+.event-list-container, .deadline-list-container, .milestone-list-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.outside-event, .outside-deadline {
+.outside-event, .outside-deadline, .outside-milestone {
     width: calc(100% - 68px);
     margin-left: 58px;
 }
 
-.event-date, .deadline-date {
+.event-date, .deadline-date, .milestone-date {
     color: #666666;
     font-size: small;
 }
 
-.event, .deadline {
+.event, .deadline, .milestone {
     flex-grow: 1;
 }
 
-.editEventForm, .editDeadlineForm {
+.editEventForm, .editDeadlineForm, .editMilestoneForm {
     width: 100%;
     flex-grow: 5;
     margin-top: 5px;
@@ -331,6 +331,6 @@ button:hover {
     cursor: pointer;
 }
 
-.bi-calendar-event, .bi-calendar-deadline {
+.bi-calendar-event, .bi-calendar-deadline, .bi-calendar-milestone {
     margin: 5px;
 }

@@ -77,10 +77,26 @@
                                 maxDescLen=${maxDescLen},
                                 projectStart=${projectStart},
                                 projectEnd=${projectEnd})">
-
             </div>
         </div>
     </div>
+    <!-- The first milestones outside the sprint -->
+    <div class="milestone-list-container outside-milestone">
+        <div th:if="${!#arrays.isEmpty(milestones)} and ((${!#arrays.isEmpty(sprints)} and ${milestone.getMilestoneDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
+             th:each="milestone: ${milestones}" >
+            <div th:replace="detailFragments :: milestone(
+                                milestone=${milestone},
+                                canEdit=${canEdit},
+                                boxId=${milestone.getId} + '-after-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
+            </div>
+        </div>
+    </div>
+
 
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
@@ -138,6 +154,22 @@
                         </div>
                     </div>
                 </div>
+                <!-- The milestones inside the sprint -->
+                <div class="milestone-list-container">
+                    <div th:if="${!#arrays.isEmpty(milestones)} and ${milestone.getMilestoneDate()} >= *{getSprintStartDate} and ${milestone.getMilestoneDate()} <= *{getSprintEndDate}"
+                         th:each="milestone: ${milestones}">
+                        <div th:replace="detailFragments :: milestone(
+                                milestone=${milestone},
+                                canEdit=${canEdit},
+                                boxId=${milestone.getId} + '-in-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- The events outside the sprint -->
@@ -164,6 +196,22 @@
                                 deadline=${deadline},
                                 canEdit=${canEdit},
                                 boxId=${deadline.getId} + '-after-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
+                </div>
+            </div>
+        </div>
+        <!-- The milestones outside the sprint -->
+        <div class="milestone-list-container outside-milestone" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+            <div th:if="${!#arrays.isEmpty(milestones)} and ((${iterStat.index+1 < iterStat.size} and ${milestone.getMilestoneDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${milestone.getMilestoneDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${milestone.getMilestoneDate()} > *{getSprintEndDate}))"
+                 th:each="milestone: ${milestones}">
+                <div th:replace="detailFragments :: milestone(
+                                milestone=${milestone},
+                                canEdit=${canEdit},
+                                boxId=${milestone.getId} + '-after-' + *{getId},
                                 minNameLen=${minNameLen},
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},

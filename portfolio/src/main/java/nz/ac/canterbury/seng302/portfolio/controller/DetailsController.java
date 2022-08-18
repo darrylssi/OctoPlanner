@@ -46,6 +46,8 @@ public class DetailsController extends PageController {
     @Autowired
     private DeadlineService deadlineService;
     @Autowired
+    private MilestoneService milestoneService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     /**
@@ -116,6 +118,11 @@ public class DetailsController extends PageController {
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
         deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
         model.addAttribute("deadlines", deadlineList);
+
+        // Gets the milestone list and sorts it based on the milestone date
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
+        milestoneList.sort(Comparator.comparing(Milestone::getMilestoneDate));
+        model.addAttribute("milestones", milestoneList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
