@@ -62,10 +62,21 @@ function addRole(userId, role) {
     patchRequest.send();
 }
 
-/** Toggles the dropdown with the associated id
- *
+/**
+ * Toggles the dropdown with the associated id
  * @param elementId the id of the dropdown to be toggled
  */
 function toggleRoleList(elementId) {
+    hideAllRoleDropdowns();
     document.getElementById(elementId).classList.toggle("show");
+}
+
+/**
+ * Does what it says on the tin - hides all add role dropdowns when called.
+ */
+function hideAllRoleDropdowns() {
+    const dropdowns = document.getElementsByClassName("user-role-dropdown");
+    for (const item of dropdowns) {
+        item.classList.remove("show");
+    }
 }
