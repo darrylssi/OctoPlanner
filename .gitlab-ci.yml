@@ -6,6 +6,40 @@ stages:
   - sonarqube
   - deploy
 
+tag-checker:
+  stage: tagChecking
+  script:
+    - python3 tag_checker.py $CI_COMMIT_TAG
+  only:
+    - tags
+
+publish-protos-to-maven-local:
+  stage: publishProtosToLocalMavenRepo
+  script:
+    - cd shared
+    - ./gradlew clean
+    - ./gradlew publishToMavenLocal
+
+junit-portfolio:
+  stage: test
+  script:
+    - cd portfolio
+    - ./gradlew test
+  artifacts:
+    paths:
+      - portfolio/build/jacoco/test-report.xml
+    expire_in: 20min
+
+junit-identityprovider:
+  stage: test
+  script:
+    - cd identityprovider
+    - ./gradlew test
+  artifacts:
+    paths:
+      - identityprovider/build/jacoco/test-report.xml
+    expire_in: 20min
+
 sonarqube-report:
   stage: sonarqube
   script:
@@ -16,40 +50,6 @@ sonarqube-report:
   dependencies:
     - junit-portfolio
     - junit-identityprovider
-
-tag-checker:
-  stage: tagChecking
-  script:
-    - python3 tag_checker.py $CI_COMMIT_TAG
-  only:
-    - tags
-
-junit-portfolio:
-  stage: test
-  script:
-    - cd portfolio
-    - ./gradlew test
-  artifacts:
-    paths:
-      - portfolio/build/jacoco/test-report.xml
-    expire_in: 10min
-
-junit-identityprovider:
-  stage: test
-  script:
-    - cd identityprovider
-    - ./gradlew test
-  artifacts:
-    paths:
-      - identityprovider/build/jacoco/test-report.xml
-    expire_in: 10min
-
-publish-protos-to-maven-local:
-  stage: publishProtosToLocalMavenRepo
-  script:
-    - cd shared
-    - ./gradlew clean
-    - ./gradlew publishToMavenLocal
 
 # builds all branches, except dev and master
 branch-build:
