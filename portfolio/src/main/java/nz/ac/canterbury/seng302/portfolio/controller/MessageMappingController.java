@@ -83,21 +83,13 @@ public class MessageMappingController {
             updatedEvent = eventService.getEventById(eventMessage.getId());
         } catch (Exception e){
             eventMessageOutput = new EventMessageOutput();
-            eventMessageOutput.setSprintIds(new ArrayList<>());
+            eventMessageOutput.setEventListIds(new ArrayList<>());
             eventMessageOutput.setId(eventMessage.getId());
             return eventMessageOutput;
         }
 
         //Add event info to message output
-        eventMessageOutput = new EventMessageOutput();
-        eventMessageOutput.setParentProjectId(updatedEvent.getParentProject().getId());
-        eventMessageOutput.setId(eventMessage.getId());
-        eventMessageOutput.setName(updatedEvent.getEventName());
-        eventMessageOutput.setEndDate(updatedEvent.getEventEndDate());
-        eventMessageOutput.setStartDate(updatedEvent.getEventStartDate());
-        eventMessageOutput.setStartDateString(DateUtils.toDisplayDateTimeString(updatedEvent.getEventStartDate()));
-        eventMessageOutput.setEndDateString(DateUtils.toDisplayDateTimeString(updatedEvent.getEventEndDate()));
-        eventMessageOutput.setDescription(updatedEvent.getEventDescription());
+        eventMessageOutput = new EventMessageOutput(updatedEvent);
 
         List<Sprint> sprints = sprintService.getSprintsInProject(updatedEvent.getParentProject().getId());
         eventMessageOutput.setStartColour(updatedEvent.determineColour(sprints, false) + "4c");
@@ -107,36 +99,50 @@ public class MessageMappingController {
         List<Event> events = eventService.getAllEvents();
         events.sort(Comparator.comparing(Event::getEventStartDate));
 
-        ArrayList<String> sprintIds = new ArrayList<>();
-        ArrayList<String> eventIds = new ArrayList<>();
+        ArrayList<String> eventListIds = new ArrayList<>();
+        ArrayList<String> nextEventIds = new ArrayList<>();
         ArrayList<String> eventBoxIds = new ArrayList<>();
+        // check if the event occurs before any sprints
         if(sprints.get(0).getSprintStartDate().after(updatedEvent.getEventStartDate())) {
-            sprintIds.add(FIRST_OUTSIDE_BOX_ID);
-            eventIds.add(getNextEvent(events, updatedEvent.getParentProject().getProjectStartDate(),
+            // add id of first event box to list of ids to display the event
+            eventListIds.add(FIRST_OUTSIDE_BOX_ID);
+            // get the id of the event that is displayed after this event so that they appear in the correct order
+            nextEventIds.add(getNextEvent(events, updatedEvent.getParentProject().getProjectStartDate(),
                     sprints.get(0).getSprintStartDate(), updatedEvent.getEventStartDate()));
+            // set the id of the box that the event is in at this location so that it can be used to edit the event
             eventBoxIds.add(String.format(EVENT_FIRST_ID_FORMAT, updatedEvent.getId()));
         }
 
         //get list of all event box ids to include the event on the project details page
         for (int i = 0; i < sprints.size(); i++) {
+            // Check if the event overlaps with the sprint at index i
             if(DateUtils.timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())){
-                sprintIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                eventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
+                // add id of sprint box to list of ids to display event
+                eventListIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
                         sprints.get(i).getSprintEndDate(), updatedEvent.getEventStartDate()));
                 eventBoxIds.add(String.format(EVENT_IN_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
             }
+            // Check if event occurs between the end of this sprint and the start of the next one
             if((sprints.size() > i+1) && DateUtils.timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     updatedEvent.getEventStartDate(), updatedEvent.getEventEndDate())) {
-                sprintIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
-                eventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
+                eventListIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
                         sprints.get(i+1).getSprintStartDate(), updatedEvent.getEventStartDate()));
+                eventBoxIds.add(String.format(EVENT_AFTER_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
+            }
+            // If this sprint is the last sprint, check if the event occurs after the end of this sprint
+            if(sprints.size() == i+1 && sprints.get(i).getSprintEndDate().before(updatedEvent.getEventEndDate())){
+                eventListIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprints.get(i).getId()));
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
+                        updatedEvent.getParentProject().getProjectEndDate(), updatedEvent.getEventStartDate()));
                 eventBoxIds.add(String.format(EVENT_AFTER_ID_FORMAT, updatedEvent.getId(), sprints.get(i).getId()));
             }
         }
 
-        eventMessageOutput.setSprintIds(sprintIds);
-        eventMessageOutput.setEventIds(eventIds);
+        eventMessageOutput.setEventListIds(eventListIds);
+        eventMessageOutput.setNextEventIds(nextEventIds);
         eventMessageOutput.setEventBoxIds(eventBoxIds);
         return eventMessageOutput;
     }
