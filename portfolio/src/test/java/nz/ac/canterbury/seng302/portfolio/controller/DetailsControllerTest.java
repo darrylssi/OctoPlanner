@@ -32,6 +32,8 @@ class DetailsControllerTest {
     @MockBean
     DeadlineService deadlineService;
     @MockBean
+    MilestoneService milestoneService;
+    @MockBean
     ProjectService projectService;
     @MockBean
     private SprintLabelService labelUtils;
