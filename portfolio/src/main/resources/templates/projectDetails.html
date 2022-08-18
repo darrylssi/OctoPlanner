@@ -40,7 +40,7 @@
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
 <div class="container-fluid content">
     <div class="detail-block">
-        <div th:text="${project.getProjectDescription}"/>
+        <div th:text="${project.getProjectDescription}"></div>
         <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
@@ -60,19 +60,37 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})">
+            </div>
+        </div>
+    </div>
+    <!-- The first deadlines outside the sprint -->
+    <div class="deadline-list-container outside-deadline">
+        <div th:if="${!#arrays.isEmpty(deadlines)} and ((${!#arrays.isEmpty(sprints)} and ${deadline.getDeadlineDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
+             th:each="deadline: ${deadlines}" >
+            <div th:replace="detailFragments :: deadline(
+                                deadline=${deadline},
+                                canEdit=${canEdit},
+                                boxId=${deadline.getId} + '-after-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
+
+            </div>
         </div>
     </div>
 
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
-            <div class="sprint-label" th:text="*{getSprintLabel}" th:style="'background-color:'+ *{getSprintColour} + '4c'"/>
+            <div class="sprint-label" th:text="*{getSprintLabel}" th:style="'background-color:'+ *{getSprintColour} + '4c'"></div>
             <div class="detail-block">
                 <div>
-                    <div class="sprint-title" th:text="*{getSprintName}" />
-                    <div class="sprint-date" th:text="|*{getStartDateString} - *{getEndDateString}|" />
-                    <div class="sprint-description" th:text="*{getSprintDescription}" />
+                    <div class="sprint-title" th:text="*{getSprintName}"></div>
+                    <div class="sprint-date" th:text="|*{getStartDateString} - *{getEndDateString}|"></div>
+                    <div class="sprint-description" th:text="*{getSprintDescription}"></div>
                 </div>
                 <div>
                     <a th:href="|../../edit-sprint/${sprint.getId}|" class="edit-button" th:if="${canEdit}">
@@ -100,40 +118,30 @@
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
                                 projectStart=${projectStart},
-                                projectEnd=${projectEnd})" />
+                                projectEnd=${projectEnd})">
+                        </div>
                     </div>
                 </div>
                 <!-- The deadlines inside the sprint -->
                 <div class="deadline-list-container">
-                    <div th:class="deadline-box" th:if="${!#arrays.isEmpty(deadlines)} and ${deadline.getDeadlineDate()} >= *{getSprintStartDate} and ${deadline.getDeadlineDate()} <= *{getSprintEndDate}" th:id="'deadline-box-' + ${deadline.getId}"
-                         th:style="'background:linear-gradient(to right, '+ ${deadline.determineColour(sprints)} + '4c, '+ ${deadline.determineColour(sprints)} + '4c)'" th:each="deadline: ${deadlines}">
-                        <div th:id="'deadline-' + *{getId}" class="deadline" th:object="${deadline}" data-toggle="tooltip" data-placement="top" th:title="${deadline.getDeadlineDescription()}">
-                            <div class="deadline-left">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
-                                    <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
-                                </svg>
-                                <span th:text="*{getDeadlineName}" ></span>
-                                <span class="event-date" th:text="|${#lensfolioDates.toDisplayDateTimeString(deadline.getDeadlineDate())}|" ></span>
-                            </div>
-                            <div class="deadline-right">
-                                <button th:if="${canEdit}" class="edit-button edit-deadline-button" th:onclick="">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
-                                    </svg>
-                                </button>
-                                <button th:if="${canEdit}" class="delete-button delete-deadline-button" type="submit" th:onclick="">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
-                                    </svg>
-                                </button>
-                            </div>
+                    <div th:if="${!#arrays.isEmpty(deadlines)} and ${deadline.getDeadlineDate()} >= *{getSprintStartDate} and ${deadline.getDeadlineDate()} <= *{getSprintEndDate}"
+                         th:each="deadline: ${deadlines}">
+                        <div th:replace="detailFragments :: deadline(
+                                deadline=${deadline},
+                                canEdit=${canEdit},
+                                boxId=${deadline.getId} + '-in-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+        <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
             <div th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))"
                  th:each="event: ${events}" >
                 <div th:replace="detailFragments :: event(
@@ -144,7 +152,24 @@
                         maxNameLen=${maxNameLen},
                         maxDescLen=${maxDescLen},
                         projectStart=${projectStart},
-                        projectEnd=${projectEnd})" />
+                        projectEnd=${projectEnd})">
+                </div>
+            </div>
+        </div>
+        <!-- The deadlines outside the sprint -->
+        <div class="deadline-list-container outside-deadline" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+            <div th:if="${!#arrays.isEmpty(deadlines)} and ((${iterStat.index+1 < iterStat.size} and ${deadline.getDeadlineDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${deadline.getDeadlineDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${deadline.getDeadlineDate()} > *{getSprintEndDate}))"
+                 th:each="deadline: ${deadlines}">
+                <div th:replace="detailFragments :: deadline(
+                                deadline=${deadline},
+                                canEdit=${canEdit},
+                                boxId=${deadline.getId} + '-after-' + *{getId},
+                                minNameLen=${minNameLen},
+                                maxNameLen=${maxNameLen},
+                                maxDescLen=${maxDescLen},
+                                projectStart=${projectStart},
+                                projectEnd=${projectEnd})">
+                </div>
             </div>
         </div>
     </div>
@@ -167,8 +192,8 @@
             Add Event
         </button>
         <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
-                <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+                <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
             </svg>
             Add Deadline
         </button>
@@ -195,7 +220,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <label class="form-label" for="addEventNameInput">Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="text-danger" />
+                    <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="text-danger"></small>
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
@@ -203,7 +228,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <label for="addEventDescriptionInput">Description</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="text-danger" />
+                    <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="text-danger"></small>
 
                 </div>
             </div>
@@ -307,8 +332,8 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
 
 <!-- Used for event editing popups -->
 <div>
-    <div id="user" th:data-name="${user}" value="${user}" />
-    <div id="userId" th:data-name="${userId}" value="${userId}" /> <!-- there must be a better way of doing this -->
+    <div id="user" th:data-name="${user}" value="${user}"></div>
+    <div id="userId" th:data-name="${userId}" value="${userId}"></div> <!-- there must be a better way of doing this -->
 </div>
 <!--/*
     JS files are static, and thus don't know anything about the project (i.e. the base URL).
@@ -332,5 +357,6 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         });
     });
 </script>
+</div>
 </body>
 </html>
