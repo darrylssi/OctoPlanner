@@ -32,7 +32,7 @@ junit-portfolio:
   artifacts:
     paths:
       - portfolio/build/jacoco/test-report.xml
-    expire_in: 5min
+    expire_in: 10min
 
 junit-identityprovider:
   stage: test
@@ -42,7 +42,7 @@ junit-identityprovider:
   artifacts:
     paths:
       - identityprovider/build/jacoco/test-report.xml
-    expire_in: 5min
+    expire_in: 10min
 
 publish-protos-to-maven-local:
   stage: publishProtosToLocalMavenRepo
