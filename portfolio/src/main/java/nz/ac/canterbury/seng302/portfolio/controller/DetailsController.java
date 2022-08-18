@@ -1,6 +1,27 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -10,35 +31,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 /**
@@ -97,9 +90,9 @@ public class DetailsController extends PageController {
      * 
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
-     * @param thisUser          The currently logged in user
+     * @param thisUser          The currently logged-in user
      */
-    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
+    public void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
         // Give the template validation info, so the browser can let the user know.
         // Have to enter these one-by-one because Thymeleaf struggles to access utility classes
         model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
@@ -157,50 +150,6 @@ public class DetailsController extends PageController {
     }
 
     /**
-     * Endpoint for adding events to the database, or conveying errors
-     * to the user
-     * @param projectID The project this event will be bound to
-     * @param eventForm The form submitted by our lovely customers
-     * @param bindingResult Any errors that came up during validation
-     * @return  Either redirects them back to the project page, or renders the project page with errors.
-     */
-    @PostMapping("/project/{project_id}/add-event")
-    public String postAddEvent(
-        @AuthenticationPrincipal AuthState principal,
-        @PathVariable("project_id") int projectID,
-        @Valid EventForm eventForm,
-        BindingResult bindingResult,
-        TimeZone userTimezone,
-        Model model
-    ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError dateErrors = null;
-        ValidationError nameErrors = null;
-        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
-        if (bindingResult.hasErrors()) {
-            populateProjectDetailsModel(model, projectID, thisUser);
-            return PROJECT_DETAILS_TEMPLATE_NAME;
-        }
-        // Check that the dates are correct
-        Project parentProject = projectService.getProjectById(projectID);
-        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
-        nameErrors = ValidationUtils.validateName(eventForm.getName());
-        if (dateErrors.isError() || nameErrors.isError()) {
-            // Merge both errors into one
-            nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
-            model.addAttribute("eventFormError", dateErrors.getErrorMessages());
-            populateProjectDetailsModel(model, projectID, thisUser);
-            return PROJECT_DETAILS_TEMPLATE_NAME;
-        }
-        // Data is valid, add it to database
-        Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
-        event.setParentProject(parentProject);
-        eventService.saveEvent(event);
-        return "redirect:.";
-    }
-
-    /**
      * Pre-populates the event form with default values, if they don't already exist
      * @param eventForm The eventForm object from your endpoint args
      */
@@ -218,5 +167,4 @@ public class DetailsController extends PageController {
             eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
     }
-
 }
