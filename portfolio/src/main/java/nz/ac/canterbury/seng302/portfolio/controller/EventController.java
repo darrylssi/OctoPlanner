@@ -89,10 +89,10 @@ public class EventController extends PageController {
     /**
      * 
      * @param eventForm The form submitted by the user
-     * @param bindingResult Any errors that occured while constraint checking the form
+     * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
      * @return  A response of either 200 (success), 401 (unauthenticated),
-     *          or 400 (Given event failed validation, replies with what errors occured)
+     *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/edit-event/{event_id}")
     @ResponseBody
@@ -166,4 +166,5 @@ public class EventController extends PageController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

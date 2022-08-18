@@ -57,6 +57,4 @@ class DetailsControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("User not authorised."));
     }
-
-
 }
