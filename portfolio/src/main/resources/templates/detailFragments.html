@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <!-- Keeping SonarQube happy -->
+    <title></title>
+</head>
 <body>
 
 <div th:fragment="event">
@@ -31,6 +35,85 @@
                 </button>
             </div>
         </span>
+        <div th:replace="detailFragments :: editEventForm(
+                event=${event},
+                boxId=${boxId},
+                minNameLen=${minNameLen},
+                maxNameLen=${maxNameLen},
+                maxDescLen=${maxDescLen},
+                projectStart=${projectStart},
+                projectEnd=${projectEnd})" />
+    </div>
+</div>
+
+<div th:fragment="editEventForm">
+    <div th:id="|editEventForm-${boxId}|" class="editEventForm collapse">
+        <div class="card">
+            <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getEventName}|"></div>
+            <div class="card-body">
+                <form th:action="@{edit-event/${event.getId()}}" id="form" class="container-fluid" method="post">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="text" id="editEventNameInput" class="form-control" name="editEventName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required th:value="${event.getEventName()}">
+                                <label for="editEventNameInput" class="form-label">Name</label>
+                                <div id="editEventNameFeedback" class="invalid-feedback"></div>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating mb-3">
+                                <input type="text" id="editEventDescriptionInput" name="editEventDescription" th:maxlength="${maxDescLen}" class="form-control" th:value="${event.getEventDescription()}">
+                                <label for="editEventDescriptionInput">Description</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" name="editEventStartDate" id="editEventStartDate" required aria-describedby="editEventStartDateFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toString(event.getEventStartDate())}">
+                                <label for="editEventStartDate">Start Date</label>
+                                <div id="editEventStartDateFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" name="editEventStartTime" id="editEventStartTime" required aria-describedby="editEventStartTimeFeedback" th:value="${#lensfolioDates.toDisplayDateTimeString(event.getEventStartDate()).substring(12,17)}">
+                                <label for="editEventStartTime">Start Time</label>
+                                <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3 has-validation">
+                                <input type="date" class="form-control" name="editEventEndDate" id="editEventEndDate" required aria-describedby="editEventEndDateFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toString(event.getEventEndDate())}">
+                                <label for="editEventEndDate">End Date</label>
+                                <div id="editEventEndDateFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3 has-validation">
+                                <input type="time" class="form-control" name="editEventEndTime" id="editEventEndTime" required aria-describedby="editEventEndTimeFeedback" th:value="${#lensfolioDates.toDisplayDateTimeString(event.getEventEndDate()).substring(12,17)}">
+                                <label for="editEventEndTime">End Time</label>
+                                <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-end">
+                        <ul id="errors" class="col"></ul>
+                        <div class="col col-md-4 col-lg-2">
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditEvent([[${event.getId}]], [[${boxId}]])">Cancel</button>
+                        </div>
+                        <div class="col col-md-3 col-lg-2">
+                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                        </div>
+                    </div>
+                    <ul th:if="${editEventFormError}">
+                        <li th:each="errMsg: ${editEventFormError}" th:text="${errMsg}" class="text-danger"></li>
+                    </ul>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 

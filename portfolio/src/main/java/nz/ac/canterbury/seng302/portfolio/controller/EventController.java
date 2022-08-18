@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 import java.util.TimeZone;
+import java.util.Date;
 import java.util.StringJoiner;
 
 import javax.validation.Valid;
@@ -45,7 +46,12 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("event_id") int eventId,
-            @Valid EventForm eventForm,
+            @RequestParam(name="editEventName") String name,
+            @RequestParam(name="editEventDescription") String description,
+            @RequestParam(name="editEventStartDate") Date startDate,
+            @RequestParam(name="editEventStartTime") String startTime,
+            @RequestParam(name="editEventEndDate") Date endDate,
+            @RequestParam(name="editEventEndTime") String endTime,
             BindingResult bindingResult,
             TimeZone userTimeZone
     ) {
@@ -63,24 +69,24 @@ public class EventController extends PageController {
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
-        // Validation round 2: Do our custom errors pass?
-        var dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimeZone), eventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        var nameError = ValidationUtils.validateName(eventForm.getName());
-        if (dateErrors.isError() || nameError.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameError.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-        }
+        // // Validation round 2: Do our custom errors pass? TODO: Refactor this (GEORGE)
+        // var dateErrors = ValidationUtils.validateEventDates(editEventForm.startDatetimeToDate(userTimeZone), editEventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
+        // var nameError = ValidationUtils.validateName(editEventForm.getName());
+        // if (dateErrors.isError() || nameError.isError()) {
+        //     StringJoiner errors = new StringJoiner("\n");
+        //     for (var err: dateErrors.getErrorMessages()) {
+        //         errors.add(err);
+        //     }
+        //     for (var err: nameError.getErrorMessages()) {
+        //         errors.add(err);
+        //     }
+        //     return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        // }
         // Set new event details
-        event.setEventName(eventForm.getName());
-        event.setEventDescription(eventForm.getDescription());
-        event.setStartDate(eventForm.startDatetimeToDate(userTimeZone));
-        event.setEndDate(eventForm.endDatetimeToDate(userTimeZone));
+        event.setEventName(name);
+        event.setEventDescription(description);
+        event.setStartDate(startDate);
+        event.setEndDate(endDate);  //TODO: factor in the time (GEORGE). Find a way to accept it as not a string
 
         eventService.saveEvent(event);
 
