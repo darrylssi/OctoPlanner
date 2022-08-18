@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
@@ -36,7 +37,6 @@ public class RoleUtils {
             case TEACHER -> "Teacher";
             case COURSE_ADMINISTRATOR -> "Course Admin";
             case UNRECOGNIZED -> "Unrecognized (!!! this shouldn't be here !!!)";
-            default -> throw new IllegalArgumentException(role.toString() + " hasn't been registered in `RoleUtils.toName()`, add it please thanks");
         };
     }
 
@@ -70,8 +70,23 @@ public class RoleUtils {
         return hasRoleOfAtLeast(userRoles, targetRole);
     }
 
+    /**
+     * Gets a UserRole from a string
+     * @param sRole a string representing a UserRole
+     * @return the UserRole that correlates to the string
+     */
     public static UserRole fromString(String sRole) {
         return UserRole.valueOf(sRole.toUpperCase(Locale.ROOT));
     }
-    
+
+    /**
+     * Checks if there are any roles that can be added to a user that they don't already have.
+     * Intended to be used in the Thymeleaf template to govern the displaying of the add roles button.
+     * @param acceptableRoles the roles that the current user is able to add
+     * @param userRoles the roles that the user being edited currently has
+     * @return false if the user already has all roles that can be added
+     */
+    public static boolean canAddRoles(List<UserRole> acceptableRoles, List<UserRole> userRoles) {
+        return !userRoles.containsAll(acceptableRoles);
+    }
 }
