@@ -19,6 +19,10 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import java.security.Principal;
 import java.util.ArrayList;
 
+/**
+ * Controller to handle websockets.
+ * Sends websocket messages to endpoints specified with @SendTo annotations.
+ */
 @Controller
 public class MessageMappingController {
 
@@ -31,6 +35,16 @@ public class MessageMappingController {
         this.simpMessagingTemplate = template;
     }
 
+    @Autowired
+    EventService eventService;
+    @Autowired
+    SprintService sprintService;
+
+    /**
+     * Called when a user disconnects from their websocket connection.
+     * Logs the disconnect and sends a DISCONNECTED message to the editing event endpoint.
+     * @param event the event fired when the user disconnected
+     */
     @EventListener
     @SendTo("/topic/editing-event")
     public void onDisconnectEvent(SessionDisconnectEvent event) {
@@ -40,11 +54,6 @@ public class MessageMappingController {
         simpMessagingTemplate.convertAndSend("/ws",
                 new Message(from, "DISCONNECTED"));
     }
-
-    @Autowired
-    EventService eventService;
-    @Autowired
-    SprintService sprintService;
 
     /**
      * Websocket message mapping for editing events
