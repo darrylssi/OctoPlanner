@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +28,12 @@ public class EventControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     EventService eventService;
+    @MockBean
+    ProjectService projectService;
+    @MockBean
+    DetailsController detailsController;
     @MockBean
     private UserAccountClientService userAccountClientService;
 
@@ -50,5 +54,4 @@ public class EventControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("User not authorised."));
     }
-
 }

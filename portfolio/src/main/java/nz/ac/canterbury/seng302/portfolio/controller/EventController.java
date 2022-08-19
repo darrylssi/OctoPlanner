@@ -2,7 +2,10 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
@@ -18,11 +21,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+
+import static nz.ac.canterbury.seng302.portfolio.controller.DetailsController.PROJECT_DETAILS_TEMPLATE_NAME;
 
 /**
  * Controller to handle requests related to events.
@@ -33,15 +39,64 @@ public class EventController extends PageController {
     private static final Logger logger = LoggerFactory.getLogger(EventController.class);
 
     @Autowired
+    private ProjectService projectService;
+    @Autowired
     private EventService eventService;
+    @Autowired
+    DetailsController detailsController;
+
+
+    /**
+     * Endpoint for adding events to the database, or conveying errors
+     * to the user
+     * @param projectID The project this event will be bound to
+     * @param eventForm The form submitted by our lovely customers
+     * @param bindingResult Any errors that came up during validation
+     * @return  Either redirects them back to the project page, or renders the project page with errors.
+     */
+    @PostMapping("/project/{project_id}/add-event")
+    public String postAddEvent(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("project_id") int projectID,
+            @Valid EventForm eventForm,
+            BindingResult bindingResult,
+            TimeZone userTimezone,
+            Model model
+    ) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        ValidationError dateErrors = null;
+        ValidationError nameErrors = null;
+        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
+        if (bindingResult.hasErrors()) {
+            detailsController.populateProjectDetailsModel(model, projectID, thisUser);
+            return PROJECT_DETAILS_TEMPLATE_NAME;
+        }
+        // Check that the dates are correct
+        Project parentProject = projectService.getProjectById(projectID);
+        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
+        nameErrors = ValidationUtils.validateName(eventForm.getName());
+        if (dateErrors.isError() || nameErrors.isError()) {
+            // Merge both errors into one
+            nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
+            model.addAttribute("eventFormError", dateErrors.getErrorMessages());
+            detailsController.populateProjectDetailsModel(model, projectID, thisUser);
+            return PROJECT_DETAILS_TEMPLATE_NAME;
+        }
+        // Data is valid, add it to database
+        Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
+        event.setParentProject(parentProject);
+        eventService.saveEvent(event);
+        return "redirect:.";
+    }
 
     /**
      * 
      * @param eventForm The form submitted by the user
-     * @param bindingResult Any errors that occured while constraint checking the form
+     * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
      * @return  A response of either 200 (success), 401 (unauthenticated),
-     *          or 400 (Given event failed validation, replies with what errors occured)
+     *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/edit-event/{event_id}")
     @ResponseBody
@@ -116,4 +171,5 @@ public class EventController extends PageController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
