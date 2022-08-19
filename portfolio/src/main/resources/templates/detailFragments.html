@@ -53,6 +53,7 @@
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getEventName}|"></div>
             <div class="card-body">
                 <form th:action="@{edit-event/{id}(id=${event.getId()})}" id="form" class="container-fluid" method="post" th:object="${editEventForm}">
+                    <input type="hidden" id="editEventId" th:value="${event.getId()}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">

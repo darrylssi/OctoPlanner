@@ -84,7 +84,6 @@ function sendEditEventViaAjax(elem, e) {
         }
     }
     editRequest.send(formData);
-
 }
 
 /**
@@ -148,6 +147,13 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
     editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
+
+    /* Set up JS to intercept the request */
+    const formElem = editForm.querySelector("#form");
+    if (formElem != null) {
+        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
+        formElem.setAttribute("id", "form-js-enabled"); // Remove ability to add more listeners to this form
+    }
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
