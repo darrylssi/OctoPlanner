@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
@@ -116,10 +117,18 @@ public class DetailsController extends PageController {
 
         // Gets the event list and sort it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
-        eventList.sort(Comparator.comparing(Event::getStartDate));
-        model.addAttribute("events", eventList);
+        //List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        //List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
 
-        //List<Schedulable> schedulableList = eventService.getEventByParentProjectId(parentProjectId);
+        List<Schedulable> schedulableList = new ArrayList<>();
+        schedulableList.addAll(eventList);
+        //schedulableList.addAll(deadlineList);
+        //schedulableList.addAll(milestoneList);
+
+        // Sorts schedulable list by start dates.
+        schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
+        model.addAttribute("events", schedulableList);
+
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
