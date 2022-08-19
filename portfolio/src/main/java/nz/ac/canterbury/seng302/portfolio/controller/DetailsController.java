@@ -14,6 +14,14 @@ import java.util.TimeZone;
 import javax.validation.Valid;
 
 import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.service.*;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +29,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
@@ -37,6 +41,16 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import javax.validation.Valid;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TimeZone;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 /**
@@ -54,6 +68,8 @@ public class DetailsController extends PageController {
     @Autowired
     private EventService eventService;
     @Autowired
+    private DeadlineService deadlineService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     /**
@@ -70,7 +86,7 @@ public class DetailsController extends PageController {
                 EventForm eventForm,
                 TimeZone userTimezone,
                 Model model
-    ) {
+    ){
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateEventForm(eventForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
@@ -79,20 +95,20 @@ public class DetailsController extends PageController {
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
 
-        /**
-     Redirects so any project page URL gets a slash on the end
-     */
+    /**
+     * Redirects so any project page URL gets a slash on the end
+     * */
     @GetMapping("/project/{id}")
     public String detailsRedirect(
                 @PathVariable(name="id") int id
     ) {
         return "redirect:" + id + '/';
     }
-    
-    
+
+
     /**
      * <p>Pre-populates all the data needed in the model</p>
-     * 
+     *
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
      * @param thisUser          The currently logged in user
@@ -110,12 +126,12 @@ public class DetailsController extends PageController {
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
-        // Gets the sprint list and sort it based on the sprint start date
+        // Gets the sprint list and sorts it based on the sprint start date
         List<Sprint> sprintList = sprintService.getSprintsInProject(parentProjectId);
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event list and sort it based on the event start date
+        // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         //List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
         //List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
@@ -129,6 +145,11 @@ public class DetailsController extends PageController {
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
         model.addAttribute("events", schedulableList);
 
+
+        // Gets the deadline list and sorts it based on the deadline date
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
+        model.addAttribute("deadlines", deadlineList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
@@ -224,31 +245,6 @@ public class DetailsController extends PageController {
         if (eventForm.getEndTime() == null) {
             eventForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
             eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
-        }
-    }
-
-    /**
-     * Deletes an event and redirects back to the project view
-     * @param principal used to check if the user is authorised to delete events
-     * @param eventId the id of the event to be deleted
-     * @return a redirect to the project view
-     */
-    @DeleteMapping("/delete-event/{eventId}")
-    @ResponseBody
-    public ResponseEntity<String> deleteEvent(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name="eventId") int eventId
-    ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete events
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
-        try {
-            eventService.deleteEvent(eventId);
-            return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

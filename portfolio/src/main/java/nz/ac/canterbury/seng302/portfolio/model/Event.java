@@ -74,18 +74,10 @@ public class Event implements Schedulable {
                 id, eventName, eventStartDate, eventEndDate, eventDescription);
     }
 
-    /**
-     * Sets the value of the event id 
-     * @param id the value to set the id to
-     */
     public void setId(int id) {
         this.id = id;
     }
 
-    /**
-     * Gets the event id
-     * @return event's id
-     */
     public int getId(){
         return id;
     }
@@ -130,10 +122,6 @@ public class Event implements Schedulable {
         return eventStartDate;
     }
 
-    /**
-     * Sets the event start date
-     * @param newStartDate The event start date given by the user
-     */
     public void setStartDate(Date newStartDate) {
         this.eventStartDate = newStartDate;
     }
@@ -146,10 +134,6 @@ public class Event implements Schedulable {
         return eventEndDate;
     }
 
-    /**
-     * Sets the event end date
-     * @param newEndDate The event end date given by user
-     */
     public void setEndDate(Date newEndDate) {
         this.eventEndDate = newEndDate;
     }

@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 import java.util.TimeZone;
+import java.util.Date;
 import java.util.StringJoiner;
 
 import javax.validation.Valid;
@@ -45,7 +46,12 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("event_id") int eventId,
-            @Valid EventForm eventForm,
+            @RequestParam(name="editEventName") String name,
+            @RequestParam(name="editEventDescription") String description,
+            @RequestParam(name="editEventStartDate") Date startDate,
+            @RequestParam(name="editEventStartTime") String startTime,
+            @RequestParam(name="editEventEndDate") Date endDate,
+            @RequestParam(name="editEventEndTime") String endTime,
             BindingResult bindingResult,
             TimeZone userTimeZone
     ) {
@@ -63,27 +69,52 @@ public class EventController extends PageController {
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
-        // Validation round 2: Do our custom errors pass?
-        var dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimeZone), eventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        var nameError = ValidationUtils.validateName(eventForm.getName());
-        if (dateErrors.isError() || nameError.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameError.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-        }
+        // // Validation round 2: Do our custom errors pass? TODO: Refactor this (GEORGE)
+        // var dateErrors = ValidationUtils.validateEventDates(editEventForm.startDatetimeToDate(userTimeZone), editEventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
+        // var nameError = ValidationUtils.validateName(editEventForm.getName());
+        // if (dateErrors.isError() || nameError.isError()) {
+        //     StringJoiner errors = new StringJoiner("\n");
+        //     for (var err: dateErrors.getErrorMessages()) {
+        //         errors.add(err);
+        //     }
+        //     for (var err: nameError.getErrorMessages()) {
+        //         errors.add(err);
+        //     }
+        //     return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        // }
         // Set new event details
-        event.setName(eventForm.getName());
-        event.setDescription(eventForm.getDescription());
-        event.setStartDate(eventForm.startDatetimeToDate(userTimeZone));
-        event.setEndDate(eventForm.endDatetimeToDate(userTimeZone));
+        event.setName(name);
+        event.setDescription(description);
+        event.setStartDate(startDate);
+        event.setEndDate(endDate);  //TODO: factor in the time (GEORGE). Find a way to accept it as not a string
 
         eventService.saveEvent(event);
 
         return ResponseEntity.ok("");
+    }
+
+    /**
+     * Deletes an event and redirects back to the project view
+     * @param principal used to check if the user is authorised to delete events
+     * @param eventId the id of the event to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/delete-event/{eventId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteEvent(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="eventId") int eventId
+    ) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        // Check if the user is authorised to delete events
+        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            eventService.deleteEvent(eventId);
+            return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
