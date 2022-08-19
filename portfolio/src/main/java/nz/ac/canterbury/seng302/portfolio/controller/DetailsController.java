@@ -118,8 +118,7 @@ public class DetailsController extends PageController {
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
-        model.addAttribute("events", schedulableList); //TODO change name from events to something else
-
+        model.addAttribute("schedulables", schedulableList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);

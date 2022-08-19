@@ -116,6 +116,14 @@ public class Deadline implements Schedulable {
     }
 
     /**
+     * Gets a String containing the name of the thymeleaf fragment in which the event will be displayed
+     * @return Said string
+     */
+    public String getType(){
+        return DEADLINE_TYPE;
+    }
+
+    /**
      * Determines the correct colour for this deadline based on the list of sprints.
      * Specifically, this function returns the colour of the first sprint it finds which
      * contains the date of the deadline. If it finds no sprint, it returns the default colour

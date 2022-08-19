@@ -225,14 +225,14 @@ button {
     flex-direction: column;
 }
 
-.event-list-container, .deadline-list-container {
+.schedulable-list-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.outside-event, .outside-deadline {
+.outside-schedulable {
     width: calc(100% - 68px);
     margin-left: 58px;
 }

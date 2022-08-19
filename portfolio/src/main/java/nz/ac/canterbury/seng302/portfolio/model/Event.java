@@ -147,6 +147,14 @@ public class Event implements Schedulable {
     }
 
     /**
+     * Gets a String containing the name of the thymeleaf fragment in which the event will be displayed
+     * @return Said string
+     */
+    public String getType(){
+        return EVENT_TYPE;
+    }
+
+    /**
      * Determines the correct colour for this event based on the list of sprints.
      * Specifically, this function returns the colour of the first sprint it finds which
      * overlaps the start date of the event (or end date if the end parameter is true).

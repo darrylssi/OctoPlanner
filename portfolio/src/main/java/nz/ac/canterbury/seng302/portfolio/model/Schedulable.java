@@ -25,6 +25,7 @@ public interface Schedulable extends Comparable<Schedulable>{
     Date getEndDate();
     void setEndDate(Date endDate);
 
+    String getType();
 
     String determineColour(List<Sprint> sprints, boolean end);
 
