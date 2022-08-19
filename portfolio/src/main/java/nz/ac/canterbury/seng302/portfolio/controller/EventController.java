@@ -77,8 +77,8 @@ public class EventController extends PageController {
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
-        event.setEventName(eventForm.getName());
-        event.setEventDescription(eventForm.getDescription());
+        event.setName(eventForm.getName());
+        event.setDescription(eventForm.getDescription());
         event.setStartDate(eventForm.startDatetimeToDate(userTimeZone));
         event.setEndDate(eventForm.endDatetimeToDate(userTimeZone));
 

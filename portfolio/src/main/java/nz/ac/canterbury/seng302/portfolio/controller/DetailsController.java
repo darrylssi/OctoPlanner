@@ -12,6 +12,7 @@ import java.util.TimeZone;
 
 import javax.validation.Valid;
 
+import nz.ac.canterbury.seng302.portfolio.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
@@ -119,8 +116,10 @@ public class DetailsController extends PageController {
 
         // Gets the event list and sort it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
-        eventList.sort(Comparator.comparing(Event::getEventStartDate));
+        eventList.sort(Comparator.comparing(Event::getStartDate));
         model.addAttribute("events", eventList);
+
+        //List<Schedulable> schedulableList = eventService.getEventByParentProjectId(parentProjectId);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
@@ -175,8 +174,8 @@ public class DetailsController extends PageController {
     ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError dateErrors = null;
-        ValidationError nameErrors = null;
+        ValidationError dateErrors;
+        ValidationError nameErrors;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             populateProjectDetailsModel(model, projectID, thisUser);

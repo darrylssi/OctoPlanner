@@ -15,7 +15,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Event objects are stored in a table called Event, as it is an @Entity.
  */
 @Entity
-public class Event {
+public class Event implements Schedulable {
 
     public static final String DEFAULT_COLOUR = "#ff3823";
 
@@ -94,39 +94,39 @@ public class Event {
      * Gets the event name
      * @return event's name
      */
-    public String getEventName() {
+    public String getName() {
         return eventName;
     }
 
     /**
      * Sets the event name
-     * @param newName Gets the event name given by user
+     * @param name Gets the event name given by user
      */
-    public void setEventName(String newName) {
-        this.eventName = newName;
+    public void setName(String name) {
+        this.eventName = name;
     }
 
     /**
      * Gets the event description
      * @return event's description
      */
-    public String getEventDescription(){
+    public String getDescription(){
         return eventDescription;
     }
 
     /**
      * Sets the event Description
-     * @param newDescription Gets the event description given by the user
+     * @param description Gets the event description given by the user
      */
-    public void setEventDescription(String newDescription) {
-        this.eventDescription = newDescription;
+    public void setDescription(String description) {
+        this.eventDescription = description;
     }
 
     /**
      * Gets the event start date
      * @return event's start date
      */
-    public Date getEventStartDate() {
+    public Date getStartDate() {
         return eventStartDate;
     }
 
@@ -142,7 +142,7 @@ public class Event {
      * Gets the event end date
      * @return event's end date
      */
-    public Date getEventEndDate() {
+    public Date getEndDate() {
         return eventEndDate;
     }
 
