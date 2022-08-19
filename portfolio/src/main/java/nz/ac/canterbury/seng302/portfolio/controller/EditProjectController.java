@@ -107,8 +107,8 @@ public class EditProjectController extends PageController {
             model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
             model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
             model.addAttribute("projectDescription", projectDescription);
-            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            model.addAttribute("invalidName", invalidName.getFirstError());
+            model.addAttribute("invalidDateRange", dateOutOfRange.getErrorMessages());
+            model.addAttribute("invalidName", invalidName.getErrorMessages());
             return "editProject";
         }
 

@@ -26,12 +26,14 @@ import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
@@ -91,7 +93,6 @@ public class DetailsController extends PageController {
     /**
      * <p>Pre-populates all the data needed in the model</p>
      *
-     * Note: You should ONLY DEFINE MODEL ATTRIBUTES IN HERE!
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
      * @param thisUser          The currently logged in user
@@ -102,7 +103,7 @@ public class DetailsController extends PageController {
         model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
         model.addAttribute("maxNameLen", GlobalVars.MAX_NAME_LENGTH);
         model.addAttribute("maxDescLen", GlobalVars.MAX_DESC_LENGTH);
-        model.addAttribute("datetimeISOFormat", GlobalVars.DATETIME_ISO_FORMAT);
+        model.addAttribute("dateISOFormat", GlobalVars.DATE_FORMAT);
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
@@ -171,16 +172,29 @@ public class DetailsController extends PageController {
         TimeZone userTimezone,
         Model model
     ) {
+        PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        // Initial checks that the data has some integrity (The data isn't null, etc.)
+        ValidationError dateErrors = null;
+        ValidationError nameErrors = null;
+        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
-            PrincipalData thisUser = PrincipalData.from(principal);
             populateProjectDetailsModel(model, projectID, thisUser, -1);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
-        
+        // Check that the dates are correct
+        Project parentProject = projectService.getProjectById(projectID);
+        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
+        nameErrors = ValidationUtils.validateName(eventForm.getName());
+        if (dateErrors.isError() || nameErrors.isError()) {
+            // Merge both errors into one
+            nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
+            model.addAttribute("eventFormError", dateErrors.getErrorMessages());
+            populateProjectDetailsModel(model, projectID, thisUser);
+            return PROJECT_DETAILS_TEMPLATE_NAME;
+        }
+        // Data is valid, add it to database
         Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
-        event.setParentProject(projectService.getProjectById(projectID));
+        event.setParentProject(parentProject);
         Event savedEvent = eventService.saveEvent(event);
         return "redirect:.?eventId=" + savedEvent.getId();
     }

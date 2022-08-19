@@ -123,7 +123,7 @@ class ProjectControllerTest {
                         .param("projectStartDate", "2021-06-20")
                         .param("projectEndDate", "2022-03-05"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters.")));
+                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters")));
     }
 
     @Test

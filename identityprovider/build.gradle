@@ -91,11 +91,6 @@ jacocoTestReport {
     }
 }
 
-// Sonarqube specific configuration (task)
-tasks.named('sonarqube').configure {
-    dependsOn test
-}
-
 sonarqube {
     properties {
         property "sonar.projectKey", "team-800-identityprovider"

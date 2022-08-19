@@ -23,6 +23,13 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 @Component
 public class DateUtils {
 
+    // Private constructor to hide the implicit public one
+    private DateUtils() {}
+
+    private static final String BACKEND_DATE_FORMAT = DATE_FORMAT;
+    private static final String DISPLAYED_DATE_FORMAT = DISPLAY_DATE_FORMAT;
+    private static final String DISPLAYED_DATE_TIME_FORMAT = DISPLAY_DATETIME_FORMAT;
+
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     // Using a singleton pattern, because SonarLint doesn't like it when a static
@@ -35,15 +42,13 @@ public class DateUtils {
         return singleton;
     }
 
-    private DateUtils() {}
-
     /**
      * Converts a Date object to a String with dd/MMM/yyyy format.
      * @param date Date to be converted
      * @return Date as a String
      */
     public static String toDisplayString(Date date) {
-        return new SimpleDateFormat(DISPLAY_DATE_FORMAT).format(date);
+        return new SimpleDateFormat(DISPLAYED_DATE_FORMAT).format(date);
     }
 
     /**
@@ -52,7 +57,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayDateTimeString(Date date) {
-        return new SimpleDateFormat(DISPLAY_DATETIME_FORMAT).format(date);
+        return new SimpleDateFormat(DISPLAYED_DATE_TIME_FORMAT).format(date);
     }
 
     /**
@@ -62,7 +67,7 @@ public class DateUtils {
      */
     public static Date toDate(String date) {
         try {
-            return new SimpleDateFormat(DATE_FORMAT).parse(date);
+            return new SimpleDateFormat(BACKEND_DATE_FORMAT).parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }

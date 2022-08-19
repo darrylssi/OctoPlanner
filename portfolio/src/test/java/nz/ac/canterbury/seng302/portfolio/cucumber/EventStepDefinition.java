@@ -6,7 +6,9 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
 
 import java.text.SimpleDateFormat;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -16,9 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 /**
  * Class containing the step definitions for the account_credited Cucumber
@@ -32,6 +35,24 @@ public class EventStepDefinition extends RunCucumberTest {
     private SimpleDateFormat dateTimeFormatter;
     private Project parentProject;
     private Event event;
+
+    /**
+     * Validates event against its javax validation annotations
+     * @return Constraint errors
+     */
+    Set<ConstraintViolation<Event>> checkJavaxConstraints() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        return validator.validate(event);
+    }
+
+    /**
+     * Checks against the validation utils validator
+     * @return Validation errors
+     */
+    ValidationError checkValidator() {
+        return ValidationUtils.validateEventDates(event.getEventStartDate(), event.getEventEndDate(), parentProject);
+    }
 
     public EventStepDefinition() {
         this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -60,18 +81,24 @@ public class EventStepDefinition extends RunCucumberTest {
     public void an_event_called_exists_starting_at_ending_on_with_a_description(
         String name, String startDate, String endDate, String description
     ) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        var errors = validator.validate(event);
-        assertThat(errors, is(empty()));
+        // 1. Check the constraint annotations
+        var javaxErrors = checkJavaxConstraints();
+        assertThat(javaxErrors, is(empty()));
+        // 2. Check the validation utils errors
+        var validationErrors = checkValidator();
+        assertThat(validationErrors.getErrorMessages(), is(empty()));
     }
 
     @Then("creating the event should fail")
     public void adding_event_should_fail() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        var errors = validator.validate(event);
-        assertThat(errors, is(not(empty())));
+        var javaxErrors = checkJavaxConstraints();
+        assertThat(javaxErrors, is(not(empty())));
+        // Note: Unfortunately I don't know how to check if EITHER
+        // javaxErrors or validationErrors is(not(empty())), so the
+        // feature file must have constaint errors to see any
+        // validation errors
+        var validationErrors = checkValidator();
+        assertThat(validationErrors.getErrorMessages(), is(not(empty())));
     }
 
 }
