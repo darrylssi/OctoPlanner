@@ -58,7 +58,7 @@ function deleteEvent(eventId) {
  * @param {HTMLFormElement} elem 
  * @param {Event} e 
  */
-function sendEditEventViaAjax(elem, e) {
+function sendEditEventViaAjax(elem, e, eventId) {
     e.preventDefault();
 
     // Delete any pre-existing errors
@@ -72,7 +72,10 @@ function sendEditEventViaAjax(elem, e) {
     editRequest.onload = () => {
         if (editRequest.status == 200) {
             // Success
-            window.location.reload()
+            if(updateLogs){
+                console.log("Sending update message for event: " + eventId);
+            }
+            stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
         } else {
             const errors = editRequest.responseText.split('\n');
             for (const errorMsg of errors) {
@@ -136,7 +139,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
         editForm.setAttribute("class", "editEventForm collapse");
         editForm.innerHTML = editFormTemplate;
         const formElem = editForm.querySelector("#form");
-        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
+        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e, eventId));    // Send error via AJAX request
         document.getElementById("event-box-" + eventBoxId).appendChild(editForm);
 
         /* Set internal attributes of form and link cancel button */

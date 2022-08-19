@@ -187,7 +187,7 @@ function stopEventTimeout(eventId) {
 */
 function updateEvent(eventMessage) {
     if (updateLogs) {
-        console.log("Got update message: " + eventMessage);
+            console.log("Got update event message for event " + eventMessage.id);
     }
 // get a list of event list containers
     const event_lists = document.getElementsByClassName('event-list-container');
@@ -200,7 +200,7 @@ function updateEvent(eventMessage) {
             event.remove();
           }
           // check if event list container is in the list of ids the event should be displayed in
-          idIndex = eventMessage.sprintIds.indexOf(event_lists[i].id);
+          idIndex = eventMessage.eventListIds.indexOf(event_lists[i].id);
         if(idIndex != -1) {
             createEventDisplay(eventMessage, event_lists[i], idIndex);
         }
@@ -219,10 +219,10 @@ function createEventDisplay(eventMessage, parent, idIndex) {
     newEvent.setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
     newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
     newEvent.innerHTML = eventTemplate;
-    if(eventMessage.eventIds[idIndex] === '-1') {
+    if(eventMessage.nextEventIds[idIndex] === '-1') {
         parent.appendChild(newEvent);
     } else {
-        parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.eventIds[idIndex])[0]);
+        parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.nextEventIds[idIndex])[0]);
     }
 //    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
 //    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";

@@ -103,7 +103,15 @@ public class MessageMappingController {
         ArrayList<String> nextEventIds = new ArrayList<>();
         ArrayList<String> eventBoxIds = new ArrayList<>();
         // check if the event occurs before any sprints
-        if(sprints.get(0).getSprintStartDate().after(updatedEvent.getEventStartDate())) {
+        if(sprints.isEmpty()){
+            // add id of first event box to list of ids to display the event
+            eventListIds.add(FIRST_OUTSIDE_BOX_ID);
+            // get the id of the event that is displayed after this event so that they appear in the correct order
+            nextEventIds.add(getNextEvent(events, updatedEvent.getParentProject().getProjectStartDate(),
+                    updatedEvent.getParentProject().getProjectEndDate(), updatedEvent.getEventStartDate()));
+            // set the id of the box that the event is in at this location so that it can be used to edit the event
+            eventBoxIds.add(String.format(EVENT_FIRST_ID_FORMAT, updatedEvent.getId()));
+        } else if(sprints.get(0).getSprintStartDate().after(updatedEvent.getEventStartDate())) {
             // add id of first event box to list of ids to display the event
             eventListIds.add(FIRST_OUTSIDE_BOX_ID);
             // get the id of the event that is displayed after this event so that they appear in the correct order

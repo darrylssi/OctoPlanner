@@ -174,8 +174,8 @@ public class DetailsController extends PageController {
     ) {
         PrincipalData thisUser = PrincipalData.from(principal);
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError dateErrors = null;
-        ValidationError nameErrors = null;
+        ValidationError dateErrors;
+        ValidationError nameErrors;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             populateProjectDetailsModel(model, projectID, thisUser, -1);
@@ -189,7 +189,7 @@ public class DetailsController extends PageController {
             // Merge both errors into one
             nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
             model.addAttribute("eventFormError", dateErrors.getErrorMessages());
-            populateProjectDetailsModel(model, projectID, thisUser);
+            populateProjectDetailsModel(model, projectID, thisUser, -1);
             return PROJECT_DETAILS_TEMPLATE_NAME;
         }
         // Data is valid, add it to database
