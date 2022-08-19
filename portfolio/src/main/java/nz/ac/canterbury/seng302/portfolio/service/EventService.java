@@ -59,14 +59,6 @@ public class EventService {
     }
 
     /**
-     * Gets all the events that belong to a given project.
-     *
-     */
-    public List<Event> getEventsOfProjectById(Integer id) {
-        return repository.findEventByParentProjectId(id);
-    }
-
-    /**
      * Deletes an event from the repository
      * @param eventId the id of the event to be deleted
      */

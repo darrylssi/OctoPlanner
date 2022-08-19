@@ -1,7 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +13,17 @@ import java.util.List;
  * Contains all information used by javascript to update the event display in html.
  */
 public class EventMessageOutput {
+
+    enum BoxLocation {FIRST, INSIDE, AFTER}
+
+    private static final String INSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-inside";
+    private static final String OUTSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-outside";
+    private static final String FIRST_OUTSIDE_BOX_ID = "events-firstOutside";
+    private static final String EVENT_ID_FORMAT = "event-box-%d";
+    private static final String EVENT_FIRST_ID_FORMAT = "%d-before";
+    private static final String EVENT_IN_ID_FORMAT = "%d-in-%d";
+    private static final String EVENT_AFTER_ID_FORMAT = "%d-after-%d";
+
     private int id;
     private int parentProjectId;
     private String name;
@@ -37,16 +51,119 @@ public class EventMessageOutput {
     /**
      * Constructor for an EventMessageOutput
      * @param event the Event to take parameters from
+     * @param sprints list of all sprints for the project of this event
+     * @param events list of all events for the project of this event
      */
-    public EventMessageOutput(Event event) {
+    public EventMessageOutput(Event event, List<Sprint> sprints, List<Event> events) {
         this.id = event.getId();
-        this.parentProjectId = event.getParentProject().getId();
         this.name = event.getEventName();
+        this.parentProjectId = event.getParentProject().getId();
         this.description = event.getEventDescription();
         this.startDate = event.getEventStartDate();
         this.endDate = event.getEventEndDate();
         this.startDateString = DateUtils.toDisplayDateTimeString(event.getEventStartDate());
         this.endDateString = DateUtils.toDisplayDateTimeString(event.getEventEndDate());
+
+        this.setStartColour(event.determineColour(sprints, false) + "4c");
+        this.setEndColour(event.determineColour(sprints, true) + "4c");
+
+        // Set the lists
+        this.generateLists(event, sprints, events);
+    }
+
+    /**
+     * Finds where the event should go on the page, setting the IDs of:
+     * the list box it should go in,
+     * the event immediately after this event, and
+     * the id of the new box being created.
+     * @param event the event that is being updated
+     * @param sprints list of all sprints in this event's project
+     * @param events list of all events in this event's project
+     */
+    private void generateLists(Event event, List<Sprint> sprints, List<Event> events) {
+        sprints.sort(Comparator.comparing(Sprint::getSprintEndDate));
+        events.sort(Comparator.comparing(Event::getEventStartDate));
+
+        this.eventListIds = new ArrayList<>();
+        this.nextEventIds = new ArrayList<>();
+        this.eventBoxIds = new ArrayList<>();
+        // check if the event occurs before any sprints
+        if(sprints.isEmpty()){
+            // get the id of the event that is displayed after this event so that they appear in the correct order
+            nextEventIds.add(getNextEvent(events, event.getParentProject().getProjectStartDate(),
+                    event.getParentProject().getProjectEndDate()));
+            setEventLocationIds(BoxLocation.FIRST, -1);
+        } else if(sprints.get(0).getSprintStartDate().after(this.startDate)) {
+            // get the id of the event that is displayed after this event so that they appear in the correct order
+            nextEventIds.add(getNextEvent(events, event.getParentProject().getProjectStartDate(),
+                    sprints.get(0).getSprintStartDate()));
+            setEventLocationIds(BoxLocation.FIRST, -1);
+        }
+
+        //get list of all event box ids to include the event on the project details page
+        for (int i = 0; i < sprints.size(); i++) {
+            // Check if the event overlaps with the sprint at index i
+            if(DateUtils.timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+                    this.startDate, this.endDate)){
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
+                        sprints.get(i).getSprintEndDate()));
+                setEventLocationIds(BoxLocation.INSIDE, sprints.get(i).getId());
+            }
+            // Check if event occurs between the end of this sprint and the start of the next one
+            if((sprints.size() > i+1) && DateUtils.timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
+                    this.startDate, this.endDate)) {
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
+                        sprints.get(i+1).getSprintStartDate()));
+                setEventLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
+            }
+            // If this sprint is the last sprint, check if the event occurs after the end of this sprint
+            if(sprints.size() == i+1 && sprints.get(i).getSprintEndDate().before(this.endDate)){
+                nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
+                        event.getParentProject().getProjectEndDate()));
+                setEventLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
+            }
+        }
+    }
+
+    /**
+     * Sets the list of id and event box id that the event in this message will occupy.
+     * Should be called once the actual location has already been determined.
+     * @param boxLocation the location, relative to sprints, of the updated event
+     * @param sprintId the id of the sprint this event is located in or after. -1 if event is before all sprints
+     */
+    private void setEventLocationIds(BoxLocation boxLocation, int sprintId) {
+        switch (boxLocation) {
+            case FIRST -> {
+                this.eventListIds.add(FIRST_OUTSIDE_BOX_ID);
+                this.eventBoxIds.add(String.format(EVENT_FIRST_ID_FORMAT, this.id));
+            }
+            case INSIDE -> {
+                this.eventListIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprintId));
+                this.eventBoxIds.add(String.format(EVENT_IN_ID_FORMAT, this.id, sprintId));
+            }
+            case AFTER -> {
+                this.eventListIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprintId));
+                this.eventBoxIds.add(String.format(EVENT_AFTER_ID_FORMAT, this.id, sprintId));
+            }
+        }
+    }
+
+    /**
+     * Gets the next event within a certain time period
+     * @param events the list of all events
+     * @param periodStart the start of the time period
+     * @param periodEnd the end of the time period
+     * @return the box id of the next event or -1 if there is no next event
+     */
+    private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd){
+        for (Event event : events) {
+            if (event.getEventStartDate().after(this.startDate) &&
+                    DateUtils.timesOverlap(periodStart, periodEnd,
+                            event.getEventStartDate(), event.getEventEndDate())) {
+                return (String.format(EVENT_ID_FORMAT, event.getId()));
+            }
+        }
+        return "-1";
     }
 
     public void setId(int id) {
