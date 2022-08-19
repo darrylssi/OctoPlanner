@@ -1,19 +1,5 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TimeZone;
-
-import javax.validation.Valid;
-
-import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
@@ -31,21 +17,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import javax.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
@@ -133,23 +110,16 @@ public class DetailsController extends PageController {
 
         // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
-        //List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
-        //List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
 
         List<Schedulable> schedulableList = new ArrayList<>();
         schedulableList.addAll(eventList);
-        //schedulableList.addAll(deadlineList);
-        //schedulableList.addAll(milestoneList);
+        schedulableList.addAll(deadlineList);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
-        model.addAttribute("events", schedulableList);
+        model.addAttribute("events", schedulableList); //TODO change name from events to something else
 
-
-        // Gets the deadline list and sorts it based on the deadline date
-        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
-        deadlineList.sort(Comparator.comparing(Deadline::getDeadlineDate));
-        model.addAttribute("deadlines", deadlineList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);

@@ -50,7 +50,7 @@
     <hr/>
     <!-- The first events outside the sprint -->
     <div class="event-list-container outside-event">
-        <div th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
+        <div th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
              th:each="event: ${events}" >
             <div th:replace="detailFragments :: event(
                     event=${event},
@@ -90,7 +90,7 @@
                 <div class="break"></div>
 <!--            <-- The events inside the sprint -->
                 <div class="event-list-container">
-                    <div th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}"
+                    <div th:if="${!#arrays.isEmpty(events)} and ${event.getStartDate()} <= *{getSprintEndDate} and ${event.getEndDate()} >= *{getSprintStartDate}"
                          th:each="event: ${events}" >
                         <div th:replace="detailFragments :: event(
                                 event=${event},
@@ -134,7 +134,7 @@
         </div>
         <!-- The events outside the sprint -->
         <div class="event-list-container outside-event"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))"
+            <div th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEndDate()} > *{getSprintEndDate}))"
                  th:each="event: ${events}" >
                 <div th:replace="detailFragments :: event(
                         event=${event},

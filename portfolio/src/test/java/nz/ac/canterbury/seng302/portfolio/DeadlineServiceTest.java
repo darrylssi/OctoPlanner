@@ -33,7 +33,7 @@ class DeadlineServiceTest {
 
     @BeforeEach
     void setUp() {
-        deadline = new Deadline(0, "name", "description", new Date());
+        deadline = new Deadline("name", "description", new Date());
     }
 
     @Test
