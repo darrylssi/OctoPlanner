@@ -81,7 +81,7 @@ public class DetailsController extends PageController {
         return PROJECT_DETAILS_TEMPLATE_NAME;
     }
 
-        /**
+    /**
      Redirects so any project page URL gets a slash on the end
      */
     @GetMapping("/project/{id}")
@@ -127,6 +127,7 @@ public class DetailsController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
+        model.addAttribute("editEventForm", new EventForm());
 
         model.addAttribute("tab", 0);
     }

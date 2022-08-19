@@ -7,11 +7,12 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 import java.util.TimeZone;
-import java.util.Date;
 import java.util.StringJoiner;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,8 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
  */
 @Controller
 public class EventController extends PageController {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventController.class);
 
     @Autowired
     private EventService eventService;
@@ -46,12 +49,7 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("event_id") int eventId,
-            @RequestParam(name="editEventName") String name,
-            @RequestParam(name="editEventDescription") String description,
-            @RequestParam(name="editEventStartDate") Date startDate,
-            @RequestParam(name="editEventStartTime") String startTime,
-            @RequestParam(name="editEventEndDate") Date endDate,
-            @RequestParam(name="editEventEndTime") String endTime,
+            @Valid @ModelAttribute EventForm editEventForm,
             BindingResult bindingResult,
             TimeZone userTimeZone
     ) {
@@ -66,27 +64,28 @@ public class EventController extends PageController {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: bindingResult.getAllErrors()) {
                 errors.add(err.getDefaultMessage());
+                logger.info(err.getDefaultMessage());
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
-        // // Validation round 2: Do our custom errors pass? TODO: Refactor this (GEORGE)
-        // var dateErrors = ValidationUtils.validateEventDates(editEventForm.startDatetimeToDate(userTimeZone), editEventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        // var nameError = ValidationUtils.validateName(editEventForm.getName());
-        // if (dateErrors.isError() || nameError.isError()) {
-        //     StringJoiner errors = new StringJoiner("\n");
-        //     for (var err: dateErrors.getErrorMessages()) {
-        //         errors.add(err);
-        //     }
-        //     for (var err: nameError.getErrorMessages()) {
-        //         errors.add(err);
-        //     }
-        //     return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-        // }
+        // Validation round 2: Do our custom errors pass?
+        var dateErrors = ValidationUtils.validateEventDates(editEventForm.startDatetimeToDate(userTimeZone), editEventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
+        var nameError = ValidationUtils.validateName(editEventForm.getName());
+        if (dateErrors.isError() || nameError.isError()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: dateErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: nameError.getErrorMessages()) {
+                errors.add(err);
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
         // Set new event details
-        event.setEventName(name);
-        event.setEventDescription(description);
-        event.setStartDate(startDate);
-        event.setEndDate(endDate);  //TODO: factor in the time (GEORGE). Find a way to accept it as not a string
+        event.setEventName(editEventForm.getName());
+        event.setEventDescription(editEventForm.getDescription());
+        event.setStartDate(editEventForm.startDatetimeToDate(userTimeZone));
+        event.setEndDate(editEventForm.endDatetimeToDate(userTimeZone));
 
         eventService.saveEvent(event);
 

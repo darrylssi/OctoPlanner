@@ -100,9 +100,10 @@ function sendEditEventViaAjax(elem, e) {
  * @param eventStartDate start date of the edited event
  * @param eventEndDate end date of the edited event
  */
-function showEditEvent(eventId, eventBoxId) {
+function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
     /* Search for the edit form */
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    let editForm = null;    // Split to account for weird behaviour
+    editForm = document.getElementById("editEventForm-" + eventBoxId);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -121,7 +122,7 @@ function showEditEvent(eventId, eventBoxId) {
             /* Check whether any form is for a different event, to see whether
                we need to send a stop editing message */
             if (element.id.indexOf("editEventForm-" + eventId) == -1) {
-                differentEvent = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+                differentEvent = true;  // Extracted to a variable to avoid sending extra messages (in a worst case scenario)
                 previousEvent = (element.id.split('-')[1]);  // Get event id from that form
             }
         }
@@ -139,6 +140,14 @@ function showEditEvent(eventId, eventBoxId) {
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingEventMessage(eventId)}, EVENT_EDIT_MESSAGE_FREQUENCY)
+
+    /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
+    editForm.querySelector("#name").setAttribute("value", eventName);
+    editForm.querySelector("#description").setAttribute("value", eventDescription);
+    editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
+    editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
+    editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
+    editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
