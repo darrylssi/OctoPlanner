@@ -32,7 +32,7 @@ class MilestoneTests {
 
     @Test
     void saveNullMilestoneName_getException() {
-        milestone.setMilestoneName(null);
+        milestone.setName(null);
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
     }
@@ -40,14 +40,14 @@ class MilestoneTests {
     @ParameterizedTest
     @ValueSource (strings = {"a", "This is a very long milestone name that is longer than the maximum limit"})
     void saveInvalidMilestoneName_getException(String name) {
-        milestone.setMilestoneName(name);
+        milestone.setName(name);
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
     }
 
     @Test
     void saveLongMilestoneDescription_getException() {
-        milestone.setMilestoneDescription("This is a really really long milestone description that is hopefully longer than the maximum limit of two hundred " +
+        milestone.setDescription("This is a really really long milestone description that is hopefully longer than the maximum limit of two hundred " +
                 "characters which is a lot longer than I thought it would be so here are few more characters");
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
@@ -55,14 +55,14 @@ class MilestoneTests {
 
     @Test
     void saveNullMilestoneDescription_getException() {
-        milestone.setMilestoneDescription(null);
+        milestone.setDescription(null);
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
     }
 
     @Test
     void saveNullMilestoneDate_getException() {
-        milestone.setMilestoneDate(null);
+        milestone.setStartDate(null);
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
     }
