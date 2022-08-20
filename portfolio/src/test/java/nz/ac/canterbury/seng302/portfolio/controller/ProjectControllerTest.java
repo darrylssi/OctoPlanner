@@ -38,7 +38,6 @@ class ProjectControllerTest {
 
     @MockBean
     private SprintRepository sprintRepository;
-
     @MockBean
     private ProjectRepository projectRepository;
 

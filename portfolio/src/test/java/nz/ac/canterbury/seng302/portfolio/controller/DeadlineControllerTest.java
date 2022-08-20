@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
@@ -22,33 +22,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = EventController.class)
+@WebMvcTest(controllers = DeadlineController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class EventControllerTest {
+class DeadlineControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     ProjectService projectService;
     @MockBean
-    EventService eventService;
+    DeadlineService deadlineService;
     @MockBean
     private UserAccountClientService userAccountClientService;
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void deleteEventAsTeacher_get200Response() throws Exception {
-        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
-        mockMvc.perform(delete("/delete-event/1"))
+    void deleteDeadlineAsTeacher_get200Response() throws Exception {
+        Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
+        mockMvc.perform(delete("/delete-deadline/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Event deleted."));
+                .andExpect(content().string("Deadline deleted."));
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteEventAsStudent_get401Response() throws Exception {
-        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
-        mockMvc.perform(delete("/delete-event/1"))
+    void deleteDeadlineAsStudent_get401Response() throws Exception {
+        Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
+        mockMvc.perform(delete("/delete-deadline/1"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("User not authorised."));
     }
