@@ -116,8 +116,11 @@ public class Deadline implements Schedulable {
     }
 
     /**
-     * Gets a String containing the name of the thymeleaf fragment in which the event will be displayed
-     * @return Said string
+     * Gets a String to identify the type of this object.
+     * This is used to specify which type of thymeleaf fragment to display without having to have
+     * an instanceof check and a div specifically for each type of schedulable object.
+     * The returned String should directly match the name of the thymeleaf fragment it will be displayed in.
+     * @return A String constant containing the type of this object.
      */
     public String getType(){
         return DEADLINE_TYPE;

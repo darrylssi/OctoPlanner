@@ -82,42 +82,22 @@ public class Event implements Schedulable {
         return id;
     }
 
-    /**
-     * Gets the event name
-     * @return event's name
-     */
     public String getName() {
         return eventName;
     }
 
-    /**
-     * Sets the event name
-     * @param name Gets the event name given by user
-     */
     public void setName(String name) {
         this.eventName = name;
     }
 
-    /**
-     * Gets the event description
-     * @return event's description
-     */
     public String getDescription(){
         return eventDescription;
     }
 
-    /**
-     * Sets the event Description
-     * @param description Gets the event description given by the user
-     */
     public void setDescription(String description) {
         this.eventDescription = description;
     }
 
-    /**
-     * Gets the event start date
-     * @return event's start date
-     */
     public Date getStartDate() {
         return eventStartDate;
     }
@@ -126,10 +106,6 @@ public class Event implements Schedulable {
         this.eventStartDate = newStartDate;
     }
 
-    /**
-     * Gets the event end date
-     * @return event's end date
-     */
     public Date getEndDate() {
         return eventEndDate;
     }
@@ -147,8 +123,11 @@ public class Event implements Schedulable {
     }
 
     /**
-     * Gets a String containing the name of the thymeleaf fragment in which the event will be displayed
-     * @return Said string
+     * Gets a String to identify the type of this object.
+     * This is used to specify which type of thymeleaf fragment to display without having to have
+     * an instanceof check and a div specifically for each type of schedulable object.
+     * The returned String should directly match the name of the thymeleaf fragment it will be displayed in.
+     * @return A String constant containing the type of this object.
      */
     public String getType(){
         return EVENT_TYPE;
