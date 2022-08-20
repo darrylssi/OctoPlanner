@@ -56,10 +56,10 @@ public class DeadlineController extends PageController {
         String deadlineDateTime = deadlineDate + " " + deadlineTime;
 
         // Set details of new deadline object
-        deadline.setParentProjectId(parentProject.getId());
-        deadline.setDeadlineName(deadlineName);
-        deadline.setDeadlineDate(DateUtils.toDateTime(deadlineDateTime));
-        deadline.setDeadlineDescription(deadlineDescription);
+        deadline.setParentProject(parentProject);
+        deadline.setName(deadlineName);
+        deadline.setStartDate(DateUtils.toDateTime(deadlineDateTime));
+        deadline.setDescription(deadlineDescription);
 
         deadlineService.saveDeadline(deadline);
 

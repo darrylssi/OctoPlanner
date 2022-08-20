@@ -1,17 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-
-import java.util.TimeZone;
-import java.util.Date;
-import java.util.StringJoiner;
-
-import javax.validation.Valid;
-
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.TimeZone;
 
 /**
  * Controller to handle requests related to events.
@@ -83,8 +77,8 @@ public class EventController extends PageController {
         //     return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         // }
         // Set new event details
-        event.setEventName(name);
-        event.setEventDescription(description);
+        event.setName(name);
+        event.setDescription(description);
         event.setStartDate(startDate);
         event.setEndDate(endDate);  //TODO: factor in the time (GEORGE). Find a way to accept it as not a string
 

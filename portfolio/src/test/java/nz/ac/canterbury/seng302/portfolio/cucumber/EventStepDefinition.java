@@ -51,7 +51,7 @@ public class EventStepDefinition extends RunCucumberTest {
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        return ValidationUtils.validateEventDates(event.getEventStartDate(), event.getEventEndDate(), parentProject);
+        return ValidationUtils.validateEventDates(event.getStartDate(), event.getEndDate(), parentProject);
     }
 
     public EventStepDefinition() {
@@ -71,8 +71,8 @@ public class EventStepDefinition extends RunCucumberTest {
     public void the_user_creates_an_event_called_starting_at_ending_on_with_a_description(
             String name, String startDate, String endDate, String description) throws Exception {
         event = new Event();
-        event.setEventName(name);
-        event.setEventDescription(description);
+        event.setName(name);
+        event.setDescription(description);
         event.setStartDate(dateTimeFormatter.parse(startDate));
         event.setEndDate(dateTimeFormatter.parse(endDate));
     }
