@@ -1,8 +1,7 @@
-package nz.ac.canterbury.seng302.portfolio;
+package nz.ac.canterbury.seng302.portfolio.service;
 
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.model.MilestoneRepository;
-import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +47,9 @@ class MilestoneServiceTest {
 
     @Test
     void getMilestoneInvalidId_thenThrowException() {
-        when(milestoneRepository.findMilestoneById(1))
+        when(milestoneRepository.findMilestoneById(2))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Milestone not found."));
-        Exception exception = assertThrows(ResponseStatusException.class, () -> milestoneService.getMilestoneById(1));
+        Exception exception = assertThrows(ResponseStatusException.class, () -> milestoneService.getMilestoneById(2));
         assertTrue(exception.getMessage().contains("Milestone not found"));
     }
 

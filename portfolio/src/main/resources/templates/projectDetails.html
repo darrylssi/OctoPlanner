@@ -267,13 +267,15 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
 </div>
 
 <!-- Add Milestone Form -->
-    <div class="collapse" id="addMilestoneForm">
+    <div class="collapse" id="addMilestoneForm"
+         th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
+         projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
         <div class="card">
             <div class="card-header">
                 New Milestone
             </div>
             <div class="card-body">
-                <form class="container-fluid" th:action="@{/project/{id}/add-milestone(id = ${parentProjectId})}"
+                <form class="container-fluid" th:action="@{/project/{id}/add-milestone(id = ${project.getId})}"
                       method="post" th:object="${milestone}" modelAttribute="milestone">
                     <div class="row">
                         <div class="col">
@@ -296,7 +298,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${projectStartDate}" th:max="${projectEndDate}"
+                                <input type="date" class="form-control" th:classappend="${milestoneDateError} ? is-invalid : '' " id="milestoneDate" th:required="required" aria-describedby="milestoneDateFeedback" th:min="${projectStart}" th:max="${projectEnd}"
                                        th:name="milestoneDate" th:value="${milestoneDate}">
                                 <label for="milestoneDate">Date</label>
                                 <div id="milestoneDateFeedback" class="invalid-feedback" th:text="${milestoneDateError}"></div>

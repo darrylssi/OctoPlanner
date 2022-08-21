@@ -110,9 +110,6 @@ public class DetailsController extends PageController {
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
-        model.addAttribute("parentProjectId", project.getId());
-        model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
-        model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
