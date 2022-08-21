@@ -5,7 +5,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
-import java.util.List;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -15,8 +14,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  */
 @Entity
 public class Deadline implements Schedulable {
-
-    public static final String DEFAULT_COLOUR = "#ff3823";
 
     /** The id of this deadline. This id should be unique between all deadlines.*/
     @Id
@@ -126,25 +123,5 @@ public class Deadline implements Schedulable {
         return DEADLINE_TYPE;
     }
 
-    /**
-     * Determines the correct colour for this deadline based on the list of sprints.
-     * Specifically, this function returns the colour of the first sprint it finds which
-     * contains the date of the deadline. If it finds no sprint, it returns the default colour
-     * determined by the system.
-     * @param sprints a List object of sprints to choose a colour from.
-     */
-    public String determineColour(List<Sprint> sprints, boolean end) {
-        for (Sprint checkedSprint : sprints) {
-            Date sprintStart = checkedSprint.getSprintStartDate();
-            Date sprintEnd = checkedSprint.getSprintEndDate();
 
-            /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
-            if ((sprintStart.before(deadlineDate) || sprintStart.equals(deadlineDate)) &&
-                    (sprintEnd.after(deadlineDate) || sprintEnd.equals(deadlineDate))) {
-                return checkedSprint.getSprintColour();
-            }
-        }
-
-        return DEFAULT_COLOUR;
-    }
 }
