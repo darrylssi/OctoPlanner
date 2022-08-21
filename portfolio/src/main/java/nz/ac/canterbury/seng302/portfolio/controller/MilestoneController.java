@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,10 +76,7 @@ public class MilestoneController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="milestoneId") int milestoneId
     ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         try {
             milestoneService.deleteMilestone(milestoneId);
             return new ResponseEntity<>("Milestone deleted.", HttpStatus.OK);

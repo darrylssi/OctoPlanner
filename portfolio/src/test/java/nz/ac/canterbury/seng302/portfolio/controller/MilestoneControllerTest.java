@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,8 +52,8 @@ class MilestoneControllerTest {
     void deleteMilestoneAsStudent_get401Response() throws Exception {
         Mockito.doNothing().when(milestoneService).deleteMilestone(1);
         mockMvc.perform(delete("/delete-milestone/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not authorised."));
+                .andExpect(status().isForbidden())
+                .andExpect(status().reason(containsString("You do not have permission to access this endpoint")));
     }
 
 }
