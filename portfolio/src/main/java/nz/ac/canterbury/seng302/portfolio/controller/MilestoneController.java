@@ -77,9 +77,16 @@ public class MilestoneController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="milestoneId") int milestoneId
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        milestoneService.deleteMilestone(milestoneId);
-        return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
+        PrincipalData thisUser = PrincipalData.from(principal);
+        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            milestoneService.deleteMilestone(milestoneId);
+            return new ResponseEntity<>("Milestone deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
