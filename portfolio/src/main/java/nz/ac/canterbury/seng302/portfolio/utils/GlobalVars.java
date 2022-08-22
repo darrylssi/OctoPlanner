@@ -7,17 +7,23 @@ public class GlobalVars {
 
     private GlobalVars() {}
 
-    public static final int MAX_DESC_LENGTH = 200;
+    public static final int MAX_DESC_LENGTH = 200; // Maximum number of characters a description field can have
 
-    public static final int MIN_NAME_LENGTH = 2;
-    public static final int MAX_NAME_LENGTH = 32;
+    public static final int MIN_NAME_LENGTH = 2;    // Minimum number of characters a name field can have
+    public static final int MAX_NAME_LENGTH = 32;   // Maximum number of characters a name field can have
 
-    public static final int MIN_PASSWORD_LENGTH = 7;
-    public static final int MAX_PASSWORD_LENGTH = 20;
+    public static final int MIN_PASSWORD_LENGTH = 7;    // Minimum number of characters a password field can have
+    public static final int MAX_PASSWORD_LENGTH = 20;   // Maximum number of characters a password field can have
 
-    public static final int MAX_USERNAME_LENGTH = 20;
+    public static final int MAX_USERNAME_LENGTH = 20;   // Maximum number of characters a username field can have
 
     public static final int COLOUR_LENGTH = 7;
+    public static final String DEFAULT_COLOUR = "#ff3823";  // The default colour code for displaying schedulables outside sprints
+
+    // Used instead of doing an instanceof check for the type of the schedulable
+    public static final String EVENT_TYPE = "event";
+    public static final String DEADLINE_TYPE = "deadline";
+    public static final String MILESTONE_TYPE = "milestone";
 
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm";

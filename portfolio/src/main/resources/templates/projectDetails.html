@@ -48,14 +48,14 @@
         </a>
     </div>
     <hr/>
-    <!-- The first events outside the sprint -->
-    <div class="event-list-container outside-event">
-        <div th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
-             th:each="event: ${events}" >
-            <div th:replace="detailFragments :: event(
-                    event=${event},
+    <!-- The first schedulables outside the sprint -->
+    <div class="schedulable-list-container outside-schedulable">
+        <div th:if="${!#arrays.isEmpty(schedulables)} and ((${!#arrays.isEmpty(sprints)} and ${schedulable.getStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
+             th:each="schedulable: ${schedulables}" >
+            <div th:replace="detailFragments :: ${schedulable.getType()}(
+                    ${schedulable.getType()}=${schedulable},
                     canEdit=${canEdit},
-                    boxId=${event.getId} + '-before',
+                    boxId=${schedulable.getId} + '-before',
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
@@ -96,8 +96,6 @@
             </div>
         </div>
     </div>
-
-
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
@@ -122,46 +120,14 @@
                     </button>
                 </div>
                 <div class="break"></div>
-<!--            <-- The events inside the sprint -->
-                <div class="event-list-container">
-                    <div th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}"
-                         th:each="event: ${events}" >
-                        <div th:replace="detailFragments :: event(
-                                event=${event},
+                <!-- The schedulables inside the sprint -->
+                <div class="schedulable-list-container">
+                    <div th:if="${!#arrays.isEmpty(schedulables)} and ${schedulable.getStartDate()} <= *{getSprintEndDate} and ${schedulable.getEndDate()} >= *{getSprintStartDate}"
+                         th:each="schedulable: ${schedulables}" >
+                        <div th:replace="detailFragments :: ${schedulable.getType()}(
+                                ${schedulable.getType()}=${schedulable},
                                 canEdit=${canEdit},
-                                boxId=${event.getId} + '-in-' + *{getId},
-                                minNameLen=${minNameLen},
-                                maxNameLen=${maxNameLen},
-                                maxDescLen=${maxDescLen},
-                                projectStart=${projectStart},
-                                projectEnd=${projectEnd})">
-                        </div>
-                    </div>
-                </div>
-                <!-- The deadlines inside the sprint -->
-                <div class="deadline-list-container">
-                    <div th:if="${!#arrays.isEmpty(deadlines)} and ${deadline.getDeadlineDate()} >= *{getSprintStartDate} and ${deadline.getDeadlineDate()} <= *{getSprintEndDate}"
-                         th:each="deadline: ${deadlines}">
-                        <div th:replace="detailFragments :: deadline(
-                                deadline=${deadline},
-                                canEdit=${canEdit},
-                                boxId=${deadline.getId} + '-in-' + *{getId},
-                                minNameLen=${minNameLen},
-                                maxNameLen=${maxNameLen},
-                                maxDescLen=${maxDescLen},
-                                projectStart=${projectStart},
-                                projectEnd=${projectEnd})">
-                        </div>
-                    </div>
-                </div>
-                <!-- The milestones inside the sprint -->
-                <div class="milestone-list-container">
-                    <div th:if="${!#arrays.isEmpty(milestones)} and ${milestone.getMilestoneDate()} >= *{getSprintStartDate} and ${milestone.getMilestoneDate()} <= *{getSprintEndDate}"
-                         th:each="milestone: ${milestones}">
-                        <div th:replace="detailFragments :: milestone(
-                                milestone=${milestone},
-                                canEdit=${canEdit},
-                                boxId=${milestone.getId} + '-in-' + *{getId},
+                                boxId=${schedulable.getId} + '-in-' + *{getId},
                                 minNameLen=${minNameLen},
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
@@ -172,52 +138,19 @@
                 </div>
             </div>
         </div>
-        <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))"
-                 th:each="event: ${events}" >
-                <div th:replace="detailFragments :: event(
-                        event=${event},
-                        canEdit=${canEdit},
-                        boxId=${event.getId} + '-after-' + *{getId},
-                        minNameLen=${minNameLen},
-                        maxNameLen=${maxNameLen},
-                        maxDescLen=${maxDescLen},
-                        projectStart=${projectStart},
-                        projectEnd=${projectEnd})">
-                </div>
-            </div>
-        </div>
-        <!-- The deadlines outside the sprint -->
-        <div class="deadline-list-container outside-deadline" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:if="${!#arrays.isEmpty(deadlines)} and ((${iterStat.index+1 < iterStat.size} and ${deadline.getDeadlineDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${deadline.getDeadlineDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${deadline.getDeadlineDate()} > *{getSprintEndDate}))"
-                 th:each="deadline: ${deadlines}">
-                <div th:replace="detailFragments :: deadline(
-                                deadline=${deadline},
-                                canEdit=${canEdit},
-                                boxId=${deadline.getId} + '-after-' + *{getId},
-                                minNameLen=${minNameLen},
-                                maxNameLen=${maxNameLen},
-                                maxDescLen=${maxDescLen},
-                                projectStart=${projectStart},
-                                projectEnd=${projectEnd})">
-                </div>
-            </div>
-        </div>
-        <!-- The milestones outside the sprint -->
-        <div class="milestone-list-container outside-milestone" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:if="${!#arrays.isEmpty(milestones)} and ((${iterStat.index+1 < iterStat.size} and ${milestone.getMilestoneDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${milestone.getMilestoneDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${milestone.getMilestoneDate()} > *{getSprintEndDate}))"
-                 th:each="milestone: ${milestones}">
-                <div th:replace="detailFragments :: milestone(
-                                milestone=${milestone},
-                                canEdit=${canEdit},
-                                boxId=${milestone.getId} + '-after-' + *{getId},
-                                minNameLen=${minNameLen},
-                                maxNameLen=${maxNameLen},
-                                maxDescLen=${maxDescLen},
-                                projectStart=${projectStart},
-                                projectEnd=${projectEnd})">
-                </div>
+        <!-- The schedulables outside the sprint -->
+        <div class="schedulable-list-container outside-schedulable"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+            <div th:if="${!#arrays.isEmpty(schedulables)} and ((${iterStat.index+1 < iterStat.size} and ${schedulable.getStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${schedulable.getEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${schedulable.getEndDate()} > *{getSprintEndDate}))"
+                 th:each="schedulable: ${schedulables}" >
+                <div th:replace="detailFragments :: ${schedulable.getType()}(
+                    ${schedulable.getType()}=${schedulable},
+                    canEdit=${canEdit},
+                    boxId=${schedulable.getId} + '-after-' + *{getId},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectStart=${projectStart},
+                    projectEnd=${projectEnd})" />
             </div>
         </div>
     </div>

@@ -1,11 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
-import java.util.List;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -15,9 +15,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Event objects are stored in a table called Event, as it is an @Entity.
  */
 @Entity
-public class Event {
-
-    public static final String DEFAULT_COLOUR = "#ff3823";
+public class Event implements Schedulable {
 
     /** The id of this event. This id should be unique between all events.*/
     @Id
@@ -82,23 +80,23 @@ public class Event {
         return id;
     }
 
-    public String getEventName() {
+    public String getName() {
         return eventName;
     }
 
-    public void setEventName(String newName) {
-        this.eventName = newName;
+    public void setName(String name) {
+        this.eventName = name;
     }
 
-    public String getEventDescription(){
+    public String getDescription(){
         return eventDescription;
     }
 
-    public void setEventDescription(String newDescription) {
-        this.eventDescription = newDescription;
+    public void setDescription(String description) {
+        this.eventDescription = description;
     }
 
-    public Date getEventStartDate() {
+    public Date getStartDate() {
         return eventStartDate;
     }
 
@@ -106,7 +104,7 @@ public class Event {
         this.eventStartDate = newStartDate;
     }
 
-    public Date getEventEndDate() {
+    public Date getEndDate() {
         return eventEndDate;
     }
 
@@ -123,30 +121,13 @@ public class Event {
     }
 
     /**
-     * Determines the correct colour for this event based on the list of sprints.
-     * Specifically, this function returns the colour of the first sprint it finds which
-     * overlaps the start date of the event (or end date if the end parameter is true).
-     * If it finds no sprint, it returns the default colour determined by the system.
-     * @param sprints a List object of sprints to choose a colour from.
-     * @param end {boolean} fetch the colour at the end of the event, instead of the start.
+     * Gets a String to identify the type of this object.
+     * This is used to specify which type of thymeleaf fragment to display without having to have
+     * an instanceof check and a div specifically for each type of schedulable object.
+     * The returned String should directly match the name of the thymeleaf fragment it will be displayed in.
+     * @return A String constant containing the type of this object.
      */
-    public String determineColour(List<Sprint> sprints, boolean end) {
-        Date comparisonDate = eventStartDate;
-        if (end) {
-            comparisonDate = eventEndDate;
-        }
-
-        for (Sprint checkedSprint : sprints) {
-            Date sprintStart = checkedSprint.getSprintStartDate();
-            Date sprintEnd = checkedSprint.getSprintEndDate();
-
-            /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
-            if ((sprintStart.before(comparisonDate) || sprintStart.equals(comparisonDate)) &&
-                    (sprintEnd.after(comparisonDate) || sprintEnd.equals(comparisonDate))) {
-                return checkedSprint.getSprintColour();
-            }
-        }
-
-        return DEFAULT_COLOUR;
+    public String getType(){
+        return EVENT_TYPE;
     }
 }
