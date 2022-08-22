@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -14,8 +15,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  */
 @Entity
 public class Milestone implements Schedulable {
-
-    public static final String DEFAULT_COLOUR = "#ff3823";
 
     /** The id of this milestone. This id should be unique between all milestones.*/
     @Id
@@ -29,16 +28,15 @@ public class Milestone implements Schedulable {
     @Column(nullable = false)
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
             message="The milestone name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
+    @NotBlank(message = "Milestone name cannot be blank.")
     private String milestoneName;
 
     @Column (nullable = false)
     @Size(max=MAX_DESC_LENGTH, message="The milestone description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String milestoneDescription;
 
-    @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
+    @DateTimeFormat(pattern=DATE_FORMAT)
     private Date milestoneDate;
-
 
     public Milestone() {}
 
