@@ -47,6 +47,8 @@ public class DetailsController extends PageController {
     @Autowired
     private DeadlineService deadlineService;
     @Autowired
+    private MilestoneService milestoneService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     /**
@@ -111,10 +113,12 @@ public class DetailsController extends PageController {
         // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
 
         List<Schedulable> schedulableList = new ArrayList<>();
         schedulableList.addAll(eventList);
         schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
