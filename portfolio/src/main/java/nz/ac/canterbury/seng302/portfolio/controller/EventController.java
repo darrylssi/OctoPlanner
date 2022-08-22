@@ -27,8 +27,6 @@ public class EventController extends PageController {
     private EventService eventService;
 
     /**
-     * 
-     * @param eventForm The form submitted by the user
      * @param bindingResult Any errors that occured while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
      * @return  A response of either 200 (success), 401 (unauthenticated),
@@ -99,11 +97,7 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="eventId") int eventId
     ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete events
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         try {
             eventService.deleteEvent(eventId);
             return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
