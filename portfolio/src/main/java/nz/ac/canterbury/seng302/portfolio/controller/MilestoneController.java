@@ -8,6 +8,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -54,14 +59,35 @@ public class MilestoneController extends PageController {
 
         // Set details of new milestone object
         milestone.setParentProject(parentProject);
-        milestone.setMilestoneName(milestoneName);
-        milestone.setMilestoneDate(DateUtils.toDate(milestoneDate));
-        milestone.setMilestoneDescription(milestoneDescription);
+        milestone.setName(milestoneName);
+        milestone.setStartDate(DateUtils.toDate(milestoneDate));
+        milestone.setDescription(milestoneDescription);
 
         milestoneService.saveMilestone(milestone);
 
         return "redirect:../" + parentProject.getId();
 
+    }
+
+    /**
+     * Deletes a milestone and redirects back to the project view
+     * @param principal used to check if the user is authorised to delete events
+     * @param milestoneId the id of the milestone to be deleted
+     * @return response if milestone is deleted
+     */
+    @DeleteMapping("/delete-milestone/{milestoneId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteMilestone(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="milestoneId") int milestoneId
+    ) {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        try {
+            milestoneService.deleteMilestone(milestoneId);
+            return new ResponseEntity<>("Milestone deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

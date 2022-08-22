@@ -3,70 +3,29 @@ const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sen
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 
-/** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
-function showDeleteSprintModal(sprintId, sprintName) {
-    const modal = document.getElementById("deleteModal");
-    const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
-    deleteButton.onclick = () => {deleteSprint(sprintId)}
-    modal.style.display = "block";
-}
-
 /** Hides the confirm delete modal without deleting a sprint/event/deadline */
 function hideModal() {
     const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
 }
 
-/** sends a http request to delete the sprint with the given id */
-function deleteSprint(sprintId) {
-    const url = BASE_URL + "delete-sprint/" + sprintId;
-    const deleteRequest = new XMLHttpRequest();
-    deleteRequest.open("DELETE", url, true);
-    deleteRequest.onload = () => {
-        // Reload the page to get the updated list of sprints after the delete
-        window.location.reload();
-    }
-    deleteRequest.send();
-}
-
-/** When the delete event button is clicked, show a modal checking if the user is sure about deleting the event */
-function showDeleteEventModal(eventId, eventName) {
+/** When the delete button is clicked, show a modal checking if the user is sure about deleting the object
+ * Type  */
+function showDeleteModal(id, name, type) {
     const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + eventName + "?";
-    deleteButton.onclick = () => {deleteEvent(eventId)}
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + name + "?";
+    deleteButton.onclick = () => {deleteObject(id, type)}
     modal.style.display = "block";
 }
 
-/** When the delete deadline button is clicked, show a modal checking if the user is sure about deleting the deadline */
-function showDeleteDeadlineModal(deadlineId, deadlineName) {
-    const modal = document.getElementById("deleteModal");
-    const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + deadlineName + "?";
-    deleteButton.onclick = () => {deleteDeadline(deadlineId)}
-    modal.style.display = "block";
-}
-
-/** sends a http request to delete the event with the given id */
-function deleteEvent(eventId) {
-    const url = BASE_URL + "delete-event/" + eventId;
+/** sends a http request to delete the object with the given id */
+function deleteObject(id, type) {
+    const url = BASE_URL + "delete-" + type + "/" + id;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Reload the page to get the updated list of events after the delete
-        window.location.reload();
-    }
-    deleteRequest.send();
-}
-
-/** sends a http request to delete the deadline with the given id */
-function deleteDeadline(deadlineId) {
-    const url = BASE_URL + "delete-deadline/" + deadlineId;
-    const deleteRequest = new XMLHttpRequest();
-    deleteRequest.open("DELETE", url, true);
-    deleteRequest.onload = () => {
-        // Reload the page to get the updated list of deadlines after the delete
         window.location.reload();
     }
     deleteRequest.send();
