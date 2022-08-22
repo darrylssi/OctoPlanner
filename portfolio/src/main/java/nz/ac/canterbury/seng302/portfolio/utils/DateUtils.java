@@ -26,10 +26,6 @@ public class DateUtils {
     // Private constructor to hide the implicit public one
     private DateUtils() {}
 
-    private static final String BACKEND_DATE_FORMAT = DATE_FORMAT;
-    private static final String DISPLAYED_DATE_FORMAT = DISPLAY_DATE_FORMAT;
-    private static final String DISPLAYED_DATE_TIME_FORMAT = DISPLAY_DATETIME_FORMAT;
-
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     // Using a singleton pattern, because SonarLint doesn't like it when a static
@@ -48,7 +44,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayString(Date date) {
-        return new SimpleDateFormat(DISPLAYED_DATE_FORMAT).format(date);
+        return new SimpleDateFormat(DISPLAY_DATE_FORMAT).format(date);
     }
 
     /**
@@ -57,7 +53,7 @@ public class DateUtils {
      * @return Date as a String
      */
     public static String toDisplayDateTimeString(Date date) {
-        return new SimpleDateFormat(DISPLAYED_DATE_TIME_FORMAT).format(date);
+        return new SimpleDateFormat(DISPLAY_DATETIME_FORMAT).format(date);
     }
 
     /**
@@ -67,7 +63,7 @@ public class DateUtils {
      */
     public static Date toDate(String date) {
         try {
-            return new SimpleDateFormat(BACKEND_DATE_FORMAT).parse(date);
+            return new SimpleDateFormat(DATE_FORMAT).parse(date);
         } catch (ParseException e) {
             logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }
@@ -84,15 +80,15 @@ public class DateUtils {
     }
 
     /**
-     * Converts a String with yyyy-MM-ddTHH:mm format to a Date object.
-     * @param date String to be converted to a Date
-     * @return Date object of the corresponding string
+     * Converts a String to a Date in yyyy--MM-dd HH:mm format.
+     * @param dateTime String to be converted to Date
+     * @return Date object
      */
-    public static Date toDateTime(String date) {
+    public static Date toDateTime(String dateTime) {
         try {
-            return new SimpleDateFormat(DATETIME_ISO_FORMAT).parse(date);
+            return new SimpleDateFormat(DATETIME_FORMAT).parse(dateTime);
         } catch (ParseException e) {
-            logger.error(String.format("Error parsing date and time: %s", e.getMessage()));
+            logger.error(String.format("Error parsing date: %s", e.getMessage()));
         }
         return null;
     }

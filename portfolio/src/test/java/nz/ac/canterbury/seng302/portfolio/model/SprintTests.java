@@ -70,7 +70,7 @@ class SprintTests {
     }
 
     @Test
-    void searchById_getSprint() throws Exception {
+    void searchById_getSprint() {
         when(sprintService.getSprintById(baseSprint.getId())).thenReturn(baseSprint);
         Sprint foundSprint = sprintService.getSprintById(baseSprint.getId());
         assertEquals(baseSprint, foundSprint);
