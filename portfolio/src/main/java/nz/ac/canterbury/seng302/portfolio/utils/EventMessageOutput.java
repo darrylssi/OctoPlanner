@@ -16,13 +16,13 @@ public class EventMessageOutput {
 
     enum BoxLocation {FIRST, INSIDE, AFTER}
 
-    private static final String INSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-inside";
-    private static final String OUTSIDE_SPRINT_BOX_ID_FORMAT = "events-%d-outside";
-    private static final String FIRST_OUTSIDE_BOX_ID = "events-firstOutside";
-    private static final String EVENT_ID_FORMAT = "event-box-%d";
-    private static final String EVENT_FIRST_ID_FORMAT = "%d-before";
-    private static final String EVENT_IN_ID_FORMAT = "%d-in-%d";
-    private static final String EVENT_AFTER_ID_FORMAT = "%d-after-%d";
+    public static final String LIST_IN_ID_FORMAT = "events-%d-inside"; // id of sprint box
+    public static final String LIST_AFTER_ID_FORMAT = "events-%d-outside"; // id of box after sprint
+    public static final String LIST_BEFORE_ALL_ID_NAME = "events-firstOutside"; // id of first box
+    public static final String NEXT_EVENT_ID_FORMAT = "event-box-%d"; // id of an event (used for the next event)
+    public static final String EVENT_BEFORE_ALL_ID_FORMAT = "%d-before"; // id of event in first box
+    public static final String EVENT_IN_ID_FORMAT = "%d-in-%d"; // id of event in sprint box
+    public static final String EVENT_AFTER_ID_FORMAT = "%d-after-%d"; // id of event after sprint box
 
     private int id;
     private int parentProjectId;
@@ -134,15 +134,15 @@ public class EventMessageOutput {
     private void setEventLocationIds(BoxLocation boxLocation, int sprintId) {
         switch (boxLocation) {
             case FIRST -> {
-                this.eventListIds.add(FIRST_OUTSIDE_BOX_ID);
-                this.eventBoxIds.add(String.format(EVENT_FIRST_ID_FORMAT, this.id));
+                this.eventListIds.add(LIST_BEFORE_ALL_ID_NAME);
+                this.eventBoxIds.add(String.format(EVENT_BEFORE_ALL_ID_FORMAT, this.id));
             }
             case INSIDE -> {
-                this.eventListIds.add(String.format(INSIDE_SPRINT_BOX_ID_FORMAT, sprintId));
+                this.eventListIds.add(String.format(LIST_IN_ID_FORMAT, sprintId));
                 this.eventBoxIds.add(String.format(EVENT_IN_ID_FORMAT, this.id, sprintId));
             }
             case AFTER -> {
-                this.eventListIds.add(String.format(OUTSIDE_SPRINT_BOX_ID_FORMAT, sprintId));
+                this.eventListIds.add(String.format(LIST_AFTER_ID_FORMAT, sprintId));
                 this.eventBoxIds.add(String.format(EVENT_AFTER_ID_FORMAT, this.id, sprintId));
             }
         }
@@ -160,7 +160,7 @@ public class EventMessageOutput {
             if (event.getEventStartDate().after(this.startDate) &&
                     DateUtils.timesOverlap(periodStart, periodEnd,
                             event.getEventStartDate(), event.getEventEndDate())) {
-                return (String.format(EVENT_ID_FORMAT, event.getId()));
+                return (String.format(NEXT_EVENT_ID_FORMAT, event.getId()));
             }
         }
         return "-1";
