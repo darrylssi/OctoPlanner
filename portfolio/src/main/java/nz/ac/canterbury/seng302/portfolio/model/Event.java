@@ -130,14 +130,4 @@ public class Event implements Schedulable {
     public String getType(){
         return EVENT_TYPE;
     }
-
-    @Override
-    public Date getStartDate() {
-        return this.getEventStartDate();
-    }
-
-    @Override
-    public Date getEndDate() {
-        return this.getEventEndDate();
-    }
 }

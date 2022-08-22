@@ -57,13 +57,13 @@ public class EventMessageOutput {
      */
     public EventMessageOutput(Event event, List<Sprint> sprints, List<Event> events) {
         this.id = event.getId();
-        this.name = event.getEventName();
+        this.name = event.getName();
         this.parentProjectId = event.getParentProject().getId();
-        this.description = event.getEventDescription();
-        this.startDate = event.getEventStartDate();
-        this.endDate = event.getEventEndDate();
-        this.startDateString = DateUtils.toDisplayDateTimeString(event.getEventStartDate());
-        this.endDateString = DateUtils.toDisplayDateTimeString(event.getEventEndDate());
+        this.description = event.getDescription();
+        this.startDate = event.getStartDate();
+        this.endDate = event.getEndDate();
+        this.startDateString = DateUtils.toDisplayDateTimeString(event.getStartDate());
+        this.endDateString = DateUtils.toDisplayDateTimeString(event.getEndDate());
 
         this.setStartColour(event.determineColour(sprints, false) + "4c");
         this.setEndColour(event.determineColour(sprints, true) + "4c");
@@ -83,7 +83,7 @@ public class EventMessageOutput {
      */
     private void generateLists(Event event, List<Sprint> sprints, List<Event> events) {
         sprints.sort(Comparator.comparing(Sprint::getSprintEndDate));
-        events.sort(Comparator.comparing(Event::getEventStartDate));
+        events.sort(Comparator.comparing(Event::getStartDate));
 
         this.eventListIds = new ArrayList<>();
         this.nextEventIds = new ArrayList<>();
@@ -158,9 +158,9 @@ public class EventMessageOutput {
      */
     private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd){
         for (Event event : events) {
-            if (event.getEventStartDate().after(this.startDate) &&
+            if (event.getStartDate().after(this.startDate) &&
                     DateUtils.timesOverlap(periodStart, periodEnd,
-                            event.getEventStartDate(), event.getEventEndDate())) {
+                            event.getStartDate(), event.getEndDate())) {
                 return (String.format(NEXT_EVENT_ID_FORMAT, event.getId()));
             }
         }
