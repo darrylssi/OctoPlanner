@@ -37,9 +37,9 @@ public class MilestoneStepDefinition extends RunCucumberTest{
     public void the_user_creates_a_milestone_called_on_with_a_description(
             String name, String date, String description) throws Exception {
         milestone = new Milestone();
-        milestone.setMilestoneName(name);
-        milestone.setMilestoneDate(DateUtils.toDate(date));
-        milestone.setMilestoneDescription(description);
+        milestone.setName(name);
+        milestone.setStartDate(DateUtils.toDate(date));
+        milestone.setDescription(description);
     }
 
     @Then("there are no errors in creating the milestone")
