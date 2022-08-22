@@ -127,8 +127,8 @@ class EventMessageOutputTest {
 
     @Test
     void whenCreateEventBetweenSprints_thenAppearsOnlyBetweenSprints() {
-        Date eventStartDate = DateUtils.toDateTime("2022-02-02T02:00");
-        Date eventEndDate = DateUtils.toDateTime("2022-02-02T03:00");
+        Date eventStartDate = DateUtils.toDateTime("2022-02-02 02:00");
+        Date eventEndDate = DateUtils.toDateTime("2022-02-02 03:00");
         Event event = new Event("Test Event",  "This is an event", eventStartDate, eventEndDate);
         event.setId(0);
         event.setParentProject(parentProject);
@@ -178,8 +178,8 @@ class EventMessageOutputTest {
 
     @Test
     void whenCreateEventBetweenOtherEvents_thenNewEventAppearsBetween() {
-        Date eventStartDate = DateUtils.toDateTime("2022-03-01T02:00");
-        Date eventEndDate = DateUtils.toDateTime("2022-03-01T03:00");
+        Date eventStartDate = DateUtils.toDateTime("2022-03-01 02:00");
+        Date eventEndDate = DateUtils.toDateTime("2022-03-01 03:00");
         Event event = new Event("Test Event",  "This is an event", eventStartDate, eventEndDate);
         event.setId(0);
         event.setParentProject(parentProject);
