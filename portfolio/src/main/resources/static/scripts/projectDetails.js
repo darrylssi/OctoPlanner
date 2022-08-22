@@ -2,6 +2,7 @@ let previousEvent; // the previous event being edited by THIS user (only one can
 const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
+const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -52,38 +53,57 @@ function deleteEvent(eventId) {
 }
 
 /**
- * Submits the `edit-event` request in Javascript, because the form doesn't
- * exist until it's spawned via Javascript, and this is the only way to convey errors.
- * @param {HTMLFormElement} elem 
- * @param {Event} e 
+ * Hides and clears any input feedback boxes in the given element
+ * @param {HTMLFormElement} elem
  */
-function sendEditEventViaAjax(elem, e) {
-    e.preventDefault();
+function hideErrorBoxes(elem) {
+    const errorBoxes = elem.querySelectorAll(`[id*="Feedback"]`);
+    for (let feedbackBox of errorBoxes) {
+        feedbackBox.innerHTML = '';
+        feedbackBox.style.display = 'none';
+    }
+}
 
-    // Delete any pre-existing errors
-    const errorListElem = elem.querySelector("#errors");
-    errorListElem.innerHTML = '';
+/**
+ * Submits the given form's request in Javascript, allowing for in-place
+ * updating of the page.
+ * @param {HTMLFormElement} elem
+ */
+function sendFormViaAjax(elem) {
+    // Delete any pre-existing errors on the form
+    hideErrorBoxes(elem);
+
     const formData = new FormData(elem);
-    const url = "./edit-event/" + elem.querySelector("#editEventId").value;
-    const editRequest = new XMLHttpRequest();
-    editRequest.open("POST", url);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
 
-    editRequest.onload = () => {
-        if (editRequest.status == 200) {
+    formRequest.onload = () => {
+        if (formRequest.status == 200) {
             // Success
             window.location.reload()
         } else {
-            const errors = editRequest.responseText.split('\n');
-            for (const errorMsg of errors) {
-                // Add one list item per error
-                const errorItem = document.createElement('li');
-                errorItem.classList.add("text-danger");
-                errorItem.textContent = errorMsg;
-                errorListElem.appendChild(errorItem);
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                // Determine correct error field. Defaults to NameFeedback
+                let field = "Name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') != -1) {
+                    field = 'EndDate';
+                } else if (errorMsg.indexOf('end time') != -1) {
+                    field = 'EndTime';
+                } else if (errorMsg.indexOf('date') != -1) {
+                    field = 'StartDate';
+                } else if (errorMsg.indexOf('time') != -1 || errorMsg.indexOf('minute') != -1) {
+                    field = 'StartTime';
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
             }
         }
     }
-    editRequest.send(formData);
+    formRequest.send(formData);
 }
 
 /**
@@ -98,8 +118,10 @@ function sendEditEventViaAjax(elem, e) {
  * @param eventDescription description of the edited event
  * @param eventStartDate start date of the edited event
  * @param eventEndDate end date of the edited event
+ * @param projectStart start date of the project (the earliest an event can start)
+ * @param projectEnd end date of the project (the latest an event can end)
  */
-function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate) {
+function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate, projectStart, projectEnd) {
     /* Search for the edit form */
     let editForm = null;    // Split to account for weird behaviour
     editForm = document.getElementById("editEventForm-" + eventBoxId);
@@ -113,11 +135,12 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     /* Collapse any edit event forms already on the page. If we find any, delay
        opening the new form by EDIT_FORM_CLOSE_DELAY. */
     let collapseElementList = document.getElementsByClassName("collapse show");
-    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
+    let delay = 0;
     let differentEvent = false;
     for (let element of collapseElementList) {
         if (element.id.indexOf("editEventForm") != -1) {
             new bootstrap.Collapse(element).hide();
+            delay = EDIT_FORM_CLOSE_DELAY;
             /* Check whether any form is for a different event, to see whether
                we need to send a stop editing message */
             if (element.id.indexOf("editEventForm-" + eventId) == -1) {
@@ -144,16 +167,13 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#name").setAttribute("value", eventName);
     editForm.querySelector("#description").setAttribute("value", eventDescription);
     editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
+    editForm.querySelector("#startDate").setAttribute("min", projectStart);
+    editForm.querySelector("#startDate").setAttribute("max", projectEnd);
     editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
     editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
+    editForm.querySelector("#endDate").setAttribute("min", projectStart);
+    editForm.querySelector("#endDate").setAttribute("max", projectEnd);
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
-
-    /* Set up JS to intercept the request */
-    const formElem = editForm.querySelector("#form");
-    if (formElem != null) {
-        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
-        formElem.setAttribute("id", "form-js-enabled"); // Remove ability to add more listeners to this form
-    }
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {

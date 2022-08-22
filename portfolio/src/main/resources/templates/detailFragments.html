@@ -23,7 +23,7 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                 </span>
-                <button class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[${boxId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate.toString().substring(0,16)}]], [[*{getEventEndDate.toString().substring(0,16)}]])">
+                <button class="edit-button edit-event-button" th:onclick="return showEditEvent([[*{getId}]], [[${boxId}]], [[*{getEventName}]], [[*{getEventDescription}]], [[*{getEventStartDate}]], [[*{getEventEndDate}]], [[${projectStart}]], [[${projectEnd}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                     </svg>
@@ -41,8 +41,6 @@
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
                 maxDescLen=${maxDescLen},
-                projectStart=${projectStart},
-                projectEnd=${projectEnd},
                 editEventForm=${editEventForm})" />
     </div>
 </div>
@@ -52,15 +50,14 @@
         <div class="card">
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getEventName}|"></div>
             <div class="card-body">
-                <form th:action="@{edit-event/{id}(id=${event.getId()})}" id="form" class="container-fluid" method="post" th:object="${editEventForm}">
-                    <input type="hidden" id="editEventId" th:value="${event.getId()}">
+                <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required>
                                 <label for="editEventNameInput" class="form-label">Name</label>
-                                <div id="editEventNameFeedback" class="invalid-feedback"></div>
                                 <span class="input-group-text remaining-chars-field">...</span>
+                                <small id="editEventNameFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col-10">
@@ -74,30 +71,30 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editEventStartDateFeedback" th:min="${projectStart}" th:max="${projectEnd}">
+                                <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editEventStartDateFeedback">
                                 <label for="editEventStartDate">Start Date</label>
-                                <div id="editEventStartDateFeedback" class="invalid-feedback"></div>
+                                <small id="editEventStartDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3">
                                 <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editEventStartTimeFeedback">
                                 <label for="editEventStartTime">Start Time</label>
-                                <div id="editEventStartTimeFeedback" class="invalid-feedback"></div>
+                                <small id="editEventStartTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editEventEndDateFeedback" th:min="${projectStart}" th:max="${projectEnd}">
+                                <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editEventEndDateFeedback">
                                 <label for="editEventEndDate">End Date</label>
-                                <div id="editEventEndDateFeedback" class="invalid-feedback"></div>
+                                <small id="editEventEndDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editEventEndTimeFeedback">
                                 <label for="editEventEndTime">End Time</label>
-                                <div id="editEventEndTimeFeedback" class="invalid-feedback"></div>
+                                <small id="editEventEndTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
                     </div>
@@ -110,9 +107,6 @@
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
-                    <ul th:if="${editEventFormError}">
-                        <li th:each="errMsg: ${editEventFormError}" th:text="${errMsg}" class="text-danger"></li>
-                    </ul>
                 </form>
             </div>
         </div>
