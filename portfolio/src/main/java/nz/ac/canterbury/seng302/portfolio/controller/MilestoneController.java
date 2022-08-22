@@ -54,9 +54,9 @@ public class MilestoneController extends PageController {
 
         // Set details of new milestone object
         milestone.setParentProject(parentProject);
-        milestone.setMilestoneName(milestoneName);
-        milestone.setMilestoneDate(DateUtils.toDate(milestoneDate));
-        milestone.setMilestoneDescription(milestoneDescription);
+        milestone.setName(milestoneName);
+        milestone.setStartDate(DateUtils.toDate(milestoneDate));
+        milestone.setDescription(milestoneDescription);
 
         milestoneService.saveMilestone(milestone);
 
