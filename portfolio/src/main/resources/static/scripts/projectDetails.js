@@ -148,6 +148,12 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
 
+    for (const parent of document.getElementsByClassName('limited-text-input')) {
+        const input = parent.getElementsByTagName('input')[0];
+        const display = parent.getElementsByClassName('remaining-chars-field')[0];
+        displayRemainingCharacters(input, display);
+    }
+
     /* Set up JS to intercept the request */
     const formElem = editForm.querySelector("#form");
     if (formElem != null) {
