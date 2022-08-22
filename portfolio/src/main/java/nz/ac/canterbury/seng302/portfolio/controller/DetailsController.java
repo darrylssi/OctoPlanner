@@ -113,19 +113,16 @@ public class DetailsController extends PageController {
         // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
 
         List<Schedulable> schedulableList = new ArrayList<>();
         schedulableList.addAll(eventList);
         schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
         model.addAttribute("schedulables", schedulableList);
-
-        // Gets the milestone list and sorts it based on the milestone date
-        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
-        milestoneList.sort(Comparator.comparing(Milestone::getMilestoneDate));
-        model.addAttribute("milestones", milestoneList);
 
         // If the user is at least a teacher, the template will render delete/edit buttons
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
