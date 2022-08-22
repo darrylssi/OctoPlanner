@@ -14,6 +14,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
@@ -86,7 +87,7 @@ public class MessageMappingController {
             eventMessageOutput = new EventMessageOutput(updatedEvent,
                     sprintService.getSprintsInProject(updatedEvent.getParentProject().getId()),
                     eventService.getEventByParentProjectId(updatedEvent.getParentProject().getId()));
-        } catch (Exception e) {
+        } catch (ResponseStatusException e) {
             // Send back an empty response if the event doesn't exist
             logger.error(e.getMessage());
             eventMessageOutput = new EventMessageOutput();
