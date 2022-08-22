@@ -119,6 +119,14 @@ public class EventController extends PageController {
         }
     }
 
+    /**
+     * A method to get the html of an event that can be added to the details
+     * page using javascript
+     * @param principal the current user
+     * @param eventId the id of the event being displayed
+     * @param model the model that stores the attributes of the event
+     * @return an html fragment of the given event
+     */
     @GetMapping("/event-frag/{eventId}")
     public String eventFragment(
             @AuthenticationPrincipal AuthState principal,
