@@ -6,14 +6,6 @@ stages:
   - sonarqube
   - deploy
 
-sonarqube-report:
-  stage: sonarqube
-  script:
-    - cd identityprovider
-    - ./gradlew sonarqube
-    - cd ../portfolio
-    - ./gradlew sonarqube
-
 tag-checker:
   stage: tagChecking
   script:
@@ -21,24 +13,43 @@ tag-checker:
   only:
     - tags
 
-junit-porfolio:
-  stage: test
-  script:
-    - cd portfolio
-    - ./gradlew test
-
-junit-identityprovider:
-  stage: test
-  script:
-    - cd identityprovider
-    - ./gradlew test
-
 publish-protos-to-maven-local:
   stage: publishProtosToLocalMavenRepo
   script:
     - cd shared
     - ./gradlew clean
     - ./gradlew publishToMavenLocal
+
+junit-portfolio:
+  stage: test
+  script:
+    - cd portfolio
+    - ./gradlew test
+  artifacts:
+    paths:
+      - portfolio/build/jacoco/test-report.xml
+    expire_in: 20min
+
+junit-identityprovider:
+  stage: test
+  script:
+    - cd identityprovider
+    - ./gradlew test
+  artifacts:
+    paths:
+      - identityprovider/build/jacoco/test-report.xml
+    expire_in: 20min
+
+sonarqube-report:
+  stage: sonarqube
+  script:
+    - cd identityprovider
+    - ./gradlew sonarqube
+    - cd ../portfolio
+    - ./gradlew sonarqube
+  dependencies:
+    - junit-portfolio
+    - junit-identityprovider
 
 # builds all branches, except dev and master
 branch-build:
@@ -114,7 +125,8 @@ deploy-production-identityprovider:
       - identityprovider/build/libs
   only:
     - tags
-    - master
+  except:    # Combining an 'only' with a negated 'except' is equivalent to a logical 'and'
+    - /^master-.*/    # RegEx to match any string that doesn't start with master-
 
 deploy-production-portfolio:
   stage: deploy
@@ -133,4 +145,5 @@ deploy-production-portfolio:
       - portfolio/build/libs
   only:
     - tags
-    - master
+  except:    # Combining an 'only' with a negated 'except' is equivalent to a logical 'and'
+    - /^master-.*/    # RegEx to match any string that doesn't start with master-
