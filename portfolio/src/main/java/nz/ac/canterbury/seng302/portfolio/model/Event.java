@@ -15,7 +15,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Event objects are stored in a table called Event, as it is an @Entity.
  */
 @Entity
-public class Event {
+public class Event implements Schedulable {
 
     public static final String DEFAULT_COLOUR = "#ff3823";
 
@@ -82,23 +82,23 @@ public class Event {
         return id;
     }
 
-    public String getEventName() {
+    public String getName() {
         return eventName;
     }
 
-    public void setEventName(String newName) {
-        this.eventName = newName;
+    public void setName(String name) {
+        this.eventName = name;
     }
 
-    public String getEventDescription(){
+    public String getDescription(){
         return eventDescription;
     }
 
-    public void setEventDescription(String newDescription) {
-        this.eventDescription = newDescription;
+    public void setDescription(String description) {
+        this.eventDescription = description;
     }
 
-    public Date getEventStartDate() {
+    public Date getStartDate() {
         return eventStartDate;
     }
 
@@ -106,7 +106,7 @@ public class Event {
         this.eventStartDate = newStartDate;
     }
 
-    public Date getEventEndDate() {
+    public Date getEndDate() {
         return eventEndDate;
     }
 
@@ -120,6 +120,17 @@ public class Event {
 
     public void setParentProject(Project parentProject) {
         this.parentProject = parentProject;
+    }
+
+    /**
+     * Gets a String to identify the type of this object.
+     * This is used to specify which type of thymeleaf fragment to display without having to have
+     * an instanceof check and a div specifically for each type of schedulable object.
+     * The returned String should directly match the name of the thymeleaf fragment it will be displayed in.
+     * @return A String constant containing the type of this object.
+     */
+    public String getType(){
+        return EVENT_TYPE;
     }
 
     /**

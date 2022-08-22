@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
-import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,26 +28,23 @@ class DeadlineTests {
     private final List<Deadline> deadlineList = new ArrayList<>();
     private Deadline baseDeadline;
 
-    private Project baseProject;
-
     @BeforeEach
     public void setUp() {
         int parentProjId = 5;
-
-        baseDeadline = new Deadline();
-        baseDeadline.setDeadlineName("Deadline 1");
-        baseDeadline.setDeadlineDescription("The first.");
-        baseDeadline.setParentProjectId(parentProjId);
-        baseDeadline.setDeadlineDate(DateUtils.toDateTime("2022-02-05 17:00"));
-        deadlineList.add(baseDeadline);
-
-        baseProject = new Project();
+        Project baseProject = new Project();
         baseProject.setId(parentProjId);
         baseProject.setProjectName("Project 1");
         baseProject.setProjectDescription("The first.");
         baseProject.setStartDateString("2022-01-01");
         baseProject.setEndDateString("2022-10-01");
-        baseProject.setId(1);
+        baseProject.setId(parentProjId);
+
+        baseDeadline = new Deadline();
+        baseDeadline.setName("Deadline 1");
+        baseDeadline.setDescription("The first.");
+        baseDeadline.setParentProject(baseProject);
+        baseDeadline.setStartDate(DateUtils.toDateTime("2022-02-05 17:00"));
+        deadlineList.add(baseDeadline);
     }
 
     @Test
@@ -69,8 +65,8 @@ class DeadlineTests {
 
     @Test
     void searchByParentProjectId_getDeadline() {
-        when(deadlineService.getDeadlinesInProject(baseDeadline.getParentProjectId())).thenReturn(deadlineList);
-        List<Deadline> foundDeadlines = deadlineService.getDeadlinesInProject(baseDeadline.getParentProjectId());
+        when(deadlineService.getDeadlinesInProject(baseDeadline.getParentProject().getId())).thenReturn(deadlineList);
+        List<Deadline> foundDeadlines = deadlineService.getDeadlinesInProject(baseDeadline.getParentProject().getId());
         Deadline foundDeadline = foundDeadlines.get(0);
         assertEquals(baseDeadline, foundDeadline);
     }
