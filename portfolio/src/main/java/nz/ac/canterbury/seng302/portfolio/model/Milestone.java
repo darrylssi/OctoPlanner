@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.portfolio.model;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -16,8 +15,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  */
 @Entity
 public class Milestone implements Schedulable {
-
-    public static final String DEFAULT_COLOUR = "#ff3823";
 
     /** The id of this milestone. This id should be unique between all milestones.*/
     @Id
