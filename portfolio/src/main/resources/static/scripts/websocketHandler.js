@@ -190,19 +190,28 @@ function updateEvent(eventMessage) {
             console.log("Got update event message for event " + eventMessage.id);
     }
 // get a list of event list containers
-    const event_lists = document.getElementsByClassName('event-list-container');
+    const event_lists = document.getElementsByClassName('schedulable-list-container');
 
 // check each event list container to see if it has the event in it / should have the event in it
     for (let i = 0; i < event_lists.length; i++) {
           //check if event is there, then remove event if it exists
-          event = event_lists[i].getElementsByClassName('event-box-' + eventMessage.id)[0];
-          if (event !== undefined) {
-            event.remove();
+          event = event_lists[i].querySelector('#event-' + eventMessage.id);
+          if (event !== null) {
+            event.parentNode.parentNode.parentNode.remove();
           }
           // check if event list container is in the list of ids the event should be displayed in
           idIndex = eventMessage.eventListIds.indexOf(event_lists[i].id);
         if(idIndex != -1) {
-            createEventDisplay(eventMessage, event_lists[i], idIndex);
+
+            const url = BASE_URL + "event-frag/" + eventMessage.id;
+            const eventFragRequest = new XMLHttpRequest();
+            eventFragRequest.open("GET", url, true);
+            const tempIdIndex = idIndex;
+            eventFragRequest.onload = () => {
+                // Reload the page to get the updated list of sprints after the delete
+                createEventDisplay(eventMessage, event_lists[i], tempIdIndex, eventFragRequest.response);
+            }
+            eventFragRequest.send();
         }
     }
 }
@@ -213,33 +222,14 @@ function updateEvent(eventMessage) {
 * @param parent the parent object for the event to be displayed in
 * @param nextEvent the id of the event that the new event should be inserted before. -1 if no following event
 */
-function createEventDisplay(eventMessage, parent, idIndex) {
+function createEventDisplay(eventMessage, parent, idIndex, eventHtml) {
     let newEvent = document.createElement("div");
-    newEvent.setAttribute("class", "event-box event-box-" + eventMessage.id);
-    newEvent.setAttribute("id", "event-box-" + eventMessage.eventBoxIds[idIndex]);
-    newEvent.setAttribute("style", "background:linear-gradient(to right, " + eventMessage.startColour + ', ' + eventMessage.endColour);
-    newEvent.innerHTML = eventTemplate;
+    newEvent.setAttribute("id", "schedulable-box-" + eventMessage.eventBoxIds[idIndex]);
+    newEvent.innerHTML = eventHtml;
     if(eventMessage.nextEventIds[idIndex] === '-1') {
         parent.appendChild(newEvent);
     } else {
-        parent.insertBefore(newEvent, parent.getElementsByClassName(eventMessage.nextEventIds[idIndex])[0]);
-    }
-//    newEvent.getElementsByClassName("event")[0].title = eventMessage.description;
-//    newEvent.getElementsByClassName("event")[0].data-toggle = "tooltip";
-//    newEvent.getElementsByClassName("event")[0].data-placement = "top";
-
-    newEvent.querySelector("#editing-box").setAttribute("class", 'event-' + eventMessage.id + '-editing-box');
-    newEvent.querySelector("#editing-text").setAttribute("class", 'event-' + eventMessage.id + '-editing-text');
-
-
-    newEvent.querySelector("#event-name").innerHTML = eventMessage.name;
-    newEvent.querySelector("#event-date").innerHTML = eventMessage.startDateString + " - " + eventMessage.endDateString;
-
-    if (canEdit === false) {
-        newEvent.querySelector('.event-right').style.visibility = 'hidden';
-    } else {
-        const editFunctionString = 'showEditEvent('+ eventMessage.id+',"'+ eventMessage.eventBoxIds[idIndex] + '","' + eventMessage.name +'","'+ eventMessage.description +'","'+ eventMessage.startDate +'","'+ eventMessage.endDate +'")';
-        newEvent.getElementsByClassName('edit-button')[0].setAttribute('onclick', editFunctionString );
+        parent.insertBefore(newEvent, parent.querySelector('#' + eventMessage.nextEventIds[idIndex]).parentNode.parentNode.parentNode);
     }
 }
 

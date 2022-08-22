@@ -48,7 +48,6 @@ class MessageMappingControllerTest {
         EventMessageOutput eventMessageOutput = messageMappingController.sendEventData(message);
         assertEquals(1, eventMessageOutput.getId());
         assertEquals(new ArrayList<>(), eventMessageOutput.getEventListIds());
-        assertNull(eventMessageOutput.getName());
     }
 
     @Test
@@ -67,6 +66,5 @@ class MessageMappingControllerTest {
         EventMessageOutput eventMessageOutput = messageMappingController.sendEventData(message);
         assertEquals(1, eventMessageOutput.getId());
         assertEquals(1, eventMessageOutput.getEventListIds().size());
-        assertEquals("Name", eventMessageOutput.getName());
     }
 }

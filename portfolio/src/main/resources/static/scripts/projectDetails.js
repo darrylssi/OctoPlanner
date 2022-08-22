@@ -54,8 +54,9 @@ function deleteEvent(eventId) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        // Reload the page to get the updated list of events after the delete
-        window.location.replace(BASE_URL + "project/0/?eventId=" + eventId);
+        // Send a websocket message to update the page after the delete
+        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+        hideModal();
     }
     deleteRequest.send();
 }

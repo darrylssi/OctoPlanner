@@ -40,26 +40,6 @@ class EventMessageOutputTest {
         event3.setId(3);
     }
 
-
-
-    @Test
-    void whenCreateOutput_eventDetailsAdded(){
-        Date eventStartDate = DateUtils.toDate("2022-02-25");
-        Date eventEndDate = DateUtils.toDate("2022-02-26");
-        Event event = new Event("Test Event",  "This is an event", eventStartDate, eventEndDate);
-        event.setId(1);
-        event.setParentProject(parentProject);
-
-        EventMessageOutput eventMessageOutput = new EventMessageOutput(event, new ArrayList<>(), new ArrayList<>(List.of(event)));
-        assertEquals("Test Event", eventMessageOutput.getName() );
-        assertEquals("This is an event", eventMessageOutput.getDescription());
-        assertEquals(eventStartDate, eventMessageOutput.getStartDate());
-        assertEquals(eventEndDate, eventMessageOutput.getEndDate());
-        assertEquals(DateUtils.toDisplayDateTimeString(eventStartDate), eventMessageOutput.getStartDateString());
-        assertEquals(DateUtils.toDisplayDateTimeString(eventEndDate), eventMessageOutput.getEndDateString());
-
-    }
-
     @Test
     void whenCreateOutputWithNoSprints_thenOutsideSprintBox() {
         Date eventStartDate = DateUtils.toDate("2022-02-25");

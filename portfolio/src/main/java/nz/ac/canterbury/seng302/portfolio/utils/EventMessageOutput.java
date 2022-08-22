@@ -16,32 +16,19 @@ public class EventMessageOutput {
 
     enum BoxLocation {FIRST, INSIDE, AFTER}
 
-    public static final String LIST_IN_ID_FORMAT = "events-%d-inside"; // id of sprint box
-    public static final String LIST_AFTER_ID_FORMAT = "events-%d-outside"; // id of box after sprint
-    public static final String LIST_BEFORE_ALL_ID_NAME = "events-firstOutside"; // id of first box
-    public static final String NEXT_EVENT_ID_FORMAT = "event-box-%d"; // id of an event (used for the next event)
+    public static final String LIST_IN_ID_FORMAT = "schedulables-in-%d"; // id of sprint box
+    public static final String LIST_AFTER_ID_FORMAT = "schedulables-after-%d"; // id of box after sprint
+    public static final String LIST_BEFORE_ALL_ID_NAME = "schedulables-before"; // id of first box
+    public static final String NEXT_EVENT_ID_FORMAT = "event-%d"; // id of an event (used for the next event)
     public static final String EVENT_BEFORE_ALL_ID_FORMAT = "%d-before"; // id of event in first box
     public static final String EVENT_IN_ID_FORMAT = "%d-in-%d"; // id of event in sprint box
     public static final String EVENT_AFTER_ID_FORMAT = "%d-after-%d"; // id of event after sprint box
 
     private int id;
-    private int parentProjectId;
-    private String name;
-    private String description;
     // NOTE if you change the names of these lists (or any of these variables), you will need to change them in websocketHandler.js
     private List<String> eventListIds; // List of all display boxes that this event is included in
     private List<String> nextEventIds; // List of events displayed immediately after this event in each box
     private List<String> eventBoxIds; // List of ids of the event box being created
-
-    // Dates used for editing events
-    private Date startDate;
-    private Date endDate;
-
-    // Dates used to display events
-    private String startDateString;
-    private String endDateString;
-    private String startColour;
-    private String endColour;
 
     /**
      * Empty constructor so we can send an output for a nonexistent event
@@ -57,16 +44,6 @@ public class EventMessageOutput {
      */
     public EventMessageOutput(Event event, List<Sprint> sprints, List<Event> events) {
         this.id = event.getId();
-        this.name = event.getName();
-        this.parentProjectId = event.getParentProject().getId();
-        this.description = event.getDescription();
-        this.startDate = event.getStartDate();
-        this.endDate = event.getEndDate();
-        this.startDateString = DateUtils.toDisplayDateTimeString(event.getStartDate());
-        this.endDateString = DateUtils.toDisplayDateTimeString(event.getEndDate());
-
-        this.setStartColour(event.determineColour(sprints, false) + "4c");
-        this.setEndColour(event.determineColour(sprints, true) + "4c");
 
         // Set the lists
         this.generateLists(event, sprints, events);
@@ -92,12 +69,12 @@ public class EventMessageOutput {
         if(sprints.isEmpty()){
             // get the id of the event that is displayed after this event so that they appear in the correct order
             nextEventIds.add(getNextEvent(events, event.getParentProject().getProjectStartDate(),
-                    event.getParentProject().getProjectEndDate()));
+                    event.getParentProject().getProjectEndDate(), event));
             setEventLocationIds(BoxLocation.FIRST, -1);
-        } else if(sprints.get(0).getSprintStartDate().after(this.startDate)) {
+        } else if(sprints.get(0).getSprintStartDate().after(event.getStartDate())) {
             // get the id of the event that is displayed after this event so that they appear in the correct order
             nextEventIds.add(getNextEvent(events, event.getParentProject().getProjectStartDate(),
-                    sprints.get(0).getSprintStartDate()));
+                    sprints.get(0).getSprintStartDate(), event));
             setEventLocationIds(BoxLocation.FIRST, -1);
         }
 
@@ -105,22 +82,22 @@ public class EventMessageOutput {
         for (int i = 0; i < sprints.size(); i++) {
             // Check if the event overlaps with the sprint at index i
             if(DateUtils.timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
-                    this.startDate, this.endDate)){
+                    event.getStartDate(), event.getEndDate())){
                 nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintStartDate(),
-                        sprints.get(i).getSprintEndDate()));
+                        sprints.get(i).getSprintEndDate(), event));
                 setEventLocationIds(BoxLocation.INSIDE, sprints.get(i).getId());
             }
             // Check if event occurs between the end of this sprint and the start of the next one
             if((sprints.size() > i+1) && DateUtils.timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
-                    this.startDate, this.endDate)) {
+                    event.getStartDate(), event.getEndDate())) {
                 nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
-                        sprints.get(i+1).getSprintStartDate()));
+                        sprints.get(i+1).getSprintStartDate(), event));
                 setEventLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
             }
             // If this sprint is the last sprint, check if the event occurs after the end of this sprint
-            if(sprints.size() == i+1 && sprints.get(i).getSprintEndDate().before(this.endDate)){
+            if(sprints.size() == i+1 && sprints.get(i).getSprintEndDate().before(event.getEndDate())){
                 nextEventIds.add(getNextEvent(events, sprints.get(i).getSprintEndDate(),
-                        event.getParentProject().getProjectEndDate()));
+                        event.getParentProject().getProjectEndDate(), event));
                 setEventLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
             }
         }
@@ -156,9 +133,9 @@ public class EventMessageOutput {
      * @param periodEnd the end of the time period
      * @return the box id of the next event or -1 if there is no next event
      */
-    private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd){
+    private String getNextEvent(List<Event> events, Date periodStart, Date periodEnd, Event updatedEvent){
         for (Event event : events) {
-            if (event.getStartDate().after(this.startDate) &&
+            if (event.getStartDate().after(updatedEvent.getStartDate()) &&
                     DateUtils.timesOverlap(periodStart, periodEnd,
                             event.getStartDate(), event.getEndDate())) {
                 return (String.format(NEXT_EVENT_ID_FORMAT, event.getId()));
@@ -173,30 +150,6 @@ public class EventMessageOutput {
 
     public int getId(){
         return  id;
-    }
-
-    public void setParentProjectId(int id) {
-        this.parentProjectId = id;
-    }
-
-    public int getParentProjectId() {
-        return parentProjectId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String newName) {
-        this.name = newName;
-    }
-
-    public String getDescription(){
-        return description;
-    }
-
-    public void setDescription(String newDescription) {
-        this.description = newDescription;
     }
 
     public List<String> getEventListIds() {
@@ -223,51 +176,4 @@ public class EventMessageOutput {
         this.eventBoxIds = eventBoxIds;
     }
 
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDateString() {
-        return endDateString;
-    }
-
-    public String getStartDateString() {
-        return startDateString;
-    }
-
-    public void setEndDateString(String endDateString) {
-        this.endDateString = endDateString;
-    }
-
-    public void setStartDateString(String startDateString) {
-        this.startDateString = startDateString;
-    }
-
-    public void setStartColour(String startColour) {
-        this.startColour = startColour;
-    }
-
-    public void setEndColour(String endColour) {
-        this.endColour = endColour;
-    }
-
-    public String getStartColour() {
-        return startColour;
-    }
-
-    public String getEndColour() {
-        return endColour;
-    }
 }
