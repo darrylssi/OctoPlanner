@@ -49,7 +49,7 @@ class MilestoneControllerTest {
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteMilestoneAsStudent_get401Response() throws Exception {
+    void deleteMilestoneAsStudent_get403Response() throws Exception {
         Mockito.doNothing().when(milestoneService).deleteMilestone(1);
         mockMvc.perform(delete("/delete-milestone/1"))
                 .andExpect(status().isForbidden())
