@@ -28,6 +28,7 @@ public class EventMessageOutput {
     private int parentProjectId;
     private String name;
     private String description;
+    // NOTE if you change the names of these lists (or any of these variables), you will need to change them in websocketHandler.js
     private List<String> eventListIds; // List of all display boxes that this event is included in
     private List<String> nextEventIds; // List of events displayed immediately after this event in each box
     private List<String> eventBoxIds; // List of ids of the event box being created
