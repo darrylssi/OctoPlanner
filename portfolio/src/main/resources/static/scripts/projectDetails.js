@@ -148,11 +148,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
 
-    for (const parent of document.getElementsByClassName('limited-text-input')) {
-        const input = parent.getElementsByTagName('input')[0];
-        const display = parent.getElementsByClassName('remaining-chars-field')[0];
-        displayRemainingCharacters(input, display);
-    }
+    showRemainingChars();
 
     /* Set up JS to intercept the request */
     const formElem = editForm.querySelector("#form");
@@ -235,4 +231,13 @@ function displayRemainingCharacters(input, display) {
     // Bind the event, then give it a kick to initialise the display
     input.addEventListener("input", event);
     event();
+}
+
+// Bind a 'characters remaining' display to their output
+function showRemainingChars() {
+    for (const parent of document.getElementsByClassName('limited-text-input')) {
+        const input = parent.getElementsByTagName('input')[0];
+        const display = parent.getElementsByClassName('remaining-chars-field')[0];
+        displayRemainingCharacters(input, display);
+    }
 }
