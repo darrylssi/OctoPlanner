@@ -5,7 +5,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
-import java.util.List;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -126,25 +125,4 @@ public class Milestone implements Schedulable {
         return MILESTONE_TYPE;
     }
 
-    /**
-     * Determines the correct colour for this milestone based on the list of sprints.
-     * Specifically, this function returns the colour of the first sprint it finds which
-     * contains the date of the milestone. If it finds no sprint, it returns the default colour
-     * determined by the system.
-     * @param sprints a List object of sprints to choose a colour from.
-     */
-    public String determineColour(List<Sprint> sprints, boolean end) {
-        for (Sprint checkedSprint : sprints) {
-            Date sprintStart = checkedSprint.getSprintStartDate();
-            Date sprintEnd = checkedSprint.getSprintEndDate();
-
-            /* Sprints are assumed to be active on their start and end dates, so we also check for equality */
-            if ((sprintStart.before(milestoneDate) || sprintStart.equals(milestoneDate)) &&
-                    (sprintEnd.after(milestoneDate) || sprintEnd.equals(milestoneDate))) {
-                return checkedSprint.getSprintColour();
-            }
-        }
-
-        return DEFAULT_COLOUR;
-    }
 }
