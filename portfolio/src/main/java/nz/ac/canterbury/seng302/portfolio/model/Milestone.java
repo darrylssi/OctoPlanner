@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -13,15 +15,17 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Milestone objects are stored in a table called Milestone, as it is an @Entity.
  */
 @Entity
-public class Milestone {
+public class Milestone implements Schedulable {
 
+    public static final String DEFAULT_COLOUR = "#ff3823";
+
+    /** The id of this milestone. This id should be unique between all milestones.*/
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="milestone_id")
     private int id;
 
     @ManyToOne
-    @JoinColumn(name="parent_project_id", nullable = false)
+    @JoinColumn(name = "parent_project_id", nullable = false)
     private Project parentProject;
 
     @Column(nullable = false)
@@ -34,7 +38,6 @@ public class Milestone {
     @Size(max=MAX_DESC_LENGTH, message="The milestone description must not exceed " + MAX_DESC_LENGTH + " characters.")
     private String milestoneDescription;
 
-    @Column (nullable = false)
     @DateTimeFormat(pattern=DATE_FORMAT)
     private Date milestoneDate;
 
@@ -52,36 +55,24 @@ public class Milestone {
         this.milestoneDate = milestoneDate;
     }
 
+
+    /**
+     * Returns a string listing the attributes of the milestone in the form "Milestone[x, x, x]".
+     * @return said string
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "Milestone[id=%d, milestoneName='%s', milestoneDate='%s', milestoneDescription='%s']",
+                id, milestoneName, milestoneDate, milestoneDescription);
+    }
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getMilestoneName() {
-        return milestoneName;
-    }
-
-    public void setMilestoneName(String milestoneName) {
-        this.milestoneName = milestoneName;
-    }
-
-    public String getMilestoneDescription() {
-        return milestoneDescription;
-    }
-
-    public void setMilestoneDescription(String milestoneDescription) {
-        this.milestoneDescription = milestoneDescription;
-    }
-
-    public Date getMilestoneDate() {
-        return milestoneDate;
-    }
-
-    public void setMilestoneDate(Date milestoneDate) {
-        this.milestoneDate = milestoneDate;
     }
 
     public Project getParentProject() {
@@ -91,4 +82,48 @@ public class Milestone {
     public void setParentProject(Project parentProject) {
         this.parentProject = parentProject;
     }
+
+    public String getName() {
+        return milestoneName;
+    }
+
+    public void setName(String name) {
+        this.milestoneName = name;
+    }
+
+    public String getDescription() {
+        return milestoneDescription;
+    }
+
+    public void setDescription(String description) {
+        this.milestoneDescription = description;
+    }
+
+    public Date getStartDate() {
+        return milestoneDate;
+    }
+
+    public void setStartDate(Date date) {
+        this.milestoneDate = date;
+    }
+
+    public Date getEndDate() {
+        return getStartDate();
+    }
+
+    public void setEndDate(Date date) {
+        setStartDate(date);
+    }
+
+    /**
+     * Gets a String to identify the type of this object.
+     * This is used to specify which type of thymeleaf fragment to display without having to have
+     * an instanceof check and a div specifically for each type of schedulable object.
+     * The returned String should directly match the name of the thymeleaf fragment it will be displayed in.
+     * @return A String constant containing the type of this object.
+     */
+    public String getType(){
+        return MILESTONE_TYPE;
+    }
+
 }
