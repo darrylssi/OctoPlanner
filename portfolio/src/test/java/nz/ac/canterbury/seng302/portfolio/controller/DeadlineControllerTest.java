@@ -46,11 +46,10 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteDeadlineAsStudent_get401Response() throws Exception {
+    void deleteDeadlineAsStudent_get403Response() throws Exception {
         Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
         mockMvc.perform(delete("/delete-deadline/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not authorised."));
+                .andExpect(status().isForbidden());
     }
 
 }
