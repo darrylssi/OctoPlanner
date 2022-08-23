@@ -142,7 +142,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
             }
         }
     }
-
     /* If a form we just closed was for a different schedulable, we need to
        send a stop editing message */
 //     if (differentSchedulable) {
