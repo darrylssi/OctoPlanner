@@ -149,7 +149,7 @@
         </button>
 
     </div>
-
+</div>
 <!--/*
     Add Event Form
     */-->
@@ -294,11 +294,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
 
     // Bind a 'characters remaining' display to their output
-    for (const parent of document.getElementsByClassName('limited-text-input')) {
-        const input = parent.getElementsByTagName('input')[0];
-        const display = parent.getElementsByClassName('remaining-chars-field')[0];
-        displayRemainingCharacters(input, display);
-    }
+    showRemainingChars();
 
     /** Required for initialisation of bootstrap tooltip for event description */
     $(function () {

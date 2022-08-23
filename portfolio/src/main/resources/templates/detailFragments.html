@@ -97,7 +97,7 @@
                 <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
                     <div class="row">
                         <div class="col">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required>
                                 <label for="editEventNameInput" class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div class="col-10">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
                                 <label for="editEventDescriptionInput">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
