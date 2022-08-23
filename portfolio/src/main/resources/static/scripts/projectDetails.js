@@ -195,8 +195,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endDate").setAttribute("min", projectStart);
     editForm.querySelector("#endDate").setAttribute("max", projectEnd);
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
-
-    showRemainingChars();
+    showRemainingChars();   // Used to update the remaining number of chars for name and description
 
     /* Set up JS to intercept the request */
     const formElem = editForm.querySelector("#form");
