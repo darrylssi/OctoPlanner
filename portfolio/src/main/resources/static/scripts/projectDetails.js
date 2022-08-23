@@ -233,7 +233,11 @@ function displayRemainingCharacters(input, display) {
     event();
 }
 
-// Bind a 'characters remaining' display to their output
+/**
+ * Shows the number of remaining characters on an input field with class 'limited-text-input'
+ * in a span tag with class 'remaining-chars-field'.
+ * This is called when the page is loaded and when the edit button is clicked.
+ */
 function showRemainingChars() {
     for (const parent of document.getElementsByClassName('limited-text-input')) {
         const input = parent.getElementsByTagName('input')[0];
