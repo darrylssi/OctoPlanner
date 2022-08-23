@@ -37,8 +37,8 @@ class EventServiceTest {
     void setUp() {
         event = new Event();
         event.setId(ID);
-        event.setEventName("Test Event");
-        event.setEventDescription("Testing patience, once course at a time");
+        event.setName("Test Event");
+        event.setDescription("Testing patience, once course at a time");
         event.setStartDate(new Date());
         event.setEndDate(new Date());
     }
