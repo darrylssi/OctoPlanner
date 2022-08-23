@@ -48,14 +48,14 @@
         </a>
     </div>
     <hr/>
-    <!-- The first events outside the sprint -->
-    <div class="event-list-container outside-event">
-        <div th:if="${!#arrays.isEmpty(events)} and ((${!#arrays.isEmpty(sprints)} and ${event.getEventStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
-             th:each="event: ${events}" >
-            <div th:replace="detailFragments :: event(
-                    event=${event},
+    <!-- The first schedulables outside the sprint -->
+    <div class="schedulable-list-container outside-schedulable">
+        <div th:if="${!#arrays.isEmpty(schedulables)} and ((${!#arrays.isEmpty(sprints)} and ${schedulable.getStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
+             th:each="schedulable: ${schedulables}" >
+            <div th:replace="detailFragments :: ${schedulable.getType()}(
+                    ${schedulable.getType()}=${schedulable},
                     canEdit=${canEdit},
-                    boxId=${event.getId} + '-before',
+                    boxId=${schedulable.getId} + '-before',
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
@@ -64,7 +64,6 @@
                     editEventForm=${editEventForm})" />
         </div>
     </div>
-
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
@@ -89,14 +88,14 @@
                     </button>
                 </div>
                 <div class="break"></div>
-<!--            <-- The events inside the sprint -->
-                <div class="event-list-container">
-                    <div th:if="${!#arrays.isEmpty(events)} and ${event.getEventStartDate()} <= *{getSprintEndDate} and ${event.getEventEndDate()} >= *{getSprintStartDate}"
-                         th:each="event: ${events}" >
-                        <div th:replace="detailFragments :: event(
-                                event=${event},
+                <!-- The schedulables inside the sprint -->
+                <div class="schedulable-list-container">
+                    <div th:if="${!#arrays.isEmpty(schedulables)} and ${schedulable.getStartDate()} <= *{getSprintEndDate} and ${schedulable.getEndDate()} >= *{getSprintStartDate}"
+                         th:each="schedulable: ${schedulables}" >
+                        <div th:replace="detailFragments :: ${schedulable.getType()}(
+                                ${schedulable.getType()}=${schedulable},
                                 canEdit=${canEdit},
-                                boxId=${event.getId} + '-in-' + *{getId},
+                                boxId=${schedulable.getId} + '-in-' + *{getId},
                                 minNameLen=${minNameLen},
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
@@ -107,20 +106,20 @@
                 </div>
             </div>
         </div>
-        <!-- The events outside the sprint -->
-        <div class="event-list-container outside-event"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
-            <div th:if="${!#arrays.isEmpty(events)} and ((${iterStat.index+1 < iterStat.size} and ${event.getEventStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${event.getEventEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${event.getEventEndDate()} > *{getSprintEndDate}))"
-                 th:each="event: ${events}" >
-                <div th:replace="detailFragments :: event(
-                        event=${event},
-                        canEdit=${canEdit},
-                        boxId=${event.getId} + '-after-' + *{getId},
-                        minNameLen=${minNameLen},
-                        maxNameLen=${maxNameLen},
-                        maxDescLen=${maxDescLen},
-                        projectStart=${projectStart},
-                        projectEnd=${projectEnd},
-                        editEventForm=${editEventForm})" />
+        <!-- The schedulables outside the sprint -->
+        <div class="schedulable-list-container outside-schedulable"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+            <div th:if="${!#arrays.isEmpty(schedulables)} and ((${iterStat.index+1 < iterStat.size} and ${schedulable.getStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${schedulable.getEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${schedulable.getEndDate()} > *{getSprintEndDate}))"
+                 th:each="schedulable: ${schedulables}" >
+                <div th:replace="detailFragments :: ${schedulable.getType()}(
+                    ${schedulable.getType()}=${schedulable},
+                    canEdit=${canEdit},
+                    boxId=${schedulable.getId} + '-after-' + *{getId},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectStart=${projectStart},
+                    projectEnd=${projectEnd},
+                    editEventForm=${editEventForm})" />
             </div>
         </div>
     </div>
@@ -142,6 +141,13 @@
             </svg>
             Add Event
         </button>
+        <button class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addDeadlineForm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-hourglass-bottom" viewBox="0 0 16 16">
+                <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z"/>
+            </svg>
+            Add Deadline
+        </button>
+
     </div>
 
 <!--/*
@@ -211,6 +217,67 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         </form>
     </div>
 </div>
+
+    <!-- Add Deadline Form -->
+    <div class="collapse" id="addDeadlineForm">
+        <div class="card">
+            <div class="card-header">
+                New Deadline
+            </div>
+            <div class="card-body">
+                <form th:action="@{add-deadline}" method="post" class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' "
+                                       id="deadlineName" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback"
+                                       th:name="deadlineName">
+                                <label for="deadlineName">Name</label>
+                                <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription">
+                                <label for="deadlineDescription">Description</label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' "
+                                       id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback"
+                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
+                                       th:name="deadlineDate">
+                                <label for="deadlineDate">Date</label>
+                                <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
+                                <script>
+                                    document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
+                                </script>
+                            </div>
+                        </div>
+                        <div class = "col">
+                            <div class="form-floating mb-3">
+                                <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' "
+                                       id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback"
+                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
+                                       th:name="deadlineTime">
+                                <label for="deadlineTime">Time</label>
+                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 
 <!-- Used for event editing popups -->
