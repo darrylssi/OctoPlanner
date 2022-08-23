@@ -48,10 +48,10 @@ public class EventControllerTest {
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteEventAsStudent_get401Response() throws Exception {
+    void deleteEventAsStudent_get403Response() throws Exception {
         Mockito.doNothing().when(eventService).deleteEvent(anyInt());
         mockMvc.perform(delete("/delete-event/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not authorised."));
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 }
