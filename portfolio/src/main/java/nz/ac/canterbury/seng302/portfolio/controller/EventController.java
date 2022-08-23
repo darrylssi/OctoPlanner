@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 import java.util.TimeZone;
@@ -51,7 +50,8 @@ public class EventController extends PageController {
      * @param projectID The project this event will be bound to
      * @param eventForm The form submitted by our lovely customers
      * @param bindingResult Any errors that came up during validation
-     * @return  Either redirects them back to the project page, or renders the project page with errors.
+     * @return  A response of either 200 (success), 403 (forbidden),
+     *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-event")
     public ResponseEntity<String> postAddEvent(
@@ -61,8 +61,14 @@ public class EventController extends PageController {
             BindingResult bindingResult,
             TimeZone userTimezone,
             Model model
-    ) throws ResponseStatusException {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
         ValidationError dateErrors = null;
         ValidationError nameErrors = null;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
@@ -96,11 +102,11 @@ public class EventController extends PageController {
     }
 
     /**
-     * 
-     * @param eventForm The form submitted by the user
+     * Handle edit requests for events. Validate the form and determine the response
+     * @param editventForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
-     * @return  A response of either 200 (success), 401 (unauthenticated),
+     * @return  A response of either 200 (success), 403 (forbidden),
      *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/edit-event/{event_id}")
@@ -113,11 +119,13 @@ public class EventController extends PageController {
             BindingResult bindingResult,
             TimeZone userTimeZone
     ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to edit events
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
+
         // Validation round 1: Do the Javax Validation annotations pass?
         Event event = eventService.getEventById(eventId);
         if (bindingResult.hasErrors()) {
@@ -163,11 +171,13 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="eventId") int eventId
     ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete events
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
+
         try {
             eventService.deleteEvent(eventId);
             return new ResponseEntity<>("Event deleted.", HttpStatus.OK);
