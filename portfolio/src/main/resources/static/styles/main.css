@@ -18,7 +18,7 @@
 
 .navigation-tabs a {
     padding: 5px 10px;
-    border-radius: 10px 10px 0px 0px;
+    border-radius: 10px 10px 0 0;
     background-color: #888888;
     color: white;
 }
@@ -148,7 +148,7 @@ body {
     justify-content: center;
     align-items: center;
 }
-.edit-event-button {
+.edit-schedulable-button {
     height: 30px !important;
     width: 30px !important;
 }
@@ -165,7 +165,7 @@ body {
     background-color: var(--primary);
 }
 
-.delete-event-button {
+.delete-schedulable-button {
     height: 30px !important;
     width: 30px !important;
 }
@@ -199,25 +199,25 @@ button {
     cursor:pointer;
 }
 
-.event button {
+.schedulable button {
     display: inline-block;
 }
 
-.event-left {
+.schedulable-left {
     float: left;
     margin-top: 2px;
 }
 
-.event-left span {
+.schedulable-left span {
     line-height: 100%;
     vertical-align: middle;
 }
 
-.event-right {
+.schedulable-right {
     float: right;
 }
 
-.event-box {
+.schedulable-box {
     padding: 5px;
     border-radius: 5px;
     margin: 5px;
@@ -225,35 +225,35 @@ button {
     flex-direction: column;
 }
 
-.event-list-container {
+.schedulable-list-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.outside-event {
+.outside-schedulable {
     width: calc(100% - 68px);
     margin-left: 58px;
 }
 
-.event-date {
+.schedulable-date {
     color: #666666;
     font-size: small;
 }
 
-.event {
+.schedulable {
     flex-grow: 1;
 }
 
-.editEventForm {
+.editSchedulableForm {
     width: 100%;
     flex-grow: 5;
     margin-top: 5px;
 }
 
 .tooltip-inner {
-    max-width: 65%;
+    max-width: 50em;
     margin: auto;
 }
 
@@ -280,7 +280,7 @@ button {
   right: 8px;
   background-color: #f1f1f1;
   min-width: 60px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
   z-index: 1;
 }
 
@@ -331,6 +331,6 @@ button:hover {
     cursor: pointer;
 }
 
-.bi-calendar-event {
+.bi-calendar-event, .bi-hourglass-bottom {
     margin: 5px;
 }

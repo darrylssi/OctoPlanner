@@ -13,7 +13,7 @@ function showDeleteSprintModal(sprintId, sprintName) {
     modal.style.display = "block";
 }
 
-/** Hides the confirm delete modal without deleting a sprint/event */
+/** Hides the confirm delete modal without deleting a sprint/event/deadline */
 function hideModal() {
     const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
@@ -40,6 +40,15 @@ function showDeleteEventModal(eventId, eventName) {
     modal.style.display = "block";
 }
 
+/** When the delete deadline button is clicked, show a modal checking if the user is sure about deleting the deadline */
+function showDeleteDeadlineModal(deadlineId, deadlineName) {
+    const modal = document.getElementById("deleteModal");
+    const deleteButton = document.getElementById("deleteButton");
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + deadlineName + "?";
+    deleteButton.onclick = () => {deleteDeadline(deadlineId)}
+    modal.style.display = "block";
+}
+
 /** sends a http request to delete the event with the given id */
 function deleteEvent(eventId) {
     const url = BASE_URL + "delete-event/" + eventId;
@@ -47,6 +56,18 @@ function deleteEvent(eventId) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Reload the page to get the updated list of events after the delete
+        window.location.reload();
+    }
+    deleteRequest.send();
+}
+
+/** sends a http request to delete the deadline with the given id */
+function deleteDeadline(deadlineId) {
+    const url = BASE_URL + "delete-deadline/" + deadlineId;
+    const deleteRequest = new XMLHttpRequest();
+    deleteRequest.open("DELETE", url, true);
+    deleteRequest.onload = () => {
+        // Reload the page to get the updated list of deadlines after the delete
         window.location.reload();
     }
     deleteRequest.send();

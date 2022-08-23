@@ -105,12 +105,12 @@
                 </div>
                 </div>
 
-                <div class="dropdown" th:if="${canEdit}">
+                <div class="dropdown" th:if="${canEdit && #roles.canAddRoles(acceptableRoles, user.getRolesList())}">
                     <button id="add-role-button" class="add-role-button" th:onclick='|toggleRoleList("roleList${user.getId()}")|'>
                         <svg id="add-role-button" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                             <path id="add-role-button" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                         </svg></button>
-                    <div th:id='|roleList${user.getId()}|' class="dropdown-content">
+                    <div th:id='|roleList${user.getId()}|' class="dropdown-content user-role-dropdown">
                         <button th:each="role: ${acceptableRoles}"
                                 th:if="${!#arrays.contains(user.getRolesList, role)}"
                                 th:text="${#roles.toName(role)}"

@@ -15,6 +15,8 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +26,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 /**
  * Controller to handle requests related to events.
@@ -149,8 +148,8 @@ public class EventController extends PageController {
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
-        event.setEventName(editEventForm.getName());
-        event.setEventDescription(editEventForm.getDescription());
+        event.setName(editEventForm.getName());
+        event.setDescription(editEventForm.getDescription());
         event.setStartDate(editEventForm.startDatetimeToDate(userTimeZone));
         event.setEndDate(editEventForm.endDatetimeToDate(userTimeZone));
 
