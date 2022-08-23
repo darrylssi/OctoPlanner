@@ -1,4 +1,3 @@
-let previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
 const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
@@ -109,6 +108,82 @@ function sendEditEventViaAjax(elem, e) {
 }
 
 /**
+ * TODO this whole function
+ * An attempt to make this function deal with schedulable objects...
+ * @param schedulableId the id of the schedulable object being edited
+ * @param schedulableBoxId the id of the box element of the schedulable object being edited
+ * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone)
+ */
+function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    /* Search for the edit form */
+    let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
+
+    /* Collapse element, send stop message, and take no further action if the selected form is open */
+    if (editForm != null && editForm.classList.contains("show")) {
+        hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType);
+        return;
+    }
+
+    /* Collapse any edit schedulable forms already on the page. If we find any, delay
+       opening the new form by EDIT_FORM_CLOSE_DELAY. */
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
+    let differentSchedulable = false;
+    for (let element of collapseElementList) {
+        if (element.id.indexOf("edit" + schedulableType + "Form") != -1) {
+            new bootstrap.Collapse(element).hide();
+            /* Check whether any form is for a different schedulable, to see whether
+               we need to send a stop editing message */
+            if (element.id.indexOf("edit" + schedulableType + "Form-" + schedulableBoxId) == -1) {
+                differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+                previousSchedulable.id = (element.id.split('-')[1]);  // Get schedulable id from that form
+                previousSchedulable.type = schedulableType;
+
+            }
+        }
+    }
+
+    /* If a form we just closed was for a different schedulable, we need to
+       send a stop editing message */
+//     if (differentSchedulable) {
+//         stopEditing(); TODO editing messages for schedulables
+//     }
+
+
+    /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
+    // sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp TODO popups for schedulables
+    if (sendEditMessageInterval) { // reset interval
+        clearInterval(sendEditMessageInterval);
+    }
+    // sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+
+    /* Get this form to show after a delay that allows any other open forms to collapse */
+    setTimeout((formId) => {
+        let shownForm = document.getElementById(formId)
+        new bootstrap.Collapse(shownForm).show();
+        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
+    }, delay, "edit" + schedulableType + "Form-" + schedulableBoxId);
+}
+
+/**
+ * Collapse the edit form for the specified schedulable box.
+ * Accessed directly by the cancel button.
+ * TODO SHOULD, but DOESN'T send a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * @param schedulableId the id of the schedulable object whose edit form is being hidden
+ * @param schedulableBoxId the id of the box in which the edit form will be hidden
+ * @param schedulablhideEditSchedulableeType the type of the schedulable whose edit form is being hidden
+ */
+function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
+    if (editForm) { // Just in case
+        new bootstrap.Collapse(editForm).hide();
+    }
+    previousSchedulable.id = schedulableId;
+    previousSchedulable.type = schedulableType;
+//    stopEditing();
+}
+
+/**
  * Inserts/expands the event edit form directly below the event being edited.
  * This function adds forms into the page only as they are needed.
  *
@@ -116,10 +191,6 @@ function sendEditEventViaAjax(elem, e) {
  * set up repeating edit messages.
  * @param eventId id of the event the message should show for
  * @param eventBoxId id of the event box to display the form at
- * @param eventName name of the edited event
- * @param eventDescription description of the edited event
- * @param eventStartDate start date of the edited event
- * @param eventEndDate end date of the edited event
  */
 function showEditEvent(eventId, eventBoxId) {
     /* Search for the edit form */

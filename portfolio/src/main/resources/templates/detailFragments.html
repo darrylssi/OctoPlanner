@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-
+<!-- Event fragment -->
 <div th:fragment="event">
     <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${event}"
          th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
@@ -23,7 +23,7 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                 </span>
-                <button class="edit-button edit-schedulable-button" th:onclick="return showEditEvent([[*{getId}]], [[${boxId}]], [[*{getName}]], [[*{getDescription}]], [[*{getStartDate.toString().substring(0,16)}]], [[*{getEndDate.toString().substring(0,16)}]])">
+                <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], 'Event')"> <!-- TODO get the type -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                     </svg>
@@ -46,6 +46,7 @@
     </div>
 </div>
 
+<!-- Deadline fragment -->
 <div th:fragment="deadline">
     <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${deadline}"
          th:style="'background:linear-gradient(to right, '+ ${deadline.determineColour(sprints, true)} + '4c, '+ ${deadline.determineColour(sprints, true)} + '4c)'">
@@ -62,7 +63,7 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'deadline-' + *{getId} + '-editing-text'"></span>
                 </span>
-                <button class="edit-button edit-schedulable-button" th:onclick="return showEditDeadline([[*{getId}]], [[${boxId}]], [[*{getName}]], [[*{getDescription}]], [[*{getStartDate.toString().substring(0,16)}]])">
+                <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], 'Deadline')"> <!-- TODO get the type -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                     </svg>
@@ -74,8 +75,7 @@
                 </button>
             </div>
         </span>
-        <!-- TODO Uncomment this once the editDeadlineForm fragment has been created -->
-        <!--
+        <!-- TODO -->
         <div th:replace="detailFragments :: editDeadlineForm(
                 deadline=${deadline},
                 boxId=${boxId},
@@ -84,11 +84,10 @@
                 maxDescLen=${maxDescLen},
                 projectStart=${projectStart},
                 projectEnd=${projectEnd})"/>
-                -->
     </div>
 </div>
 
-
+<!-- Event edit form fragment -->
 <div th:fragment="editEventForm">
     <div th:id="|editEventForm-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
@@ -97,7 +96,7 @@
                 <form th:action="@{edit-event/${event.getId()}}" id="form" class="container-fluid" method="post">
                     <div class="row">
                         <div class="col">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" id="editEventNameInput" class="form-control" name="editEventName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required th:value="${event.getName()}">
                                 <label for="editEventNameInput" class="form-label">Name</label>
                                 <div id="editEventNameFeedback" class="invalid-feedback"></div>
@@ -105,7 +104,7 @@
                             </div>
                         </div>
                         <div class="col-10">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" id="editEventDescriptionInput" name="editEventDescription" th:maxlength="${maxDescLen}" class="form-control" th:value="${event.getDescription()}">
                                 <label for="editEventDescriptionInput">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
@@ -145,7 +144,7 @@
                     <div class="row justify-content-end">
                         <ul id="errors" class="col"></ul>
                         <div class="col col-md-4 col-lg-2">
-                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditEvent([[${event.getId}]], [[${boxId}]])">Cancel</button>
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${event.getId}]], [[${boxId}]], 'Event')">Cancel</button>
                         </div>
                         <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
@@ -153,6 +152,63 @@
                     </div>
                     <ul th:if="${editEventFormError}">
                         <li th:each="errMsg: ${editEventFormError}" th:text="${errMsg}" class="text-danger"></li>
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deadline edit form fragment -->
+<div th:fragment="editDeadlineForm">
+    <div th:id="|editDeadlineForm-${boxId}|" class="editSchedulableForm collapse">
+        <div class="card">
+            <div class="card-header" id="edit-deadline-form-header" th:text="|Editing ${deadline.getName}|"></div>
+            <div class="card-body">
+                <form th:action="@{edit-deadline/${deadline.getId()}}" class="container-fluid" method="post">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" id="editDeadlineNameInput" class="form-control" name="editDeadlineName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editDeadlineNameFeedback" required th:value="${deadline.getName()}">
+                                <label for="editDeadlineNameInput" class="form-label">Name</label>
+                                <div id="editDeadlineNameFeedback" class="invalid-feedback"></div>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" id="editDeadlineDescriptionInput" name="editDeadlineDescription" th:maxlength="${maxDescLen}" class="form-control" th:value="${deadline.getDescription()}">
+                                <label for="editDeadlineDescriptionInput">Description</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" name="editDeadlineDate" id="editDeadlineDate" required aria-describedby="editDeadlineDateFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toString(deadline.getStartDate())}">
+                                <label for="editDeadlineDate">Date</label>
+                                <div id="editDeadlineDateFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" name="editDeadlineTime" id="editDeadlineTime" required aria-describedby="editDeadlineTimeFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toDateTimeString(deadline.getStartDate()).substring(11)}">
+                                <label for="editDeadlineTime">Time</label>
+                                <div id="editDeadlineTimeFeedback" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-end">
+                        <ul class="col"></ul>
+                        <div class="col col-md-4 col-lg-2">
+                            <button type="button" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${deadline.getId}]], [[${boxId}]], 'Deadline')">Cancel</button>                        </div>
+                        <div class="col col-md-3 col-lg-2">
+                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                        </div>
+                    </div>
+                    <ul th:if="${editDeadlineFormError}">
+                        <li th:each="errMsg: ${editDeadlineFormError}" th:text="${errMsg}" class="text-danger"></li>
                     </ul>
                 </form>
             </div>
