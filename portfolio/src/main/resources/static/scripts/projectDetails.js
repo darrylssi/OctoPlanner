@@ -212,7 +212,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
  * @param eventBoxId the ID of the event box to hide the form from
  */
 function hideEditEvent(eventId, eventBoxId) {
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+    let editForm = document.getElementById("editSchedulableForm-" + eventBoxId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
