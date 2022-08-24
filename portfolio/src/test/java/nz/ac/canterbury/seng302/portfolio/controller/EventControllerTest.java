@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +28,12 @@ class EventControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     EventService eventService;
+    @MockBean
+    ProjectService projectService;
+    @MockBean
+    DetailsController detailsController;
     @MockBean
     private UserAccountClientService userAccountClientService;
 
@@ -44,11 +48,10 @@ class EventControllerTest {
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteEventAsStudent_get401Response() throws Exception {
+    void deleteEventAsStudent_get403Response() throws Exception {
         Mockito.doNothing().when(eventService).deleteEvent(anyInt());
         mockMvc.perform(delete("/delete-event/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not authorised."));
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
-
 }
