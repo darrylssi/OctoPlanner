@@ -200,7 +200,7 @@
 <div th:fragment="editMilestoneForm">
     <div th:id="|editMilestoneForm-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
-            <div class="card-header" id="edit-milestone-form-header" th:text="|Editing ${milestone.getName} and the project min date is ${projectStart}|"></div>
+            <div class="card-header" id="edit-milestone-form-header" th:text="|Editing ${milestone.getName}|"></div>
             <div class="card-body">
                 <form th:action="@{edit-milestone/${milestone.getId()}}" id="form" class="container-fluid" method="post">
                     <div class="row">
