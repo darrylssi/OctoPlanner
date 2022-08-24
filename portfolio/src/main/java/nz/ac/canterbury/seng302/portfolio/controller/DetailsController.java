@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
@@ -125,6 +126,7 @@ public class DetailsController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
+        model.addAttribute("deadlineForm", new DeadlineForm());
 
         model.addAttribute("tab", 0);
     }
