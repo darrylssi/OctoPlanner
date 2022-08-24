@@ -59,8 +59,9 @@
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
-                    projectStart=${projectStart},
-                    projectEnd=${projectEnd})">
+                    projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())},
+                    editEventForm=${editEventForm})">
             </div>
         </div>
     </div>
@@ -131,8 +132,9 @@
                                 minNameLen=${minNameLen},
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
-                                projectStart=${projectStart},
-                                projectEnd=${projectEnd})">
+                                projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
+                                projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())},
+                                editEventForm=${editEventForm})">
                         </div>
                     </div>
                 </div>
@@ -150,7 +152,8 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd},
+                    edit + ${schedulable.getType()} + Form=${editEventForm})" />
             </div>
         </div>
     </div>
@@ -185,7 +188,7 @@
             Add Milestone
         </button>
     </div>
-
+</div>
 <!--/*
     Add Event Form
     */-->
@@ -198,7 +201,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         New Event
     </div>
     <div class="card-body">
-        <form th:action="@{add-event}" method="post" class="container-fluid" th:object="${eventForm}">
+        <form action="javascript:;" th:data-url="@{add-event}" onsubmit="return sendFormViaAjax(this)" method="post" class="container-fluid js-form" th:object="${eventForm}">
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
@@ -206,7 +209,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <label class="form-label" for="addEventNameInput">Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="text-danger" />
+                    <small id="addEventNameFeedback" class="text-danger"></small>
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
@@ -214,7 +217,6 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <label for="addEventDescriptionInput">Description</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="text-danger" />
 
                 </div>
             </div>
@@ -224,32 +226,33 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                         <input type="date" th:field="*{startDate}" class="form-control" id="eventStartDate" aria-describedby="eventStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                         <label for="eventStartDate">Start Date</label>
                     </div>
+                    <small id="addEventStartDateFeedback" class="text-danger"></small>
                 </div>
                 <div class="col">
                     <div class="form-floating mb-3">
                         <input type="time" th:field="*{startTime}" class="form-control" id="eventStartTime" aria-describedby="eventStartTimeFeedback" required>
                         <label for="eventStartTime">Start Time</label>
                     </div>
+                    <small id="addEventStartTimeFeedback" class="text-danger"></small>
                 </div>
                 <div class="col">
                     <div class="form-floating mb-3 has-validation">
                         <input type="date" th:field="*{endDate}" class="form-control" id="eventEndDate" aria-describedby="eventEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                         <label for="eventEndDate">End Date</label>
                     </div>
+                    <small id="addEventEndDateFeedback" class="text-danger"></small>
                 </div>
                 <div class="col">
                     <div class="form-floating mb-3 has-validation">
                         <input type="time" th:field="*{endTime}" class="form-control" id="eventEndTime" aria-describedby="eventEndDateFeedback" required>
                         <label for="eventEndTime">End Time</label>
                     </div>
+                    <small id="addEventEndTimeFeedback" class="text-danger"></small>
                 </div>
                 <div class="col">
                     <button type="submit" class="btn btn-primary btn-lg">Save</button>
                 </div>
             </div>
-            <ul th:if="${eventFormError}">
-                <li th:each="errMsg: ${eventFormError}" th:text="${errMsg}" class="text-danger"></li>
-            </ul>
         </form>
     </div>
 </div>
@@ -384,11 +387,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
 
     // Bind a 'characters remaining' display to their output
-    for (const parent of document.getElementsByClassName('limited-text-input')) {
-        const input = parent.getElementsByTagName('input')[0];
-        const display = parent.getElementsByClassName('remaining-chars-field')[0];
-        displayRemainingCharacters(input, display);
-    }
+    showRemainingChars();
 
     /** Required for initialisation of bootstrap tooltip for event description */
     $(function () {
