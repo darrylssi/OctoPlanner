@@ -35,7 +35,6 @@ function connect() {
         stompClient.subscribe('/topic/events', function(eventMessageOutput) {
             updateEvent(JSON.parse(eventMessageOutput.body));
         });
-        sendEventUpdates();
     });
 }
 
@@ -203,7 +202,7 @@ function updateEvent(eventMessage) {
           idIndex = eventMessage.eventListIds.indexOf(event_lists[i].id);
         if(idIndex != -1) {
 
-            const url = BASE_URL + "event-frag/" + eventMessage.id;
+            const url = BASE_URL + "event-frag/" + eventMessage.id + '/' + eventMessage.eventBoxIds[idIndex];
             const eventFragRequest = new XMLHttpRequest();
             eventFragRequest.open("GET", url, true);
             const tempIdIndex = idIndex;
@@ -224,24 +223,10 @@ function updateEvent(eventMessage) {
 */
 function createEventDisplay(eventMessage, parent, idIndex, eventHtml) {
     let newEvent = document.createElement("div");
-    newEvent.setAttribute("id", "schedulable-box-" + eventMessage.eventBoxIds[idIndex]);
     newEvent.innerHTML = eventHtml;
     if(eventMessage.nextEventIds[idIndex] === '-1') {
         parent.appendChild(newEvent);
     } else {
         parent.insertBefore(newEvent, parent.querySelector('#' + eventMessage.nextEventIds[idIndex]).parentNode.parentNode.parentNode);
-    }
-}
-
-/**
-* Checks if there is an event that has been updated and sends a websocket message if there is
-* TODO this gets called on page load, stop that
-*/
-function sendEventUpdates() {
-    if (eventId !== -1){
-        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
-        if (updateLogs) {
-            console.log("Sending update event message for event " + eventId);
-        }
     }
 }

@@ -91,7 +91,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem, eventId) {
+function sendFormViaAjax(elem, formId) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -103,10 +103,8 @@ function sendFormViaAjax(elem, eventId) {
     formRequest.onload = () => {
         if (formRequest.status == 200) {
             // Success
-            if(updateLogs){
-                console.log("Sending update message for event: " + eventId);
-            }
-            stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+            hideEditEvent(formRequest.response, formId);
+            stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -153,7 +151,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        hideEditEvent(eventId, eventBoxId);
+        hideEditEvent(eventId, "editEventForm-" + eventBoxId);
         return;
     }
 
@@ -201,13 +199,6 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
-    /* Set up JS to intercept the request */
-    const formElem = editForm.querySelector("#form");
-    if (formElem != null) {
-        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
-        formElem.setAttribute("id", "form-js-enabled"); // Remove ability to add more listeners to this form
-    }
-
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
@@ -222,8 +213,8 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
  * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
  * @param eventBoxId the ID of the event box to hide the form from
  */
-function hideEditEvent(eventId, eventBoxId) {
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+function hideEditEvent(eventId, formId) {
+    let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }

@@ -94,7 +94,7 @@
         <div class="card">
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
+                <form action="javascript:;" th:data-id="|editEventForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
