@@ -106,3 +106,4 @@ public class EventController extends PageController {
         }
     }
 }
+

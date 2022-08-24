@@ -1,6 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title th:text="${project.getProjectName}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -144,8 +143,8 @@
             </svg>
             Add Deadline
         </button>
-
     </div>
+</div>
 
 <!--/*
     Add Event Form
@@ -154,66 +153,68 @@
 <div th:if="${canEdit}"
 th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
          projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
-<div class="card collapse" id="addEventForm" th:classappend="${#fields.hasErrors('eventForm.*') OR !#arrays.isEmpty(eventFormError) ? 'show' : null}">
-    <div class="card-header">
-        New Event
-    </div>
-    <div class="card-body">
-        <form th:action="@{add-event}" method="post" class="container-fluid" th:object="${eventForm}">
-            <div class="row">
-                <div class="col">
-                    <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="addEventNameInput" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control" aria-describedby="eventNameFeedback">
-                        <label class="form-label" for="addEventNameInput">Name</label>
-                        <span class="input-group-text remaining-chars-field">...</span>
+    <div class="card collapse" id="addEventForm" th:classappend="${#fields.hasErrors('eventForm.*') OR !#arrays.isEmpty(eventFormError) ? 'show' : null}">
+        <div class="card-header">
+            New Event
+        </div>
+        <div class="card-body">
+            <form th:action="@{add-event}" method="post" class="container-fluid" th:object="${eventForm}">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addEventNameInput" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control" aria-describedby="eventNameFeedback">
+                            <label class="form-label" for="addEventNameInput">Name</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+                        <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="text-danger" />
                     </div>
-                    <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="text-danger" />
-                </div>
-                <div class="col-10">
-                    <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="addEventDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description">
-                        <label for="addEventDescriptionInput">Description</label>
-                        <span class="input-group-text remaining-chars-field">...</span>
-                    </div>
-                    <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="text-danger" />
+                    <div class="col-10">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addEventDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description">
+                            <label for="addEventDescriptionInput">Description</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+                        <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" th:errorclass="text-danger" />
 
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="form-floating mb-3">
-                        <input type="date" th:field="*{startDate}" class="form-control" id="eventStartDate" aria-describedby="eventStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
-                        <label for="eventStartDate">Start Date</label>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="form-floating mb-3">
-                        <input type="time" th:field="*{startTime}" class="form-control" id="eventStartTime" aria-describedby="eventStartTimeFeedback" required>
-                        <label for="eventStartTime">Start Time</label>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" th:field="*{startDate}" class="form-control" id="eventStartDate" aria-describedby="eventStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="eventStartDate">Start Date</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="time" th:field="*{startTime}" class="form-control" id="eventStartTime" aria-describedby="eventStartTimeFeedback" required>
+                            <label for="eventStartTime">Start Time</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" th:field="*{endDate}" class="form-control" id="eventEndDate" aria-describedby="eventEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="eventEndDate">End Date</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="time" th:field="*{endTime}" class="form-control" id="eventEndTime" aria-describedby="eventEndDateFeedback" required>
+                            <label for="eventEndTime">End Time</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="form-floating mb-3 has-validation">
-                        <input type="date" th:field="*{endDate}" class="form-control" id="eventEndDate" aria-describedby="eventEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
-                        <label for="eventEndDate">End Date</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-floating mb-3 has-validation">
-                        <input type="time" th:field="*{endTime}" class="form-control" id="eventEndTime" aria-describedby="eventEndDateFeedback" required>
-                        <label for="eventEndTime">End Time</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
-                </div>
-            </div>
-            <ul th:if="${eventFormError}">
-                <li th:each="errMsg: ${eventFormError}" th:text="${errMsg}" class="text-danger"></li>
-            </ul>
-        </form>
+                <ul th:if="${eventFormError}">
+                    <li th:each="errMsg: ${eventFormError}" th:text="${errMsg}" class="text-danger"></li>
+                </ul>
+            </form>
+        </div>
+
+
     </div>
-</div>
 
     <!-- Add Deadline Form -->
     <div class="collapse" id="addDeadlineForm">
@@ -225,18 +226,21 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                 <form th:action="@{add-deadline}" method="post" class="container-fluid">
                     <div class="row">
                         <div class="col">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' "
                                        id="deadlineName" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback"
-                                       th:name="deadlineName">
+                                       th:name="deadlineName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}">
                                 <label for="deadlineName">Name</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
                                 <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
                         </div>
                         <div class="col-10">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription"
+                                       th:maxlength="${maxDescLen}" >
                                 <label for="deadlineDescription">Description</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
                             </div>
 
                         </div>
@@ -262,7 +266,9 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                                        th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
                                        th:name="deadlineTime">
                                 <label for="deadlineTime">Time</label>
-                                <div id="deadlineTimeFeedback" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                                <div id="deadlineTimeFeedb
+
+ack" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
                             </div>
                         </div>
                         <div class="col-1">
@@ -271,13 +277,13 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
-
 </div>
 
 <!-- Used for event editing popups -->
+
+
 <div>
     <div id="user" th:data-name="${user}" value="${user}" />
     <div id="userId" th:data-name="${userId}" value="${userId}" /> <!-- there must be a better way of doing this -->
@@ -297,7 +303,9 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         displayRemainingCharacters(input, display);
     }
 
-    /** Required for initialisation of bootstrap tooltip for event description */
+    /** Required for initialisation of bootstrap tooltip
+
+for event description */
     $(function () {
         $('[data-toggle="tooltip"]').tooltip({
             trigger : 'hover'
