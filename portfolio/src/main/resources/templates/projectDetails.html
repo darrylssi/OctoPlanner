@@ -1,6 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title th:text="${project.getProjectName}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -144,9 +143,9 @@
             </svg>
             Add Deadline
         </button>
-
     </div>
 </div>
+
 <!--/*
     Add Event Form
     */-->
@@ -225,18 +224,21 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                 <form th:action="@{add-deadline}" method="post" class="container-fluid">
                     <div class="row">
                         <div class="col">
-                            <div class="form-floating mb-3">
+                            <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' "
                                        id="deadlineName" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback"
-                                       th:name="deadlineName">
+                                       th:name="deadlineName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}">
                                 <label for="deadlineName">Name</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
                                 <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
                         </div>
                         <div class="col-10">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription"
+                                       th:maxlength="${maxDescLen}" >
                                 <label for="deadlineDescription">Description</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
                             </div>
 
                         </div>
@@ -271,10 +273,8 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
-
 </div>
 
 <!-- Used for event editing popups -->
