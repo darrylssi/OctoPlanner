@@ -71,8 +71,9 @@ function sendEditEventViaAjax(elem, e) {
 
 
 /**
- * TODO this whole function
- * An attempt to make this function deal with schedulable objects...
+ * Displays the edit form for the specified schedulable object.
+ * Will hide the edit forms for other schedulables (but not events TODO)
+ * Should send editing messages for this schedulable so that other users can see an editing popup (TODO)
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone)
@@ -108,7 +109,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     /* If a form we just closed was for a different schedulable, we need to
        send a stop editing message */
 //     if (differentSchedulable) {
-//         stopEditing(); TODO editing messages for schedulables
+//         stopEditing(); TODO editing messages for all schedulables
 //     }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
