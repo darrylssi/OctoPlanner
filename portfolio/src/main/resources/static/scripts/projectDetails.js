@@ -145,7 +145,7 @@ function sendFormViaAjax(elem) {
 function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate, projectStart, projectEnd) {
     /* Search for the edit form */
     let editForm = null;    // Split to account for weird behaviour
-    editForm = document.getElementById("editEventForm-" + eventBoxId);
+    editForm = document.getElementById("editSchedulableForm-" + eventBoxId);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -197,19 +197,12 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
-    /* Set up JS to intercept the request */
-    const formElem = editForm.querySelector("#form");
-    if (formElem != null) {
-        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
-        formElem.setAttribute("id", "form-js-enabled"); // Remove ability to add more listeners to this form
-    }
-
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
         new bootstrap.Collapse(shownForm).show();
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
-    }, delay, "editEventForm-" + eventBoxId);
+    }, delay, "editSchedulableForm-" + eventBoxId);
 }
 
 /**

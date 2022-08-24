@@ -35,7 +35,7 @@
                 </button>
             </div>
         </span>
-        <div th:replace="detailFragments :: eventEditForm(
+        <div th:replace="detailFragments :: schedulableEditForm(
                 schedulable=${event},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
@@ -73,17 +73,12 @@
                 </button>
             </div>
         </span>
-        <!-- TODO Uncomment this once the editDeadlineForm fragment has been created -->
-        <!--
-        <div th:replace="detailFragments :: editDeadlineForm(
-                deadline=${deadline},
+        <div th:replace="detailFragments :: schedulableEditForm(
+                schedulable=${deadline},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
-                maxDescLen=${maxDescLen},
-                projectStart=${projectStart},
-                projectEnd=${projectEnd})"/>
-                -->
+                maxDescLen=${maxDescLen})"/>
     </div>
 </div>
 
@@ -92,7 +87,8 @@
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${schedulable.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-schedulable/{id}(id=${schedulable.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
+                <form action="javascript:;" th:data-url="@{edit-{type}/{id}(id=${schedulable.getId()},type=${schedulable.getType()})}"
+                      onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}"> <!-- TODO This should get something like schedulable -->
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
