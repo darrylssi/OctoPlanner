@@ -60,8 +60,7 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())},
-                    editEventForm=${editEventForm})" />
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" />
         </div>
     </div>
     <!-- /* The project's sprints */ -->
@@ -100,14 +99,13 @@
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
                                 projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                                projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())},
-                                editEventForm=${editEventForm})" />
+                                projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" />
                     </div>
                 </div>
             </div>
         </div>
         <!-- The schedulables outside the sprint -->
-        <div class="schedulable-list-container outside-schedulable"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+        <div class="schedulable-list-container outside-schedulable" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
             <div th:if="${!#arrays.isEmpty(schedulables)} and ((${iterStat.index+1 < iterStat.size} and ${schedulable.getStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${schedulable.getEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${schedulable.getEndDate()} > *{getSprintEndDate}))"
                  th:each="schedulable: ${schedulables}" >
                 <div th:replace="detailFragments :: ${schedulable.getType()}(
@@ -118,8 +116,7 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd},
-                    edit + ${schedulable.getType()} + Form=${editEventForm})" />
+                    projectEnd=${projectEnd})" />
             </div>
         </div>
     </div>
