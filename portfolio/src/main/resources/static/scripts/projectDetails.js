@@ -1,3 +1,6 @@
+const previousSchedulable = {type:"", id:-1}; // the previous schedulable being edited by THIS user (only one can be edited at a time)
+let previousEvent;
+const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
 const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
@@ -112,9 +115,12 @@ function sendEditEventViaAjax(elem, e) {
  * An attempt to make this function deal with schedulable objects...
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
- * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone)
+ * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone) as a string
  */
 function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    /* Capitalize only the first letter of the schedulableType string */
+    schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
 
@@ -173,70 +179,18 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
  * @param schedulablhideEditSchedulableeType the type of the schedulable whose edit form is being hidden
  */
 function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    /* Capitalize only the first letter of the schedulableType string */
+    schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+
+    /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
+
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
     previousSchedulable.id = schedulableId;
     previousSchedulable.type = schedulableType;
 //    stopEditing();
-}
-
-/**
- * Inserts/expands the event edit form directly below the event being edited.
- * This function adds forms into the page only as they are needed.
- *
- * Also deals with the websocket part of editing events. This function will send an initial editing message and
- * set up repeating edit messages.
- * @param eventId id of the event the message should show for
- * @param eventBoxId id of the event box to display the form at
- */
-function showEditEvent(eventId, eventBoxId) {
-    /* Search for the edit form */
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
-
-    /* Collapse element, send stop message, and take no further action if the selected form is open */
-    if (editForm != null && editForm.classList.contains("show")) {
-        hideEditEvent(eventId, eventBoxId);
-        return;
-    }
-
-    /* Collapse any edit event forms already on the page. If we find any, delay
-       opening the new form by EDIT_FORM_CLOSE_DELAY. */
-    let collapseElementList = document.getElementsByClassName("collapse show");
-    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
-    let differentEvent = false;
-    for (let element of collapseElementList) {
-        if (element.id.indexOf("editEventForm") != -1) {
-            new bootstrap.Collapse(element).hide();
-            /* Check whether any form is for a different event, to see whether
-               we need to send a stop editing message */
-            if (element.id.indexOf("editEventForm-" + eventId) == -1) {
-                differentEvent = true;  // Extracted to a variable to avoid sending extra messages (worst case)
-                previousEvent = (element.id.split('-')[1]);  // Get event id from that form
-            }
-        }
-    }
-
-    /* If a form we just closed was for a different event, we need to
-       send a stop editing event */
-    if (differentEvent) {
-        stopEditing();
-    }
-
-    /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingEventMessage(eventId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
-    if (sendEditMessageInterval) { // reset interval
-        clearInterval(sendEditMessageInterval);
-    }
-    sendEditMessageInterval = setInterval(function() {sendEditingEventMessage(eventId)}, EVENT_EDIT_MESSAGE_FREQUENCY)
-
-    /* Get this form to show after a delay that allows any other open forms to collapse */
-    setTimeout((formId) => {
-        let shownForm = document.getElementById(formId)
-        new bootstrap.Collapse(shownForm).show();
-        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
-    }, delay, "editEventForm-" + eventBoxId);
 }
 
 /**
