@@ -20,7 +20,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * database flags Sonarqube errors.
  */
 public class EventForm {
-    @NotNull
     @NotBlank(message="Event name cannot be blank")
     @Size(min=MIN_NAME_LENGTH,
             max=MAX_NAME_LENGTH,
@@ -33,19 +32,19 @@ public class EventForm {
     
     // Due to Firefox's lack of <input type="datetime"> support,
     // we store this as two separate fields: Date and Time
-    @NotNull
+    @NotNull(message="Event start date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate startDate;
 
-    @NotNull
+    @NotNull(message="Event start time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime startTime;
 
-    @NotNull
+    @NotNull(message="Event end date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate endDate;
 
-    @NotNull
+    @NotNull(message="Event end time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime endTime;
 
