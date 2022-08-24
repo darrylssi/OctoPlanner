@@ -99,7 +99,7 @@
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required>
-                                <label for="editEventNameInput" class="form-label">Name</label>
+                                <label class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                                 <small id="editEventNameFeedback" class="text-danger"></small>
                             </div>
@@ -107,7 +107,7 @@
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
-                                <label for="editEventDescriptionInput">Description</label>
+                                <label class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
                         </div>
@@ -116,28 +116,28 @@
                         <div class="col">
                             <div class="form-floating mb-3">
                                 <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editEventStartDateFeedback">
-                                <label for="editEventStartDate">Start Date</label>
+                                <label class="form-label">Start Date</label>
                                 <small id="editEventStartDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3">
                                 <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editEventStartTimeFeedback">
-                                <label for="editEventStartTime">Start Time</label>
+                                <label class="form-label">Start Time</label>
                                 <small id="editEventStartTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editEventEndDateFeedback">
-                                <label for="editEventEndDate">End Date</label>
+                                <label class="form-label">End Date</label>
                                 <small id="editEventEndDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editEventEndTimeFeedback">
-                                <label for="editEventEndTime">End Time</label>
+                                <label class="form-label">End Time</label>
                                 <small id="editEventEndTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
