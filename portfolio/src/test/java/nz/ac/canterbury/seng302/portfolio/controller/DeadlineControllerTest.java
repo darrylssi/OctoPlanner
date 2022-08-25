@@ -92,7 +92,7 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void postDeadlineValidId() throws Exception {
+    void postValidDeadline_redirect() throws Exception {
         when(deadlineService.getDeadlineById(anyInt()))
                 .thenReturn(deadline);
         this.mockMvc.perform(post("/project/0/edit-deadline/1")
@@ -104,6 +104,7 @@ class DeadlineControllerTest {
     @WithMockPrincipal(STUDENT)
     void postDeadlineEditPage_forbidden() throws Exception {
         this.mockMvc.perform(post("/project/0/edit-deadline/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(status().reason(containsString("You do not have permission to access this endpoint")));;
     }
 }
