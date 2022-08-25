@@ -95,9 +95,11 @@ function sendFormViaAjax(elem) {
  * Should send editing messages for this schedulable so that other users can see an editing popup (TODO)
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
- * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone)
+ * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone - 1st letter must be capitalised!)
  */
 function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
 
@@ -157,6 +159,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
  * @param schedulableType the type of the schedulable whose edit form is being hidden
  */
 function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
