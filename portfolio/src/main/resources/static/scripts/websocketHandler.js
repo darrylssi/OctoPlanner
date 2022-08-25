@@ -13,7 +13,6 @@ function connect() {
     const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
-        setConnected(true);
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/editing-event', function(message) {
             handleEventMessage(JSON.parse(message.body));
@@ -71,7 +70,7 @@ function handleEditingSchedulableMessage(editMessage) {
         const schedulableType = messageContent[1].toLowerCase();
         const userId = messageContent[2];
         showEditingSchedulableMessage(schedulableId, schedulableType, userId);
-    } else if (messageContent.length() == 2) {
+    } else if (messageContent.length() === 2) {
         console.log('GOT STOP MESSAGE ' + editMessage.content);
         const schedulableId = messageContent[0];
         const schedulableType = messageContent[1].toLowerCase();
@@ -145,19 +144,6 @@ function sendEditingEventMessage(eventId) {
     let content = `${eventId},${userId}`;
     stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'content':content}));
-}
-
-/**
- * Sends a websocket message saying that a user has stopped editing an event
- * Won't send anything if eventId is undefined
- */
-function sendStopEditingMessage(eventId) {
-    if (previousEvent !== undefined) {
-        console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
-        let user = document.getElementById('user').getAttribute('data-name');
-        stompClient.send("/app/ws", {},
-        JSON.stringify({'from':user, 'content':eventId}));
-    }
 }
 
 /**

@@ -82,8 +82,9 @@
     </div>
 </div>
 
+<!-- TODO Hide fields depending on schedulable type -->
 <div th:fragment="schedulableEditForm">
-    <div th:id="|editSchedulableForm-${boxId}|" class="editSchedulableForm collapse">
+    <div th:id="|edit${#strings.capitalize(schedulable.getType)}Form-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${schedulable.getName}|"></div>
             <div class="card-body">

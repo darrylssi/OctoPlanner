@@ -102,7 +102,7 @@ function sendFormViaAjax(elem) {
     formRequest.open("POST", url);
 
     formRequest.onload = () => {
-        if (formRequest.status == 200) {
+        if (formRequest.status === 200) {
             // Success
             window.location.reload()
         } else {
@@ -110,13 +110,13 @@ function sendFormViaAjax(elem) {
             for (let errorMsg of errors) {
                 // Determine correct error field. Defaults to NameFeedback
                 let field = "Name";
-                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') != -1) {
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
                     field = 'EndDate';
-                } else if (errorMsg.indexOf('end time') != -1) {
+                } else if (errorMsg.indexOf('end time') !== -1) {
                     field = 'EndTime';
-                } else if (errorMsg.indexOf('date') != -1) {
+                } else if (errorMsg.indexOf('date') !== -1) {
                     field = 'StartDate';
-                } else if (errorMsg.indexOf('time') != -1 || errorMsg.indexOf('minute') != -1) {
+                } else if (errorMsg.indexOf('time') !== -1 || errorMsg.indexOf('minute') !== -1) {
                     field = 'StartTime';
                 }
                 field += 'Feedback';
@@ -141,9 +141,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
-    let editForm = null;    // Split to account for weird behaviour
-    editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
-
+    let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -157,11 +155,11 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
     let differentSchedulable = false;
     for (let element of collapseElementList) {
-        if (element.id.indexOf("edit" + schedulableType + "Form") != -1) {
+        if (element.id.indexOf("edit" + schedulableType + "Form") !== -1) {
             new bootstrap.Collapse(element).hide();
             /* Check whether any form is for a different schedulable, to see whether
                we need to send a stop editing message */
-            if (element.id.indexOf("edit" + schedulableType + "Form-" + schedulableBoxId) == -1) {
+            if (element.id.indexOf("edit" + schedulableType + "Form-" + schedulableBoxId) === -1) {
                 differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
                 previousSchedulable.id = (element.id.split('-')[1]);  // Get schedulable id from that form
                 previousSchedulable.type = schedulableType;
@@ -175,7 +173,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 //         stopEditing(); TODO editing messages for schedulables
 //     }
 
-
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
     // sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp TODO popups for schedulables
     if (sendEditMessageInterval) { // reset interval
@@ -183,22 +180,25 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     }
     // sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
+    // TODO redo form populating so it works with schedulables
     /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
-    editForm.querySelector("#name").setAttribute("value", eventName);
-    editForm.querySelector("#description").setAttribute("value", eventDescription);
-    editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
-    editForm.querySelector("#startDate").setAttribute("min", projectStart);
-    editForm.querySelector("#startDate").setAttribute("max", projectEnd);
-    editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
-    editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
-    editForm.querySelector("#endDate").setAttribute("min", projectStart);
-    editForm.querySelector("#endDate").setAttribute("max", projectEnd);
-    editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
+    //editForm.querySelector("#name").setAttribute("value", eventName);
+    //editForm.querySelector("#description").setAttribute("value", eventDescription);
+    //editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
+    //editForm.querySelector("#startDate").setAttribute("min", projectStart);
+    //editForm.querySelector("#startDate").setAttribute("max", projectEnd);
+    //editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
+    //editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
+    //editForm.querySelector("#endDate").setAttribute("min", projectStart);
+    //editForm.querySelector("#endDate").setAttribute("max", projectEnd);
+    //editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
+        console.log(formId);
         let shownForm = document.getElementById(formId)
+        console.log(shownForm);
         new bootstrap.Collapse(shownForm).show();
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
     }, delay, "edit" + schedulableType + "Form-" + schedulableBoxId);
