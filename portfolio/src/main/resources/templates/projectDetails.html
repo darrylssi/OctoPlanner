@@ -292,7 +292,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
 */-->
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
-    var canEdit = /*[[ ${canEdit} ]]*/;
+    var canEdit = /*[[ ${canEdit} ]]*/ null;
 
     // Bind a 'characters remaining' display to their output
     showRemainingChars();

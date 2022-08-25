@@ -70,7 +70,7 @@ function sendEditingEventMessage(eventId) {
 function sendStopEditingMessage(eventId) {
     if (previousEvent !== undefined) {
         if (editingLogs) {
-        console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
+            console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
         }
         let user = document.getElementById('user').getAttribute('data-name');
         stompClient.send("/app/ws", {},
@@ -186,20 +186,20 @@ function stopEventTimeout(eventId) {
 */
 function updateEvent(eventMessage) {
     if (updateLogs) {
-            console.log("Got update event message for event " + eventMessage.id);
+        console.log("Got update event message for event " + eventMessage.id);
     }
 // get a list of event list containers
     const event_lists = document.getElementsByClassName('schedulable-list-container');
 
 // check each event list container to see if it has the event in it / should have the event in it
-    for (let i = 0; i < event_lists.length; i++) {
+    for (let eventListContainer of event_lists) {
           //check if event is there, then remove event if it exists
-          event = event_lists[i].querySelector('#event-' + eventMessage.id);
+          event = eventListContainer.querySelector('#event-' + eventMessage.id);
           if (event !== null) {
             event.parentNode.parentNode.parentNode.remove();
           }
           // check if event list container is in the list of ids the event should be displayed in
-          idIndex = eventMessage.eventListIds.indexOf(event_lists[i].id);
+          idIndex = eventMessage.eventListIds.indexOf(eventListContainer.id);
         if(idIndex != -1) {
 
             const url = BASE_URL + "event-frag/" + eventMessage.id + '/' + eventMessage.eventBoxIds[idIndex];
@@ -208,7 +208,7 @@ function updateEvent(eventMessage) {
             const tempIdIndex = idIndex;
             eventFragRequest.onload = () => {
                 // Reload the page to get the updated list of sprints after the delete
-                createEventDisplay(eventMessage, event_lists[i], tempIdIndex, eventFragRequest.response);
+                createEventDisplay(eventMessage, eventListContainer, tempIdIndex, eventFragRequest.response);
             }
             eventFragRequest.send();
         }
@@ -219,7 +219,8 @@ function updateEvent(eventMessage) {
 * Creates a new event display object and puts it into the correct place in the DOM
 * @param eventMessage the message sent by websockets containing event info to be displayed
 * @param parent the parent object for the event to be displayed in
-* @param nextEvent the id of the event that the new event should be inserted before. -1 if no following event
+* @param idIndex the index of this event used to access values in the id lists
+* @param eventHtml the html of this event to be inserted into the page
 */
 function createEventDisplay(eventMessage, parent, idIndex, eventHtml) {
     let newEvent = document.createElement("div");
