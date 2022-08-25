@@ -29,7 +29,7 @@ function deleteObject(id, type) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the delete
-        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+        stompClient.send("/app/events", {}, JSON.stringify({id: id})); // TODO should only send if it is an event?
         hideModal();
     }
     deleteRequest.send();
