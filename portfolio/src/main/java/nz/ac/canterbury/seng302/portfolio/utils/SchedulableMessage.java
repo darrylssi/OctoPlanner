@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.utils;
 
 /**
  * Class for sending schedulable updates through websockets.
- * Contains the id of the schedulable that has been updated. Wrapper class so that it can be sent through websockets.
+ * Contains the id and type of the schedulable that has been updated. Wrapper class so that it can be sent through websockets.
  */
 public class SchedulableMessage {
 
