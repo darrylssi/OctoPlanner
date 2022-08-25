@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
@@ -101,6 +102,8 @@ public class DetailsController extends PageController {
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
+        model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
+        model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
