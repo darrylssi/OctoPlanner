@@ -1,5 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.EventMessage;
+import nz.ac.canterbury.seng302.portfolio.utils.EventMessageOutput;
 import nz.ac.canterbury.seng302.portfolio.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +14,16 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
+import java.util.ArrayList;
 
+/**
+ * Controller to handle websockets.
+ * Sends websocket messages to endpoints specified with @SendTo annotations.
+ */
 @Controller
 public class MessageMappingController {
 
@@ -25,6 +36,16 @@ public class MessageMappingController {
         this.simpMessagingTemplate = template;
     }
 
+    @Autowired
+    EventService eventService;
+    @Autowired
+    SprintService sprintService;
+
+    /**
+     * Called when a user disconnects from their websocket connection.
+     * Logs the disconnect and sends a DISCONNECTED message to the editing event endpoint.
+     * @param event the event fired when the user disconnected
+     */
     @EventListener
     @SendTo("/topic/editing-event")
     public void onDisconnectEvent(SessionDisconnectEvent event) {
@@ -44,5 +65,36 @@ public class MessageMappingController {
     @SendTo("/topic/editing-event")
     public Message editingEvent(Message message) {
         return message;
+    }
+
+    /**
+     * Receives a websocket message with an event id, and then replies with an empty output
+     * (if the specified event does not exist) or an EventMessageOutput with the event's information
+     * and location if it does exist.
+     *
+     * @param eventMessage Data received from the websocket containing the event id
+     * @return An EventMessageOutput that gets sent to the endpoint in the @SendTo parameter
+     */
+    @MessageMapping("/events")
+    @SendTo("/topic/events")
+    public EventMessageOutput sendEventData(EventMessage eventMessage) {
+        Event updatedEvent;
+        EventMessageOutput eventMessageOutput;
+
+        try {
+            // Return a proper response if the event exists
+            updatedEvent = eventService.getEventById(eventMessage.getId());
+            eventMessageOutput = new EventMessageOutput(updatedEvent,
+                    sprintService.getSprintsInProject(updatedEvent.getParentProject().getId()),
+                    eventService.getEventByParentProjectId(updatedEvent.getParentProject().getId()));
+        } catch (ResponseStatusException e) {
+            // Send back an empty response if the event doesn't exist
+            logger.error(e.getMessage());
+            eventMessageOutput = new EventMessageOutput();
+            eventMessageOutput.setEventListIds(new ArrayList<>());
+            eventMessageOutput.setId(eventMessage.getId());
+        }
+
+        return eventMessageOutput;
     }
 }

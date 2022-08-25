@@ -60,14 +60,6 @@ public class EventService {
     }
 
     /**
-     * Gets all the events that belong to a given project.
-     *
-     */
-    public List<Event> getEventsOfProjectById(Integer id) {
-        return repository.findEventByParentProjectId(id);
-    }
-
-    /**
      * Deletes an event from the repository
      * @param eventId the id of the event to be deleted
      */
@@ -80,8 +72,8 @@ public class EventService {
      * Otherwise, updates the event with the given ID.
      * @param event event to be added to the database
      */
-    public void saveEvent(Event event) {
-        repository.save(event);
+    public Event saveEvent(Event event) {
+        return repository.save(event);
     }
 
 }

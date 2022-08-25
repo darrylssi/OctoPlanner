@@ -28,8 +28,9 @@ function deleteObject(id, type) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        // Reload the page to get the updated list of events after the delete
-        window.location.reload();
+        // Send a websocket message to update the page after the delete
+        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+        hideModal();
     }
     deleteRequest.send();
 }
@@ -51,7 +52,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem) {
+function sendFormViaAjax(elem, formId) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -63,7 +64,8 @@ function sendFormViaAjax(elem) {
     formRequest.onload = () => {
         if (formRequest.status == 200) {
             // Success
-            window.location.reload()
+            hideForm(formRequest.response, formId);
+            stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -191,7 +193,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        hideEditEvent(eventId, eventBoxId);
+        hideForm(eventId, "editEventForm-" + eventBoxId);
         return;
     }
 
@@ -239,13 +241,6 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
-    /* Set up JS to intercept the request */
-    const formElem = editForm.querySelector("#form");
-    if (formElem != null) {
-        formElem.addEventListener("submit", e => sendEditEventViaAjax(formElem, e));    // Send error via AJAX request
-        formElem.setAttribute("id", "form-js-enabled"); // Remove ability to add more listeners to this form
-    }
-
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
@@ -255,13 +250,14 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 }
 
 /**
- * Collapse the edit form for the specified event box.
+ * Collapse the form with the specified Id.
  * Accessed directly by the cancel button.
  * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
- * @param eventBoxId the ID of the event box to hide the form from
+ * @param eventId the ID of the event being edited
+ * @param formId the ID of the form to be closed
  */
-function hideEditEvent(eventId, eventBoxId) {
-    let editForm = document.getElementById("editEventForm-" + eventBoxId);
+function hideForm(eventId, formId) {
+    let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }

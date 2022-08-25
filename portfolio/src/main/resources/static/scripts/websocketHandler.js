@@ -2,6 +2,10 @@ let stompClient = null;
 const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
 const EVENT_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing event messages after this many ms
 
+// logging consts to hide certain things while developing
+const editingLogs = false;
+const updateLogs = true;
+
 /**
  * Sets html elements according to whether a WebSocket has been connected to or not
  * @param connected Boolean if a connection has been established to a WebSocket
@@ -21,11 +25,15 @@ function setConnected(connected) {
 function connect() {
     const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
+    stompClient.debug = function (){}; // stop log spamming, from https://stackoverflow.com/questions/21767126/stompjs-javascript-client-logging-like-crazy-on-console
     stompClient.connect({}, function(frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/editing-event', function(message) {
             handleEventMessage(JSON.parse(message.body));
+        });
+        stompClient.subscribe('/topic/events', function(eventMessageOutput) {
+            updateEvent(JSON.parse(eventMessageOutput.body));
         });
     });
 }
@@ -45,7 +53,9 @@ function disconnect() {
  * Sends a message to a WebSocket endpoint using data from an HTML element
  */
 function sendEditingEventMessage(eventId) {
-    console.log("SENDING EDITING MESSAGE FOR EVENT: " + eventId)
+    if (editingLogs) {
+        console.log("SENDING EDITING MESSAGE FOR EVENT: " + eventId);
+    }
     let user = document.getElementById('user').getAttribute('data-name');
     let userId = document.getElementById('userId').getAttribute('data-name');
     let content = `${eventId},${userId}`;
@@ -59,7 +69,9 @@ function sendEditingEventMessage(eventId) {
  */
 function sendStopEditingMessage(eventId) {
     if (previousEvent !== undefined) {
-        console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
+        if (editingLogs) {
+            console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
+        }
         let user = document.getElementById('user').getAttribute('data-name');
         stompClient.send("/app/ws", {},
         JSON.stringify({'from':user, 'content':eventId}));
@@ -71,6 +83,7 @@ function sendStopEditingMessage(eventId) {
  * @param messageOutput JSON object received from the WebSocket
  */
 function showMessageOutput(messageOutput) {
+
     const response = document.getElementById('response');
     const p = document.createElement('p');
     p.style.wordWrap = 'break-word';
@@ -85,10 +98,14 @@ function showMessageOutput(messageOutput) {
  */
 function handleEventMessage(editMessage) {
     if (editMessage.content.split(',').length === 2) {
-        console.log('GOT EDITING MESSAGE ' + editMessage.content);
+        if (editingLogs) {
+            console.log('GOT EDITING MESSAGE ' + editMessage.content);
+        }
         showEditingMessage(editMessage);
     } else {
-        console.log('GOT STOP MESSAGE ' + editMessage.content);
+        if (editingLogs) {
+            console.log('GOT STOP MESSAGE ' + editMessage.content);
+        }
         hideEditMessage(editMessage);
     }
 }
@@ -160,5 +177,57 @@ function hideEditMessage(message) {
 function stopEventTimeout(eventId) {
     if (eventTimeouts.has(eventId)) {
         clearTimeout(eventTimeouts.get(eventId));
+    }
+}
+
+/**
+* Updates all instances of an event that has been changed using information sent through websockets
+* @param eventMessage the message sent through websockets with event information
+*/
+function updateEvent(eventMessage) {
+    if (updateLogs) {
+        console.log("Got update event message for event " + eventMessage.id);
+    }
+// get a list of event list containers
+    const event_lists = document.getElementsByClassName('schedulable-list-container');
+
+// check each event list container to see if it has the event in it / should have the event in it
+    for (let eventListContainer of event_lists) {
+          //check if event is there, then remove event if it exists
+          event = eventListContainer.querySelector('#event-' + eventMessage.id);
+          if (event !== null) {
+            event.parentNode.parentNode.parentNode.remove();
+          }
+          // check if event list container is in the list of ids the event should be displayed in
+          idIndex = eventMessage.eventListIds.indexOf(eventListContainer.id);
+        if(idIndex != -1) {
+
+            const url = BASE_URL + "event-frag/" + eventMessage.id + '/' + eventMessage.eventBoxIds[idIndex];
+            const eventFragRequest = new XMLHttpRequest();
+            eventFragRequest.open("GET", url, true);
+            const tempIdIndex = idIndex;
+            eventFragRequest.onload = () => {
+                // Reload the page to get the updated list of sprints after the delete
+                createEventDisplay(eventMessage, eventListContainer, tempIdIndex, eventFragRequest.response);
+            }
+            eventFragRequest.send();
+        }
+    }
+}
+
+/**
+* Creates a new event display object and puts it into the correct place in the DOM
+* @param eventMessage the message sent by websockets containing event info to be displayed
+* @param parent the parent object for the event to be displayed in
+* @param idIndex the index of this event used to access values in the id lists
+* @param eventHtml the html of this event to be inserted into the page
+*/
+function createEventDisplay(eventMessage, parent, idIndex, eventHtml) {
+    let newEvent = document.createElement("div");
+    newEvent.innerHTML = eventHtml;
+    if(eventMessage.nextEventIds[idIndex] === '-1') {
+        parent.appendChild(newEvent);
+    } else {
+        parent.insertBefore(newEvent, parent.querySelector('#' + eventMessage.nextEventIds[idIndex]).parentNode.parentNode.parentNode);
     }
 }

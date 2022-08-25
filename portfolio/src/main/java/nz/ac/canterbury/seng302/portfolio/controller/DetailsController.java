@@ -13,21 +13,19 @@ import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-import static java.time.temporal.ChronoUnit.MINUTES;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.validation.Valid;
 
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +48,19 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.MINUTES;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TimeZone;
+
+import javax.validation.Valid;
+
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 
 
 /**
@@ -68,8 +79,6 @@ public class DetailsController extends PageController {
     private EventService eventService;
     @Autowired
     private DeadlineService deadlineService;
-    @Autowired
-    private MilestoneService milestoneService;
     @Autowired
     private SprintLabelService labelUtils;
 
@@ -135,12 +144,10 @@ public class DetailsController extends PageController {
         // Gets the event list and sorts it based on the event start date
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
-        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
 
         List<Schedulable> schedulableList = new ArrayList<>();
         schedulableList.addAll(eventList);
         schedulableList.addAll(deadlineList);
-        schedulableList.addAll(milestoneList);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));

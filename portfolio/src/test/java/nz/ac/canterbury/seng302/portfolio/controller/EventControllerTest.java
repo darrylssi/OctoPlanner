@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ class EventControllerTest {
     private MockMvc mockMvc;
     @MockBean
     EventService eventService;
+    @MockBean
+    SprintService sprintService;
     @MockBean
     ProjectService projectService;
     @MockBean

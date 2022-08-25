@@ -49,7 +49,7 @@
     </div>
     <hr/>
     <!-- The first schedulables outside the sprint -->
-    <div class="schedulable-list-container outside-schedulable">
+    <div class="schedulable-list-container outside-schedulable" id="schedulables-before">
         <div th:if="${!#arrays.isEmpty(schedulables)} and ((${!#arrays.isEmpty(sprints)} and ${schedulable.getStartDate()} < ${sprints.get(0).getSprintStartDate()}) or ${#arrays.isEmpty(sprints)})"
              th:each="schedulable: ${schedulables}" >
             <div th:replace="detailFragments :: ${schedulable.getType()}(
@@ -122,7 +122,7 @@
                 </div>
                 <div class="break"></div>
                 <!-- The schedulables inside the sprint -->
-                <div class="schedulable-list-container">
+                <div class="schedulable-list-container" th:id="'schedulables-in-' + *{getId}">
                     <div th:if="${!#arrays.isEmpty(schedulables)} and ${schedulable.getStartDate()} <= *{getSprintEndDate} and ${schedulable.getEndDate()} >= *{getSprintStartDate}"
                          th:each="schedulable: ${schedulables}" >
                         <div th:replace="detailFragments :: ${schedulable.getType()}(
@@ -141,7 +141,7 @@
             </div>
         </div>
         <!-- The schedulables outside the sprint -->
-        <div class="schedulable-list-container outside-schedulable"th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
+        <div class="schedulable-list-container outside-schedulable" th:id="'schedulables-after-' + *{getId}" th:unless="${iterStat.index+1 < iterStat.size} and (${#lensfolioDates.isDayAfter(sprints.get(iterStat.index+1).getSprintStartDate(), sprint.getSprintEndDate())})">
             <div th:if="${!#arrays.isEmpty(schedulables)} and ((${iterStat.index+1 < iterStat.size} and ${schedulable.getStartDate()} < ${sprints.get(iterStat.index+1).getSprintStartDate()} and ${schedulable.getEndDate()} > *{getSprintEndDate}) or (${iterStat.index == iterStat.size-1} and ${schedulable.getEndDate()} > *{getSprintEndDate}))"
                  th:each="schedulable: ${schedulables}" >
                 <div th:replace="detailFragments :: ${schedulable.getType()}(
@@ -201,7 +201,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
         New Event
     </div>
     <div class="card-body">
-        <form action="javascript:;" th:data-url="@{add-event}" onsubmit="return sendFormViaAjax(this)" method="post" class="container-fluid js-form" th:object="${eventForm}">
+        <form action="javascript:;" th:data-url="@{add-event}" onsubmit="return sendFormViaAjax(this, 'addEventForm')" method="post" class="container-fluid js-form" th:object="${eventForm}">
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
@@ -370,7 +370,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
 
         </div>
     </div>
-
+</div>
 </div>
 
 <!-- Used for event editing popups -->
@@ -385,6 +385,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
 */-->
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
+    var canEdit = /*[[ ${canEdit} ]]*/ null;
 
     // Bind a 'characters remaining' display to their output
     showRemainingChars();
