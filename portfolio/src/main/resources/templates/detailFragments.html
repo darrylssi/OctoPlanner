@@ -82,7 +82,6 @@
     </div>
 </div>
 
-<!-- TODO Hide fields depending on schedulable type -->
 <div th:fragment="schedulableEditForm">
     <div th:id="|edit${#strings.capitalize(schedulable.getType)}Form-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
@@ -115,21 +114,21 @@
                                 <small id="editSchedulableStartDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() != 'milestone'}" class="col">
                             <div class="form-floating mb-3">
                                 <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editSchedulableStartTimeFeedback">
                                 <label class="form-label">Start Time</label>
                                 <small id="editSchedulableStartTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editSchedulableEndDateFeedback">
                                 <label class="form-label">End Date</label>
                                 <small id="editSchedulableEndDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editSchedulableEndTimeFeedback">
                                 <label class="form-label">End Time</label>
