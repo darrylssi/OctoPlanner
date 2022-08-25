@@ -180,10 +180,10 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
  * @param deadline Deadline object
  */
 function prefillDeadline(editForm, deadline) {
-    editForm.querySelector("#name").setAttribute("value", deadline.name);
-    editForm.querySelector("#description").setAttribute("value", deadline.description);
-    editForm.querySelector("#date").setAttribute("value", deadline.startDate.substring(0,10));
-    editForm.querySelector("#time").setAttribute("value", deadline.startDate.substring(11, 16));
+    editForm.querySelector("#name").value = deadline.name;
+    editForm.querySelector("#description").value =  deadline.description;
+    editForm.querySelector("#date").value = deadline.startDate.substring(0,10);
+    editForm.querySelector("#time").value = deadline.startDate.substring(11, 16);
 }
 
 
