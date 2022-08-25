@@ -1,6 +1,4 @@
 let stompClient = null;
-const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
-const EVENT_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing event messages after this many ms
 
 const schedulableTimeouts = new Map(); // holds schedulable box class names and setTimeout functions in a key/value pair mapping
 const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
@@ -88,14 +86,14 @@ function showEditingSchedulableMessage(schedulableId, schedulableType, userId, u
     const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
 
     if (userId !== docUserId) {
-        // stops any existing timeouts so that the message is shown for the full length
-        stopEditingSchedulableTimeout(schedulableId);
-
         // locate the correct elements on the page
         const editingSchedulableBoxClass = `${schedulableType}-${schedulableId}-editing-box`;
         const editingSchedulableTextBoxClass = `${schedulableType}-${schedulableId}-editing-text`;
         const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
         const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
+
+        // stops any existing timeouts so that the message is shown for the full length
+        stopEditingSchedulableTimeout(editingSchedulableBoxClass);
 
         // update the text and make it visible
         for (const schedulableTextBox of editingSchedulableTextBoxes) {

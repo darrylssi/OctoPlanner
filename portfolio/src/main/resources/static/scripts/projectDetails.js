@@ -156,7 +156,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
      }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    sendEditingSchedulableMessage(schedulableId, schedulableType); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
