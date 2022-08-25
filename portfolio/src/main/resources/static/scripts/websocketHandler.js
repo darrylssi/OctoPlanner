@@ -2,7 +2,7 @@ let stompClient = null;
 const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
 const EVENT_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing event messages after this many ms
 
-const schedulableTimeouts = new Map(); // holds schedulable box classes and setTimeout functions in a key/value pair mapping
+const schedulableTimeouts = new Map(); // holds schedulable box class names and setTimeout functions in a key/value pair mapping
 const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
 
 /**
@@ -13,11 +13,11 @@ function connect() {
     const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
-        setConnected(true);
         console.log('Connected: ' + frame);
+        stompClient.debug = function(){}; // stop logging every single message, from https://stackoverflow.com/questions/21767126/stompjs-javascript-client-logging-like-crazy-on-console
         stompClient.subscribe('/topic/editing-event', function(message) {
-            handleEventMessage(JSON.parse(message.body));
-//          TODO  handleEditingSchedulableMessage(JSON.parse(message.body));
+//            handleEventMessage(JSON.parse(message.body));
+            handleEditingSchedulableMessage(JSON.parse(message.body));
         });
     });
 }
@@ -29,7 +29,6 @@ function disconnect() {
     if(stompClient != null) {
         stompClient.disconnect();
     }
-        setConnected(false);
         console.log("Disconnected");
 }
 
@@ -50,7 +49,7 @@ function sendEditingSchedulableMessage(schedulableId, schedulableType) {
  * Sends a websocket message saying that a user has stopped editing a schedulable.
  * Won't send anything if schedulableId is undefined
  */
-function sendStopEditingMessage(schedulableId, schedulableType) {
+function sendStopEditingSchedulableMessage(schedulableId, schedulableType) {
     if (previousSchedulable !== undefined) {
         console.log('SENDING STOP MESSAGE FOR SCHEDULABLE: ' + schedulableId);
         let user = document.getElementById('user').getAttribute('data-name');
@@ -70,12 +69,14 @@ function handleEditingSchedulableMessage(editMessage) {
         const schedulableId = messageContent[0];
         const schedulableType = messageContent[1].toLowerCase();
         const userId = messageContent[2];
-        showEditingSchedulableMessage(schedulableId, schedulableType, userId);
-    } else if (messageContent.length() == 2) {
+        showEditingSchedulableMessage(schedulableId, schedulableType, userId, editMessage.from);
+    } else if (messageContent.length == 2) {
         console.log('GOT STOP MESSAGE ' + editMessage.content);
         const schedulableId = messageContent[0];
         const schedulableType = messageContent[1].toLowerCase();
-        hideEditingSchedulableMessage(schedulableId, schedulableType);
+        hideEditingSchedulableMessage(schedulableId, schedulableType, editMessage.from);
+    } else {
+        console.log('GOT BAD WEBSOCKET MESSAGE ' + editMessage.content);
     }
 }
 
@@ -83,12 +84,12 @@ function handleEditingSchedulableMessage(editMessage) {
  * Shows editing-schedulable notifications on the page
  * @param editMessage JSON object received from the WebSocket
  */
-function showEditingSchedulableMessage(schedulableId, schedulableType, userId) {
+function showEditingSchedulableMessage(schedulableId, schedulableType, userId, username) {
     const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
 
     if (userId !== docUserId) {
         // stops any existing timeouts so that the message is shown for the full length
-        stopSchedulableTimeout(schedulableId);
+        stopEditingSchedulableTimeout(schedulableId);
 
         // locate the correct elements on the page
         const editingSchedulableBoxClass = `${schedulableType}-${schedulableId}-editing-box`;
@@ -109,7 +110,7 @@ function showEditingSchedulableMessage(schedulableId, schedulableType, userId) {
         }
 
         // Hide it after 8s
-        schedulableTimeouts.set(editingSchedulableBoxClass, setTimeout(function() {hideEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
+        schedulableTimeouts.set(editingSchedulableBoxClass, setTimeout(function() {hideEditingSchedulableMessage(schedulableId, schedulableType, username)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
     }
 }
 
@@ -118,10 +119,10 @@ function showEditingSchedulableMessage(schedulableId, schedulableType, userId) {
  * Will clear the messages from all schedulable boxes for that schedulable (such as if it spans many sprints).
  * @param message the stop message that was received
  */
-function hideEditingSchedulableMessage(schedulableId, schedulableType) {
+function hideEditingSchedulableMessage(schedulableId, schedulableType, username) {
     // this check is so that if you are editing a schedulable that someone else is editing, you don't hide their message
     // when you close your form. Their message would reappear without this anyway but it avoids confusion.
-    if (document.getElementById('user').getAttribute('data-name') !== message.from) {
+    if (document.getElementById('user').getAttribute('data-name') !== username) {
         const editingSchedulableBoxId = `${schedulableType}-${schedulableId}-editing-box`;
         const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxId);
 
@@ -241,5 +242,15 @@ function hideEditMessage(message) {
 function stopEventTimeout(eventId) {
     if (eventTimeouts.has(eventId)) {
         clearTimeout(eventTimeouts.get(eventId));
+    }
+}
+
+/**
+ * Stops the timeout for the specified schedulable, if it exists
+ * @param eventId the event to stop the timeout for
+ */
+function stopEditingSchedulableTimeout(editingSchedulableBoxClass) {
+    if (schedulableTimeouts.has(editingSchedulableBoxClass)) {
+        clearTimeout(schedulableTimeouts.get(editingSchedulableBoxClass));
     }
 }
