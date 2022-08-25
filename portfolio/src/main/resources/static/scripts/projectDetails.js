@@ -3,6 +3,9 @@ const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sen
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EVENT_TYPE = "event";
+const DEADLINE_TYPE = "deadline";
+const MILESTONE_TYPE = "milestone";
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -180,11 +183,11 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
     }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingEventMessage(eventId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    sendEditingSchedulableMessage(eventId, EVENT_TYPE); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
-    sendEditMessageInterval = setInterval(function() {sendEditingEventMessage(eventId)}, EVENT_EDIT_MESSAGE_FREQUENCY)
+    sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(eventId, EVENT_TYPE)}, EVENT_EDIT_MESSAGE_FREQUENCY)
 
     /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
     editForm.querySelector("#name").setAttribute("value", eventName);
