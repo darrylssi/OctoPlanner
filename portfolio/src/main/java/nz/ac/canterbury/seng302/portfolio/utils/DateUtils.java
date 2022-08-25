@@ -123,4 +123,19 @@ public class DateUtils {
         LocalDateTime datetime = LocalDateTime.of(date, time);
         return Date.from(datetime.atZone(usersTimezone.toZoneId()).toInstant());
     }
+
+    /**
+     * Takes the start and ends of two time periods and checks whether they overlap
+     * @param startA the start time of the first time period
+     * @param endA the end time of the first time period
+     * @param startB the start time of the second time period
+     * @param endB the end time of the second time period
+     * @return true if the time periods overlap
+     */
+    public static boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
+        if (!startA.before(startB)){
+            return !startA.after(endB);
+        }
+        return !endA.before(startB);
+    }
 }

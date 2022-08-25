@@ -57,8 +57,9 @@ function deleteEvent(eventId) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        // Reload the page to get the updated list of events after the delete
-        window.location.reload();
+        // Send a websocket message to update the page after the delete
+        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+        hideModal();
     }
     deleteRequest.send();
 }
@@ -92,7 +93,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem) {
+function sendFormViaAjax(elem, formId) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -104,7 +105,8 @@ function sendFormViaAjax(elem) {
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             // Success
-            window.location.reload()
+            hideForm(formRequest.response, formId);
+            stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -196,9 +198,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
-        console.log(formId);
         let shownForm = document.getElementById(formId)
-        console.log(shownForm);
         new bootstrap.Collapse(shownForm).show();
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
     }, delay, "edit" + schedulableType + "Form-" + schedulableBoxId);
@@ -228,13 +228,14 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 }
 
 /**
- * Collapse the edit form for the specified event box.
+ * Collapse the form with the specified Id.
  * Accessed directly by the cancel button.
  * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
- * @param eventBoxId the ID of the event box to hide the form from
+ * @param eventId the ID of the event being edited
+ * @param formId the ID of the form to be closed
  */
-function hideEditEvent(eventId, eventBoxId) {
-    let editForm = document.getElementById("editSchedulableForm-" + eventBoxId);
+function hideForm(eventId, formId) {
+    let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }

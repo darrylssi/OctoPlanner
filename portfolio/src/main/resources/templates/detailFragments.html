@@ -157,7 +157,7 @@
         <div class="card">
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
+                <form action="javascript:;" th:data-id="|editEventForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
@@ -214,64 +214,6 @@
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Deadline edit form fragment -->
-<div th:fragment="editDeadlineForm">
-    <div th:id="|editDeadlineForm-${boxId}|" class="editSchedulableForm collapse">
-        <div class="card">
-            <div class="card-header" id="edit-deadline-form-header" th:text="|Editing ${deadline.getName}|"></div>
-            <div class="card-body">
-                <form th:action="@{edit-deadline/${deadline.getId()}}" class="container-fluid" method="post">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" id="editDeadlineNameInput" class="form-control" name="editDeadlineName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editDeadlineNameFeedback" required th:value="${deadline.getName()}">
-                                <label for="editDeadlineNameInput" class="form-label">Name</label>
-                                <div id="editDeadlineNameFeedback" class="invalid-feedback"></div>
-                                <span class="input-group-text remaining-chars-field">...</span>
-                            </div>
-                        </div>
-                        <div class="col-10">
-                            <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" id="editDeadlineDescriptionInput" name="editDeadlineDescription" th:maxlength="${maxDescLen}" class="form-control" th:value="${deadline.getDescription()}">
-                                <label for="editDeadlineDescriptionInput">Description</label>
-                                <span class="input-group-text remaining-chars-field">...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="date" class="form-control" name="editDeadlineDate" id="editDeadlineDate" required aria-describedby="editDeadlineDateFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toString(deadline.getStartDate())}">
-                                <label for="editDeadlineDate">Date</label>
-                                <div id="editDeadlineDateFeedback" class="invalid-feedback"></div>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="time" class="form-control" name="editDeadlineTime" id="editDeadlineTime" required aria-describedby="editDeadlineTimeFeedback" th:min="${projectStart}" th:max="${projectEnd}" th:value="${#lensfolioDates.toDateTimeString(deadline.getStartDate()).substring(11)}">
-                                <label for="editDeadlineTime">Time</label>
-                                <div id="editDeadlineTimeFeedback" class="invalid-feedback"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row justify-content-end">
-                        <ul class="col"></ul>
-                        <div class="col col-md-4 col-lg-2">
-                            <button type="button" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${deadline.getId}]], [[${boxId}]], [[*{getType}]])">Cancel</button>
-                        </div>
-                        <div class="col col-md-3 col-lg-2">
-                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
-                        </div>
-                    </div>
-                    <ul th:if="${editDeadlineFormError}">
-                        <li th:each="errMsg: ${editDeadlineFormError}" th:text="${errMsg}" class="text-danger"></li>
-                    </ul>
                 </form>
             </div>
         </div>
