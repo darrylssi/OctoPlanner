@@ -73,8 +73,9 @@ function sendStopEditingMessage(schedulableId, type) {
             console.log('SENDING STOP MESSAGE FOR ' + type +': ' + schedulableId);
         }
         let user = document.getElementById('user').getAttribute('data-name');
+        let content = `${schedulableId}, ${type}`
         stompClient.send("/app/ws", {},
-        JSON.stringify({'from':user, 'content':{schedulableId, type}}));
+        JSON.stringify({'from':user, 'content':content}));
     }
 }
 
@@ -123,7 +124,7 @@ function showEditingMessage(editMessage) {
 
     if (userId !== docUserId) {
         // stops any existing timeouts so that the message is shown for the full length
-        stopSchedulableTimeout(schedulableId);
+        stopSchedulableTimeout(schedulableId, type);
 
         // locate the correct elements on the page
         const editingSchedulableBoxClass = `event-${schedulableId}-editing-box`;
@@ -144,7 +145,7 @@ function showEditingMessage(editMessage) {
         }
 
         // Hide it after 8s
-        schedulableTimeouts.set(schedulableId, setTimeout(function() {hideEditMessage(editMessage)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
+        schedulableTimeouts.set((schedulableId, type), setTimeout(function() {hideEditMessage(editMessage)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
     }
 }
 
@@ -157,17 +158,18 @@ function hideEditMessage(message) {
     // this check is so that if you are editing an schedulable that someone else is editing, you don't hide their message
     // when you close your form. Their message would reappear without this anyway but it avoids confusion.
     if (document.getElementById('user').getAttribute('data-name') !== message.from) {
-        const schedulableId = (message.content.split(',').length === 2) ? message.content.split(',')[0] : message.content;
+        const schedulableId = message.content.split(',')[0];
+        const type = message.content.split(',')[1];
 
 
-        const editingSchedulableBoxId = `event-${schedulableId}-editing-box`;
+        const editingSchedulableBoxId = `${type}-${schedulableId}-editing-box`;
         const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxId);
         for (const schedulableBox of editingSchedulableBoxes) {
             if (schedulableBox) {
                 schedulableBox.style.visibility = "hidden";
             }
         }
-        stopSchedulableTimeout(schedulableId);
+        stopSchedulableTimeout(schedulableId, type);
     }
 }
 
@@ -175,9 +177,9 @@ function hideEditMessage(message) {
  * Stops the timeout for the specified schedulable, if it exists
  * @param schedulableId the schedulable to stop the timeout for
  */
-function stopSchedulableTimeout(schedulableId) {
-    if (schedulableTimeouts.has(schedulableId)) {
-        clearTimeout(schedulableTimeouts.get(schedulableId));
+function stopSchedulableTimeout(schedulableId, type) {
+    if (schedulableTimeouts.has((schedulableId, type))) {
+        clearTimeout(schedulableTimeouts.get((schedulableId, type)));
     }
 }
 
@@ -187,7 +189,7 @@ function stopSchedulableTimeout(schedulableId) {
 */
 function updateSchedulable(schedulableMessage) {
     if (updateLogs) {
-        console.log("Got update schedulable message for schedulable " + schedulableMessage.id);
+        console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
     }
 // get a list of schedulable list containers
     const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
@@ -195,7 +197,7 @@ function updateSchedulable(schedulableMessage) {
 // check each schedulable list container to see if it has the schedulable in it / should have the schedulable in it
     for (let schedulableListContainer of schedulable_lists) {
           //check if schedulable is there, then remove schedulable if it exists
-          let schedulable = schedulableListContainer.querySelector('#event-' + schedulableMessage.id);
+          let schedulable = schedulableListContainer.querySelector('#' + schedulableMessage.type + '-' + schedulableMessage.id);
           if (schedulable !== null) {
             schedulable.parentNode.parentNode.parentNode.remove();
           }
@@ -203,7 +205,7 @@ function updateSchedulable(schedulableMessage) {
           let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
         if(idIndex != -1) {
 
-            const url = BASE_URL + "event-frag/" + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
+            const url = BASE_URL + schedulableMessage.type + "-frag/" + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
             const schedulableFragRequest = new XMLHttpRequest();
             schedulableFragRequest.open("GET", url, true);
             const tempIdIndex = idIndex;
