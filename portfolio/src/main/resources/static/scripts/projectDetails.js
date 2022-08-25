@@ -132,11 +132,10 @@ function sendFormViaAjax(elem, formId) {
 }
 
 /**
- * TODO this whole function
  * An attempt to make this function deal with schedulable objects...
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
- * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone) as a string
+ * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
  */
 function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     /* Capitalize only the first letter of the schedulableType string */
@@ -157,23 +156,20 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
     let differentSchedulable = false;
     for (let element of collapseElementList) {
-        if (element.id.indexOf("edit" + schedulableType + "Form") !== -1) {
-            new bootstrap.Collapse(element).hide();
-            /* Check whether any form is for a different schedulable, to see whether
-               we need to send a stop editing message */
-            if (element.id.indexOf("edit" + schedulableType + "Form-" + schedulableBoxId) === -1) {
-                differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
-                previousSchedulable.id = (element.id.split('-')[1]);  // Get schedulable id from that form
-                previousSchedulable.type = schedulableType;
-
-            }
+        new bootstrap.Collapse(element).hide();
+        /* Check whether any form is for a different schedulable, to see whether
+           we need to send a stop editing message */
+        if (element.id.indexOf("edit" + schedulableType + "Form-" + schedulableBoxId) === -1) {
+            differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+            previousSchedulable.id = (element.id.split('-')[1]);  // Get schedulable id from that form
+            previousSchedulable.type = schedulableType;
         }
     }
     /* If a form we just closed was for a different schedulable, we need to
        send a stop editing message */
-//     if (differentSchedulable) {
-//         stopEditing(); TODO editing messages for schedulables
-//     }
+    //if (differentSchedulable) {
+    //     stopEditing(); //TODO editing messages for schedulables
+    //}
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
     // sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp TODO popups for schedulables
@@ -182,18 +178,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     }
     // sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
-    // TODO redo form populating so it works with schedulables
-    /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
-    //editForm.querySelector("#name").setAttribute("value", eventName);
-    //editForm.querySelector("#description").setAttribute("value", eventDescription);
-    //editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
-    //editForm.querySelector("#startDate").setAttribute("min", projectStart);
-    //editForm.querySelector("#startDate").setAttribute("max", projectEnd);
-    //editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
-    //editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
-    //editForm.querySelector("#endDate").setAttribute("min", projectStart);
-    //editForm.querySelector("#endDate").setAttribute("max", projectEnd);
-    //editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
