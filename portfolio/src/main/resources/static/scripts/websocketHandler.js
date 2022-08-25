@@ -47,7 +47,7 @@ function sendEditingSchedulableMessage(schedulableId, schedulableType) {
  * Won't send anything if schedulableId is undefined
  */
 function sendStopEditingSchedulableMessage(schedulableId, schedulableType) {
-    if (previousSchedulable !== undefined) {
+    if (previousSchedulable.id !== -1) { // -1 is when there is no previousSchedulable
         console.log('SENDING STOP MESSAGE FOR SCHEDULABLE: ' + schedulableId + " " + schedulableType);
         let user = document.getElementById('user').getAttribute('data-name');
         stompClient.send("/app/ws", {},

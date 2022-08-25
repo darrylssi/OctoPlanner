@@ -173,7 +173,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 /**
  * Collapse the edit form for the specified schedulable box.
  * Accessed directly by the cancel button.
- * TODO SHOULD, but DOESN'T send a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
  * @param schedulableId the id of the schedulable object whose edit form is being hidden
  * @param schedulableBoxId the id of the box in which the edit form will be hidden
  * @param schedulablhideEditSchedulableeType the type of the schedulable whose edit form is being hidden
