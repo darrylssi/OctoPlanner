@@ -22,27 +22,60 @@ describe('Navigation', () => {
   })
 })
 
+describe('Setup', () => {
+  it('already has the test user', () => {
+    cy.fixture('users/student.json').then((user) => {
+      cy.task('queryDb', `SELECT COUNT(*) as "rowCount" FROM USERS WHERE username=` + user.username).then((result) => {
+        if(result[0].rowCount != 1) {
+          cy.visit('/register')
+
+          cy.get('[data-cy="firstName"]').type(user.fname)
+          cy.get('[data-cy="middleName"]').type(user.mname)
+          cy.get('[data-cy="lastName"]').type(user.lname)
+          cy.get('[data-cy="nickname"]').type(user.nickname)
+          cy.get('[data-cy="username"]').type(user.username)
+          cy.get('[data-cy="email"]').type(user.email)
+          cy.get('[data-cy="pronouns"]').type(user.pronouns)
+          cy.get('[data-cy="bio"]').type(user.bio)
+          cy.get('[data-cy="password"]').type(user.password)
+          cy.get('[data-cy="passwordConfirm"]').type(user.password)
+
+          cy.get('[data-cy="register-button"]').click()
+
+          // Should be redirected to profile page
+          cy.url().should('match', /users\/\d*/)
+        }
+      })
+    })
+  })
+
+  it('is logged out', () => {
+    cy.getCookie('lens-session-token').should('not.exist')
+  })
+})
+
 describe('I can log into an existing account', () => {
   it('shows typed data', () => {
     cy.visit('/login')
 
     cy.get('[data-cy="username"]')
-      .type('example_username')
-      .should('have.value', 'example_username')
+      .type('cy-username')
+      .should('have.value', 'cy-username')
     cy.get('[data-cy="password"]')
-      .type('example_password')
-      .should('have.value', 'example_password')
+      .type('cy-password')
+      .should('have.value', 'cy-password')
   })
 
   it('redirects to profile page on successful login', () => {
-    cy.visit('/login')
+    cy.fixture('users/student.json').then((user) => {
+      cy.visit('/login')
 
-    // This will be reliant on your user database
-    cy.get('[data-cy="username"]').type('cypress_test_username')
-    cy.get('[data-cy="password"]').type('cypress_test_password')
-    cy.get('[data-cy="login-button"]').click()
+      cy.get('[data-cy="username"]').type(user.username)
+      cy.get('[data-cy="password"]').type(user.password)
+      cy.get('[data-cy="login-button"]').click()
 
-    // Should be redirected to profile page
-    cy.url().should('match', /users\/\d*/)
+      // Should be redirected to profile page
+      cy.url().should('match', /users\/\d*/)
+    })
   })
 })
