@@ -14,12 +14,12 @@ import java.util.TimeZone;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
- * <p>EventForm class that's given to the user inside templates.</p>
+ * <p>SchedulableForm class that's given to the user inside templates.</p>
  * 
  * This proxy exists for security reasons, as directly giving Event objects from the
  * database flags Sonarqube errors.
  */
-public class EventForm {
+public class SchedulableForm {
     @NotBlank(message="Event name cannot be blank")
     @Size(min=MIN_NAME_LENGTH,
             max=MAX_NAME_LENGTH,

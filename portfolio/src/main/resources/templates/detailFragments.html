@@ -88,11 +88,11 @@
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${schedulable.getName}|"></div>
             <div class="card-body">
                 <form action="javascript:;" th:data-url="@{edit-{type}/{id}(id=${schedulable.getId()},type=${schedulable.getType()})}"
-                      onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}"> <!-- TODO This should get something like schedulable -->
+                      onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editSchedulableNameFeedback" required>
+                                <input type="text" class="form-control" th:name="name" th:value="${schedulable.getName()}"  th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editSchedulableNameFeedback" required>
                                 <label class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                                 <small id="editSchedulableNameFeedback" class="text-danger"></small>
@@ -100,7 +100,7 @@
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
+                                <input type="text" th:name="description" th:value="${schedulable.getDescription()}" th:maxlength="${maxDescLen}" class="form-control">
                                 <label class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -109,28 +109,28 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editSchedulableStartDateFeedback">
+                                <input type="date" class="form-control" th:name="startDate" th:value="${schedulable.getStartDay()}" required aria-describedby="editSchedulableStartDateFeedback">
                                 <label class="form-label">Start Date</label>
                                 <small id="editSchedulableStartDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div th:if="${schedulable.getType() != 'milestone'}" class="col">
                             <div class="form-floating mb-3">
-                                <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editSchedulableStartTimeFeedback">
+                                <input type="time" class="form-control" th:name="startTime" th:value="${schedulable.getStartTime()}" required aria-describedby="editSchedulableStartTimeFeedback">
                                 <label class="form-label">Start Time</label>
                                 <small id="editSchedulableStartTimeFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editSchedulableEndDateFeedback">
+                                <input type="date" class="form-control" th:name="endDate" th:value="${schedulable.getEndDay()}" required aria-describedby="editSchedulableEndDateFeedback">
                                 <label class="form-label">End Date</label>
                                 <small id="editSchedulableEndDateFeedback" class="text-danger"></small>
                             </div>
                         </div>
                         <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editSchedulableEndTimeFeedback">
+                                <input type="time" class="form-control" th:name="endTime" th:value="${schedulable.getEndTime()}" required aria-describedby="editSchedulableEndTimeFeedback">
                                 <label class="form-label">End Time</label>
                                 <small id="editSchedulableEndTimeFeedback" class="text-danger"></small>
                             </div>
@@ -152,11 +152,11 @@
 </div>
 
 <div th:fragment="eventEditForm">
-    <div th:id="|editEventForm-${boxId}|" class="editSchedulableForm collapse">
+    <div th:id="|editSchedulableForm-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-id="|editEventForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
+                <form action="javascript:;" th:data-id="|editSchedulableForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">

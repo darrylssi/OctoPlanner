@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -110,6 +111,22 @@ public class Event implements Schedulable {
 
     public void setEndDate(Date newEndDate) {
         this.eventEndDate = newEndDate;
+    }
+
+    public String getStartDay() {
+        return DateUtils.toString(eventStartDate);
+    }
+
+    public String getStartTime() {
+        return DateUtils.toDateTimeString(eventStartDate).substring(11, 16);
+    }
+
+    public String getEndDay() {
+        return DateUtils.toString(eventEndDate);
+    }
+
+    public String getEndTime() {
+        return DateUtils.toDateTimeString(eventEndDate).substring(11, 16);
     }
 
     public Project getParentProject() {

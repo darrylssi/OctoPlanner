@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -110,6 +111,22 @@ public class Deadline implements Schedulable {
 
     public void setEndDate(Date date) {
         setStartDate(date);
+    }
+
+    public String getStartDay() {
+        return DateUtils.toString(deadlineDate);
+    }
+
+    public String getStartTime() {
+        return DateUtils.toDateTimeString(deadlineDate).substring(11, 16);
+    }
+
+    public String getEndDay() {
+        return getStartDay();
+    }
+
+    public String getEndTime() {
+        return getStartTime();
     }
 
     /**

@@ -1,6 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
@@ -23,10 +23,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
-
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,16 +37,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TimeZone;
-
-import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 /**
@@ -82,12 +70,12 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
-                EventForm eventForm,
+                SchedulableForm schedulableForm,
                 TimeZone userTimezone,
                 Model model
     ){
         PrincipalData thisUser = PrincipalData.from(principal);
-        prePopulateEventForm(eventForm, userTimezone.toZoneId());
+        prePopulateSchedulableForm(schedulableForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
 
         /* Return the name of the Thymeleaf template */
@@ -147,7 +135,7 @@ public class DetailsController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
-        model.addAttribute("editEventForm", new EventForm());
+        model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         model.addAttribute("tab", 0);
     }
@@ -179,20 +167,20 @@ public class DetailsController extends PageController {
 
     /**
      * Pre-populates the event form with default values, if they don't already exist
-     * @param eventForm The eventForm object from your endpoint args
+     * @param schedulableForm The schedulableForm object from your endpoint args
      */
-    private void prePopulateEventForm(EventForm eventForm, ZoneId userTimezone) {
+    private void prePopulateSchedulableForm(SchedulableForm schedulableForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
         // If field isn't filled (because we just loaded the page), use this default value
-        if (eventForm.getStartTime() == null) {
-            eventForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
-            eventForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
+        if (schedulableForm.getStartTime() == null) {
+            schedulableForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
+            schedulableForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
         }
         // Default the value to 1 minute in the future
-        if (eventForm.getEndTime() == null) {
-            eventForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
-            eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
+        if (schedulableForm.getEndTime() == null) {
+            schedulableForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
+            schedulableForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
     }
 }
