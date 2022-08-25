@@ -94,7 +94,7 @@
         <div class="card">
             <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
+                <form action="javascript:;" th:data-id="|editEventForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
@@ -145,7 +145,7 @@
                     <div class="row justify-content-end">
                         <ul id="errors" class="col"></ul>
                         <div class="col col-md-4 col-lg-2">
-                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditEvent([[${event.getId}]], [[${boxId}]])">Cancel</button>
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideForm([[${event.getId}]], 'editEventForm-' + [[${boxId}]])">Cancel</button>
                         </div>
                         <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
