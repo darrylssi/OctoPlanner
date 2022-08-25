@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
@@ -12,7 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
 
 /**
  * Controller to handle requests related to deadlines.
@@ -25,24 +31,20 @@ public class DeadlineController extends PageController {
     @Autowired
     private DeadlineService deadlineService;
 
+
     /**
-     * Post request to add a deadline to a project.
-     * @param principal Authenticated user
-     * @param projectId ID of the project the deadline will be added to
-     * @param deadlineName Name of the deadline
-     * @param deadlineDate Date of the deadline
-     * @param deadlineTime Time of the deadline
-     * @param deadlineDescription Description of the deadline
-     * @return Project details page
+     * Endpoint for adding events to the database, or conveying errors
+     * to the user
+     * @param projectId The project this event will be bound to
+     * @param schedulableForm The form submitted by our lovely customers
+     * @return  A response of either 200 (success), 403 (forbidden),
+     *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-deadline")
     public String postAddDeadline(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
-            @RequestParam(name="deadlineName") String deadlineName,
-            @RequestParam(name="deadlineDate") String deadlineDate,
-            @RequestParam(name="deadlineTime") String deadlineTime,
-            @RequestParam(name="deadlineDescription") String deadlineDescription
+            @Valid SchedulableForm schedulableForm
     ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
@@ -51,13 +53,13 @@ public class DeadlineController extends PageController {
 
         Deadline deadline = new Deadline();
 
-        String deadlineDateTime = deadlineDate + " " + deadlineTime;
+        String deadlineDateTime = schedulableForm.getStartDate() + " " + schedulableForm.getStartTime();
 
         // Set details of new deadline object
         deadline.setParentProject(parentProject);
-        deadline.setName(deadlineName);
+        deadline.setName(schedulableForm.getName());
         deadline.setStartDate(DateUtils.toDateTime(deadlineDateTime));
-        deadline.setDescription(deadlineDescription);
+        deadline.setDescription(schedulableForm.getDescription());
 
         deadlineService.saveDeadline(deadline);
 

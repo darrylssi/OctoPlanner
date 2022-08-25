@@ -151,70 +151,64 @@
     </div>
 </div>
 
-<div th:fragment="eventEditForm">
-    <div th:id="|editSchedulableForm-${boxId}|" class="editSchedulableForm collapse">
-        <div class="card">
-            <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
-            <div class="card-body">
-                <form action="javascript:;" th:data-id="|editSchedulableForm-${boxId}|" th:data-url="@{edit-event/{id}(id=${event.getId()})}" th:onsubmit="return sendFormViaAjax(this, this.getAttribute('data-id'))" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required>
-                                <label class="form-label">Name</label>
-                                <span class="input-group-text remaining-chars-field">...</span>
-                                <small id="editEventNameFeedback" class="text-danger"></small>
-                            </div>
+<!-- Add Schedulable Form -->
+<div th:fragment="schedulableAddForm">
+    <div class="card collapse" th:id="|add${#strings.capitalize(type)}Form|" th:classappend="${#fields.hasErrors('schedulableForm.*') OR !#arrays.isEmpty(schedulableFormError) ? 'show' : null}">
+        <div class="card-header" th:text="|New ${#strings.capitalize(type)}|"></div>
+        <div class="card-body">
+            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" onsubmit="return sendFormViaAjax(this, 'addSchedulableForm')" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSchedulableNameInput" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control" aria-describedby="schedulableNameFeedback">
+                            <label class="form-label" for="addSchedulableNameInput">Name</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
                         </div>
-                        <div class="col-10">
-                            <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
-                                <label class="form-label">Description</label>
-                                <span class="input-group-text remaining-chars-field">...</span>
-                            </div>
-                        </div>
+                        <small id="addSchedulableNameFeedback" class="text-danger"></small>
                     </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editEventStartDateFeedback">
-                                <label class="form-label">Start Date</label>
-                                <small id="editEventStartDateFeedback" class="text-danger"></small>
-                            </div>
+                    <div class="col-10">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description">
+                            <label for="addSchedulableDescriptionInput">Description</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
                         </div>
-                        <div class="col">
-                            <div class="form-floating mb-3">
-                                <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editEventStartTimeFeedback">
-                                <label class="form-label">Start Time</label>
-                                <small id="editEventStartTimeFeedback" class="text-danger"></small>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editEventEndDateFeedback">
-                                <label class="form-label">End Date</label>
-                                <small id="editEventEndDateFeedback" class="text-danger"></small>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="form-floating mb-3 has-validation">
-                                <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editEventEndTimeFeedback">
-                                <label class="form-label">End Time</label>
-                                <small id="editEventEndTimeFeedback" class="text-danger"></small>
-                            </div>
-                        </div>
+
                     </div>
-                    <div class="row justify-content-end">
-                        <ul id="errors" class="col"></ul>
-                        <div class="col col-md-4 col-lg-2">
-                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${event.getId}]], [[${boxId}]], [[*{getType}]])">Cancel</button>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" th:field="*{startDate}" class="form-control" id="schedulableStartDate" aria-describedby="schedulableStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="schedulableStartDate">Start Date</label>
                         </div>
-                        <div class="col col-md-3 col-lg-2">
-                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
-                        </div>
+                        <small id="addSchedulableStartDateFeedback" class="text-danger"></small>
                     </div>
-                </form>
-            </div>
+                    <div th:if="${type != 'milestone'}" class="col">
+                        <div class="form-floating mb-3">
+                            <input type="time" th:field="*{startTime}" class="form-control" id="schedulableStartTime" aria-describedby="schedulableStartTimeFeedback" required>
+                            <label for="schedulableStartTime">Start Time</label>
+                        </div>
+                        <small id="addSchedulableStartTimeFeedback" class="text-danger"></small>
+                    </div>
+                    <div th:if="${type == 'event'}" class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" th:field="*{endDate}" class="form-control" id="schedulableEndDate" aria-describedby="schedulableEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="schedulableEndDate">End Date</label>
+                        </div>
+                        <small id="addSchedulableEndDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div th:if="${type == 'event'}" class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="time" th:field="*{endTime}" class="form-control" id="schedulableEndTime" aria-describedby="schedulableEndDateFeedback" required>
+                            <label for="schedulableEndTime">End Time</label>
+                        </div>
+                        <small id="addSchedulableEndTimeFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
