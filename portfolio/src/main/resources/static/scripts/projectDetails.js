@@ -165,6 +165,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    showRemainingChars();
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
@@ -276,4 +277,17 @@ function displayRemainingCharacters(input, display) {
     // Bind the event, then give it a kick to initialise the display
     input.addEventListener("input", event);
     event();
+}
+
+/**
+ * Shows the number of remaining characters on an input field with class 'limited-text-input'
+ * in a span tag with class 'remaining-chars-field'.
+ * This is called when the page is loaded and when the edit button is clicked.
+ */
+function showRemainingChars() {
+    for (const parent of document.getElementsByClassName('limited-text-input')) {
+        const input = parent.getElementsByTagName('input')[0];
+        const display = parent.getElementsByClassName('remaining-chars-field')[0];
+        displayRemainingCharacters(input, display);
+    }
 }

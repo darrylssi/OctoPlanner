@@ -37,7 +37,8 @@
     </div>
 </div>
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
-<div class="container-fluid content">
+<div class="container-fluid content" th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
+         projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}" >
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
         <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
@@ -115,7 +116,7 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})" />   
             </div>
         </div>
     </div>
@@ -250,8 +251,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                             <div class="form-floating mb-3">
                                 <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' "
                                        id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback"
-                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
-                                       th:name="deadlineDate">
+                                       th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineDate">
                                 <label for="deadlineDate">Date</label>
                                 <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
                                 <script>
@@ -263,8 +263,7 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                             <div class="form-floating mb-3">
                                 <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' "
                                        id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback"
-                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
-                                       th:name="deadlineTime">
+                                       th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineTime">
                                 <label for="deadlineTime">Time</label>
                                 <div id="deadlineTimeFeedb
 
@@ -297,11 +296,7 @@ ack" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
 
     // Bind a 'characters remaining' display to their output
-    for (const parent of document.getElementsByClassName('limited-text-input')) {
-        const input = parent.getElementsByTagName('input')[0];
-        const display = parent.getElementsByClassName('remaining-chars-field')[0];
-        displayRemainingCharacters(input, display);
-    }
+    showRemainingChars();
 
     /** Required for initialisation of bootstrap tooltip
 
