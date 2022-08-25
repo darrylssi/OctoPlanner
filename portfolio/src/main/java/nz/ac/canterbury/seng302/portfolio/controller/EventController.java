@@ -102,7 +102,7 @@ public class EventController extends PageController {
 
     /**
      * Handle edit requests for events. Validate the form and determine the response
-     * @param editventForm The form submitted by the user
+     * @param editEventForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
      * @return  A response of either 200 (success), 403 (forbidden),
