@@ -1,6 +1,6 @@
 let stompClient = null;
 
-const schedulableTimeouts = new Map(); // holds schedulable box class names and setTimeout functions in a key/value pair mapping
+const schedulableTimeouts = new Map(); // holds schedulable editing box class names and setTimeout functions in a key/value pair mapping
 const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
 
 /**
@@ -14,7 +14,6 @@ function connect() {
         console.log('Connected: ' + frame);
         stompClient.debug = function(){}; // stop logging every single message, from https://stackoverflow.com/questions/21767126/stompjs-javascript-client-logging-like-crazy-on-console
         stompClient.subscribe('/topic/editing-event', function(message) {
-//            handleEventMessage(JSON.parse(message.body));
             handleEditingSchedulableMessage(JSON.parse(message.body));
         });
     });
@@ -35,7 +34,7 @@ function disconnect() {
  * Format: `schedulableType,schedulableId,userId'.
  */
 function sendEditingSchedulableMessage(schedulableId, schedulableType) {
-    console.log("SENDING EDITING MESSAGE FOR SCHEDULABLE: " + schedulableId)
+    console.log("SENDING EDITING MESSAGE FOR SCHEDULABLE: " + schedulableId + " " + schedulableType)
     let user = document.getElementById('user').getAttribute('data-name');
     let userId = document.getElementById('userId').getAttribute('data-name');
     let content = `${schedulableId},${schedulableType},${userId}`;
@@ -49,7 +48,7 @@ function sendEditingSchedulableMessage(schedulableId, schedulableType) {
  */
 function sendStopEditingSchedulableMessage(schedulableId, schedulableType) {
     if (previousSchedulable !== undefined) {
-        console.log('SENDING STOP MESSAGE FOR SCHEDULABLE: ' + schedulableId);
+        console.log('SENDING STOP MESSAGE FOR SCHEDULABLE: ' + schedulableId + " " + schedulableType);
         let user = document.getElementById('user').getAttribute('data-name');
         stompClient.send("/app/ws", {},
         JSON.stringify({'from':user, 'content':`${schedulableId},${schedulableType}`}));
