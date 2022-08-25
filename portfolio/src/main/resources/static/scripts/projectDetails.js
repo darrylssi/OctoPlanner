@@ -103,7 +103,7 @@ function sendFormViaAjax(elem, formId) {
     formRequest.onload = () => {
         if (formRequest.status == 200) {
             // Success
-            hideEditEvent(formRequest.response, formId);
+            hideForm(formRequest.response, formId);
             stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
@@ -151,7 +151,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        hideEditEvent(eventId, "editEventForm-" + eventBoxId);
+        hideForm(eventId, "editEventForm-" + eventBoxId);
         return;
     }
 
@@ -208,12 +208,13 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 }
 
 /**
- * Collapse the edit form for the specified event box.
+ * Collapse the form with the specified Id.
  * Accessed directly by the cancel button.
  * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
- * @param eventBoxId the ID of the event box to hide the form from
+ * @param eventId the ID of the event being edited
+ * @param formId the ID of the form to be closed
  */
-function hideEditEvent(eventId, formId) {
+function hideForm(eventId, formId) {
     let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
