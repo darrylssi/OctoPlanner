@@ -177,6 +177,14 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
                     projectEnd=${projectEnd})" />
+    <div th:replace="detailFragments :: schedulableAddForm(
+                    type='milestone',
+                    canEdit=${canEdit},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectStart=${projectStart},
+                    projectEnd=${projectEnd})" />
 
 </div>
 

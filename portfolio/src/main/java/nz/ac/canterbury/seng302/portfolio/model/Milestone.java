@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.model;
 
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -110,6 +111,22 @@ public class Milestone implements Schedulable {
 
     public void setEndDate(Date date) {
         setStartDate(date);
+    }
+
+    public String getStartDay() {
+        return DateUtils.toString(milestoneDate);
+    }
+
+    public String getStartTime() {
+        return null;
+    }
+
+    public String getEndDay() {
+        return getStartDay();
+    }
+
+    public String getEndTime() {
+        return getStartTime();
     }
 
     /**
