@@ -32,7 +32,7 @@ function deleteObject(id, type) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the delete
-        stompClient.send("/app/schedulables", {}, JSON.stringify({id: eventId, type: EVENT_TYPE}));
+        stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
         hideModal();
     }
     deleteRequest.send();
