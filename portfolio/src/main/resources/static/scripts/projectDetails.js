@@ -1,6 +1,6 @@
 let previousSchedulable; // the previous schedulable being edited by THIS user (only one can be edited at a time)
 let previousSchedulableType;
-const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an schedulable
+const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
