@@ -40,3 +40,7 @@ p, #calendarTitle {
 .fc .fc-daygrid-day.fc-day-today {
     background-color: #ff9bd588;
 }
+
+.hidden {
+    visibility:hidden;
+}
