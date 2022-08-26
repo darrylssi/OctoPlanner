@@ -161,6 +161,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
  * @param schedulableType the type of the schedulable whose edit form is being hidden
  */
 function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    console.log(schedulableType);
     schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
     if (editForm) { // Just in case
@@ -168,7 +169,7 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     }
     previousSchedulable.id = schedulableId;
     previousSchedulable.type = schedulableType;
-//    stopEditing();
+    stopEditing();
 }
 
 /**
