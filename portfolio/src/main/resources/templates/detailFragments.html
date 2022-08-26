@@ -194,7 +194,7 @@
     <div class="card collapse" th:id="|add${#strings.capitalize(type)}Form|" th:classappend="${#fields.hasErrors('schedulableForm.*') OR !#arrays.isEmpty(schedulableFormError) ? 'show' : null}">
         <div class="card-header" th:text="|New ${#strings.capitalize(type)}|"></div>
         <div class="card-body">
-            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" onsubmit="return sendFormViaAjax(this, 'addSchedulableForm')" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
+            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" th:onsubmit="return sendFormViaAjax(this, 'addSchedulableForm', [[${type}]])" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
                 <div class="row">
                     <div class="col">
                         <div class="form-floating input-group mb-3 limited-text-input">

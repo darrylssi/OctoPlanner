@@ -117,6 +117,7 @@ public class MessageMappingController {
             schedulableMessageOutput = new SchedulableMessageOutput();
             schedulableMessageOutput.setSchedulableListIds(new ArrayList<>());
             schedulableMessageOutput.setId(schedulableMessage.getId());
+            schedulableMessageOutput.setType(schedulableMessage.getType());
         }
 
         return schedulableMessageOutput;

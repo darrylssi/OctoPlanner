@@ -1,7 +1,5 @@
 const previousSchedulable = {type:"", id:-1}; // the previous schedulable being edited by THIS user (only one can be edited at a time)
-let previousEvent;
 const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
-const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
@@ -55,7 +53,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem, formId) {
+function sendFormViaAjax(elem, formId, type) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -68,7 +66,7 @@ function sendFormViaAjax(elem, formId) {
         if (formRequest.status === 200) {
             // Success
             hideForm(formRequest.response, formId);
-            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response}));
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -269,8 +267,8 @@ function hideForm(schedulableId, formId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousSchedulable = schedulableId;
-    previousSchedulableType = schedulableType;
+    previousSchedulable.id = schedulableId;
+    previousSchedulable.type = schedulableType;
     stopEditing();
 }
 
@@ -281,7 +279,7 @@ function stopEditing() {
     if (sendEditMessageInterval) {
         clearInterval(sendEditMessageInterval);
     }
-    sendStopEditingSchedulableMessage(previousSchedulable.id, previousSchedulable.type);
+    sendStopEditingMessage(previousSchedulable.id, previousSchedulable.type);
 }
 
 /**

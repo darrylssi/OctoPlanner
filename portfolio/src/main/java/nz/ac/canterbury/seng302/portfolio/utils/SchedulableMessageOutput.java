@@ -25,6 +25,7 @@ public class SchedulableMessageOutput {
     public static final String SCHEDULABLE_AFTER_ID_FORMAT = "%d-after-%d"; // id of schedulable after sprint box
 
     private int id;
+    private String type;
     // NOTE if you change the names of these lists (or any of these variables), you will need to change them in websocketHandler.js
     private List<String> schedulableListIds; // List of all display boxes that this schedulable is included in
     private List<String> nextSchedulableIds; // List of schedulables displayed immediately after this schedulable in each box
@@ -44,6 +45,7 @@ public class SchedulableMessageOutput {
      */
     public SchedulableMessageOutput(Schedulable schedulable, List<Sprint> sprints, List<Schedulable> schedulables) {
         this.id = schedulable.getId();
+        this.type = schedulable.getType();
 
         // Set the lists
         this.generateLists(schedulable, sprints, schedulables);
@@ -151,6 +153,10 @@ public class SchedulableMessageOutput {
     public int getId(){
         return  id;
     }
+
+    public void setType(String type) { this.type = type; }
+
+    public String getType() { return type; }
 
     public List<String> getSchedulableListIds() {
         return schedulableListIds;

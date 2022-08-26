@@ -3,7 +3,7 @@ const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout f
 const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
 
 // logging consts to hide certain things while developing
-const editingLogs = false;
+const editingLogs = true;
 const updateLogs = true;
 
 /**
@@ -19,7 +19,7 @@ function connect() {
         stompClient.subscribe('/topic/editing-schedulable', function(message) {
             handleSchedulableMessage(JSON.parse(message.body));
         });
-        stompClient.subscribe('/topic/schedulable', function(schedulableMessageOutput) {
+        stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
             updateSchedulable(JSON.parse(schedulableMessageOutput.body));
         });
     });
@@ -163,6 +163,7 @@ function stopSchedulableTimeout(schedulableId, type) {
 function updateSchedulable(schedulableMessage) {
     if (updateLogs) {
         console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
+        console.log(schedulableMessage);
     }
 // get a list of schedulable list containers
     const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
