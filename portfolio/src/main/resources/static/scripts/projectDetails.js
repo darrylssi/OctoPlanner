@@ -165,18 +165,19 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
             previousSchedulable.type = schedulableType;
         }
     }
+
     /* If a form we just closed was for a different schedulable, we need to
        send a stop editing message */
-    //if (differentSchedulable) {
-    //     stopEditing(); //TODO editing messages for schedulables
-    //}
+     if (differentSchedulable) {
+         stopEditing();
+     }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    // sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp TODO popups for schedulables
+    sendEditingSchedulableMessage(schedulableId, schedulableType); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
-    // sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
@@ -191,7 +192,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 /**
  * Collapse the edit form for the specified schedulable box.
  * Accessed directly by the cancel button.
- * TODO SHOULD, but DOESN'T send a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
  * @param schedulableId the id of the schedulable object whose edit form is being hidden
  * @param schedulableBoxId the id of the box in which the edit form will be hidden
  * @param schedulableType the type of the schedulable whose edit form is being hidden
@@ -208,7 +209,7 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     }
     previousSchedulable.id = schedulableId;
     previousSchedulable.type = schedulableType;
-//    stopEditing();
+    stopEditing();
 }
 
 /**
@@ -228,13 +229,13 @@ function hideForm(eventId, formId) {
 }
 
 /**
- * Sends a stop editing message for the previously edited event, and stops any repeating edit messages from being sent.
+ * Sends a stop editing message for the previously edited schedulable, and stops any repeating edit messages from being sent.
  */
 function stopEditing() {
     if (sendEditMessageInterval) {
         clearInterval(sendEditMessageInterval);
     }
-    sendStopEditingMessage(previousEvent);
+    sendStopEditingSchedulableMessage(previousSchedulable.id, previousSchedulable.type);
 }
 
 /**
