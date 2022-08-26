@@ -5,6 +5,9 @@ const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sen
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EVENT_TYPE = "event";
+const DEADLINE_TYPE = "deadline";
+const MILESTONE_TYPE = "milestone";
 
 /** Hides the confirm delete modal without deleting a sprint/event/deadline */
 function hideModal() {
@@ -29,7 +32,7 @@ function deleteObject(id, type) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the delete
-        stompClient.send("/app/events", {}, JSON.stringify({id: id})); // TODO should only send if it is an event?
+        stompClient.send("/app/schedulables", {}, JSON.stringify({id: eventId, type: EVENT_TYPE}));
         hideModal();
     }
     deleteRequest.send();
@@ -65,7 +68,7 @@ function sendFormViaAjax(elem, formId) {
         if (formRequest.status === 200) {
             // Success
             hideForm(formRequest.response, formId);
-            stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -256,16 +259,18 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
 /**
  * Collapse the form with the specified Id.
  * Accessed directly by the cancel button.
- * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
- * @param eventId the ID of the event being edited
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * @param schedulableId the ID of the schedulable being edited
  * @param formId the ID of the form to be closed
+ * @param schedulableType the type of the editable being edited
  */
-function hideForm(eventId, formId) {
+function hideForm(schedulableId, formId, schedulableType) {
     let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousEvent = eventId;
+    previousSchedulable = schedulableId;
+    previousSchedulableType = schedulableType;
     stopEditing();
 }
 
