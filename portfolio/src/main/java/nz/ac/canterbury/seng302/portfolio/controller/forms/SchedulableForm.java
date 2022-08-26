@@ -20,31 +20,31 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * database flags Sonarqube errors.
  */
 public class SchedulableForm {
-    @NotBlank(message="Schedulable name cannot be blank")
+    @NotBlank(message="Name cannot be blank")
     @Size(min=MIN_NAME_LENGTH,
             max=MAX_NAME_LENGTH,
-            message="The schedulable name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
+            message="Name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
     private String name;
 
     @Size(max=MAX_DESC_LENGTH,
-            message="The schedulable description must not exceed "+MAX_DESC_LENGTH+" characters")
+            message="Description must not exceed "+MAX_DESC_LENGTH+" characters")
     private String description;
     
     // Due to Firefox's lack of <input type="datetime"> support,
     // we store this as two separate fields: Date and Time
-    @NotNull(message="Schedulable start date cannot be blank")
+    @NotNull(message="Start date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate startDate;
 
-    @NotNull(message="Schedulable start time cannot be blank")
+    @NotNull(message="Start time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime startTime;
 
-    @NotNull(message="Schedulable end date cannot be blank")
+    @NotNull(message="End date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate endDate;
 
-    @NotNull(message="Schedulable end time cannot be blank")
+    @NotNull(message="End time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime endTime;
 
