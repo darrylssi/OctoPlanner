@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 
 /**
@@ -40,9 +43,7 @@ public class MilestoneController extends PageController {
     public String postAddMilestone(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
-            @RequestParam(name="milestoneName") String milestoneName,
-            @RequestParam(name="milestoneDate") String milestoneDate,
-            @RequestParam(name="milestoneDescription") String milestoneDescription
+            @Valid SchedulableForm schedulableForm
     ) {
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
@@ -53,9 +54,9 @@ public class MilestoneController extends PageController {
 
         // Set details of new milestone object
         milestone.setParentProject(parentProject);
-        milestone.setName(milestoneName);
-        milestone.setStartDate(DateUtils.toDate(milestoneDate));
-        milestone.setDescription(milestoneDescription);
+        milestone.setName(schedulableForm.getName());
+        milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));
+        milestone.setDescription(schedulableForm.getDescription());
 
         milestoneService.saveMilestone(milestone);
 

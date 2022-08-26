@@ -82,6 +82,7 @@
     </div>
 </div>
 
+<!-- Milestone fragment -->
 <div th:fragment="milestone">
     <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${milestone}"
          th:style="'background:linear-gradient(to right, '+ ${milestone.determineColour(sprints, true)} + '4c, '+ ${milestone.determineColour(sprints, true)} + '4c)'">
@@ -110,14 +111,12 @@
                 </button>
             </div>
         </span>
-        <div th:replace="detailFragments :: editMilestoneForm(
-                milestone=${milestone},
+        <div th:replace="detailFragments :: schedulableEditForm(
+                schedulable=${milestone},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
-                maxDescLen=${maxDescLen},
-                projectStart=${projectStart},
-                projectEnd=${projectEnd})"/>
+                maxDescLen=${maxDescLen})"/>
     </div>
 </div>
 
@@ -222,21 +221,21 @@
                         </div>
                         <small id="addSchedulableStartDateFeedback" class="text-danger"></small>
                     </div>
-                    <div th:if="${type != 'milestone'}" class="col">
+                    <div th:hidden="${type == 'milestone'}" class="col">
                         <div class="form-floating mb-3">
                             <input type="time" th:field="*{startTime}" class="form-control" id="schedulableStartTime" aria-describedby="schedulableStartTimeFeedback" required>
                             <label for="schedulableStartTime">Start Time</label>
                         </div>
                         <small id="addSchedulableStartTimeFeedback" class="text-danger"></small>
                     </div>
-                    <div th:if="${type == 'event'}" class="col">
+                    <div th:hidden="${type != 'event'}" class="col">
                         <div class="form-floating mb-3 has-validation">
                             <input type="date" th:field="*{endDate}" class="form-control" id="schedulableEndDate" aria-describedby="schedulableEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="schedulableEndDate">End Date</label>
                         </div>
                         <small id="addSchedulableEndDateFeedback" class="text-danger"></small>
                     </div>
-                    <div th:if="${type == 'event'}" class="col">
+                    <div th:hidden="${type != 'event'}" class="col">
                         <div class="form-floating mb-3 has-validation">
                             <input type="time" th:field="*{endTime}" class="form-control" id="schedulableEndTime" aria-describedby="schedulableEndDateFeedback" required>
                             <label for="schedulableEndTime">End Time</label>
