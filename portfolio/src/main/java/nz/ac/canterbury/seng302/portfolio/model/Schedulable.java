@@ -32,7 +32,7 @@ public interface Schedulable extends Comparable<Schedulable>{
     String getEndDay();
     String getEndTime();
 
-    String getType();
+    String getType(); // TODO should this be an enum?
 
     /**
      * Determines the correct colour for this schedulable based on the list of sprints.

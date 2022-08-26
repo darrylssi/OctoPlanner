@@ -1,6 +1,6 @@
 -- Create default project on startup
 -- Project #1 and its sprints
-INSERT INTO project (ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_START_DATE, PROJECT_END_DATE)
+INSERT INTO project (PROJECT_ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_START_DATE, PROJECT_END_DATE)
 SELECT * FROM (SELECT
                       0 AS id,
                       'Cool Project 2022' AS name,
@@ -35,7 +35,7 @@ select * from (SELECT
 WHERE NOT EXISTS (SELECT * FROM SPRINT where ID=2);
 
 -- Project #2
-INSERT INTO project (ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_START_DATE, PROJECT_END_DATE)
+INSERT INTO project (PROJECT_ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_START_DATE, PROJECT_END_DATE)
 SELECT * FROM (SELECT
                     1 AS id,
                     'Icy Project 2023' AS name,
