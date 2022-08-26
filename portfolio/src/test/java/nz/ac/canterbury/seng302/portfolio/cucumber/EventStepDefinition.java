@@ -30,7 +30,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 @SpringBootTest
 public class EventStepDefinition extends RunCucumberTest {
 
-    private static final int ID = 1;
     private SimpleDateFormat dateFormatter;
     private SimpleDateFormat dateTimeFormatter;
     private Project parentProject;

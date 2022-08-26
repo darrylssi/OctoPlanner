@@ -1,8 +1,12 @@
-let previousEvent; // the previous event being edited by THIS user (only one can be edited at a time)
-const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
+let previousSchedulable; // the previous schedulable being edited by THIS user (only one can be edited at a time)
+let previousSchedulableType;
+const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EVENT_TYPE = "event";
+const DEADLINE_TYPE = "deadline";
+const MILESTONE_TYPE = "milestone";
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -13,7 +17,7 @@ function showDeleteSprintModal(sprintId, sprintName) {
     modal.style.display = "block";
 }
 
-/** Hides the confirm delete modal without deleting a sprint/event/deadline */
+/** Hides the confirm delete modal without deleting anything */
 function hideModal() {
     const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
@@ -31,21 +35,23 @@ function deleteSprint(sprintId) {
     deleteRequest.send();
 }
 
-/** When the delete event button is clicked, show a modal checking if the user is sure about deleting the event */
-function showDeleteEventModal(eventId, eventName) {
+/** When the delete schedulable button is clicked, show a modal checking if the user is sure about deleting the schedulable */
+function showDeleteSchedulableModal(schedulableId, schedulableName, schedulableType) {
     const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + eventName + "?";
-    deleteButton.onclick = () => {deleteEvent(eventId)}
-    modal.style.display = "block";
-}
-
-/** When the delete deadline button is clicked, show a modal checking if the user is sure about deleting the deadline */
-function showDeleteDeadlineModal(deadlineId, deadlineName) {
-    const modal = document.getElementById("deleteModal");
-    const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + deadlineName + "?";
-    deleteButton.onclick = () => {deleteDeadline(deadlineId)}
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + schedulableName + "?";
+    switch(schedulableType) {
+        case EVENT_TYPE:
+            deleteButton.onclick = () => {deleteEvent(schedulableId)};
+            break;
+        case DEADLINE_TYPE:
+            deleteButton.onclick = () => {deleteDeadline(schedulableId)};
+            break;
+        case MILESTONE_TYPE:
+            return;
+        default:
+            throw new Error('Not a schedulable type!');
+    }
     modal.style.display = "block";
 }
 
@@ -56,7 +62,7 @@ function deleteEvent(eventId) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the delete
-        stompClient.send("/app/events", {}, JSON.stringify({id: eventId}));
+        stompClient.send("/app/schedulables", {}, JSON.stringify({id: eventId, type: EVENT_TYPE}));
         hideModal();
     }
     deleteRequest.send();
@@ -104,7 +110,7 @@ function sendFormViaAjax(elem, formId) {
         if (formRequest.status == 200) {
             // Success
             hideForm(formRequest.response, formId);
-            stompClient.send("/app/events", {}, JSON.stringify({id: formRequest.response}));
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -151,7 +157,7 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        hideForm(eventId, "editEventForm-" + eventBoxId);
+        hideForm(eventId, "editEventForm-" + eventBoxId, EVENT_TYPE);
         return;
     }
 
@@ -159,32 +165,32 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
        opening the new form by EDIT_FORM_CLOSE_DELAY. */
     let collapseElementList = document.getElementsByClassName("collapse show");
     let delay = 0;
-    let differentEvent = false;
+    let differentSchedulable = false;
     for (let element of collapseElementList) {
         if (element.id.indexOf("editEventForm") != -1) {
             new bootstrap.Collapse(element).hide();
             delay = EDIT_FORM_CLOSE_DELAY;
-            /* Check whether any form is for a different event, to see whether
+            /* Check whether any form is for a different schedulable, to see whether
                we need to send a stop editing message */
             if (element.id.indexOf("editEventForm-" + eventId) == -1) {
-                differentEvent = true;  // Extracted to a variable to avoid sending extra messages (in a worst case scenario)
-                previousEvent = (element.id.split('-')[1]);  // Get event id from that form
+                differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (in a worst case scenario)
+                previousSchedulable = (element.id.split('-')[1]);  // Get schedulable id from that form
             }
         }
     }
 
-    /* If a form we just closed was for a different event, we need to
-       send a stop editing event */
-    if (differentEvent) {
+    /* If a form we just closed was for a different schedulable, we need to
+       send a stop editing schedulable */
+    if (differentSchedulable) {
         stopEditing();
     }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingEventMessage(eventId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    sendEditingSchedulableMessage(eventId, EVENT_TYPE); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
-    sendEditMessageInterval = setInterval(function() {sendEditingEventMessage(eventId)}, EVENT_EDIT_MESSAGE_FREQUENCY)
+    sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(eventId, EVENT_TYPE)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
     /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
     editForm.querySelector("#name").setAttribute("value", eventName);
@@ -210,27 +216,29 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
 /**
  * Collapse the form with the specified Id.
  * Accessed directly by the cancel button.
- * Sends a stop editing message for the previous event & ceases sending repeated editing messages.
- * @param eventId the ID of the event being edited
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * @param schedulableId the ID of the schedulable being edited
  * @param formId the ID of the form to be closed
+ * @param schedulableType the type of the editable being edited
  */
-function hideForm(eventId, formId) {
+function hideForm(schedulableId, formId, schedulableType) {
     let editForm = document.getElementById(formId);
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousEvent = eventId;
+    previousSchedulable = schedulableId;
+    previousSchedulableType = schedulableType;
     stopEditing();
 }
 
 /**
- * Sends a stop editing message for the previously edited event, and stops any repeating edit messages from being sent.
+ * Sends a stop editing message for the previously edited schedulable, and stops any repeating edit messages from being sent.
  */
 function stopEditing() {
     if (sendEditMessageInterval) {
         clearInterval(sendEditMessageInterval);
     }
-    sendStopEditingMessage(previousEvent);
+    sendStopEditingMessage(previousSchedulable, previousSchedulableType);
 }
 
 /**
