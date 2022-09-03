@@ -160,7 +160,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
      }
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingSchedulableMessage(schedulableId); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    sendEditingSchedulableMessage(schedulableId, schedulableType); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
@@ -191,7 +191,7 @@ function prefillDeadline(editForm, deadline) {
 /**
  * Collapse the edit form for the specified schedulable box.
  * Accessed directly by the cancel button.
- * TODO SHOULD, but DOESN'T send a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
  * @param schedulableId the id of the schedulable object whose edit form is being hidden
  * @param schedulableBoxId the id of the box in which the edit form will be hidden
  * @param schedulablhideEditSchedulableeType the type of the schedulable whose edit form is being hidden
