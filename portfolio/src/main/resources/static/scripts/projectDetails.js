@@ -167,6 +167,8 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
     showRemainingChars();
 
+    showRemainingChars();
+
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
