@@ -144,6 +144,28 @@ public class ValidationUtils {
     }
 
     /**
+     * Validates that a deadline's date is valid. The checks are:
+     * <ul>
+     *     <li>Deadline dates are within project dates</li>
+     * </ul>
+     * @param date The deadline's date
+     * @param parentProject The project that the deadline belongs to
+     * @return A ValidationError with a boolean error flag and a list of error messages
+     */
+    public static ValidationError validateDeadlineDates(Date date, Project parentProject) {
+        ValidationError errors = new ValidationError();
+
+        // Checks that the event's dates are within the project dates
+        if (dateOutsideProject(date, parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
+            errors.addErrorMessage(String.format("Deadline dates must be within project date range: %s - %s",
+                    parentProject.getStartDateString(),  parentProject.getEndDateString()));
+        }
+
+        return errors;
+    }
+
+
+    /**
      * Checks whether a given start and end date are within a project's dates (or any two given dates)
      * @param startDate The start date to validate
      * @param endDate The end date to validate
