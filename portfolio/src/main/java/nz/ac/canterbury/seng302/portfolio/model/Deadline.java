@@ -53,7 +53,7 @@ public class Deadline implements Schedulable {
      */
     public Deadline(String deadlineName,  String deadlineDescription, Date deadlineDate) {
         this.deadlineName = deadlineName;
-        this.deadlineDescription = deadlineDescription;
+        this.deadlineDescription = deadlineDescription.trim();
         this.deadlineDate = deadlineDate;
     }
 
@@ -98,7 +98,7 @@ public class Deadline implements Schedulable {
     }
 
     public void setDescription(String description) {
-        this.deadlineDescription = description;
+        this.deadlineDescription = description.trim();
     }
 
     public Date getStartDate() {

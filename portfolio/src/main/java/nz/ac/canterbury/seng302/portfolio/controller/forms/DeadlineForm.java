@@ -67,7 +67,7 @@ public class DeadlineForm {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description.trim();
     }
 
     public LocalDate getDate() {
