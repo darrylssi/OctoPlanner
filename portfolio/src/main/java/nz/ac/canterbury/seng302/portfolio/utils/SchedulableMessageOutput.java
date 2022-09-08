@@ -19,7 +19,7 @@ public class SchedulableMessageOutput {
     public static final String LIST_IN_ID_FORMAT = "schedulables-in-%d"; // id of sprint box
     public static final String LIST_AFTER_ID_FORMAT = "schedulables-after-%d"; // id of box after sprint
     public static final String LIST_BEFORE_ALL_ID_NAME = "schedulables-before"; // id of first box
-    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "schedulable-%d"; // id of a schedulable (used for the next schedulable)
+    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "%s-%d"; // id of a schedulable (used for the next schedulable)
     public static final String SCHEDULABLE_BEFORE_ALL_ID_FORMAT = "%d-before"; // id of schedulable in first box
     public static final String SCHEDULABLE_IN_ID_FORMAT = "%d-in-%d"; // id of schedulable in sprint box
     public static final String SCHEDULABLE_AFTER_ID_FORMAT = "%d-after-%d"; // id of schedulable after sprint box
@@ -140,7 +140,7 @@ public class SchedulableMessageOutput {
             if (schedulable.getStartDate().after(updatedSchedulable.getStartDate()) &&
                     DateUtils.timesOverlap(periodStart, periodEnd,
                             schedulable.getStartDate(), schedulable.getEndDate())) {
-                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getId()));
+                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getType(), schedulable.getId()));
             }
         }
         return "-1";

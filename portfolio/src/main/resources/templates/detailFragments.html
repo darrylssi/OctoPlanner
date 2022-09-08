@@ -125,8 +125,8 @@
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${schedulable.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-{type}/{id}(id=${schedulable.getId()},type=${schedulable.getType()})}"
-                      onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
+                <form action="javascript:;" th:data-url="@{edit-{type}/{id}(id=${schedulable.getId()},type=${schedulable.getType()})}" th:formBoxId="|edit${#strings.capitalize(schedulable.getType)}Form-${boxId}|"
+                      th:onsubmit="return sendFormViaAjax(this, [[${schedulable.getType()}]])" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
@@ -194,7 +194,8 @@
     <div class="card collapse" th:id="|add${#strings.capitalize(type)}Form|" th:classappend="${#fields.hasErrors('schedulableForm.*') OR !#arrays.isEmpty(schedulableFormError) ? 'show' : null}">
         <div class="card-header" th:text="|New ${#strings.capitalize(type)}|"></div>
         <div class="card-body">
-            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" th:onsubmit="return sendFormViaAjax(this, 'addSchedulableForm', [[${type}]])" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
+            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" formBoxId="addSchedulableForm"
+                  th:onsubmit="return sendFormViaAjax(this, [[${type}]])" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
                 <div class="row">
                     <div class="col">
                         <div class="form-floating input-group mb-3 limited-text-input">

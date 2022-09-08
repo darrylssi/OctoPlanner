@@ -53,7 +53,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem, formId, type) {
+function sendFormViaAjax(elem, type) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -61,11 +61,12 @@ function sendFormViaAjax(elem, formId, type) {
     const formRequest = new XMLHttpRequest();
     let url = elem.getAttribute('data-url');
     formRequest.open("POST", url);
+    console.log(type + ' schedulable form submitted');
 
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             // Success
-            hideForm(formRequest.response, formId);
+            hideForm(formRequest.response, elem.getAttribute('formBoxId'));
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
         } else {
             const errors = formRequest.responseText.split('\n');
