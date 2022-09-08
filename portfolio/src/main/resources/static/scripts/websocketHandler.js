@@ -179,7 +179,7 @@ function updateSchedulable(schedulableMessage) {
           let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
         if(idIndex != -1) {
 
-            const url = BASE_URL + schedulableMessage.type + "-frag/" + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
+            const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
             const schedulableFragRequest = new XMLHttpRequest();
             schedulableFragRequest.open("GET", url, true);
             const tempIdIndex = idIndex;

@@ -3,14 +3,10 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
-import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -27,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
@@ -192,38 +187,5 @@ public class EventController extends PageController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-
-    /**
-     * A method to get the html of an event that can be added to the details
-     * page using javascript
-     * @param principal the current user
-     * @param eventId the id of the event being displayed
-     * @param model the model that stores the attributes of the event
-     * @return an html fragment of the given event
-     */
-    @GetMapping("/event-frag/{eventId}/{boxId}")
-    public String eventFragment(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name="eventId") int eventId,
-            @PathVariable(name="boxId") String boxId,
-            Model model
-    ){
-        PrincipalData thisUser = PrincipalData.from(principal);
-        Event event = eventService.getEventById(eventId);
-        List<Sprint> sprints = sprintService.getSprintsInProject(event.getParentProject().getId());
-        model.addAttribute("event", event);
-        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
-        model.addAttribute("boxId", boxId);
-        model.addAttribute("sprints", sprints);
-        model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
-        model.addAttribute("maxNameLen", GlobalVars.MAX_NAME_LENGTH);
-        model.addAttribute("maxDescLen", GlobalVars.MAX_DESC_LENGTH);
-        model.addAttribute("projectStart", DateUtils.toString(event.getParentProject().getProjectStartDate()));
-        model.addAttribute("projectEnd", DateUtils.toString(event.getParentProject().getProjectEndDate()));
-        model.addAttribute("editSchedulableForm", new SchedulableForm());
-
-        return "detailFragments :: event";
     }
 }

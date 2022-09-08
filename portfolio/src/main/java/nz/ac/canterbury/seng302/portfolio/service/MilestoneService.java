@@ -74,7 +74,7 @@ public class MilestoneService {
     }
 
 
-    public void saveMilestone(Milestone milestone) {
-        repository.save(milestone);
+    public Milestone saveMilestone(Milestone milestone) {
+        return repository.save(milestone);
     }
 }

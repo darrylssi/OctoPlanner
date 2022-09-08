@@ -34,13 +34,11 @@ public class MilestoneController extends PageController {
      * Post request to add milestones to a project.
      * @param principal Authenticated user
      * @param projectId ID of the project the milestone will be added to
-     * @param milestoneName Name of the milestone
-     * @param milestoneDate Date of the milestone
-     * @param milestoneDescription Description of the milestone
-     * @return Project details page
+     * @param schedulableForm the form that stores the iformation about the milestone
+     * @return A ResponseEntity with the id of the milestone that was saved
      */
     @PostMapping("/project/{project_id}/add-milestone")
-    public String postAddMilestone(
+    public ResponseEntity<String> postAddMilestone(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @Valid SchedulableForm schedulableForm
@@ -58,9 +56,9 @@ public class MilestoneController extends PageController {
         milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));
         milestone.setDescription(schedulableForm.getDescription());
 
-        milestoneService.saveMilestone(milestone);
+        Milestone savedMilestone = milestoneService.saveMilestone(milestone);
 
-        return "redirect:../" + parentProject.getId();
+        return ResponseEntity.ok(String.valueOf(savedMilestone.getId()));
 
     }
 

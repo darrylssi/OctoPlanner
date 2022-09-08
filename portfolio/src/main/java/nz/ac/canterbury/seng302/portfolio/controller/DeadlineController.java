@@ -41,7 +41,7 @@ public class DeadlineController extends PageController {
      *          or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-deadline")
-    public String postAddDeadline(
+    public ResponseEntity<String> postAddDeadline(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @Valid SchedulableForm schedulableForm
@@ -61,9 +61,10 @@ public class DeadlineController extends PageController {
         deadline.setStartDate(DateUtils.toDateTime(deadlineDateTime));
         deadline.setDescription(schedulableForm.getDescription());
 
-        deadlineService.saveDeadline(deadline);
 
-        return "redirect:../" + parentProject.getId();
+        Deadline savedDeadline = deadlineService.saveDeadline(deadline);
+
+        return ResponseEntity.ok(String.valueOf(savedDeadline.getId()));
 
     }
 
