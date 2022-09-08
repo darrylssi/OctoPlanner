@@ -1,4 +1,4 @@
-const previousSchedulable = {type:"", id:-1}; // the previous schedulable being edited by THIS user (only one can be edited at a time)
+const currentSchedulable = {type:"", id:-1}; // the current schedulable being edited by THIS user (only one can be edited at a time)
 const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
@@ -122,8 +122,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
            we need to send a stop editing message */
         if (element.id.indexOf("edit" + capitalisedType + "Form-" + schedulableBoxId) === -1) {
             differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
-            previousSchedulable.id = (element.id.split('-')[1]);  // Get schedulable id from that form
-            previousSchedulable.type = schedulableType;
         }
     }
 
@@ -132,6 +130,9 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
      if (differentSchedulable) {
          stopEditing();
      }
+
+     currentSchedulable.id = schedulableId;
+     currentSchedulable.type = schedulableType;
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
     sendEditingSchedulableMessage(schedulableId, schedulableType); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
@@ -168,8 +169,6 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousSchedulable.id = schedulableId;
-    previousSchedulable.type = schedulableType;
     stopEditing();
 }
 
@@ -186,9 +185,9 @@ function hideForm(schedulableId, formId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousSchedulable.id = schedulableId;
-    previousSchedulable.type = schedulableType;
-    stopEditing();
+    if(currentSchedulable.id === parseInt(schedulableId) && currentSchedulable.type === schedulableType){
+        stopEditing();
+    }
 }
 
 /**
@@ -198,7 +197,9 @@ function stopEditing() {
     if (sendEditMessageInterval) {
         clearInterval(sendEditMessageInterval);
     }
-    sendStopEditingMessage(previousSchedulable.id, previousSchedulable.type);
+    sendStopEditingMessage(currentSchedulable.id, currentSchedulable.type);
+    currentSchedulable.id = -1;
+    currentSchedulable.type = "";
 }
 
 /**

@@ -55,7 +55,7 @@ function sendEditingSchedulableMessage(schedulableId, type) {
  * Won't send anything if schedulableId is undefined
  */
 function sendStopEditingMessage(schedulableId, type) {
-    if (previousSchedulable !== undefined) {
+    if (currentSchedulable !== undefined) {
         if (editingLogs) {
             console.log('SENDING STOP MESSAGE FOR ' + type +': ' + schedulableId);
         }
@@ -164,6 +164,10 @@ function updateSchedulable(schedulableMessage) {
     if (updateLogs) {
         console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
         console.log(schedulableMessage);
+    }
+
+    if(currentSchedulable.id === schedulableMessage.id && currentSchedulable.type === schedulableMessage.type) {
+        stopEditing();
     }
 // get a list of schedulable list containers
     const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
