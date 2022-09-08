@@ -144,6 +144,27 @@ public class ValidationUtils {
     }
 
     /**
+     * Validates that a milestone's date is valid. The checks are:
+     * <ul>
+     *     <li>Milestone date is within project dates</li>
+     * </ul>
+     * @param date the milestone's date
+     * @param parentProject The project that the milestone belongs to
+     * @return A ValidationError with a boolean error flag and a list of error messages
+     */
+    public static ValidationError validateMilestoneDate(Date date, Project parentProject) {
+        ValidationError errors = new ValidationError();
+
+        // Checks that the milestone's date is within the project dates
+        if (dateOutsideProject(date, parentProject.getProjectStartDate(), parentProject.getProjectEndDate())) {
+            errors.addErrorMessage(String.format("Milestone dates must be within project date range: %s - %s",
+                    parentProject.getStartDateString(),  parentProject.getEndDateString()));
+        }
+
+        return errors;
+    }
+
+    /**
      * Checks whether a given start and end date are within a project's dates (or any two given dates)
      * @param startDate The start date to validate
      * @param endDate The end date to validate
@@ -164,7 +185,6 @@ public class ValidationUtils {
      * @return True if the given date is outside the project dates, otherwise false
      */
     public static boolean dateOutsideProject(Date date, Date projectStart, Date projectEnd) {
-        // TODO use this for milestones & deadlines because they only have one date to check
         if (date.before(projectStart)) { return true; }
         else return date.after(projectEnd);
     }

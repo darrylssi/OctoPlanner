@@ -3,9 +3,11 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.StringJoiner;
+import java.util.TimeZone;
 
 
 /**
@@ -34,31 +40,44 @@ public class MilestoneController extends PageController {
      * Post request to add milestones to a project.
      * @param principal Authenticated user
      * @param projectId ID of the project the milestone will be added to
-     * @param schedulableForm the form that stores the iformation about the milestone
+     * @param schedulableForm the form that stores the information about the milestone
      * @return A ResponseEntity with the id of the milestone that was saved
      */
     @PostMapping("/project/{project_id}/add-milestone")
     public ResponseEntity<String> postAddMilestone(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
-            @Valid SchedulableForm schedulableForm
+            @Valid SchedulableForm schedulableForm,
+            BindingResult bindingResult,
+            TimeZone userTimezone
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
-        // Getting parent project object by path id
         Project parentProject = projectService.getProjectById(projectId);
 
-        Milestone milestone = new Milestone();
+        // validate milestone
+        ResponseEntity<String> validationResponse = validateMilestone(schedulableForm, bindingResult, parentProject);
+        if (validationResponse.getStatusCode() == HttpStatus.OK) {
+            // passed validation, create a new milestone
+            Milestone milestone = new Milestone();
 
-        // Set details of new milestone object
-        milestone.setParentProject(parentProject);
-        milestone.setName(schedulableForm.getName());
-        milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));
-        milestone.setDescription(schedulableForm.getDescription());
+            // Set details of new milestone object
+            milestone.setParentProject(parentProject);
+            milestone.setName(schedulableForm.getName());
+            milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));
+            milestone.setDescription(schedulableForm.getDescription());
 
-        Milestone savedMilestone = milestoneService.saveMilestone(milestone);
+            Milestone savedMilestone = milestoneService.saveMilestone(milestone);
 
-        return ResponseEntity.ok(String.valueOf(savedMilestone.getId()));
+            return ResponseEntity.ok(String.valueOf(savedMilestone.getId()));
+        } else {
+            return validationResponse;
+        }
 
     }
 
@@ -81,6 +100,40 @@ public class MilestoneController extends PageController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * A method to validate milestones when they are added or edited
+     * @param schedulableForm the form containing the milestone information
+     * @param bindingResult any errors that came up during validation
+     * @param parentProject the parent project of the milestone
+     * @return a response entity that contains any errors that were found. Bad Request if there were errors, Ok if there are none
+     */
+    private ResponseEntity<String> validateMilestone(SchedulableForm schedulableForm, BindingResult bindingResult, Project parentProject) {
+        ValidationError dateErrors;
+        ValidationError nameErrors;
+        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
+        if (bindingResult.hasErrors()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: bindingResult.getAllErrors()) {
+                errors.add(err.getDefaultMessage());
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+        // Check that the date is correct
+        dateErrors = ValidationUtils.validateMilestoneDate(DateUtils.localDateToDate(schedulableForm.getStartDate()), parentProject);
+        nameErrors = ValidationUtils.validateName(schedulableForm.getName());
+        if (dateErrors.isError() || nameErrors.isError()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: dateErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: nameErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("", HttpStatus.OK);
     }
 
 }
