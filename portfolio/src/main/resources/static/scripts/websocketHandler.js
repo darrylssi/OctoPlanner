@@ -60,7 +60,7 @@ function sendStopEditingMessage(schedulableId, type) {
             console.log('SENDING STOP MESSAGE FOR ' + type +': ' + schedulableId);
         }
         let user = document.getElementById('user').getAttribute('data-name');
-        let content = `${schedulableId}, ${type}`
+        let content = `${schedulableId},${type}`
         stompClient.send("/app/ws", {},
         JSON.stringify({'from':user, 'content':content}));
     }
@@ -100,8 +100,8 @@ function showEditingMessage(editMessage) {
         stopSchedulableTimeout(schedulableId, type);
 
         // locate the correct elements on the page
-        const editingSchedulableBoxClass = `event-${schedulableId}-editing-box`;
-        const editingSchedulableTextBoxClass = `event-${schedulableId}-editing-text`;
+        const editingSchedulableBoxClass = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableTextBoxClass = `${type}-${schedulableId}-editing-text`;
         const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
         const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
 
