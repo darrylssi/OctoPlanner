@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.TimeZone;
 
 /**
  * Controller to handle requests related to deadlines.
@@ -87,6 +88,36 @@ public class DeadlineController extends PageController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Post request to edit a deadline.
+     * @param principal Authenticated user
+     * @param projectId ID of the project the deadline belongs to
+     * @param deadlineId ID of the deadline to be edited
+     * @param deadlineForm Deadline DTO
+     * @param userTimeZone Current timezone of the user
+     * @return Project details page
+     */
+    @PostMapping("/project/{project_id}/edit-deadline/{deadline_id}")
+    public String postEditDeadline(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("project_id") int projectId,
+            @PathVariable("deadline_id") int deadlineId,
+            @Valid @ModelAttribute DeadlineForm deadlineForm,
+            TimeZone userTimeZone
+    ){
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
+        Deadline deadline = deadlineService.getDeadlineById(deadlineId);
+        deadline.setName(deadlineForm.getName());
+        deadline.setDescription(deadlineForm.getDescription());
+        deadline.setStartDate(DateUtils.localDateAndTimeToDate(deadlineForm.getDate(), deadlineForm.getTime(), userTimeZone));
+        deadline.setParentProject(projectService.getProjectById(projectId));
+
+        deadlineService.saveDeadline(deadline);
+
+        return "redirect:../";
     }
 
 }

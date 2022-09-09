@@ -98,12 +98,16 @@ function sendFormViaAjax(elem, type) {
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
  */
-function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
     /* Capitalize only the first letter of the schedulableType string */
     capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
+
+    if (capitalisedType === 'Deadline') {
+        prefillDeadline(editForm, schedulable);
+    }
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -150,6 +154,19 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
     }, delay, "edit" + capitalisedType + "Form-" + schedulableBoxId);
 }
+
+/**
+ * Populates the edit deadline form with the current details of the deadline.
+ * @param editForm Edit deadline form
+ * @param deadline Deadline object
+ */
+function prefillDeadline(editForm, deadline) {
+    editForm.querySelector("#name").value = deadline.name;
+    editForm.querySelector("#description").value =  deadline.description;
+    editForm.querySelector("#date").value = deadline.startDate.substring(0,10);
+    editForm.querySelector("#time").value = deadline.startDate.substring(11, 16);
+}
+
 
 /**
  * Collapse the edit form for the specified schedulable box.
