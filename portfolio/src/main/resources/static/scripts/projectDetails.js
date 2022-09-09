@@ -117,12 +117,16 @@ function sendEditEventViaAjax(elem, e) {
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (Event, Deadline, or Milestone) as a string
  */
-function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
     /* Capitalize only the first letter of the schedulableType string */
     schedulableType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
+
+    if (schedulableType === 'Deadline') {
+        prefillDeadline(editForm, schedulable);
+    }
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -162,6 +166,8 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
+    showRemainingChars();
+
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {
         let shownForm = document.getElementById(formId)
@@ -169,6 +175,19 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
     }, delay, "edit" + schedulableType + "Form-" + schedulableBoxId);
 }
+
+/**
+ * Populates the edit deadline form with the current details of the deadline.
+ * @param editForm Edit deadline form
+ * @param deadline Deadline object
+ */
+function prefillDeadline(editForm, deadline) {
+    editForm.querySelector("#name").value = deadline.name;
+    editForm.querySelector("#description").value =  deadline.description;
+    editForm.querySelector("#date").value = deadline.startDate.substring(0,10);
+    editForm.querySelector("#time").value = deadline.startDate.substring(11, 16);
+}
+
 
 /**
  * Collapse the edit form for the specified schedulable box.
@@ -259,4 +278,17 @@ function displayRemainingCharacters(input, display) {
     // Bind the event, then give it a kick to initialise the display
     input.addEventListener("input", event);
     event();
+}
+
+/**
+ * Shows the number of remaining characters on an input field with class 'limited-text-input'
+ * in a span tag with class 'remaining-chars-field'.
+ * This is called when the page is loaded and when the edit button is clicked.
+ */
+function showRemainingChars() {
+    for (const parent of document.getElementsByClassName('limited-text-input')) {
+        const input = parent.getElementsByTagName('input')[0];
+        const display = parent.getElementsByClassName('remaining-chars-field')[0];
+        displayRemainingCharacters(input, display);
+    }
 }
