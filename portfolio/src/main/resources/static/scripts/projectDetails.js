@@ -183,10 +183,11 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
-
     if (schedulableType === 'Deadline') {
         prefillDeadline(editForm, schedulable);
     }
+
+    hideErrorBoxes(editForm);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {

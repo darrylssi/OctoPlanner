@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -15,13 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.validation.Valid;
-import java.util.Date;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
@@ -74,7 +70,7 @@ public class DeadlineController extends PageController {
 
         // Check that the dates are correct
         Project parentProject = projectService.getProjectById(projectId);
-        dateErrors = ValidationUtils.validateDeadlineDates(deadlineForm.datetimeToDate(userTimezone), parentProject);
+        dateErrors = ValidationUtils.validateDeadlineDate(deadlineForm.datetimeToDate(userTimezone), parentProject);
         nameErrors = ValidationUtils.validateName(deadlineForm.getName());
         if (dateErrors.isError() || nameErrors.isError()) {
             StringJoiner errors = new StringJoiner("\n");
@@ -149,8 +145,9 @@ public class DeadlineController extends PageController {
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
+
         // Validation round 2: Do our custom errors pass?
-        var dateErrors = ValidationUtils.validateDeadlineDates(deadlineForm.datetimeToDate(userTimeZone), deadline.getParentProject());
+        var dateErrors = ValidationUtils.validateDeadlineDate(deadlineForm.datetimeToDate(userTimeZone), deadline.getParentProject());
         var nameError = ValidationUtils.validateName(deadlineForm.getName());
         if (dateErrors.isError() || nameError.isError()) {
             StringJoiner errors = new StringJoiner("\n");
@@ -171,5 +168,6 @@ public class DeadlineController extends PageController {
         deadlineService.saveDeadline(deadline);
         return ResponseEntity.ok("");
     }
+
 
 }

@@ -51,7 +51,7 @@ public class DeadlineStepDefinition extends RunCucumberTest {
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        return ValidationUtils.validateDeadlineDates(deadline.getStartDate(), parentProject);
+        return ValidationUtils.validateDeadlineDate(deadline.getStartDate(), parentProject);
     }
 
     public DeadlineStepDefinition() {

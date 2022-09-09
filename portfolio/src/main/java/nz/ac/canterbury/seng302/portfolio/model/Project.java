@@ -18,6 +18,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "project_id")
     private int id;
 
     @Column (nullable = false)
