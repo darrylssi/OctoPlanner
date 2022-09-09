@@ -45,3 +45,10 @@ p, #calendarTitle {
     visibility:hidden;
 }
 
+/* Change the width of icons to be more like a square. 40px is the minimum because otherwise the icons get cut in half */
+/* problem: the event icon has some weird padding that means it won't centre properly :)
+ might need to add a class to other elements in the event div to fix this */
+.schedulable-icon {
+    width: 40px !important;
+    padding: 0px !important;
+}
