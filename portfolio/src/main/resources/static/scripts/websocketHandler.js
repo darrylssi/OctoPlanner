@@ -3,8 +3,8 @@ const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout f
 const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
 
 // logging consts to hide certain things while developing
-const editingLogs = true;
-const updateLogs = true;
+const editingLogs = false;
+const updateLogs = false;
 
 /**
  * Sets up a connection to a WebSocket

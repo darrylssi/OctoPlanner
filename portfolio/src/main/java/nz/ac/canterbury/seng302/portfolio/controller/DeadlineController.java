@@ -13,10 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.TimeZone;
@@ -95,29 +93,30 @@ public class DeadlineController extends PageController {
      * @param principal Authenticated user
      * @param projectId ID of the project the deadline belongs to
      * @param deadlineId ID of the deadline to be edited
-     * @param deadlineForm Deadline DTO
+     * @param schedulableForm Deadline DTO
      * @param userTimeZone Current timezone of the user
      * @return Project details page
      */
     @PostMapping("/project/{project_id}/edit-deadline/{deadline_id}")
-    public String postEditDeadline(
+    public ResponseEntity<String> postEditDeadline(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("deadline_id") int deadlineId,
-            @Valid @ModelAttribute DeadlineForm deadlineForm,
+            @Valid @ModelAttribute SchedulableForm schedulableForm,
+            BindingResult bindingResult,
             TimeZone userTimeZone
     ){
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
         Deadline deadline = deadlineService.getDeadlineById(deadlineId);
-        deadline.setName(deadlineForm.getName());
-        deadline.setDescription(deadlineForm.getDescription());
-        deadline.setStartDate(DateUtils.localDateAndTimeToDate(deadlineForm.getDate(), deadlineForm.getTime(), userTimeZone));
+        deadline.setName(schedulableForm.getName());
+        deadline.setDescription(schedulableForm.getDescription());
+        deadline.setStartDate(DateUtils.localDateAndTimeToDate(schedulableForm.getStartDate(), schedulableForm.getStartTime(), userTimeZone));
         deadline.setParentProject(projectService.getProjectById(projectId));
 
-        deadlineService.saveDeadline(deadline);
+        Deadline savedDeadline = deadlineService.saveDeadline(deadline);
 
-        return "redirect:../";
+        return ResponseEntity.ok(String.valueOf(savedDeadline.getId()));
     }
 
 }
