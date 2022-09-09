@@ -104,6 +104,8 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
+    prefillSchedulable(editForm, schedulable, schedulableType);
+    hideErrorBoxes(editForm);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -151,6 +153,23 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
     }, delay, "edit" + capitalisedType + "Form-" + schedulableBoxId);
 }
 
+/**
+ * Populates the edit schedulable form with the current details of the schedulable.
+ * @param editForm Edit schedulable form
+ * @param schedulable Schedulable object
+ */
+function prefillSchedulable(editForm, schedulable, type) {
+    editForm.querySelector("#name").value = schedulable.name;
+    editForm.querySelector("#description").value =  schedulable.description;
+    editForm.querySelector("#startDate").value = schedulable.startDay;
+    if (type != 'milestone'){
+        editForm.querySelector("#startTime").value = schedulable.startTime;
+    }
+    if (type == 'event'){
+        editForm.querySelector("#endDate").value = schedulable.endDay;
+        editForm.querySelector("#endTime").value = schedulable.endTime;
+    }
+}
 
 /**
  * Collapse the edit form for the specified schedulable box.
