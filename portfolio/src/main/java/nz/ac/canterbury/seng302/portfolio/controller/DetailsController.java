@@ -1,31 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.model.*;
-import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-import static java.time.temporal.ChronoUnit.MINUTES;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TimeZone;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +20,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TimeZone;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 
 /**
@@ -66,6 +58,8 @@ public class DetailsController extends PageController {
      * Get request to view project details page.
      * @param principal Authenticated user
      * @param id ID of the project to be shown
+     * @param schedulableForm The form submitted by the user
+     * @param userTimezone The user's time zone
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
      */
@@ -113,6 +107,8 @@ public class DetailsController extends PageController {
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
+        model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
+        model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
@@ -121,7 +117,7 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event list and sorts it based on the event start date
+        // Gets the event, deadline and milestone lists and sorts them based on their start dates
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
         List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
@@ -173,6 +169,7 @@ public class DetailsController extends PageController {
     /**
      * Pre-populates the event form with default values, if they don't already exist
      * @param schedulableForm The schedulableForm object from your endpoint args
+     * @param userTimezone The user's time zone for calculating the correct start dates
      */
     private void prePopulateSchedulableForm(SchedulableForm schedulableForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
@@ -200,7 +197,7 @@ public class DetailsController extends PageController {
      * @return an html fragment of the given schedulable
      */
     @GetMapping("/frag/{type}/{schedulableId}/{boxId}")
-    public String eventFragment(
+    public String schedulableFragment(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="type") String schedulableType,
             @PathVariable(name="schedulableId") int schedulableId,

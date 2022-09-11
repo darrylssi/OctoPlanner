@@ -40,8 +40,9 @@ public class MilestoneController extends PageController {
      * Post request to add milestones to a project.
      * @param principal Authenticated user
      * @param projectId ID of the project the milestone will be added to
-     * @param schedulableForm the form that stores the information about the milestone
-     * @return A ResponseEntity with the id of the milestone that was saved
+     * @param schedulableForm Form that stores information about the milestone
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-milestone")
     public ResponseEntity<String> postAddMilestone(
@@ -58,6 +59,7 @@ public class MilestoneController extends PageController {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
+        // Getting parent project object by path id
         Project parentProject = projectService.getProjectById(projectId);
 
         // validate milestone
@@ -93,7 +95,13 @@ public class MilestoneController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="milestoneId") int milestoneId
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
         try {
             milestoneService.deleteMilestone(milestoneId);
             return new ResponseEntity<>("Milestone deleted.", HttpStatus.OK);

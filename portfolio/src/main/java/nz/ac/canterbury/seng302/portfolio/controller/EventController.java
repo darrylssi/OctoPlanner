@@ -47,9 +47,12 @@ public class EventController extends PageController {
     /**
      * Endpoint for adding events to the database, or conveying errors
      * to the user
+     * @param principal Authenticated user
      * @param projectID The project this event will be bound to
-     * @param schedulableForm The form submitted by our lovely customers
+     * @param schedulableForm Form that stores information about the deadline
      * @param bindingResult Any errors that came up during validation
+     * @param userTimezone The user's time zone
+     * @param model Parameters sent to thymeleaf template
      * @return  A response of either 200 (success), 403 (forbidden),
      *          or 400 (Given event failed validation, replies with what errors occurred)
      */
@@ -105,6 +108,9 @@ public class EventController extends PageController {
 
     /**
      * Handle edit requests for events. Validate the form and determine the response
+     * @param principal Authenticated user
+     * @param projectId The ID of the project the event belongs to
+     * @param eventId The ID of the event to be edited
      * @param editSchedulableForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in

@@ -53,7 +53,7 @@ class MilestoneControllerTest {
         Mockito.doNothing().when(milestoneService).deleteMilestone(1);
         mockMvc.perform(delete("/delete-milestone/1"))
                 .andExpect(status().isForbidden())
-                .andExpect(status().reason(containsString("You do not have permission to access this endpoint")));
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
 }

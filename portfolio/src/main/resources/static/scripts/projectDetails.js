@@ -98,12 +98,14 @@ function sendFormViaAjax(elem, type) {
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
  */
-function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
     /* Capitalize only the first letter of the schedulableType string */
     capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
+    prefillSchedulable(editForm, schedulable, schedulableType);
+    hideErrorBoxes(editForm);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -149,6 +151,24 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
         new bootstrap.Collapse(shownForm).show();
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
     }, delay, "edit" + capitalisedType + "Form-" + schedulableBoxId);
+}
+
+/**
+ * Populates the edit schedulable form with the current details of the schedulable.
+ * @param editForm Edit schedulable form
+ * @param schedulable Schedulable object
+ */
+function prefillSchedulable(editForm, schedulable, type) {
+    editForm.querySelector("#name").value = schedulable.name;
+    editForm.querySelector("#description").value =  schedulable.description;
+    editForm.querySelector("#startDate").value = schedulable.startDay;
+    if (type != 'milestone'){
+        editForm.querySelector("#startTime").value = schedulable.startTime;
+    }
+    if (type == 'event'){
+        editForm.querySelector("#endDate").value = schedulable.endDay;
+        editForm.querySelector("#endTime").value = schedulable.endTime;
+    }
 }
 
 /**
