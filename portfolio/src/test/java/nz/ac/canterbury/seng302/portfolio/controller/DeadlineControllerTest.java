@@ -1,17 +1,12 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.DeadlineRepository;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.ProjectRepository;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
@@ -88,7 +82,8 @@ class DeadlineControllerTest {
     void deleteDeadlineAsStudent_get403Response() throws Exception {
         Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
         mockMvc.perform(delete("/delete-deadline/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
     @Test
@@ -122,6 +117,6 @@ class DeadlineControllerTest {
     void postDeadlineEditPage_forbidden() throws Exception {
         this.mockMvc.perform(post("/project/0/edit-deadline/1"))
                 .andExpect(status().isForbidden())
-                .andExpect(status().reason(containsString("You do not have permission to access this endpoint")));
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 }

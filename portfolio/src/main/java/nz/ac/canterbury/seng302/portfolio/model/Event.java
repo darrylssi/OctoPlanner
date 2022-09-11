@@ -28,7 +28,7 @@ public class Event implements Schedulable {
     private Project parentProject;
 
     @Column(nullable = false)
-    @NotBlank(message="Event name cannot be blank")
+    @NotBlank(message="Event name cannot be blank.")
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
             message="The event name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String eventName;

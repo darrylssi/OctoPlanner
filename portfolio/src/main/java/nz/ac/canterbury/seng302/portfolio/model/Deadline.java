@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
@@ -26,6 +27,7 @@ public class Deadline implements Schedulable {
     private Project parentProject;
 
     @Column(nullable = false)
+    @NotBlank(message = "Deadline name cannot be blank.")
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
             message="The deadline name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String deadlineName;

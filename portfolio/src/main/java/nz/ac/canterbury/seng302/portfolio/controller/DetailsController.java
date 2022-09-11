@@ -58,6 +58,8 @@ public class DetailsController extends PageController {
      * Get request to view project details page.
      * @param principal Authenticated user
      * @param id ID of the project to be shown
+     * @param schedulableForm The form submitted by the user
+     * @param userTimezone The user's time zone
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
      */
@@ -115,7 +117,7 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event list and sorts it based on the event start date
+        // Gets the event, deadline and milestone lists and sorts them based on their start dates
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
         List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
@@ -167,6 +169,7 @@ public class DetailsController extends PageController {
     /**
      * Pre-populates the event form with default values, if they don't already exist
      * @param schedulableForm The schedulableForm object from your endpoint args
+     * @param userTimezone The user's time zone for calculating the correct start dates
      */
     private void prePopulateSchedulableForm(SchedulableForm schedulableForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
@@ -194,7 +197,7 @@ public class DetailsController extends PageController {
      * @return an html fragment of the given schedulable
      */
     @GetMapping("/frag/{type}/{schedulableId}/{boxId}")
-    public String eventFragment(
+    public String schedulableFragment(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="type") String schedulableType,
             @PathVariable(name="schedulableId") int schedulableId,

@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.TimeZone;
@@ -34,8 +35,9 @@ public class DeadlineController extends PageController {
     /**
      * Endpoint for adding events to the database, or conveying errors
      * to the user
+     * @param principal Authenticated user
      * @param projectId The project this event will be bound to
-     * @param schedulableForm The form submitted by our lovely customers
+     * @param schedulableForm Form that stores information about the deadline
      * @return  A response of either 200 (success), 403 (forbidden),
      *          or 400 (Given event failed validation, replies with what errors occurred)
      */
@@ -45,7 +47,12 @@ public class DeadlineController extends PageController {
             @PathVariable("project_id") int projectId,
             @Valid SchedulableForm schedulableForm
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
         // Getting parent project object by path id
         Project parentProject = projectService.getProjectById(projectId);
@@ -79,7 +86,13 @@ public class DeadlineController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="deadlineId") int deadlineId
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
         try {
             deadlineService.deleteDeadline(deadlineId);
             return new ResponseEntity<>("Deadline deleted.", HttpStatus.OK);
@@ -93,7 +106,8 @@ public class DeadlineController extends PageController {
      * @param principal Authenticated user
      * @param projectId ID of the project the deadline belongs to
      * @param deadlineId ID of the deadline to be edited
-     * @param schedulableForm Deadline DTO
+     * @param schedulableForm Form that stores information about the deadline
+     * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone Current timezone of the user
      * @return Project details page
      */
@@ -106,7 +120,12 @@ public class DeadlineController extends PageController {
             BindingResult bindingResult,
             TimeZone userTimeZone
     ){
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
         Deadline deadline = deadlineService.getDeadlineById(deadlineId);
         deadline.setName(schedulableForm.getName());

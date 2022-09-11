@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
@@ -34,7 +35,7 @@ public class MilestoneController extends PageController {
      * Post request to add milestones to a project.
      * @param principal Authenticated user
      * @param projectId ID of the project the milestone will be added to
-     * @param schedulableForm the form that stores the iformation about the milestone
+     * @param schedulableForm Form that stores information about the milestone
      * @return A ResponseEntity with the id of the milestone that was saved
      */
     @PostMapping("/project/{project_id}/add-milestone")
@@ -43,7 +44,12 @@ public class MilestoneController extends PageController {
             @PathVariable("project_id") int projectId,
             @Valid SchedulableForm schedulableForm
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
         // Getting parent project object by path id
         Project parentProject = projectService.getProjectById(projectId);
@@ -74,7 +80,13 @@ public class MilestoneController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="milestoneId") int milestoneId
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
         try {
             milestoneService.deleteMilestone(milestoneId);
             return new ResponseEntity<>("Milestone deleted.", HttpStatus.OK);
