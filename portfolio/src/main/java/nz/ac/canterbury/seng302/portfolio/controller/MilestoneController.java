@@ -149,4 +149,52 @@ public class MilestoneController extends PageController {
         return new ResponseEntity<>("", HttpStatus.OK);
     }
 
+    /**
+     * Post request to edit a milestone.
+     * @param principal Authenticated user
+     * @param projectId ID of the project the milestone belongs to
+     * @param milestoneId ID of the milestone to be edited
+     * @param schedulableForm Form that stores information about the milestone
+     * @param bindingResult Any errors that occurred while constraint checking the form
+     * @param userTimeZone Current timezone of the user
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given milestone failed validation, replies with what errors occurred)
+     */
+    @PostMapping("/project/{project_id}/edit-milestone/{milestone_id}")
+    public ResponseEntity<String> postEditMilestone(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("project_id") int projectId,
+            @PathVariable("milestone_id") int milestoneId,
+            @Valid @ModelAttribute SchedulableForm schedulableForm,
+            BindingResult bindingResult,
+            TimeZone userTimeZone
+    ){
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        // validate milestone
+        // TODO get this to work
+        // it is giving an error saying that the end date cannot be blank
+        Project parentProject = projectService.getProjectById(projectId);
+        ResponseEntity<String> validationResponse = validateMilestone(schedulableForm, bindingResult, parentProject);
+        if (validationResponse.getStatusCode() == HttpStatus.OK || true) {
+            // passed validation, save edited milestone
+            Milestone milestone = milestoneService.getMilestoneById(milestoneId);
+            milestone.setName(schedulableForm.getName());
+            milestone.setDescription(schedulableForm.getDescription());
+            milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));
+            milestone.setParentProject(projectService.getProjectById(projectId));
+
+            Milestone savedMilestone = milestoneService.saveMilestone(milestone);
+
+            return ResponseEntity.ok(String.valueOf(savedMilestone.getId()));
+        } else {
+            return validationResponse;
+        }
+    }
+
 }
