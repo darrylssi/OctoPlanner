@@ -57,6 +57,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let selectedSprint = null;
 
+     //
+     let currProjectStartDate = projectStartDate;
+     while (currProjectStartDate <= projectEndDate) {
+
+     }
+
+    //
+    let deadlineNamesList = deadlineNames.split(",");
+    let deadlineDatesList = deadlineDates.split(",");
+
+    // Creating one list for calendar sprints
+    let deadlines = [];
+    for(let i = 0; i < deadlineNamesList.length; i++) {
+        deadlines.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
+            end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
+            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
+    }
+
     // Merges the sprints with events
     let sprintWithEvents = events.sort((a, b) => a.id.localeCompare(b.id)).reverse().concat(sprints);
 
@@ -74,6 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     })
+
+
 
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
