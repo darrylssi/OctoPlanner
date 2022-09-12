@@ -78,9 +78,9 @@ public class MonthlyCalendarController extends PageController {
         }
 
         //
-        ArrayList<String> schedulablesStringList = getAllSchedulableStringList(project);
-        model.addAttribute("deadlineNames", schedulablesStringList.get(0));
-        model.addAttribute("deadlineDates", schedulablesStringList.get(1));
+//        ArrayList<String> schedulablesStringList = getAllSchedulableStringList(project);
+//        model.addAttribute("deadlineNames", schedulablesStringList.get(0));
+//        model.addAttribute("deadlineDates", schedulablesStringList.get(1));
 
 
         model.addAttribute("tab", 2);

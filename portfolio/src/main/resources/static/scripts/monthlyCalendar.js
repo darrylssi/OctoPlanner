@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
 //     }
 
     //
-    let deadlineNamesList = deadlineNames.split(",");
-    let deadlineDatesList = deadlineDates.split(",");
+//    let deadlineNamesList = deadlineNames.split(",");
+//    let deadlineDatesList = deadlineDates.split(",");
 
     // Creating one list for calendar sprints
 //    let deadlines = [];
