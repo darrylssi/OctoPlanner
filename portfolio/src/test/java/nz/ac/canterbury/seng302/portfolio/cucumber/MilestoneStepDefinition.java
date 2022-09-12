@@ -51,7 +51,7 @@ public class MilestoneStepDefinition extends RunCucumberTest{
      */
     ValidationError checkValidator() {
         // TODO this is SUS!!! Should really just be parentProject without having to get it from EventStepDefinition
-        return ValidationUtils.validateMilestoneDates(milestone.getStartDate(), EventStepDefinition.getParentProject());
+        return ValidationUtils.validateMilestoneDate(milestone.getStartDate(), EventStepDefinition.getParentProject());
     }
 
 
