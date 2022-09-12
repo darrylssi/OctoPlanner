@@ -7,19 +7,19 @@ let events = [
                    id: 'b',
                    title: 'deadlines',
                    start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'deadline', num: 0 }
+                   extendedProps: { type: 'deadline', num: 0, description: 'this is a deadline' }
                  },
                  {
                    id: 'a',
                    title: 'milestones',
                    start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'milestone', num: 5 }
+                   extendedProps: { type: 'milestone', num: 5, description: 'this is a milestone' }
                  },
                  {
                    id: 'c',
                    title: 'events',
                    start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'event', num: 1 }
+                   extendedProps: { type: 'event', num: 1, description: 'this is an event' }
                  }
              ];
 
@@ -94,6 +94,16 @@ document.addEventListener('DOMContentLoaded', function() {
             prev: "<",
             next: ">"
         },
+
+        eventRender: function(info) {
+            $(info.el).tooltip({
+                title: info.event.extendedProps.description,
+                placement: "top",
+                trigger: "hover",
+                container: "body"
+            });
+        },
+
         eventOverlap: function (stillEvent, movingEvent) {
             if (stillEvent.extendedProps.type === 'sprint') {
                 // shows the sprint overlap error message
@@ -155,18 +165,15 @@ document.addEventListener('DOMContentLoaded', function() {
             switch(arg.event.extendedProps.type) {
                 case 'event':
                     const eventContent = eventIcon + " " + arg.event.extendedProps.num.toString();
-                    return { html: eventContent }
-                    break;
+                    return { html: eventContent };
                 case 'milestone':
                     const milestoneContent = milestoneIcon + " " + arg.event.extendedProps.num.toString();
-                    return { html: milestoneContent }
-                    break;
+                    return { html: milestoneContent };
                 case 'deadline':
                     const deadlineContent = deadlineIcon + " " + arg.event.extendedProps.num.toString();
-                    return { html: deadlineContent }
-                    break;
+                    return { html: deadlineContent };
                 default:
-                    return ;
+                    return;
             }
        },
        // trying to resize just the icons
@@ -174,9 +181,9 @@ document.addEventListener('DOMContentLoaded', function() {
        // you can add "hidden" to the class string and it will hide the icon without repositioning anything else
        eventClassNames: function(arg) {
             if (['event', 'milestone', 'deadline'].includes(arg.event.extendedProps.type)) {
-                return arg.event.extendedProps.num == 0 ? [ 'schedulable-icon hidden' ] : [ 'schedulable-icon' ]
+                return arg.event.extendedProps.num === 0 ? [ 'schedulable-icon hidden' ] : [ 'schedulable-icon' ]
             } else {
-                return;
+
             }
        }
     });
