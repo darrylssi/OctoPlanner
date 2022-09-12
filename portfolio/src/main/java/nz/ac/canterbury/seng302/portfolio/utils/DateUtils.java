@@ -87,7 +87,7 @@ public class DateUtils {
     public static String toDateTimeString(Date date) { return new SimpleDateFormat(DATETIME_FORMAT).format(date); }
 
     /**
-     * Converts a String to a Date in yyyy--MM-dd HH:mm format.
+     * Converts a String to a Date in yyyy-MM-dd HH:mm format.
      * @param dateTime String to be converted to Date
      * @return Date object
      */

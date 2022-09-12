@@ -3,9 +3,10 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
+import java.util.StringJoiner;
 import java.util.TimeZone;
 
 /**
@@ -33,40 +36,47 @@ public class DeadlineController extends PageController {
      * Post request to add a deadline to a project.
      * @param principal Authenticated user
      * @param projectId ID of the project the deadline will be added to
-     * @param deadlineName Name of the deadline
-     * @param deadlineDate Date of the deadline
-     * @param deadlineTime Time of the deadline
-     * @param deadlineDescription Description of the deadline
-     * @return Project details page
+     * @param deadlineForm Form that stores information about the deadline
+     * @param bindingResult Any errors that came up during validation
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given deadline failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-deadline")
-    public String postAddDeadline(
+    public ResponseEntity<String> postAddDeadline(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
-            @RequestParam(name="deadlineName") String deadlineName,
-            @RequestParam(name="deadlineDate") String deadlineDate,
-            @RequestParam(name="deadlineTime") String deadlineTime,
-            @RequestParam(name="deadlineDescription") String deadlineDescription
+            @Valid DeadlineForm deadlineForm,
+            BindingResult bindingResult,
+            TimeZone userTimezone
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
-        // Getting parent project object by path id
+        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         Project parentProject = projectService.getProjectById(projectId);
+        if (bindingResult.hasErrors()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: bindingResult.getAllErrors()) {
+                errors.add(err.getDefaultMessage());
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
 
-        Deadline deadline = new Deadline();
+        // Validation round 2: Do our custom errors pass?
+        var dateErrors = ValidationUtils.validateDeadlineDate(deadlineForm.datetimeToDate(userTimezone), parentProject);
+        var nameError = ValidationUtils.validateName(deadlineForm.getName());
+        ResponseEntity<String> errors = validateDateAndName(dateErrors, nameError);
+        if (errors != null) return errors;
 
-        String deadlineDateTime = deadlineDate + " " + deadlineTime;
-
-        // Set details of new deadline object
+        // Data is valid, add it to database
+        Deadline deadline = new Deadline(deadlineForm.getName(), deadlineForm.getDescription(), deadlineForm.datetimeToDate(userTimezone));
         deadline.setParentProject(parentProject);
-        deadline.setName(deadlineName);
-        deadline.setStartDate(DateUtils.toDateTime(deadlineDateTime));
-        deadline.setDescription(deadlineDescription);
-
         deadlineService.saveDeadline(deadline);
-
-        return "redirect:../" + parentProject.getId();
-
+        return ResponseEntity.ok("");
     }
 
     /**
@@ -81,7 +91,13 @@ public class DeadlineController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable(name="deadlineId") int deadlineId
     ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
         try {
             deadlineService.deleteDeadline(deadlineId);
             return new ResponseEntity<>("Deadline deleted.", HttpStatus.OK);
@@ -91,33 +107,73 @@ public class DeadlineController extends PageController {
     }
 
     /**
-     * Post request to edit a deadline.
+     * Handle edit requests for deadlines. Validate the form and determine the response
      * @param principal Authenticated user
      * @param projectId ID of the project the deadline belongs to
      * @param deadlineId ID of the deadline to be edited
-     * @param deadlineForm Deadline DTO
+     * @param deadlineForm Form that stores information about the deadline
      * @param userTimeZone Current timezone of the user
-     * @return Project details page
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given deadline failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/edit-deadline/{deadline_id}")
-    public String postEditDeadline(
+    public ResponseEntity<String> postEditDeadline(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("deadline_id") int deadlineId,
             @Valid @ModelAttribute DeadlineForm deadlineForm,
+            BindingResult bindingResult,
             TimeZone userTimeZone
     ){
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
 
+        // Validation round 1: Do the Javax Validation annotations pass?
         Deadline deadline = deadlineService.getDeadlineById(deadlineId);
+        if (bindingResult.hasErrors()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: bindingResult.getAllErrors()) {
+                errors.add(err.getDefaultMessage());
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+
+        // Validation round 2: Do our custom errors pass?
+        var dateErrors = ValidationUtils.validateDeadlineDate(deadlineForm.datetimeToDate(userTimeZone), deadline.getParentProject());
+        var nameError = ValidationUtils.validateName(deadlineForm.getName());
+        ResponseEntity<String> errors = validateDateAndName(dateErrors, nameError);
+        if (errors != null) return errors;
+
         deadline.setName(deadlineForm.getName());
         deadline.setDescription(deadlineForm.getDescription());
-        deadline.setStartDate(DateUtils.localDateAndTimeToDate(deadlineForm.getDate(), deadlineForm.getTime(), userTimeZone));
+        deadline.setStartDate(deadlineForm.datetimeToDate(userTimeZone));
         deadline.setParentProject(projectService.getProjectById(projectId));
 
         deadlineService.saveDeadline(deadline);
-
-        return "redirect:../";
+        return ResponseEntity.ok("");
     }
 
-}
+    /**
+     * Validation for deadline's date and name.
+     * @param dateErrors Checks custom date error
+     * @param nameError Checks custom name error
+     * @return A response of either null, 200 (success),
+     *          or 400 (Given deadline failed validation, replies with what errors occurred)
+     */
+    private ResponseEntity<String> validateDateAndName(ValidationError dateErrors, ValidationError nameError) {
+        if (dateErrors.isError() || nameError.isError()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: dateErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: nameError.getErrorMessages()) {
+                errors.add(err);
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+        return null;
+    }}

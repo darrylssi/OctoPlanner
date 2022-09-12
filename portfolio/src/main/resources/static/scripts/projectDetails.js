@@ -4,6 +4,8 @@ const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages a
 const EVENT_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing an event
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
+const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+
 
 /** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
 function showDeleteSprintModal(sprintId, sprintName) {
@@ -75,6 +77,64 @@ function deleteDeadline(deadlineId) {
 }
 
 /**
+ * Hides and clears any input feedback boxes in the given element
+ * @param {HTMLFormElement} elem
+ */
+function hideErrorBoxes(elem) {
+    const errorBoxes = elem.querySelectorAll(`[id*="Feedback"]`);
+    for (let feedbackBox of errorBoxes) {
+        feedbackBox.innerHTML = '';
+        feedbackBox.style.display = 'none';
+    }
+}
+
+/**
+ * Submits the given form's request in Javascript, allowing for in-place
+ * updating of the page.
+ * @param {HTMLFormElement} elem
+ */
+function sendFormViaAjax(elem) {
+    // Delete any pre-existing errors on the form
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    console.log("Element -> ", elem);
+    console.log("Form Date -> ", formData);
+
+    formRequest.onload = () => {
+        if (formRequest.status == 200) {
+            // Success
+            window.location.reload()
+        } else {
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                // Determine correct error field. Defaults to NameFeedback
+                let field = "Name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') != -1) {
+                    field = 'EndDate';
+                } else if (errorMsg.indexOf('end time') != -1) {
+                    field = 'EndTime';
+                } else if (errorMsg.indexOf('date') != -1) {
+                    field = 'StartDate';
+                } else if (errorMsg.indexOf('time') != -1 || errorMsg.indexOf('minute') != -1) {
+                    field = 'StartTime';
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+
+/**
  * Submits the `edit-event` request in Javascript, because the form doesn't
  * exist until it's spawned via Javascript, and this is the only way to convey errors.
  * @param {HTMLFormElement} elem
@@ -123,10 +183,11 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + schedulableType + "Form-" + schedulableBoxId);
-
     if (schedulableType === 'Deadline') {
         prefillDeadline(editForm, schedulable);
     }
+
+    hideErrorBoxes(editForm);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -165,6 +226,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    showRemainingChars();
 
     showRemainingChars();
 

@@ -42,7 +42,7 @@
                 maxNameLen=${maxNameLen},
                 maxDescLen=${maxDescLen},
                 projectStart=${projectStart},
-                projectEnd=${projectEnd})" />
+                projectEnd=${projectEnd})" ></div>
     </div>
 </div>
 
@@ -75,14 +75,15 @@
                 </button>
             </div>
         </span>
-        <div th:replace="detailFragments :: editDeadlineForm(
+        <div th:replace="detailFragments :: deadlineEditForm(
                 deadline=${deadline},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
                 maxDescLen=${maxDescLen},
                 projectStart=${projectStart},
-                projectEnd=${projectEnd})"/>
+                projectEnd=${projectEnd},
+                editDeadlineForm=${editDeadlineForm})" ></div>
     </div>
 </div>
 
@@ -159,25 +160,26 @@
 </div>
 
 <!-- Deadline edit form fragment -->
-<div th:fragment="editDeadlineForm">
+<div th:fragment="deadlineEditForm">
     <div th:id="|editDeadlineForm-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
             <div class="card-header" id="edit-deadline-form-header" th:text="|Editing ${deadline.getName}|"></div>
             <div class="card-body">
-                <form th:action="@{edit-deadline/{id}(id = ${deadline.getId})}" class="container-fluid" method="post" th:object="${deadlineForm}">
+                <form action="javascript:;" th:data-url="@{edit-deadline/{id}(id=${deadline.getId()})}" onsubmit="return sendFormViaAjax(this)" class="container-fluid js-form form" method="post" th:object="${deadlineForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" id="name" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editDeadlineNameFeedback" required>
-                                <label for="name" class="form-label">Name</label>
-                                <div id="editDeadlineNameFeedback" class="invalid-feedback"></div>
+                                <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}"
+                                       th:maxlength="${maxNameLen}" aria-describedby="editDeadlineNameFeedback" required>
+                                <label class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
+                            <div id="editDeadlineNameFeedback" class="invalid-feedback"></div>
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" id="description" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
-                                <label for="description">Description</label>
+                                <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
+                                <label class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
                         </div>
@@ -185,17 +187,17 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:field="*{date}" id="date" required aria-describedby="editDeadlineDateFeedback" th:min="${projectStart}" th:max="${projectEnd}">
-                                <label for="date">Date</label>
-                                <div id="editDeadlineDateFeedback" class="invalid-feedback"></div>
+                                <input type="date" class="form-control" th:field="*{date}" required aria-describedby="editDeadlineStartDateFeedback" th:min="${projectStart}" th:max="${projectEnd}">
+                                <label class="form-label">Date</label>
                             </div>
+                            <div id="editDeadlineStartDateFeedback" class="invalid-feedback"></div>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="time" class="form-control" th:field="*{time}" id="time" required aria-describedby="editDeadlineTimeFeedback">
-                                <label for="time">Time</label>
-                                <div id="editDeadlineTimeFeedback" class="invalid-feedback"></div>
+                                <input type="time" class="form-control" th:field="*{time}" required aria-describedby="editDeadlineStartTimeFeedback">
+                                <label class="form-label">Time</label>
                             </div>
+                            <div id="editDeadlineStartTimeFeedback" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="row justify-content-end">
@@ -207,9 +209,6 @@
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
-                    <ul th:if="${editDeadlineFormError}">
-                        <li th:each="errMsg: ${editDeadlineFormError}" th:text="${errMsg}" class="text-danger"></li>
-                    </ul>
                 </form>
             </div>
         </div>

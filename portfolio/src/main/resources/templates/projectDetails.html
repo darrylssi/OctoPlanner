@@ -37,7 +37,8 @@
     </div>
 </div>
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
-<div class="container-fluid content">
+<div class="container-fluid content" th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
+         projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}" >
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
         <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
@@ -59,7 +60,9 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd},
+                    edit + ${schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1)}
+                    + Form=${edit + schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1) + Form})" />
         </div>
     </div>
     <!-- /* The project's sprints */ -->
@@ -98,7 +101,9 @@
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
                                 projectStart=${projectStart},
-                                projectEnd=${projectEnd})" />
+                                projectEnd=${projectEnd},
+                                edit + ${schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1)}
+                                + Form=${edit + schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1) + Form})" />
                     </div>
                 </div>
             </div>
@@ -115,7 +120,9 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd},
+                    edit + ${schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1)}
+                    + Form=${edit + schedulable.getType().substring(0, 1).toUpperCase() + schedulable.getType().substring(1) + Form})" />
             </div>
         </div>
     </div>
@@ -223,53 +230,49 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                 New Deadline
             </div>
             <div class="card-body">
-                <form th:action="@{add-deadline}" method="post" class="container-fluid">
+                <form action="javascript:;" th:data-url="@{add-deadline}" onsubmit="return sendFormViaAjax(this)" method="post" class="container-fluid js-form" th:object="${deadlineForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
                                 <input type="text" class="form-control" th:classappend="${nameError} ? is-invalid : '' "
-                                       id="deadlineName" placeholder="Name" th:required="required" aria-describedby="deadlineNameFeedback"
+                                       id="addDeadlineNameInput" th:field="*{name}" placeholder="Name" th:required="required" aria-describedby="addDeadlineNameFeedback"
                                        th:name="deadlineName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}">
-                                <label for="deadlineName">Name</label>
+                                <label class="form-label"  for="addDeadlineNameInput">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
-                                <div id="deadlineNameFeedback" class="invalid-feedback" th:text="${nameError}"></div>
                             </div>
+                            <small id="addDeadlineNameFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" id="deadlineDescription" placeholder="Description" th:name="deadlineDescription"
-                                       th:maxlength="${maxDescLen}" >
-                                <label for="deadlineDescription">Description</label>
+                                <input type="text" class="form-control" id="addDeadlineDescriptionInput" placeholder="Description"
+                                       th:name="deadlineDescription" th:field="*{description}" th:maxlength="${maxDescLen}" >
+                                <label class="form-label" for="addDeadlineDescriptionInput">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
-
+                            <small id="addDeadlineDescriptionFeedback" class="text-danger"></small>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
                                 <input type="date" class="form-control" th:classappend="${deadlineDateError} ? is-invalid : '' "
-                                       id="deadlineDate" th:required="required" aria-describedby="deadlineDateFeedback"
-                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
-                                       th:name="deadlineDate">
-                                <label for="deadlineDate">Date</label>
-                                <div id="deadlineDateFeedback" class="invalid-feedback" th:text="${deadlineDateError}"></div>
-                                <script>
+                                       id="deadlineStartDate" th:field="*{date}" th:required="required" aria-describedby="addDeadlineStartDateFeedback"
+                                       th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineDate">
+                                <label class="form-label" for="deadlineStartDate">Date</label>
+                            </div>
+                            <small id="addDeadlineStartDateFeedback" class="text-danger"></small>
+                            <script>
                                     document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
                                 </script>
-                            </div>
                         </div>
                         <div class = "col">
                             <div class="form-floating mb-3">
                                 <input type="time" value="17:00" class="form-control" th:classappend="${deadlineTimeError} ? is-invalid : '' "
-                                       id="deadlineTime" th:required="required" aria-describedby="deadlineTimeFeedback"
-                                       th:min="${project.getProjectStartDate}" th:max="${project.getProjectEndDate}"
-                                       th:name="deadlineTime">
-                                <label for="deadlineTime">Time</label>
-                                <div id="deadlineTimeFeedb
-
-ack" class="invalid-feedback" th:text="${deadlineTimeError}"></div>
+                                       id="deadlineStartTime" th:field="*{time}" th:required="required" aria-describedby="addDeadlineStartTimeFeedback"
+                                       th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineTime">
+                                <label for="deadlineStartTime">Time</label>
                             </div>
+                            <small id="addDeadlineStartTimeFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-1">
                             <button type="submit" class="btn btn-primary btn-lg">Save</button>

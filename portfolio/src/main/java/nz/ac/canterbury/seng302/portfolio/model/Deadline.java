@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.model;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,7 @@ public class Deadline implements Schedulable {
     private Project parentProject;
 
     @Column(nullable = false)
+    @NotBlank(message="Deadline name cannot be blank")
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
             message="The deadline name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
     private String deadlineName;
@@ -51,7 +53,7 @@ public class Deadline implements Schedulable {
      */
     public Deadline(String deadlineName,  String deadlineDescription, Date deadlineDate) {
         this.deadlineName = deadlineName;
-        this.deadlineDescription = deadlineDescription;
+        this.deadlineDescription = deadlineDescription.trim();
         this.deadlineDate = deadlineDate;
     }
 
@@ -96,7 +98,7 @@ public class Deadline implements Schedulable {
     }
 
     public void setDescription(String description) {
-        this.deadlineDescription = description;
+        this.deadlineDescription = description.trim();
     }
 
     public Date getStartDate() {
