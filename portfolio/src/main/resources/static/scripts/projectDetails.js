@@ -90,6 +90,8 @@ function sendFormViaAjax(elem, type) {
         }
     }
     formRequest.send(formData);
+    resetAddForm(type);
+    showRemainingChars();
 }
 
 /**
@@ -276,4 +278,27 @@ function showRemainingChars() {
         const display = parent.getElementsByClassName('remaining-chars-field')[0];
         displayRemainingCharacters(input, display);
     }
+}
+
+/**
+ * Resets the add schedulable form after submission.
+ * @param type Type of schedulable to be added.
+ */
+function resetAddForm(type) {
+    const capitalisedType = type.charAt(0).toUpperCase() + type.slice(1);
+    let addForm = document.getElementById("add" + capitalisedType + "Form");
+    addForm.querySelector("#addSchedulableNameInput").value = "";
+    addForm.querySelector("#addSchedulableDescriptionInput").value =  "";
+
+    // add default dates
+    const today = new Date();
+    addForm.querySelector("#schedulableStartDate").value = today.toISOString().substring(0,10);
+    if (type !== 'milestone'){
+        addForm.querySelector("#schedulableStartTime").value = today.getHours() + ":" + (today.getMinutes());
+    }
+    if (type === 'event'){
+        addForm.querySelector("#schedulableEndDate").value = today.toISOString().substring(0,10);
+        addForm.querySelector("#schedulableEndTime").value = today.getHours() + ":" + (today.getMinutes()+1);
+    }
+
 }
