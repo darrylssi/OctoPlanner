@@ -149,9 +149,9 @@ class SchedulableMessageOutputTest {
         ), SchedulableMessageOutput.getSchedulableBoxIds());
 
         assertEquals(List.of(
-                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event1.getId()),
-                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event2.getId()),
-                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getId())
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event1.getType(), event1.getId()),
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event2.getType(), event2.getId()),
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getType(), event3.getId())
         ), SchedulableMessageOutput.getNextSchedulableIds());
 
     }
@@ -175,7 +175,7 @@ class SchedulableMessageOutputTest {
         ), SchedulableMessageOutput.getSchedulableBoxIds());
 
         assertEquals(List.of(
-                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getId())
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getType(), event3.getId())
         ), SchedulableMessageOutput.getNextSchedulableIds());
 
     }

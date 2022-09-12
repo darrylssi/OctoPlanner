@@ -17,6 +17,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Test class for post and delete requests for sprints handled by the details controller
+ */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DetailsController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -31,6 +34,8 @@ class DetailsControllerTest {
     SprintService sprintService;
     @MockBean
     DeadlineService deadlineService;
+    @MockBean
+    MilestoneService milestoneService;
     @MockBean
     ProjectService projectService;
     @MockBean

@@ -331,6 +331,6 @@ button:hover {
     cursor: pointer;
 }
 
-.bi-calendar-event, .bi-hourglass-bottom {
+.bi-calendar-event,.bi-calendar-deadline, .bi-calendar-milestone, .bi-hourglass-bottom{
     margin: 5px;
 }

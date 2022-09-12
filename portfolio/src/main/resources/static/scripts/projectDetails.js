@@ -1,5 +1,4 @@
-let previousSchedulable; // the previous schedulable being edited by THIS user (only one can be edited at a time)
-let previousSchedulableType;
+const currentSchedulable = {type:"", id:-1}; // the current schedulable being edited by THIS user (only one can be edited at a time)
 const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
@@ -8,74 +7,31 @@ const EVENT_TYPE = "event";
 const DEADLINE_TYPE = "deadline";
 const MILESTONE_TYPE = "milestone";
 
-/** When the delete sprint button is clicked, show a modal checking if the user is sure about deleting the sprint */
-function showDeleteSprintModal(sprintId, sprintName) {
-    const modal = document.getElementById("deleteModal");
-    const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + sprintName + "?";
-    deleteButton.onclick = () => {deleteSprint(sprintId)}
-    modal.style.display = "block";
-}
-
-/** Hides the confirm delete modal without deleting anything */
+/** Hides the confirm delete modal without deleting a sprint/event/deadline */
 function hideModal() {
     const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
 }
 
-/** sends a http request to delete the sprint with the given id */
-function deleteSprint(sprintId) {
-    const url = BASE_URL + "delete-sprint/" + sprintId;
-    const deleteRequest = new XMLHttpRequest();
-    deleteRequest.open("DELETE", url, true);
-    deleteRequest.onload = () => {
-        // Reload the page to get the updated list of sprints after the delete
-        window.location.reload();
-    }
-    deleteRequest.send();
-}
-
-/** When the delete schedulable button is clicked, show a modal checking if the user is sure about deleting the schedulable */
-function showDeleteSchedulableModal(schedulableId, schedulableName, schedulableType) {
+/** When the delete button is clicked, show a modal checking if the user is sure about deleting the object
+ * Type  */
+function showDeleteModal(id, name, type) {
     const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
-    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + schedulableName + "?";
-    switch(schedulableType) {
-        case EVENT_TYPE:
-            deleteButton.onclick = () => {deleteEvent(schedulableId)};
-            break;
-        case DEADLINE_TYPE:
-            deleteButton.onclick = () => {deleteDeadline(schedulableId)};
-            break;
-        case MILESTONE_TYPE:
-            return;
-        default:
-            throw new Error('Not a schedulable type!');
-    }
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + name + "?";
+    deleteButton.onclick = () => {deleteObject(id, type)}
     modal.style.display = "block";
 }
 
-/** sends a http request to delete the event with the given id */
-function deleteEvent(eventId) {
-    const url = BASE_URL + "delete-event/" + eventId;
+/** sends a http request to delete the object with the given id */
+function deleteObject(id, type) {
+    const url = BASE_URL + "delete-" + type + "/" + id;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the delete
-        stompClient.send("/app/schedulables", {}, JSON.stringify({id: eventId, type: EVENT_TYPE}));
+        stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
         hideModal();
-    }
-    deleteRequest.send();
-}
-
-/** sends a http request to delete the deadline with the given id */
-function deleteDeadline(deadlineId) {
-    const url = BASE_URL + "delete-deadline/" + deadlineId;
-    const deleteRequest = new XMLHttpRequest();
-    deleteRequest.open("DELETE", url, true);
-    deleteRequest.onload = () => {
-        // Reload the page to get the updated list of deadlines after the delete
-        window.location.reload();
     }
     deleteRequest.send();
 }
@@ -97,7 +53,7 @@ function hideErrorBoxes(elem) {
  * updating of the page.
  * @param {HTMLFormElement} elem
  */
-function sendFormViaAjax(elem, formId) {
+function sendFormViaAjax(elem, type) {
     // Delete any pre-existing errors on the form
     hideErrorBoxes(elem);
 
@@ -105,24 +61,25 @@ function sendFormViaAjax(elem, formId) {
     const formRequest = new XMLHttpRequest();
     let url = elem.getAttribute('data-url');
     formRequest.open("POST", url);
+    console.log(type + ' schedulable form submitted');
 
     formRequest.onload = () => {
-        if (formRequest.status == 200) {
+        if (formRequest.status === 200) {
             // Success
-            hideForm(formRequest.response, formId);
-            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response}));
+            hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
                 // Determine correct error field. Defaults to NameFeedback
                 let field = "Name";
-                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') != -1) {
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
                     field = 'EndDate';
-                } else if (errorMsg.indexOf('end time') != -1) {
+                } else if (errorMsg.indexOf('end time') !== -1) {
                     field = 'EndTime';
-                } else if (errorMsg.indexOf('date') != -1) {
+                } else if (errorMsg.indexOf('date') !== -1) {
                     field = 'StartDate';
-                } else if (errorMsg.indexOf('time') != -1 || errorMsg.indexOf('minute') != -1) {
+                } else if (errorMsg.indexOf('time') !== -1 || errorMsg.indexOf('minute') !== -1) {
                     field = 'StartTime';
                 }
                 field += 'Feedback';
@@ -136,73 +93,56 @@ function sendFormViaAjax(elem, formId) {
 }
 
 /**
- * Inserts/expands the event edit form directly below the event being edited.
- * This function adds forms into the page only as they are needed.
- *
- * Also deals with the websocket part of editing events. This function will send an initial editing message and
- * set up repeating edit messages.
- * @param eventId id of the event the message should show for
- * @param eventBoxId id of the event box to display the form at
- * @param eventName name of the edited event
- * @param eventDescription description of the edited event
- * @param eventStartDate start date of the edited event
- * @param eventEndDate end date of the edited event
- * @param projectStart start date of the project (the earliest an event can start)
- * @param projectEnd end date of the project (the latest an event can end)
+ * An attempt to make this function deal with schedulable objects...
+ * @param schedulableId the id of the schedulable object being edited
+ * @param schedulableBoxId the id of the box element of the schedulable object being edited
+ * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
  */
-function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventStartDate, eventEndDate, projectStart, projectEnd) {
+function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
+    /* Capitalize only the first letter of the schedulableType string */
+    capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+
     /* Search for the edit form */
-    let editForm = null;    // Split to account for weird behaviour
-    editForm = document.getElementById("editEventForm-" + eventBoxId);
+    let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
+    prefillSchedulable(editForm, schedulable, schedulableType);
+    hideErrorBoxes(editForm);
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
-        hideForm(eventId, "editEventForm-" + eventBoxId, EVENT_TYPE);
+        hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType);
         return;
     }
 
-    /* Collapse any edit event forms already on the page. If we find any, delay
+    /* Collapse any edit schedulable forms already on the page. If we find any, delay
        opening the new form by EDIT_FORM_CLOSE_DELAY. */
     let collapseElementList = document.getElementsByClassName("collapse show");
-    let delay = 0;
+    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
     let differentSchedulable = false;
     for (let element of collapseElementList) {
-        if (element.id.indexOf("editEventForm") != -1) {
-            new bootstrap.Collapse(element).hide();
-            delay = EDIT_FORM_CLOSE_DELAY;
-            /* Check whether any form is for a different schedulable, to see whether
-               we need to send a stop editing message */
-            if (element.id.indexOf("editEventForm-" + eventId) == -1) {
-                differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (in a worst case scenario)
-                previousSchedulable = (element.id.split('-')[1]);  // Get schedulable id from that form
-            }
+        new bootstrap.Collapse(element).hide();
+        /* Check whether any form is for a different schedulable, to see whether
+           we need to send a stop editing message */
+        if (element.id.indexOf("edit" + capitalisedType + "Form-" + schedulableBoxId) === -1) {
+            differentSchedulable = true;  // Extracted to a variable to avoid sending extra messages (worst case)
         }
     }
 
     /* If a form we just closed was for a different schedulable, we need to
-       send a stop editing schedulable */
-    if (differentSchedulable) {
-        stopEditing();
-    }
+       send a stop editing message */
+     if (differentSchedulable) {
+         stopEditing();
+     }
+
+     currentSchedulable.id = schedulableId;
+     currentSchedulable.type = schedulableType;
 
     /* Send an initial message, cancel any current repeating messages, then start sending repeating messages. */
-    sendEditingSchedulableMessage(eventId, EVENT_TYPE); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
+    sendEditingSchedulableMessage(schedulableId, schedulableType); // see https://www.w3schools.com/jsref/met_win_setinterval.asp
     if (sendEditMessageInterval) { // reset interval
         clearInterval(sendEditMessageInterval);
     }
-    sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(eventId, EVENT_TYPE)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
 
-    /* Populate this form. Doing this from javascript is not the best, but our validation leaves no choice */
-    editForm.querySelector("#name").setAttribute("value", eventName);
-    editForm.querySelector("#description").setAttribute("value", eventDescription);
-    editForm.querySelector("#startDate").setAttribute("value", eventStartDate.substring(0, 10));
-    editForm.querySelector("#startDate").setAttribute("min", projectStart);
-    editForm.querySelector("#startDate").setAttribute("max", projectEnd);
-    editForm.querySelector("#startTime").setAttribute("value", eventStartDate.substring(11, 16));
-    editForm.querySelector("#endDate").setAttribute("value", eventEndDate.substring(0, 10));
-    editForm.querySelector("#endDate").setAttribute("min", projectStart);
-    editForm.querySelector("#endDate").setAttribute("max", projectEnd);
-    editForm.querySelector("#endTime").setAttribute("value", eventEndDate.substring(11, 16));
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
@@ -210,7 +150,46 @@ function showEditEvent(eventId, eventBoxId, eventName, eventDescription, eventSt
         let shownForm = document.getElementById(formId)
         new bootstrap.Collapse(shownForm).show();
         shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
-    }, delay, "editEventForm-" + eventBoxId);
+    }, delay, "edit" + capitalisedType + "Form-" + schedulableBoxId);
+}
+
+/**
+ * Populates the edit schedulable form with the current details of the schedulable.
+ * @param editForm Edit schedulable form
+ * @param schedulable Schedulable object
+ */
+function prefillSchedulable(editForm, schedulable, type) {
+    editForm.querySelector("#name").value = schedulable.name;
+    editForm.querySelector("#description").value =  schedulable.description;
+    editForm.querySelector("#startDate").value = schedulable.startDay;
+    if (type != 'milestone'){
+        editForm.querySelector("#startTime").value = schedulable.startTime;
+    }
+    if (type == 'event'){
+        editForm.querySelector("#endDate").value = schedulable.endDay;
+        editForm.querySelector("#endTime").value = schedulable.endTime;
+    }
+}
+
+/**
+ * Collapse the edit form for the specified schedulable box.
+ * Accessed directly by the cancel button.
+ * Sends a stop editing message for the previous schedulable & ceases sending repeated editing messages.
+ * @param schedulableId the id of the schedulable object whose edit form is being hidden
+ * @param schedulableBoxId the id of the box in which the edit form will be hidden
+ * @param schedulableType the type of the schedulable whose edit form is being hidden
+ */
+function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
+    /* Capitalize only the first letter of the schedulableType string */
+    capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+
+    /* Search for the edit form */
+    let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
+
+    if (editForm) { // Just in case
+        new bootstrap.Collapse(editForm).hide();
+    }
+    stopEditing();
 }
 
 /**
@@ -226,9 +205,9 @@ function hideForm(schedulableId, formId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    previousSchedulable = schedulableId;
-    previousSchedulableType = schedulableType;
-    stopEditing();
+    if(currentSchedulable.id === parseInt(schedulableId) && currentSchedulable.type === schedulableType){
+        stopEditing();
+    }
 }
 
 /**
@@ -238,7 +217,9 @@ function stopEditing() {
     if (sendEditMessageInterval) {
         clearInterval(sendEditMessageInterval);
     }
-    sendStopEditingMessage(previousSchedulable, previousSchedulableType);
+    sendStopEditingMessage(currentSchedulable.id, currentSchedulable.type);
+    currentSchedulable.id = -1;
+    currentSchedulable.type = "";
 }
 
 /**

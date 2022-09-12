@@ -2,10 +2,9 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.model.Deadline;
+import nz.ac.canterbury.seng302.portfolio.model.DeadlineRepository;
+import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,93 +35,90 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test class for post and delete requests for events handled by the event controller
+ * Test class for post and delete requests for deadlines handled by the deadline controller
  */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = EventController.class)
+@WebMvcTest(controllers = DeadlineController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class EventControllerTest {
+class DeadlineControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
-    EventService eventService;
-    @MockBean
-    SprintService sprintService;
+
     @MockBean
     ProjectService projectService;
+
     @MockBean
-    DetailsController detailsController;
+    DeadlineRepository deadlineRepository;
+
+    @MockBean
+    DeadlineService deadlineService;
+
     @MockBean
     private UserAccountClientService userAccountClientService;
 
-    private SchedulableForm eventForm;
-    private Event event;
+    private SchedulableForm deadlineForm;
+    private Deadline deadline;
 
     @BeforeEach
     void setup() {
-        eventForm = new SchedulableForm();
-        eventForm.setName("Event");
-        eventForm.setStartDate(LocalDate.now());
-        eventForm.setStartTime(LocalTime.now());
+        deadlineForm = new SchedulableForm();
+        deadlineForm.setName("Deadline");
+        deadlineForm.setStartDate(LocalDate.now());
+        deadlineForm.setStartTime(LocalTime.now());
 
-        Project parentProject = new Project("Project 2022", "Test Parent Project", "2022-01-01", "2022-12-31");
-
-        event = new Event();
-        event.setId(1);
-        event.setParentProject(parentProject);
+        deadline = new Deadline();
+        deadline.setId(1);
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void deleteEventAsTeacher_get200Response() throws Exception {
-        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
-        mockMvc.perform(delete("/delete-event/1"))
+    void deleteDeadlineAsTeacher_get200Response() throws Exception {
+        Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
+        mockMvc.perform(delete("/delete-deadline/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Event deleted."));
+                .andExpect(content().string("Deadline deleted."));
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void deleteEventAsStudent_get403Response() throws Exception {
-        Mockito.doNothing().when(eventService).deleteEvent(anyInt());
-        mockMvc.perform(delete("/delete-event/1"))
+    void deleteDeadlineAsStudent_get403Response() throws Exception {
+        Mockito.doNothing().when(deadlineService).deleteDeadline(anyInt());
+        mockMvc.perform(delete("/delete-deadline/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
-    }
-    
-    @Test
-    @WithMockPrincipal(TEACHER)
-    void postEventMissingId_throw404() throws Exception {
-        when(eventService.getEventById(anyInt()))
-                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        this.mockMvc.perform(post("/project/0/edit-event/1")
-                        .param("eventForm", String.valueOf(eventForm)))
-                .andExpect(status().isNotFound())
-                .andExpect(status().reason(containsString("Event not found")));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void postValidEvent_redirect() throws Exception {
-        when(eventService.getEventById(anyInt()))
-                .thenReturn(event);
-        when(eventService.saveEvent(any()))
-                .thenReturn(event);
-        this.mockMvc.perform(post("/project/0/edit-event/1")
-                        .param("name", eventForm.getName())
+    void postDeadlineMissingId_throw404() throws Exception {
+        when(deadlineService.getDeadlineById(anyInt()))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Deadline not found"));
+        this.mockMvc.perform(post("/project/0/edit-deadline/1")
+                        .param("deadlineForm", String.valueOf(deadlineForm)))
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason(containsString("Deadline not found")));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void postValidDeadline_redirect() throws Exception {
+        when(deadlineService.getDeadlineById(anyInt()))
+                .thenReturn(deadline);
+        when(deadlineService.saveDeadline(any()))
+                .thenReturn(deadline);
+        this.mockMvc.perform(post("/project/0/edit-deadline/1")
+                        .param("name", deadlineForm.getName())
                         .param("startDate", "2022-09-09")
-                        .param("startTime", "12:00")
-                        .param("endDate", "2022-10-09")
-                        .param("endTime", "12:00"))
+                        .param("startTime", "12:00"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
     }
 
     @Test
     @WithMockPrincipal(STUDENT)
-    void postEventEditPage_forbidden() throws Exception {
-        this.mockMvc.perform(post("/project/0/edit-event/1"))
+    void postDeadlineEditPage_forbidden() throws Exception {
+        this.mockMvc.perform(post("/project/0/edit-deadline/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }

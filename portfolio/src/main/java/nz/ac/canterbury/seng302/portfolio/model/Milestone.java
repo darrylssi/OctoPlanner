@@ -11,13 +11,13 @@ import java.util.Date;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
- * Represents a deadline object.
- * Deadline objects are stored in a table called Deadline, as it is an @Entity.
+ * Represents a milestone object.
+ * Milestone objects are stored in a table called Milestone, as it is an @Entity.
  */
 @Entity
-public class Deadline implements Schedulable {
+public class Milestone implements Schedulable {
 
-    /** The id of this deadline. This id should be unique between all deadlines.*/
+    /** The id of this milestone. This id should be unique between all milestones.*/
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -27,44 +27,42 @@ public class Deadline implements Schedulable {
     private Project parentProject;
 
     @Column(nullable = false)
-    @NotBlank(message = "Deadline name cannot be blank.")
     @Size(min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH,
-            message="The deadline name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
-    private String deadlineName;
+            message="The milestone name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.")
+    @NotBlank(message = "Milestone name cannot be blank.")
+    private String milestoneName;
 
     @Column (nullable = false)
-    @Size(max=MAX_DESC_LENGTH, message="The deadline description must not exceed " + MAX_DESC_LENGTH + " characters.")
-    private String deadlineDescription;
+    @Size(max=MAX_DESC_LENGTH, message="The milestone description must not exceed " + MAX_DESC_LENGTH + " characters.")
+    private String milestoneDescription;
 
-    @Column (nullable = false)
-    @DateTimeFormat(pattern=DATETIME_FORMAT)
-    private Date deadlineDate;
+    @DateTimeFormat(pattern=DATE_FORMAT)
+    private Date milestoneDate;
 
-
-    public Deadline() {}
+    public Milestone() {}
 
     /**
      * A constructor which set the given user data to the specified variables
-     * @param deadlineName Gets the deadline name given by user
-     * @param deadlineDescription Gets the deadline description given by the user
-     * @param deadlineDate Gets the deadline date as a Date object
+     * @param milestoneName Gets the milestone name given by user
+     * @param milestoneDescription Gets the milestone description given by the user
+     * @param milestoneDate Gets the milestone date as a Date object
      */
-    public Deadline(String deadlineName,  String deadlineDescription, Date deadlineDate) {
-        this.deadlineName = deadlineName;
-        this.deadlineDescription = deadlineDescription;
-        this.deadlineDate = deadlineDate;
+    public Milestone(String milestoneName,  String milestoneDescription, Date milestoneDate) {
+        this.milestoneName = milestoneName;
+        this.milestoneDescription = milestoneDescription;
+        this.milestoneDate = milestoneDate;
     }
 
 
     /**
-     * Returns a string listing the attributes of the deadline in the form "Deadline[x, x, x]".
+     * Returns a string listing the attributes of the milestone in the form "Milestone[x, x, x]".
      * @return said string
      */
     @Override
     public String toString() {
         return String.format(
-                "Deadline[id=%d, deadlineName='%s', deadlineDate='%s', deadlineDescription='%s']",
-                id, deadlineName, deadlineDate, deadlineDescription);
+                "Milestone[id=%d, milestoneName='%s', milestoneDate='%s', milestoneDescription='%s']",
+                id, milestoneName, milestoneDate, milestoneDescription);
     }
 
     public int getId() {
@@ -84,27 +82,27 @@ public class Deadline implements Schedulable {
     }
 
     public String getName() {
-        return deadlineName;
+        return milestoneName;
     }
 
     public void setName(String name) {
-        this.deadlineName = name;
+        this.milestoneName = name;
     }
 
     public String getDescription() {
-        return deadlineDescription;
+        return milestoneDescription;
     }
 
     public void setDescription(String description) {
-        this.deadlineDescription = description;
+        this.milestoneDescription = description;
     }
 
     public Date getStartDate() {
-        return deadlineDate;
+        return milestoneDate;
     }
 
     public void setStartDate(Date date) {
-        this.deadlineDate = date;
+        this.milestoneDate = date;
     }
 
     public Date getEndDate() {
@@ -116,11 +114,11 @@ public class Deadline implements Schedulable {
     }
 
     public String getStartDay() {
-        return DateUtils.toString(deadlineDate);
+        return DateUtils.toString(milestoneDate);
     }
 
     public String getStartTime() {
-        return DateUtils.toDateTimeString(deadlineDate).substring(11, 16);
+        return null;
     }
 
     public String getEndDay() {
@@ -139,8 +137,7 @@ public class Deadline implements Schedulable {
      * @return A String constant containing the type of this object.
      */
     public String getType(){
-        return DEADLINE_TYPE;
+        return MILESTONE_TYPE;
     }
-
 
 }
