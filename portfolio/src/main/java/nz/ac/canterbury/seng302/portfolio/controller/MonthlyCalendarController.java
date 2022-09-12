@@ -37,8 +37,8 @@ public class MonthlyCalendarController extends PageController {
     private ProjectService projectService;                      // initializing the ProjectService
     @Autowired
     private SprintService sprintService;                        // initializing the SprintService
-    @Autowired
-    private DeadlineService deadlineService;                    // initializing the DeadlineService
+//    @Autowired
+//    private DeadlineService deadlineService;                    // initializing the DeadlineService
 
     /**
      *
@@ -196,28 +196,28 @@ public class MonthlyCalendarController extends PageController {
         return Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
-    private ArrayList<String> getAllSchedulableStringList(Project project) {
-        // Deadline list that contains all the deadlines
-        List<Deadline> deadlines = deadlineService.getAllDeadlines();
-
-        // Initializing the array list
-        ArrayList<String> schedulableDetailsList = new ArrayList<>();
-
-        StringBuilder deadlineNames = new StringBuilder();         // Initiating the sprint names list
-        StringBuilder deadlineDates = new StringBuilder();
-
-        // For loop to add each schedulable names, dates
-        for (Deadline deadline: deadlines) {
-            deadlineNames.append(deadline.getName()).append(",");
-            System.out.println("Deadline date -> " + deadline.getStartDate());
-            deadlineDates.append(deadline.getStartDate()).append(",");
-//            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
-        }
-
-        // Removing the string's last character, which is "," and adding to the sprintsDetailsList
-        schedulableDetailsList.add(deadlineNames.substring(0 , deadlineNames.length()-1));
-        schedulableDetailsList.add(deadlineDates.substring(0 , deadlineDates.length()-1));
-
-        return schedulableDetailsList;
-    }
+//    private ArrayList<String> getAllSchedulableStringList(Project project) {
+//        // Deadline list that contains all the deadlines
+//        List<Deadline> deadlines = deadlineService.getAllDeadlines();
+//
+//        // Initializing the array list
+//        ArrayList<String> schedulableDetailsList = new ArrayList<>();
+//
+//        StringBuilder deadlineNames = new StringBuilder();         // Initiating the sprint names list
+//        StringBuilder deadlineDates = new StringBuilder();
+//
+//        // For loop to add each schedulable names, dates
+//        for (Deadline deadline: deadlines) {
+//            deadlineNames.append(deadline.getName()).append(",");
+//            System.out.println("Deadline date -> " + deadline.getStartDate());
+//            deadlineDates.append(deadline.getStartDate()).append(",");
+////            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
+//        }
+//
+//        // Removing the string's last character, which is "," and adding to the sprintsDetailsList
+//        schedulableDetailsList.add(deadlineNames.substring(0 , deadlineNames.length()-1));
+//        schedulableDetailsList.add(deadlineDates.substring(0 , deadlineDates.length()-1));
+//
+//        return schedulableDetailsList;
+//    }
 }
