@@ -99,7 +99,7 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void postValidDeadline_redirect() throws Exception {
+    void postValidDeadline_returnDeadlineId() throws Exception {
         when(deadlineService.getDeadlineById(anyInt()))
                 .thenReturn(deadline);
         when(deadlineService.saveDeadline(any()))

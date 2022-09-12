@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
@@ -124,7 +125,11 @@ public class MilestoneController extends PageController {
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: bindingResult.getAllErrors()) {
-                errors.add(err.getDefaultMessage());
+                if (Objects.equals(err.getDefaultMessage(), "Start date cannot be blank")) {
+                    errors.add("Date cannot be blank");
+                } else {
+                    errors.add(err.getDefaultMessage());
+                }
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
