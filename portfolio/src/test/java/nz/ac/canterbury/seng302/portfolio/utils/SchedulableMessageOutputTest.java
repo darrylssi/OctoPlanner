@@ -1,8 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,7 +39,7 @@ class SchedulableMessageOutputTest {
     }
 
     @Test
-    void whenCreateOutputWithNoSprints_thenOutsideSprintBox() {
+    void whenCreateEventOutputWithNoSprints_thenOutsideSprintBox() {
         Date eventStartDate = DateUtils.toDate("2022-02-25");
         Date eventEndDate = DateUtils.toDate("2022-02-26");
         Event event = new Event("Test Event",  "This is an event", eventStartDate, eventEndDate);
@@ -52,6 +50,66 @@ class SchedulableMessageOutputTest {
         assertEquals(List.of(SchedulableMessageOutput.LIST_BEFORE_ALL_ID_NAME), SchedulableMessageOutput.getSchedulableListIds());
 
         assertEquals(List.of(String.format(SchedulableMessageOutput.SCHEDULABLE_BEFORE_ALL_ID_FORMAT, event.getId())), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of("-1"), SchedulableMessageOutput.getNextSchedulableIds());
+    }
+
+    @Test
+    void whenCreateDeadlineOutputWithNoSprints_thenOutsideSprintBox() {
+        Date deadlineDate = DateUtils.toDate("2022-02-25");
+        Deadline deadline = new Deadline("Test Deadline",  "This is a deadline", deadlineDate);
+        deadline.setId(0);
+        deadline.setParentProject(parentProject);
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(deadline, new ArrayList<>(), new ArrayList<>(List.of(deadline)));
+
+        assertEquals(List.of(SchedulableMessageOutput.LIST_BEFORE_ALL_ID_NAME), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.SCHEDULABLE_BEFORE_ALL_ID_FORMAT, deadline.getId())), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of("-1"), SchedulableMessageOutput.getNextSchedulableIds());
+    }
+
+    @Test
+    void whenCreateMilestoneOutputWithNoSprints_thenOutsideSprintBox() {
+        Date milestoneDate = DateUtils.toDate("2022-02-25");
+        Milestone milestone = new Milestone("Test Milestone",  "This is a milestone", milestoneDate);
+        milestone.setId(0);
+        milestone.setParentProject(parentProject);
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(milestone, new ArrayList<>(), new ArrayList<>(List.of(milestone)));
+
+        assertEquals(List.of(SchedulableMessageOutput.LIST_BEFORE_ALL_ID_NAME), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.SCHEDULABLE_BEFORE_ALL_ID_FORMAT, milestone.getId())), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of("-1"), SchedulableMessageOutput.getNextSchedulableIds());
+    }
+
+    @Test
+    void whenCreateDeadlineOutputWithSprints_thenInsideSprintBox() {
+        Date deadlineDate = DateUtils.toDate("2022-01-25");
+        Deadline deadline = new Deadline("Test Deadline",  "This is a deadline", deadlineDate);
+        deadline.setId(0);
+        deadline.setParentProject(parentProject);
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(deadline, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(deadline)));
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.LIST_IN_ID_FORMAT, sprint1.getId())), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.SCHEDULABLE_IN_ID_FORMAT, deadline.getId(), sprint1.getId())), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of("-1"), SchedulableMessageOutput.getNextSchedulableIds());
+    }
+
+    @Test
+    void whenCreateMilestoneOutputWithSprints_thenInsideSprintBox() {
+        Date milestoneDate = DateUtils.toDate("2022-01-25");
+        Milestone milestone = new Milestone("Test Milestone",  "This is a milestone", milestoneDate);
+        milestone.setId(0);
+        milestone.setParentProject(parentProject);
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(milestone, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(milestone)));
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.LIST_IN_ID_FORMAT, sprint1.getId())), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(String.format(SchedulableMessageOutput.SCHEDULABLE_IN_ID_FORMAT, milestone.getId(), sprint1.getId())), SchedulableMessageOutput.getSchedulableBoxIds());
 
         assertEquals(List.of("-1"), SchedulableMessageOutput.getNextSchedulableIds());
     }
@@ -196,6 +254,144 @@ class SchedulableMessageOutputTest {
 
         assertEquals(List.of(
                 String.format(SchedulableMessageOutput.SCHEDULABLE_AFTER_ID_FORMAT, event.getId(), sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                "-1"
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateDeadlineBeforeEvents_thenNewDeadlineAppearsBeforeAll() {
+        Date deadlineDate = DateUtils.toDate("2022-01-01");
+        Deadline deadline = new Deadline("Test Deadline",  "This is a deadline", deadlineDate);
+        deadline.setId(0);
+        deadline.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(deadline, new ArrayList<>(), new ArrayList<>(List.of(deadline, event1, event2, event3)));
+
+        assertEquals(List.of(
+                SchedulableMessageOutput.LIST_BEFORE_ALL_ID_NAME
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_BEFORE_ALL_ID_FORMAT, deadline.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event1.getType(), event1.getId())
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateDeadlineBetweenEvents_thenNewDeadlineAppearsBetween() {
+        Date deadlineDate = DateUtils.toDateTime("2022-03-01 02:00");
+        Deadline deadline = new Deadline("Test Deadline",  "This is a deadline", deadlineDate);
+        deadline.setId(0);
+        deadline.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(deadline, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(deadline, event1, event2, event3)));
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.LIST_AFTER_ID_FORMAT, sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_AFTER_ID_FORMAT, deadline.getId(), sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getType(), event3.getId())
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateDeadlineAfterAllEvents_thenNewDeadlineAppearsAfterAll() {
+        Date deadlineDate = DateUtils.toDate("2022-05-01");
+        Deadline deadline = new Deadline("Test Deadline",  "This is a deadline", deadlineDate);
+        deadline.setId(0);
+        deadline.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(deadline, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(deadline, event1, event2, event3)));
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.LIST_AFTER_ID_FORMAT, sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_AFTER_ID_FORMAT, deadline.getId(), sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                "-1"
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateMilestoneBeforeEvents_thenNewMilestoneAppearsBeforeAll() {
+        Date milestoneDate = DateUtils.toDate("2022-01-01");
+        Milestone milestone = new Milestone("Test Milestone",  "This is a milestone", milestoneDate);
+        milestone.setId(0);
+        milestone.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(milestone, new ArrayList<>(), new ArrayList<>(List.of(milestone, event1, event2, event3)));
+
+        assertEquals(List.of(
+                SchedulableMessageOutput.LIST_BEFORE_ALL_ID_NAME
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_BEFORE_ALL_ID_FORMAT, milestone.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event1.getType(), event1.getId())
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateMilestoneBetweenOtherEvents_thenNewMilestoneAppearsBetween() {
+        Date milestoneDate = DateUtils.toDateTime("2022-03-01 02:00");
+        Milestone milestone = new Milestone("Test Milestone",  "This is a milestone", milestoneDate);
+        milestone.setId(0);
+        milestone.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(milestone, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(milestone, event1, event2, event3)));
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.LIST_AFTER_ID_FORMAT, sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_AFTER_ID_FORMAT, milestone.getId(), sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableBoxIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.NEXT_SCHEDULABLE_ID_FORMAT, event3.getType(), event3.getId())
+        ), SchedulableMessageOutput.getNextSchedulableIds());
+
+    }
+
+    @Test
+    void whenCreateMilestoneAfterAllEvents_thenNewMilestoneAppearsAfterAll() {
+        Date milestoneDate = DateUtils.toDate("2022-05-01");
+        Milestone milestone = new Milestone("Test Event",  "This is an event", milestoneDate);
+        milestone.setId(0);
+        milestone.setParentProject(parentProject);
+
+        SchedulableMessageOutput SchedulableMessageOutput = new SchedulableMessageOutput(milestone, new ArrayList<>(List.of(sprint1)), new ArrayList<>(List.of(milestone, event1, event2, event3)));
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.LIST_AFTER_ID_FORMAT, sprint1.getId())
+        ), SchedulableMessageOutput.getSchedulableListIds());
+
+        assertEquals(List.of(
+                String.format(SchedulableMessageOutput.SCHEDULABLE_AFTER_ID_FORMAT, milestone.getId(), sprint1.getId())
         ), SchedulableMessageOutput.getSchedulableBoxIds());
 
         assertEquals(List.of(
