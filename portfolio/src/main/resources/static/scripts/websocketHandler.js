@@ -206,6 +206,19 @@ function updateSchedulable(schedulableMessage) {
 function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulableHtml) {
     let newSchedulable = document.createElement("div");
     newSchedulable.innerHTML = schedulableHtml;
+
+    // Force tooltip to update
+    setTimeout((schedulable) => {
+        let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+        if (tooltip) {
+            tooltip.update();
+        } else if (schedulable) {
+            tooltip = new bootstrap.Tooltip(schedulable, {
+                trigger: 'hover'
+            });
+        }
+    }, 250, newSchedulable.querySelector('.schedulable'));
+
     if(schedulableMessage.nextSchedulableIds[idIndex] === '-1') {
         parent.appendChild(newSchedulable);
     } else {

@@ -78,8 +78,6 @@ function sendFormViaAjax(elem, type) {
                     tooltip = new bootstrap.Tooltip(schedulable, {
                         trigger: 'hover'
                     });
-                } else {
-                    console.log("Struggle city");
                 }
             }, 250, type + "-" + formRequest.response);
         } else {
