@@ -259,11 +259,11 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                                        id="deadlineStartDate" th:field="*{date}" th:required="required" aria-describedby="addDeadlineStartDateFeedback"
                                        th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineDate">
                                 <label class="form-label" for="deadlineStartDate">Date</label>
-                                <small id="addDeadlineStartDateFeedback" class="text-danger"></small>
-                                <script>
+                            </div>
+                            <small id="addDeadlineStartDateFeedback" class="text-danger"></small>
+                            <script>
                                     document.getElementById('deadlineDate').value = new Date().toISOString().substring(0, 10);
                                 </script>
-                            </div>
                         </div>
                         <div class = "col">
                             <div class="form-floating mb-3">
@@ -271,8 +271,8 @@ th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat
                                        id="deadlineStartTime" th:field="*{time}" th:required="required" aria-describedby="addDeadlineStartTimeFeedback"
                                        th:min="${projectStart}" th:max="${projectEnd}" th:name="deadlineTime">
                                 <label for="deadlineStartTime">Time</label>
-                                <small id="addDeadlineStartTimeFeedback" class="text-danger"></small>
                             </div>
+                            <small id="addDeadlineStartTimeFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-1">
                             <button type="submit" class="btn btn-primary btn-lg">Save</button>
