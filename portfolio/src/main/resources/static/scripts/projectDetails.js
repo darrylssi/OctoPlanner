@@ -69,14 +69,19 @@ function sendFormViaAjax(elem, type) {
             hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
             //Update tooltips, because bootstrap needs to be told to do this
-            setTimeout((elem) => {
-                let editForm = document.getElementById(elem.getAttribute('formBoxId'));
-                let schedulable = editForm.parentNode.parentNode.querySelector('.schedulable');
-                if (schedulable) {
-                    let tooltip = bootstrap.Tooltip.getOrCreateInstance(schedulable);
+            setTimeout((schedulableId) => {
+                let schedulable = document.getElementById(`${schedulableId}`);
+                let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+                if (tooltip) {
                     tooltip.update();
+                } else if (schedulable) {
+                    tooltip = new bootstrap.Tooltip(schedulable, {
+                        trigger: 'hover'
+                    });
+                } else {
+                    console.log("Struggle city");
                 }
-            }, 250, elem);
+            }, 250, type + "-" + formRequest.response);
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
