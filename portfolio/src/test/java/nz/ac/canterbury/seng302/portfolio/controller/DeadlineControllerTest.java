@@ -26,14 +26,17 @@ import java.time.LocalTime;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Test class for post and delete requests for deadlines handled by the deadline controller
+ */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DeadlineController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -99,7 +102,7 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
-    void postValidDeadline_redirect() throws Exception {
+    void postValidDeadline_returnDeadlineId() throws Exception {
         when(deadlineService.getDeadlineById(anyInt()))
                 .thenReturn(deadline);
         when(deadlineService.saveDeadline(any()))
