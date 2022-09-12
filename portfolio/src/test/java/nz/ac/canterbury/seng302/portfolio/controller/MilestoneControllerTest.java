@@ -76,10 +76,7 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "New Milestone")
                         .param("description", "This is a milestone")
-                        .param("startDate", "2022-09-09")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", "2022-09-09"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
     }
@@ -90,10 +87,7 @@ class MilestoneControllerTest {
         Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
         String resultString = mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "")
-                        .param("startDate", "2022-09-09")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
         Assertions.assertTrue(resultString.contains("Name cannot be blank"));
@@ -107,10 +101,7 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "New Milestone!")
                         .param("description", "This is a milestone")
-                        .param("startDate", "2022-09-09")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
     }
@@ -122,10 +113,7 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "New Milestone")
                         .param("description", "This is a milestone")
-                        .param("startDate", "")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", ""))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Date cannot be blank"));
     }
@@ -137,10 +125,7 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "New Milestone")
                         .param("description", "This is a milestone")
-                        .param("startDate", "2021-09-09")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", "2021-09-09"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Milestone dates must be within project date range: 01/Jan/2022 - 31/Dec/2022"));
     }
@@ -152,10 +137,7 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/add-milestone")
                         .param("name", "New Milestone")
                         .param("description", "This is a milestone")
-                        .param("startDate", "2023-09-09")
-                        .param("startTime", "00:00")
-                        .param("endDate", "2022-09-09")
-                        .param("endTime", "00:00"))
+                        .param("startDate", "2023-09-09"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Milestone dates must be within project date range: 01/Jan/2022 - 31/Dec/2022"));
     }
@@ -187,25 +169,21 @@ class MilestoneControllerTest {
                 .andExpect(content().string("1"));
     }
 
-    // TODO commented out because edit validation doesn't work properly
-//    @Test
-//    @WithMockPrincipal(TEACHER)
-//    void editInvalidNameMilestoneAsTeacher_get400Response() throws Exception {
-//        Milestone milestone = new Milestone("New Milestone", "This is a milestone", DateUtils.toDate("2022-09-09"));
-//        milestone.setId(1);
-//        Mockito.when(milestoneService.saveMilestone(any())).thenReturn(milestone);
-//        Mockito.when(milestoneService.getMilestoneById(1)).thenReturn(milestone);
-//        Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
-//        mockMvc.perform(post("/project/0/edit-milestone/1")
-//                        .param("name", "!@#$")
-//                        .param("description", "This is a milestone")
-//                        .param("startDate", "2022-09-09")
-//                        .param("startTime", "00:00")
-//                        .param("endDate", "2022-09-09")
-//                        .param("endTime", "00:00"))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
-//    }
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void editInvalidNameMilestoneAsTeacher_get400Response() throws Exception {
+        Milestone milestone = new Milestone("New Milestone", "This is a milestone", DateUtils.toDate("2022-09-09"));
+        milestone.setId(1);
+        Mockito.when(milestoneService.saveMilestone(any())).thenReturn(milestone);
+        Mockito.when(milestoneService.getMilestoneById(1)).thenReturn(milestone);
+        Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
+        mockMvc.perform(post("/project/0/edit-milestone/1")
+                        .param("name", "!@#$")
+                        .param("description", "This is a milestone")
+                        .param("startDate", "2022-09-09"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+    }
 
     @Test
     @WithMockPrincipal(STUDENT)

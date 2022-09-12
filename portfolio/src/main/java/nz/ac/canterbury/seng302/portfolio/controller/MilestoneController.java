@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.TimeZone;
+import java.util.*;
 
 
 /**
@@ -121,17 +119,21 @@ public class MilestoneController extends PageController {
     private ResponseEntity<String> validateMilestone(SchedulableForm schedulableForm, BindingResult bindingResult, Project parentProject) {
         ValidationError dateErrors;
         ValidationError nameErrors;
+        // list of errors that can be removed as they are not applicable to milestones
+        List<String> notApplicableErrors = new ArrayList<>(List.of("Start time cannot be blank", "End date cannot be blank", "End time cannot be blank"));
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: bindingResult.getAllErrors()) {
                 if (Objects.equals(err.getDefaultMessage(), "Start date cannot be blank")) {
                     errors.add("Date cannot be blank");
-                } else {
+                } else if (!notApplicableErrors.contains(err.getDefaultMessage())) {
                     errors.add(err.getDefaultMessage());
                 }
             }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            if(errors.toString().length() != 0) {
+                return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            }
         }
         // Check that the date is correct
         dateErrors = ValidationUtils.validateMilestoneDate(DateUtils.localDateToDate(schedulableForm.getStartDate()), parentProject);
@@ -177,13 +179,9 @@ public class MilestoneController extends PageController {
         }
 
         // validate milestone
-        // TODO get this to work
-        // errors are shown for blank start time, end time, and end date, despite milestones not having these
-        // the errors come from the SchedulableForm class
-        // the errors only appear if validateMilestone is run; I presume they're in bindingresult or something?
         Project parentProject = projectService.getProjectById(projectId);
         ResponseEntity<String> validationResponse = validateMilestone(schedulableForm, bindingResult, parentProject);
-        if (validationResponse.getStatusCode() == HttpStatus.OK || true) {
+        if (validationResponse.getStatusCode() == HttpStatus.OK) {
             // passed validation, save edited milestone
             Milestone milestone = milestoneService.getMilestoneById(milestoneId);
             milestone.setName(schedulableForm.getName());
