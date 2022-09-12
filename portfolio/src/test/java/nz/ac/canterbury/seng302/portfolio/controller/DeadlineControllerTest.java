@@ -82,7 +82,7 @@ class DeadlineControllerTest {
         // appropriate error is displayed
         mockMvc.perform(delete("/delete-deadline/1"))
                 .andExpect(status().isForbidden())
-                .andExpect(status().reason(containsString("You do not have permission to access this endpoint")));
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
     @Test
