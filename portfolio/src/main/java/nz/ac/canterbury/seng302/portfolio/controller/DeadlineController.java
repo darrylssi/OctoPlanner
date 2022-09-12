@@ -109,7 +109,8 @@ public class DeadlineController extends PageController {
      * @param schedulableForm Form that stores information about the deadline
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone Current timezone of the user
-     * @return Project details page
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/edit-deadline/{deadline_id}")
     public ResponseEntity<String> postEditDeadline(

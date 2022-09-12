@@ -36,7 +36,8 @@ public class MilestoneController extends PageController {
      * @param principal Authenticated user
      * @param projectId ID of the project the milestone will be added to
      * @param schedulableForm Form that stores information about the milestone
-     * @return A ResponseEntity with the id of the milestone that was saved
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given event failed validation, replies with what errors occurred)
      */
     @PostMapping("/project/{project_id}/add-milestone")
     public ResponseEntity<String> postAddMilestone(
