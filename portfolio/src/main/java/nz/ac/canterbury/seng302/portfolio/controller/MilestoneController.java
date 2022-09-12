@@ -178,7 +178,9 @@ public class MilestoneController extends PageController {
 
         // validate milestone
         // TODO get this to work
-        // it is giving an error saying that the end date cannot be blank
+        // errors are shown for blank start time, end time, and end date, despite milestones not having these
+        // the errors come from the SchedulableForm class
+        // the errors only appear if validateMilestone is run; I presume they're in bindingresult or something?
         Project parentProject = projectService.getProjectById(projectId);
         ResponseEntity<String> validationResponse = validateMilestone(schedulableForm, bindingResult, parentProject);
         if (validationResponse.getStatusCode() == HttpStatus.OK || true) {
