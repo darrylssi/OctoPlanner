@@ -32,6 +32,9 @@ function deleteObject(id, type) {
         // Send a websocket message to update the page after the delete
         stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
         hideModal();
+        if (type === 'sprint') {
+            window.location.reload();
+        }
     }
     deleteRequest.send();
 }
