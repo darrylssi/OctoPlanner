@@ -67,7 +67,16 @@ function sendFormViaAjax(elem, type) {
         if (formRequest.status === 200) {
             // Success
             hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
-            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
+            //Update tooltips, because bootstrap needs to be told to do this
+            setTimeout((elem) => {
+                let editForm = document.getElementById(elem.getAttribute('formBoxId'));
+                let schedulable = editForm.parentNode.parentNode.querySelector('.schedulable');
+                if (schedulable) {
+                    let tooltip = bootstrap.Tooltip.getOrCreateInstance(schedulable);
+                    tooltip.update();
+                }
+            }, 250, elem);
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -100,7 +109,7 @@ function sendFormViaAjax(elem, type) {
  */
 function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
     /* Capitalize only the first letter of the schedulableType string */
-    capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+    const capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
@@ -181,7 +190,7 @@ function prefillSchedulable(editForm, schedulable, type) {
  */
 function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     /* Capitalize only the first letter of the schedulableType string */
-    capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
+    const capitalisedType = schedulableType.charAt(0).toUpperCase() + schedulableType.slice(1);
 
     /* Search for the edit form */
     let editForm = document.getElementById("edit" + capitalisedType + "Form-" + schedulableBoxId);
