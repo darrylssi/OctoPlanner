@@ -33,8 +33,9 @@ public class AuthenticationClientInterceptor implements ClientInterceptor {
      */
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String sessionToken = CookieUtil.getValue(request, "lens-session-token");
+        // Check that the attributes aren't null, otherwise we send a null value as the token
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String sessionToken = attributes == null ? null : CookieUtil.getValue(attributes.getRequest(), "lens-session-token");
 
         // Every time we send a gRPC request, include a copy of our authentication token in the headers
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
