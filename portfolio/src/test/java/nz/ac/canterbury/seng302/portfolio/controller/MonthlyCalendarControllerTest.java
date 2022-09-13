@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.model.Deadline;
+import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
@@ -18,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,11 +66,14 @@ class MonthlyCalendarControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    // broken
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
     void getMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
         Project project = new Project("Project 2022", "This is first project", "2022-01-01", "2022-12-31");
-        
+        Mockito.when(deadlineService.getDeadlinesInProject(0)).thenReturn(new ArrayList<Deadline>());
+        Mockito.when(eventService.getEventByParentProjectId(0)).thenReturn(new ArrayList<Event>());
+        Mockito.when(milestoneService.getMilestonesInProject(0)).thenReturn(new ArrayList<Milestone>());
         Mockito.when(projectService.getProjectById(0)).thenReturn(project);
         mockMvc.perform(get("/monthlyCalendar/0"))
             .andExpect(status().isOk());
