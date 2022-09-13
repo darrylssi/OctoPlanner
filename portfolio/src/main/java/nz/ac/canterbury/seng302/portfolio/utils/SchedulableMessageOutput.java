@@ -129,10 +129,12 @@ public class SchedulableMessageOutput {
     }
 
     /**
-     * Gets the next schedulable within a certain time period
+     * Given a schedulable, gets the next schedulable within a certain time period
      * @param schedulables the list of all schedulables
      * @param periodStart the start of the time period
      * @param periodEnd the end of the time period
+     * @param updatedSchedulable the schedulable being updated
+     * @param exclusive whether the period is exclusive of the start and end dates
      * @return the box id of the next schedulable or -1 if there is no next schedulable
      */
     private String getNextSchedulable(List<Schedulable> schedulables, Date periodStart, Date periodEnd, Schedulable updatedSchedulable, boolean exclusive){
