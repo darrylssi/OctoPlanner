@@ -1,8 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.DeadlineRepository;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
@@ -67,6 +69,7 @@ class DeadlineControllerTest {
 
         deadline = new Deadline();
         deadline.setId(1);
+        deadline.setParentProject(new Project("Project", "", "2022-01-01", "2022-12-31"));
     }
 
     @Test
@@ -88,6 +91,26 @@ class DeadlineControllerTest {
         // As the user is STUDENT, the access is unauthorized. Therefore, the deadline is not deleted at id 1, and
         // appropriate error is displayed
         mockMvc.perform(delete("/delete-deadline/1"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void postDeadlineAddPage_forbidden() throws Exception {
+        // As the user is STUDENT, so they do not have permission to add deadline form. Therefore, appropriate error
+        // is shown
+        this.mockMvc.perform(post("/project/0/add-deadline"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(containsString("You do not have permission to access this endpoint")));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void postDeadlineEditPage_forbidden() throws Exception {
+        // As the user is STUDENT, so they do not have permission to edit deadline form. Therefore, appropriate error
+        // is shown
+        this.mockMvc.perform(post("/project/0/edit-deadline/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }
@@ -116,45 +139,13 @@ class DeadlineControllerTest {
                 .thenReturn(deadline);
         this.mockMvc.perform(post("/project/0/edit-deadline/1")
                         .param("name", deadlineForm.getName())
-                        .param("startDate", "2022-09-09")
-                        .param("startTime", "12:00"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("1"));
-    }
-
-    @Test
-    @WithMockPrincipal(STUDENT)
-    void postDeadlineEditPage_forbidden() throws Exception {
-        // As the user is STUDENT, so they do not have permission to edit deadline form. Therefore, appropriate error
-        // is shown
-        this.mockMvc.perform(post("/project/0/edit-deadline/1"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string("You do not have permission to access this endpoint"));
-    }
-
-    @Test
-    @WithMockPrincipal(STUDENT)
-    void postDeadlineAddPage_forbidden() throws Exception {
-        // As the user is STUDENT, so they do not have permission to add deadline form. Therefore, appropriate error
-        // is shown
-        this.mockMvc.perform(post("/project/0/add-deadline"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string(containsString("You do not have permission to access this endpoint")));
-    }
-
-    @Test
-    @WithMockPrincipal(TEACHER)
-    void postValidEditDeadline_redirect() throws Exception {
-        when(deadlineService.getDeadlineById(anyInt()))
-                .thenReturn(deadline);
-
-        // Sends post edit deadline request with deadline form data, then expects 200 status response
-        this.mockMvc.perform(post("/project/0/edit-deadline/1")
-                        .param("name", deadlineForm.getName())
                         .param("description", "")
                         .param("startDate", "2022-09-09")
-                        .param("startTime", "12:00"))
-                .andExpect(status().isOk());
+                        .param("startTime", "12:00")
+                        .param("endDate", "2022-09-09")
+                        .param("endTime", "12:00"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
     }
 
 }
