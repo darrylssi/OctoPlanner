@@ -7,7 +7,7 @@ const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16
  * Takes the project start and end dates from monthlyCalendar.html and returns them as JS Date objects.
  * NOTE: JS Date objects start months at 0, not 1!
  * https://stackoverflow.com/questions/15677869/how-to-convert-a-string-of-numbers-to-an-array-of-numbers
- * @param date in format 'yyyy-mm-dd [other stuff that gets ignored]'
+ * @param originalDateString in format 'yyyy-mm-dd [other stuff that gets ignored]'
  * @return {Date} Date object with a time of midnight (00:00:00)
  */
 function getDateFromProjectDateString(originalDateString) {
@@ -63,8 +63,7 @@ function createSchedulableIconsForProject() {
                 start: `${date}${time}`,
                 extendedProps: { type: 'event', num: 0, schedulableNames: [] }
             });
-        // on the advice of https://stackoverflow.com/a/19691491
-        let newStart = new Date(start);
+        let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
         newStart.setDate(newStart.getDate() + 1);
         start = newStart;
     }
@@ -259,24 +258,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const sStarts = schedulableStartDates.split(", ");
         const sEnds = schedulableEndDates.split(", ");
 
-        console.log(sNames, sTypes, sStarts, sEnds);
-
-        const count = sNames.length; // num of things
+        const count = sNames.length; // number of schedulables
         for (let i = 0; i < count; i++) {
-
-            // need another loop! convert to dates and then do it again...
             let start = getDateFromProjectDateString(sStarts[i]);
             const end = getDateFromProjectDateString(sEnds[i]);
 
             while (start <= end) {
-                // create the id, get the event, update the num and name list
                 const id = `${sTypes[i]}-${getStringFromDate(start)}`;
                 const icon = calendar.getEventById(id);
                 icon.setExtendedProp("num", icon.extendedProps.num + 1);
                 icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
 
-                // increase start by 1
-                let newStart = new Date(start);
+                let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
                 newStart.setDate(newStart.getDate() + 1);
                 start = newStart;
             }
