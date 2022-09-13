@@ -60,7 +60,7 @@ public class DeadlineController extends PageController {
         // Getting parent project object by path project id
         Project parentProject = projectService.getProjectById(projectId);
 
-        // validate milestone
+        // validate deadline
         ResponseEntity<String> validationResponse = validateDeadline(schedulableForm, bindingResult, parentProject, userTimezone);
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
             // Passed validation, create a new deadline and set details of new deadline object
@@ -129,11 +129,11 @@ public class DeadlineController extends PageController {
         } catch (ResponseStatusException ex) {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
-        // validate milestone
+        // validate deadline
         Project parentProject = projectService.getProjectById(projectId);
         ResponseEntity<String> validationResponse = validateDeadline(editSchedulableForm, bindingResult, parentProject, userTimeZone);
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
-            // passed validation, save edited milestone
+            // passed validation, save edited deadline
             Deadline deadline = deadlineService.getDeadlineById(deadlineId);
             deadline.setName(editSchedulableForm.getName());
             deadline.setDescription(editSchedulableForm.getDescription());
