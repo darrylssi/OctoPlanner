@@ -71,9 +71,6 @@ class MonthlyCalendarControllerTest {
     @WithMockPrincipal(UserRole.STUDENT)
     void getMonthlyCalendar_whenGivenValidProjectId_returnProject() throws Exception {
         Project project = new Project("Project 2022", "This is first project", "2022-01-01", "2022-12-31");
-        Mockito.when(deadlineService.getDeadlinesInProject(0)).thenReturn(new ArrayList<Deadline>());
-        Mockito.when(eventService.getEventByParentProjectId(0)).thenReturn(new ArrayList<Event>());
-        Mockito.when(milestoneService.getMilestonesInProject(0)).thenReturn(new ArrayList<Milestone>());
         Mockito.when(projectService.getProjectById(0)).thenReturn(project);
         mockMvc.perform(get("/monthlyCalendar/0"))
             .andExpect(status().isOk());
