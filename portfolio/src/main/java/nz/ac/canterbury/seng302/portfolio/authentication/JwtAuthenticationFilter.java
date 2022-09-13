@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.portfolio.authentication;
 import io.grpc.StatusRuntimeException;
 import nz.ac.canterbury.seng302.portfolio.service.AuthenticateClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -69,7 +71,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         AuthState authState;
         try {
-            authState = getAuthenticateClientService(request).checkAuthState();
+            AuthenticateClientService authService = getAuthenticateClientService(request);
+            // Check that the service is fetched
+            if (authService == null) {
+                return authToken;
+            }
+            authState = authService.checkAuthState();
         } catch (StatusRuntimeException e) {
             // This exception is thrown if the IdP encounters some error, or if the IdP can not be reached
             // Also may be thrown if some error connecting to IdP, either way, return unauthenticated token

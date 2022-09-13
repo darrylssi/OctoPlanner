@@ -5,8 +5,6 @@ import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * This class is a global interceptor for all gRPC clients used by this application. What this means, is that
  * any time a gRPC client sends a request (e.g to the IdentityProvider), the message is 'intercepted' before it
