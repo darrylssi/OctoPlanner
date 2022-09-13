@@ -41,17 +41,17 @@ function createSchedulableIconsForProject() {
             {
                 id: `deadline-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'deadline', num: 0 }
+                extendedProps: { type: 'deadline', num: 0, schedulableNames: [] }
             },
             {
                 id: `milestone-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'milestone', num: 0 }
+                extendedProps: { type: 'milestone', num: 0, schedulableNames: [] }
             },
             {
                 id: `event-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'event', num: 0 }
+                extendedProps: { type: 'event', num: 0, schedulableNames: [] }
             });
         // on the advice of https://stackoverflow.com/a/19691491
         let newStart = new Date(start);
@@ -63,6 +63,23 @@ function createSchedulableIconsForProject() {
 
 
 let events = createSchedulableIconsForProject();
+
+
+/**
+ * Updates the list icons with the provided schedulable information.
+ * For each schedulable object, every day it occurs will have its icon's counter increased, and its name added to the
+ * icon's name list.
+ * TODO document date format
+ * @param icons list of icon event objects to be updated
+ * @param sType the type of schedulable - event, milestone, or deadline
+ * @param sNames the names of the schedulables
+ * @param sStartDates the start dates of the schedulables
+ * @param sEndDates (optional) the end dates of the schedulables
+ */
+function updateIconObjectsWithSchedulables(icons, sType, sNames, sStartDates, sEndDates = []) {
+    // actually, don't do this here; wait until things are in the calendar and then look up the events using getEventById
+    // ids are in a sensible format
+}
 
 
 // Will return black or white based on the provided colour string
