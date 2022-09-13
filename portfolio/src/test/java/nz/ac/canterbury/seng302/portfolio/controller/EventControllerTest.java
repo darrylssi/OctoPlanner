@@ -112,6 +112,7 @@ class EventControllerTest {
                 .thenReturn(event);
         this.mockMvc.perform(post("/project/0/edit-event/1")
                         .param("name", eventForm.getName())
+                        .param("description", "")
                         .param("startDate", "2022-09-09")
                         .param("startTime", "12:00")
                         .param("endDate", "2022-10-09")

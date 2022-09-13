@@ -49,7 +49,7 @@ public class Milestone implements Schedulable {
      */
     public Milestone(String milestoneName,  String milestoneDescription, Date milestoneDate) {
         this.milestoneName = milestoneName;
-        this.milestoneDescription = milestoneDescription;
+        this.milestoneDescription = milestoneDescription.trim();
         this.milestoneDate = milestoneDate;
     }
 
@@ -94,7 +94,7 @@ public class Milestone implements Schedulable {
     }
 
     public void setDescription(String description) {
-        this.milestoneDescription = description;
+        this.milestoneDescription = description.trim();
     }
 
     public Date getStartDate() {

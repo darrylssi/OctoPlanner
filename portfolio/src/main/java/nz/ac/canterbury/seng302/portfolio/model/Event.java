@@ -57,7 +57,7 @@ public class Event implements Schedulable {
      */
     public Event(String eventName,  String eventDescription, Date eventStartDate, Date eventEndDate) {
         this.eventName = eventName;
-        this.eventDescription = eventDescription;
+        this.eventDescription = eventDescription.trim();
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
     }
@@ -94,7 +94,7 @@ public class Event implements Schedulable {
     }
 
     public void setDescription(String description) {
-        this.eventDescription = description;
+        this.eventDescription = description.trim();
     }
 
     public Date getStartDate() {
