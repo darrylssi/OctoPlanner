@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -80,6 +81,13 @@ public class DateUtils {
     }
 
     /**
+     * Converts a Date Time object to a String with yyyy-MM-dd HH:mm format.
+     * @param date Date Time object to be converted to String
+     * @return String object
+     */
+    public static String toDateTimeString(Date date) { return new SimpleDateFormat(DATETIME_FORMAT).format(date); }
+
+    /**
      * Converts a String to a Date in yyyy--MM-dd HH:mm format.
      * @param dateTime String to be converted to Date
      * @return Date object
@@ -101,6 +109,16 @@ public class DateUtils {
         c.setTime(dayBefore);
         c.add(Calendar.DATE, 1);    // Add n days to the date
         return c.getTime().equals(dayAfter);
+    }
+
+    // https://stackoverflow.com/questions/22929237
+    /**
+     * Converts a LocalDate object to a Date object.
+     * @param localDate The LocalDate to convert
+     * @return The converted Date object
+     */
+    public static Date localDateToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 
     // https://stackoverflow.com/a/23885950

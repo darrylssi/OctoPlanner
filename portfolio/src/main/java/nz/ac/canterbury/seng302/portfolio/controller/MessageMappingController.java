@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessage;
 import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessageOutput;
@@ -44,9 +45,8 @@ public class MessageMappingController {
     EventService eventService;
     @Autowired
     DeadlineService deadlineService;
-    // TODO: uncomment once added
-    // @Autowired
-    // MilestoneService milestoneService;
+    @Autowired
+    MilestoneService milestoneService;
     @Autowired
     SprintService sprintService;
 
@@ -94,28 +94,19 @@ public class MessageMappingController {
         try {
             /* Determine schedulable type and get data.
              * Return a proper response if the schedulable exists. */
-            switch(schedulableMessage.getType()) {
-                case EVENT_TYPE -> {
-                    updatedSchedulable = eventService.getEventById(schedulableMessage.getId());
-                    break;
-                }
-                case DEADLINE_TYPE -> {
-                    updatedSchedulable = deadlineService.getDeadlineById(schedulableMessage.getId());
-                    break;
-                }
-                case MILESTONE_TYPE -> {
-                    // updatedSchedulable = milestoneService.getMilestoneById(schedulableMessage.getId());
-                    // break;
-                    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Milestones do not support live editing");
-                }
-                default -> {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableMessage.getType() + " is not a type of schedulable!");
-                }
+            if (EVENT_TYPE.equals(schedulableMessage.getType())) {
+                updatedSchedulable = eventService.getEventById(schedulableMessage.getId());
+            } else if (DEADLINE_TYPE.equals(schedulableMessage.getType())) {
+                updatedSchedulable = deadlineService.getDeadlineById(schedulableMessage.getId());
+            } else if (MILESTONE_TYPE.equals(schedulableMessage.getType())) {
+                updatedSchedulable = milestoneService.getMilestoneById(schedulableMessage.getId());
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableMessage.getType() + " is not a type of schedulable!");
             }
 
             schedulableList.addAll(eventService.getEventByParentProjectId(updatedSchedulable.getParentProject().getId()));
             schedulableList.addAll(deadlineService.getDeadlineByParentProjectId(updatedSchedulable.getParentProject().getId()));
-            // schedulableList.addAll(milestoneService.getMilestoneByParentProjectId(updatedSchedulable.getParentProject().getId()));
+            schedulableList.addAll(milestoneService.getMilestoneByParentProjectId(updatedSchedulable.getParentProject().getId()));
             
             schedulableMessageOutput = new SchedulableMessageOutput(updatedSchedulable,
                     sprintService.getSprintsInProject(updatedSchedulable.getParentProject().getId()),
@@ -126,6 +117,7 @@ public class MessageMappingController {
             schedulableMessageOutput = new SchedulableMessageOutput();
             schedulableMessageOutput.setSchedulableListIds(new ArrayList<>());
             schedulableMessageOutput.setId(schedulableMessage.getId());
+            schedulableMessageOutput.setType(schedulableMessage.getType());
         }
 
         return schedulableMessageOutput;

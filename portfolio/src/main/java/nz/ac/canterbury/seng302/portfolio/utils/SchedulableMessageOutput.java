@@ -19,12 +19,13 @@ public class SchedulableMessageOutput {
     public static final String LIST_IN_ID_FORMAT = "schedulables-in-%d"; // id of sprint box
     public static final String LIST_AFTER_ID_FORMAT = "schedulables-after-%d"; // id of box after sprint
     public static final String LIST_BEFORE_ALL_ID_NAME = "schedulables-before"; // id of first box
-    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "schedulable-%d"; // id of a schedulable (used for the next schedulable)
+    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "%s-%d"; // id of a schedulable (used for the next schedulable)
     public static final String SCHEDULABLE_BEFORE_ALL_ID_FORMAT = "%d-before"; // id of schedulable in first box
     public static final String SCHEDULABLE_IN_ID_FORMAT = "%d-in-%d"; // id of schedulable in sprint box
     public static final String SCHEDULABLE_AFTER_ID_FORMAT = "%d-after-%d"; // id of schedulable after sprint box
 
     private int id;
+    private String type;
     // NOTE if you change the names of these lists (or any of these variables), you will need to change them in websocketHandler.js
     private List<String> schedulableListIds; // List of all display boxes that this schedulable is included in
     private List<String> nextSchedulableIds; // List of schedulables displayed immediately after this schedulable in each box
@@ -44,6 +45,7 @@ public class SchedulableMessageOutput {
      */
     public SchedulableMessageOutput(Schedulable schedulable, List<Sprint> sprints, List<Schedulable> schedulables) {
         this.id = schedulable.getId();
+        this.type = schedulable.getType();
 
         // Set the lists
         this.generateLists(schedulable, sprints, schedulables);
@@ -138,7 +140,7 @@ public class SchedulableMessageOutput {
             if (schedulable.getStartDate().after(updatedSchedulable.getStartDate()) &&
                     DateUtils.timesOverlap(periodStart, periodEnd,
                             schedulable.getStartDate(), schedulable.getEndDate())) {
-                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getId()));
+                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getType(), schedulable.getId()));
             }
         }
         return "-1";
@@ -151,6 +153,10 @@ public class SchedulableMessageOutput {
     public int getId(){
         return  id;
     }
+
+    public void setType(String type) { this.type = type; }
+
+    public String getType() { return type; }
 
     public List<String> getSchedulableListIds() {
         return schedulableListIds;

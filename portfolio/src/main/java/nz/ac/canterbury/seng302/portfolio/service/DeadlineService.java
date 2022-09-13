@@ -72,7 +72,7 @@ public class DeadlineService {
      * Otherwise, updates the deadline with the given ID.
      * @param deadline deadline to be added to the database
      */
-    public void saveDeadline(Deadline deadline) {
-        repository.save(deadline);
+    public Deadline saveDeadline(Deadline deadline) {
+        return repository.save(deadline);
     }
 }
