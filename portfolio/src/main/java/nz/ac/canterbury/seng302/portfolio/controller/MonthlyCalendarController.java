@@ -1,9 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
-import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Milestone;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
+import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -37,8 +38,12 @@ public class MonthlyCalendarController extends PageController {
     private ProjectService projectService;                      // initializing the ProjectService
     @Autowired
     private SprintService sprintService;                        // initializing the SprintService
-//    @Autowired
-//    private DeadlineService deadlineService;                    // initializing the DeadlineService
+    @Autowired
+    private DeadlineService deadlineService;                    // initializing the DeadlineService
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    private MilestoneService milestoneService;
 
     /**
      *
@@ -77,15 +82,63 @@ public class MonthlyCalendarController extends PageController {
             model.addAttribute("sprintColours", getSprintsArrayList.get(4));
         }
 
-        //
-//        ArrayList<String> schedulablesStringList = getAllSchedulableStringList(project);
-//        model.addAttribute("deadlineNames", schedulablesStringList.get(0));
-//        model.addAttribute("deadlineDates", schedulablesStringList.get(1));
-
+        List<Schedulable> schedulableList = getAllSchedulablesInProject(id);
+        List<String> schedulableDetailsList = getStringListFromSchedulables(schedulableList);
+        model.addAttribute("schedulableNames", schedulableDetailsList.get(0));
+        model.addAttribute("schedulableTypes", schedulableDetailsList.get(1));
+        model.addAttribute("schedulableStartDates", schedulableDetailsList.get(2));
+        model.addAttribute("schedulableEndDates", schedulableDetailsList.get(3));
 
         model.addAttribute("tab", 2);
 
         return "monthlyCalendar";
+    }
+
+    /**
+     * Returns a list of every schedulable object in the specified project.
+     * @param projectId as an int, e.g. 5
+     * @return list of schedulable objects in that project
+     */
+    private List<Schedulable> getAllSchedulablesInProject(int projectId) {
+        List<Deadline> deadlineList = deadlineService.getDeadlinesInProject(projectId);
+        List<Milestone> milestoneList = milestoneService.getMilestonesInProject(projectId);
+        List<Event> eventList = eventService.getEventByParentProjectId(projectId);
+        List<Schedulable> schedulableList = new ArrayList<>();
+        schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
+        schedulableList.addAll(eventList);
+
+        return schedulableList;
+    }
+
+    /**
+     * Returns a list with four strings, each comma separated (actually ", " separated).
+     * The strings are, in order, the names, types, start days, and end days of the provided schedulable objects.
+     * Note: the "days" means that the dates are in "yyyy-mm-dd" format. Not sure why they're like that, but they are.
+     * @param schedulableList list of schedulable objects
+     * @return list of 4 strings as described above
+     */
+    private List<String> getStringListFromSchedulables(List<Schedulable> schedulableList) {
+        ArrayList<String> schedulableDetailsList = new ArrayList<>();
+
+        ArrayList<String> schedulableNames = new ArrayList<>();
+        ArrayList<String> schedulableTypes = new ArrayList<>();
+        ArrayList<String> schedulableStartDays = new ArrayList<>();
+        ArrayList<String> schedulableEndDays = new ArrayList<>();
+
+        for (Schedulable schedulable: schedulableList) {
+            schedulableNames.add(schedulable.getName());
+            schedulableTypes.add(schedulable.getType());
+            schedulableStartDays.add(schedulable.getStartDay());
+            schedulableEndDays.add(schedulable.getEndDay());
+        }
+
+        schedulableDetailsList.add(String.join(", ", schedulableNames));
+        schedulableDetailsList.add(String.join(", ", schedulableTypes));
+        schedulableDetailsList.add(String.join(", ", schedulableStartDays));
+        schedulableDetailsList.add(String.join(", ", schedulableEndDays));
+
+        return  schedulableDetailsList;
     }
 
     /**
@@ -195,29 +248,4 @@ public class MonthlyCalendarController extends PageController {
         // Converting the new project/sprint LocalDate object to Date object
         return Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
-
-//    private ArrayList<String> getAllSchedulableStringList(Project project) {
-//        // Deadline list that contains all the deadlines
-//        List<Deadline> deadlines = deadlineService.getAllDeadlines();
-//
-//        // Initializing the array list
-//        ArrayList<String> schedulableDetailsList = new ArrayList<>();
-//
-//        StringBuilder deadlineNames = new StringBuilder();         // Initiating the sprint names list
-//        StringBuilder deadlineDates = new StringBuilder();
-//
-//        // For loop to add each schedulable names, dates
-//        for (Deadline deadline: deadlines) {
-//            deadlineNames.append(deadline.getName()).append(",");
-//            System.out.println("Deadline date -> " + deadline.getStartDate());
-//            deadlineDates.append(deadline.getStartDate()).append(",");
-////            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
-//        }
-//
-//        // Removing the string's last character, which is "," and adding to the sprintsDetailsList
-//        schedulableDetailsList.add(deadlineNames.substring(0 , deadlineNames.length()-1));
-//        schedulableDetailsList.add(deadlineDates.substring(0 , deadlineDates.length()-1));
-//
-//        return schedulableDetailsList;
-//    }
 }

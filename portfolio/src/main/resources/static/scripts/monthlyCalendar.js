@@ -10,13 +10,23 @@ const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16
  * @param date in format 'yyyy-mm-dd [other stuff that gets ignored]'
  * @return {Date} Date object with a time of midnight (00:00:00)
  */
-function getDateFromProjectDateString(date) {
-    const dateString = String(date.split(" ")[0]); // remove time
+function getDateFromProjectDateString(originalDateString) {
+    const dateString = String(originalDateString.split(" ")[0]); // remove time
     let year, month, day;
     [year, month, day] = dateString.split("-").map(function(item) {
         return parseInt(item, 10);
     });
     return new Date(year, month - 1, day);
+}
+
+/**
+ * Returns a string corresponding to the given date object.
+ * In the returned string, months start from 1 (unlike JS dates). Month and day fields are padded with 0s.
+ * @param date JS date object
+ * @return {string} format "yyyy-mm-dd"
+ */
+function getStringFromDate(date) {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 }
 
 
@@ -36,7 +46,7 @@ function createSchedulableIconsForProject() {
 
     while (start < end) {
         // date in yyyy-mm-dd format
-        const date = `${start.getFullYear()}-${(start.getMonth() + 1).toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`;
+        const date = getStringFromDate(start);
         icons.push(
             {
                 id: `deadline-${date}`,
@@ -63,23 +73,6 @@ function createSchedulableIconsForProject() {
 
 
 let events = createSchedulableIconsForProject();
-
-
-/**
- * Updates the list icons with the provided schedulable information.
- * For each schedulable object, every day it occurs will have its icon's counter increased, and its name added to the
- * icon's name list.
- * TODO document date format
- * @param icons list of icon event objects to be updated
- * @param sType the type of schedulable - event, milestone, or deadline
- * @param sNames the names of the schedulables
- * @param sStartDates the start dates of the schedulables
- * @param sEndDates (optional) the end dates of the schedulables
- */
-function updateIconObjectsWithSchedulables(icons, sType, sNames, sStartDates, sEndDates = []) {
-    // actually, don't do this here; wait until things are in the calendar and then look up the events using getEventById
-    // ids are in a sensible format
-}
 
 
 // Will return black or white based on the provided colour string
@@ -254,6 +247,41 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     // On startup, calendar date starts from the given project start date
     calendar.gotoDate(projectStartDate);
+
+    /**
+     * Updates the list icons for the calendar with the provided schedulable information.
+     * For each schedulable object, every day it occurs will have its icon's counter increased,
+     * and its name added to the icon's name list.
+     */
+    (function updateIconObjectsWithSchedulables() {
+        const sNames = schedulableNames.split(", ");
+        const sTypes = schedulableTypes.split(", ");
+        const sStarts = schedulableStartDates.split(", ");
+        const sEnds = schedulableEndDates.split(", ");
+
+        console.log(sNames, sTypes, sStarts, sEnds);
+
+        const count = sNames.length; // num of things
+        for (let i = 0; i < count; i++) {
+
+            // need another loop! convert to dates and then do it again...
+            let start = getDateFromProjectDateString(sStarts[i]);
+            const end = getDateFromProjectDateString(sEnds[i]);
+
+            while (start <= end) {
+                // create the id, get the event, update the num and name list
+                const id = `${sTypes[i]}-${getStringFromDate(start)}`;
+                const icon = calendar.getEventById(id);
+                icon.setExtendedProp("num", icon.extendedProps.num + 1);
+                icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+
+                // increase start by 1
+                let newStart = new Date(start);
+                newStart.setDate(newStart.getDate() + 1);
+                start = newStart;
+            }
+        }
+    })();
 
     calendar.render();
 });
