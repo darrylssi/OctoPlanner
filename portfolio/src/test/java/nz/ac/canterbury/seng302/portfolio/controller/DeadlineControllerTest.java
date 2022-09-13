@@ -1,10 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
-import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
 import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.DeadlineRepository;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
@@ -20,17 +18,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Controller test class for the DeadlineController
+ * Test class for post and delete requests for deadlines handled by the deadline controller
  */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DeadlineController.class)
@@ -39,27 +41,32 @@ class DeadlineControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
     ProjectService projectService;
+
     @MockBean
     DeadlineRepository deadlineRepository;
+
     @MockBean
     DeadlineService deadlineService;
+
     @MockBean
     private UserAccountClientService userAccountClientService;
 
-    private DeadlineForm deadlineForm;
+    private SchedulableForm deadlineForm;
     private Deadline deadline;
 
     @BeforeEach
     void setup() {
-        // Creates a new deadline form and sets the deadline name
-        deadlineForm = new DeadlineForm();
+        // Creates a new deadline form, and sets the name and date
+        deadlineForm = new SchedulableForm();
         deadlineForm.setName("Deadline");
+        deadlineForm.setStartDate(LocalDate.now());
+        deadlineForm.setStartTime(LocalTime.now());
 
-        // Creates a new deadline and set the parent project
         deadline = new Deadline();
-        deadline.setParentProject(new Project("Project", "", "2022-01-01", "2022-12-31"));
+        deadline.setId(1);
     }
 
     @Test
@@ -101,13 +108,28 @@ class DeadlineControllerTest {
     }
 
     @Test
+    @WithMockPrincipal(TEACHER)
+    void postValidDeadline_returnDeadlineId() throws Exception {
+        when(deadlineService.getDeadlineById(anyInt()))
+                .thenReturn(deadline);
+        when(deadlineService.saveDeadline(any()))
+                .thenReturn(deadline);
+        this.mockMvc.perform(post("/project/0/edit-deadline/1")
+                        .param("name", deadlineForm.getName())
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "12:00"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
+    }
+
+    @Test
     @WithMockPrincipal(STUDENT)
     void postDeadlineEditPage_forbidden() throws Exception {
         // As the user is STUDENT, so they do not have permission to edit deadline form. Therefore, appropriate error
         // is shown
         this.mockMvc.perform(post("/project/0/edit-deadline/1"))
                 .andExpect(status().isForbidden())
-                .andExpect(content().string(containsString("You do not have permission to access this endpoint")));
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
     @Test

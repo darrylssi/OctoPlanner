@@ -4,10 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
+import javax.persistence.ManyToOne;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -24,17 +26,23 @@ import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 /**
- * Class containing the step definitions for the account_credited Cucumber
+ * Class containing the step definitions for the event_validation Cucumber
  * feature
  */
 @SpringBootTest
 public class EventStepDefinition extends RunCucumberTest {
 
-    private static final int ID = 1;
     private SimpleDateFormat dateFormatter;
     private SimpleDateFormat dateTimeFormatter;
-    private Project parentProject;
+    @ManyToOne
+    private static Project parentProject;
     private Event event;
+
+    // TODO make this code less bad - milestone and event step defs should probably be in a single file for schedulable step defs
+    // very sussy roundabout way of letting the milestone step defs access the parent project
+    public static Project getParentProject() {
+        return parentProject;
+    }
 
     /**
      * Validates event against its javax validation annotations
@@ -92,13 +100,8 @@ public class EventStepDefinition extends RunCucumberTest {
     @Then("creating the event should fail")
     public void adding_event_should_fail() {
         var javaxErrors = checkJavaxConstraints();
-        assertThat(javaxErrors, is(not(empty())));
-        // Note: Unfortunately I don't know how to check if EITHER
-        // javaxErrors or validationErrors is(not(empty())), so the
-        // feature file must have constaint errors to see any
-        // validation errors
         var validationErrors = checkValidator();
-        assertThat(validationErrors.getErrorMessages(), is(not(empty())));
+        assertTrue(!javaxErrors.isEmpty() || !validationErrors.getErrorMessages().isEmpty());
     }
 
 }

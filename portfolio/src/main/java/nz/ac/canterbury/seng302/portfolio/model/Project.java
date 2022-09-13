@@ -45,6 +45,10 @@ public class Project {
 
     @OneToMany(mappedBy = "parentProject")
     private Set<Event> events;
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Deadline> deadlines;
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Milestone> milestones;
 
     protected Project() {
         this.projectCreationDate = new Date();

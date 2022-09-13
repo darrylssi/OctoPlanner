@@ -14,38 +14,37 @@ import java.util.TimeZone;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
- * <p>EventForm class that's given to the user inside templates.</p>
+ * <p>SchedulableForm class that's given to the user inside templates.</p>
  * 
- * This proxy exists for security reasons, as directly giving Event objects from the
+ * This proxy exists for security reasons, as directly giving Schedulable objects from the
  * database flags Sonarqube errors.
  */
-public class EventForm {
-    @NotNull
-    @NotBlank(message="Event name cannot be blank")
+public class SchedulableForm {
+    @NotBlank(message="Name cannot be blank")
     @Size(min=MIN_NAME_LENGTH,
             max=MAX_NAME_LENGTH,
-            message="The event name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
+            message="Name must be between "+MIN_NAME_LENGTH+"-"+MAX_NAME_LENGTH+" characters")
     private String name;
 
     @Size(max=MAX_DESC_LENGTH,
-            message="The event description must not exceed "+MAX_DESC_LENGTH+" characters")
+            message="Description must not exceed "+MAX_DESC_LENGTH+" characters")
     private String description;
     
     // Due to Firefox's lack of <input type="datetime"> support,
     // we store this as two separate fields: Date and Time
-    @NotNull
+    @NotNull(message="Start date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate startDate;
 
-    @NotNull
+    @NotNull(message="Start time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime startTime;
 
-    @NotNull
+    @NotNull(message="End date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate endDate;
 
-    @NotNull
+    @NotNull(message="End time cannot be blank")
     @DateTimeFormat(pattern="HH:mm")
     private LocalTime endTime;
 
@@ -53,7 +52,7 @@ public class EventForm {
     /**
      * Creates a Date object from the startDate & startTime fields
      * @param userTimeZone The timezone ID of where the user is
-     * @return A Date object of when the event starts
+     * @return A Date object of when the schedulable starts
      */
     public Date startDatetimeToDate(TimeZone userTimeZone) {
         return DateUtils.localDateAndTimeToDate(startDate, startTime, userTimeZone);
@@ -62,7 +61,7 @@ public class EventForm {
     /**
      * Creates a Date object from the endDate & endTime fields
      * @param userTimeZone The timezone ID of where the user is
-     * @return A Date object of when the event ends
+     * @return A Date object of when the schedulable ends
      */
     public Date endDatetimeToDate(TimeZone userTimeZone) {
         return DateUtils.localDateAndTimeToDate(endDate, endTime, userTimeZone);

@@ -1,13 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.controller.forms.DeadlineForm;
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
-import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 
 /**
@@ -49,12 +50,16 @@ public class DetailsController extends PageController {
     @Autowired
     private DeadlineService deadlineService;
     @Autowired
+    private MilestoneService milestoneService;
+    @Autowired
     private SprintLabelService labelUtils;
 
     /**
      * Get request to view project details page.
      * @param principal Authenticated user
      * @param id ID of the project to be shown
+     * @param schedulableForm The form submitted by the user
+     * @param userTimezone The user's time zone
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
      */
@@ -62,12 +67,12 @@ public class DetailsController extends PageController {
     public String details(
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
-                EventForm eventForm,
+                SchedulableForm schedulableForm,
                 TimeZone userTimezone,
                 Model model
     ){
         PrincipalData thisUser = PrincipalData.from(principal);
-        prePopulateEventForm(eventForm, userTimezone.toZoneId());
+        prePopulateSchedulableForm(schedulableForm, userTimezone.toZoneId());
         populateProjectDetailsModel(model, id, thisUser);
 
         /* Return the name of the Thymeleaf template */
@@ -90,9 +95,9 @@ public class DetailsController extends PageController {
      *
      * @param model The model we'll be blessing with knowledge
      * @param parentProjectId   The ID of this project page
-     * @param thisUser          The currently logged in user
+     * @param thisUser          The currently logged-in user
      */
-    private void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
+    public void populateProjectDetailsModel(Model model, int parentProjectId, PrincipalData thisUser) {
         // Give the template validation info, so the browser can let the user know.
         // Have to enter these one-by-one because Thymeleaf struggles to access utility classes
         model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
@@ -112,13 +117,15 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event list and sorts it based on the event start date
+        // Gets the event, deadline and milestone lists and sorts them based on their start dates
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
 
         List<Schedulable> schedulableList = new ArrayList<>();
         schedulableList.addAll(eventList);
         schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
@@ -129,7 +136,7 @@ public class DetailsController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
-        model.addAttribute("deadlineForm", new DeadlineForm());
+        model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         model.addAttribute("tab", 0);
     }
@@ -160,66 +167,66 @@ public class DetailsController extends PageController {
     }
 
     /**
-     * Endpoint for adding events to the database, or conveying errors
-     * to the user
-     * @param projectID The project this event will be bound to
-     * @param eventForm The form submitted by our lovely customers
-     * @param bindingResult Any errors that came up during validation
-     * @return  Either redirects them back to the project page, or renders the project page with errors.
-     */
-    @PostMapping("/project/{project_id}/add-event")
-    public String postAddEvent(
-        @AuthenticationPrincipal AuthState principal,
-        @PathVariable("project_id") int projectID,
-        @Valid EventForm eventForm,
-        BindingResult bindingResult,
-        TimeZone userTimezone,
-        Model model
-    ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        ValidationError dateErrors;
-        ValidationError nameErrors;
-        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
-        if (bindingResult.hasErrors()) {
-            populateProjectDetailsModel(model, projectID, thisUser);
-            return PROJECT_DETAILS_TEMPLATE_NAME;
-        }
-        // Check that the dates are correct
-        Project parentProject = projectService.getProjectById(projectID);
-        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
-        nameErrors = ValidationUtils.validateName(eventForm.getName());
-        if (dateErrors.isError() || nameErrors.isError()) {
-            // Merge both errors into one
-            nameErrors.getErrorMessages().forEach(dateErrors::addErrorMessage);
-            model.addAttribute("eventFormError", dateErrors.getErrorMessages());
-            populateProjectDetailsModel(model, projectID, thisUser);
-            return PROJECT_DETAILS_TEMPLATE_NAME;
-        }
-        // Data is valid, add it to database
-        Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
-        event.setParentProject(parentProject);
-        eventService.saveEvent(event);
-        return "redirect:.";
-    }
-
-    /**
      * Pre-populates the event form with default values, if they don't already exist
-     * @param eventForm The eventForm object from your endpoint args
+     * @param schedulableForm The schedulableForm object from your endpoint args
+     * @param userTimezone The user's time zone for calculating the correct start dates
      */
-    private void prePopulateEventForm(EventForm eventForm, ZoneId userTimezone) {
+    private void prePopulateSchedulableForm(SchedulableForm schedulableForm, ZoneId userTimezone) {
         Instant rightNow = Instant.now();
         Instant inOneMinute = rightNow.plus(1, MINUTES);
         // If field isn't filled (because we just loaded the page), use this default value
-        if (eventForm.getStartTime() == null) {
-            eventForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
-            eventForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
+        if (schedulableForm.getStartTime() == null) {
+            schedulableForm.setStartDate(LocalDate.ofInstant(rightNow, userTimezone));
+            schedulableForm.setStartTime(LocalTime.ofInstant(rightNow, userTimezone));
         }
         // Default the value to 1 minute in the future
-        if (eventForm.getEndTime() == null) {
-            eventForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
-            eventForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
+        if (schedulableForm.getEndTime() == null) {
+            schedulableForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
+            schedulableForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
     }
 
+    /**
+     * A method to get the html of a schedulable that can be added to the details
+     * page using javascript
+     * @param principal the current user
+     * @param schedulableType the type of schedulable
+     * @param schedulableId the id of the schedulable being displayed
+     * @param boxId the id of the box in the html element being created
+     * @param model the model that stores the attributes of the schedulable
+     * @return an html fragment of the given schedulable
+     */
+    @GetMapping("/frag/{type}/{schedulableId}/{boxId}")
+    public String schedulableFragment(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="type") String schedulableType,
+            @PathVariable(name="schedulableId") int schedulableId,
+            @PathVariable(name="boxId") String boxId,
+            Model model
+    ){
+        PrincipalData thisUser = PrincipalData.from(principal);
+        Schedulable schedulable;
+        if (EVENT_TYPE.equals(schedulableType)) {
+            schedulable = eventService.getEventById(schedulableId);
+        } else if (DEADLINE_TYPE.equals(schedulableType)) {
+            schedulable = deadlineService.getDeadlineById(schedulableId);
+        } else if (MILESTONE_TYPE.equals(schedulableType)) {
+            schedulable = milestoneService.getMilestoneById(schedulableId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableType + " is not a type of schedulable!");
+        }
+        List<Sprint> sprints = sprintService.getSprintsInProject(schedulable.getParentProject().getId());
+        model.addAttribute(schedulableType, schedulable);
+        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
+        model.addAttribute("boxId", boxId);
+        model.addAttribute("sprints", sprints);
+        model.addAttribute("minNameLen", GlobalVars.MIN_NAME_LENGTH);
+        model.addAttribute("maxNameLen", GlobalVars.MAX_NAME_LENGTH);
+        model.addAttribute("maxDescLen", GlobalVars.MAX_DESC_LENGTH);
+        model.addAttribute("projectStart", DateUtils.toString(schedulable.getParentProject().getProjectStartDate()));
+        model.addAttribute("projectEnd", DateUtils.toString(schedulable.getParentProject().getProjectEndDate()));
+        model.addAttribute("editSchedulableForm", new SchedulableForm());
+
+        return "detailFragments :: " + schedulableType;
+    }
 }

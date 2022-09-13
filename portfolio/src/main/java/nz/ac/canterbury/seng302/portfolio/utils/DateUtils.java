@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -110,6 +111,16 @@ public class DateUtils {
         return c.getTime().equals(dayAfter);
     }
 
+    // https://stackoverflow.com/questions/22929237
+    /**
+     * Converts a LocalDate object to a Date object.
+     * @param localDate The LocalDate to convert
+     * @return The converted Date object
+     */
+    public static Date localDateToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
+
     // https://stackoverflow.com/a/23885950
     /**
      * <p>Combines a LocalDate and a LocalTime into a Date object, normalized by the given's timezone</p>
@@ -122,5 +133,20 @@ public class DateUtils {
     public static Date localDateAndTimeToDate(LocalDate date, LocalTime time, TimeZone usersTimezone) {
         LocalDateTime datetime = LocalDateTime.of(date, time);
         return Date.from(datetime.atZone(usersTimezone.toZoneId()).toInstant());
+    }
+
+    /**
+     * Takes the start and ends of two time periods and checks whether they overlap
+     * @param startA the start time of the first time period
+     * @param endA the end time of the first time period
+     * @param startB the start time of the second time period
+     * @param endB the end time of the second time period
+     * @return true if the time periods overlap
+     */
+    public static boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
+        if (!startA.before(startB)){
+            return !startA.after(endB);
+        }
+        return !endA.before(startB);
     }
 }
