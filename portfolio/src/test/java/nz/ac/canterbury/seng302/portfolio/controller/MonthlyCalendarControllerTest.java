@@ -3,12 +3,11 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Controller test class for the display project details on the monthly calendar
  */
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = MonthlyCalendarController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class MonthlyCalendarControllerTest {
@@ -33,13 +34,25 @@ class MonthlyCalendarControllerTest {
     private MockMvc mockMvc;                                    // initializing the MockMvc
 
     @MockBean
-    private ProjectService projectService;                      // initializing the ProjectService
+    ProjectService projectService;                      // initializing the ProjectService
+
     @MockBean
-    private SprintService sprintService;                        // initializing the SprintService
+    SprintService sprintService;                        // initializing the SprintService
+
     @MockBean
-    private UserAccountClientService userAccountClientService;  // initializing the UserAccountClientService
+    UserAccountClientService userAccountClientService;  // initializing the UserAccountClientService
+
     @MockBean
-    private DateUtils utils;                                    // initializing the DateUtils
+    DateUtils utils;                                    // initializing the DateUtils
+
+    @MockBean
+    DeadlineService deadlineService;                    // initializing the DeadlineService
+
+    @MockBean
+    EventService eventService;
+
+    @MockBean
+    MilestoneService milestoneService;
 
     @Test
     @WithMockPrincipal(UserRole.STUDENT)
