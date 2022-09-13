@@ -221,6 +221,21 @@ class EventControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
+    void addEventStartAfterEndAsTeacher_get400Response() throws Exception {
+        Mockito.when(projectService.getProjectById(0)).thenReturn(event.getParentProject());
+        mockMvc.perform(post("/project/0/add-event")
+                        .param("name", "New Event")
+                        .param("description", "This is an event")
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "12:00")
+                        .param("endDate", "2022-09-03")
+                        .param("endTime", "12:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Start date must always be before end date"));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
     void editValidEventAsTeacher_get200Response() throws Exception {
         Event editEvent = new Event("New Event", "This is an event", DateUtils.toDate("2022-09-09"), DateUtils.toDate("2022-09-14"));
         editEvent.setId(1);
