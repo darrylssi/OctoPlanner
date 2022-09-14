@@ -138,17 +138,9 @@ public class MilestoneController extends PageController {
         // Check that the date is correct
         dateErrors = ValidationUtils.validateMilestoneDate(DateUtils.localDateToDate(schedulableForm.getStartDate()), parentProject);
         nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        if (dateErrors.isError() || nameErrors.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>("", HttpStatus.OK);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors);
+        HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(errorString, status);
     }
 
     /**

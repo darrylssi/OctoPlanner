@@ -39,8 +39,6 @@ public class EventController extends PageController {
     @Autowired
     private EventService eventService;
     @Autowired
-    private SprintService sprintService;
-    @Autowired
     DetailsController detailsController;
 
 
@@ -87,14 +85,7 @@ public class EventController extends PageController {
         dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone), parentProject);
         nameErrors = ValidationUtils.validateName(schedulableForm.getName());
         if (dateErrors.isError() || nameErrors.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameErrors), HttpStatus.BAD_REQUEST);
         }
         // Data is valid, add it to database
         Event event = new Event(schedulableForm.getName(), schedulableForm.getDescription(), schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone));
@@ -148,14 +139,7 @@ public class EventController extends PageController {
         var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
         var nameError = ValidationUtils.validateName(editSchedulableForm.getName());
         if (dateErrors.isError() || nameError.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameError.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
         event.setName(editSchedulableForm.getName());
