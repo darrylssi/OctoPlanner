@@ -178,12 +178,12 @@ public class MilestoneController extends PageController {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        // validate milestone
         Project parentProject = projectService.getProjectById(projectId);
+        Milestone milestone = milestoneService.getMilestoneById(milestoneId);
+        // validate milestone
         ResponseEntity<String> validationResponse = validateMilestone(schedulableForm, bindingResult, parentProject);
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
             // passed validation, save edited milestone
-            Milestone milestone = milestoneService.getMilestoneById(milestoneId);
             milestone.setName(schedulableForm.getName());
             milestone.setDescription(schedulableForm.getDescription());
             milestone.setStartDate(DateUtils.localDateToDate(schedulableForm.getStartDate()));

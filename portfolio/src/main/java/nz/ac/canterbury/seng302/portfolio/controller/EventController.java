@@ -143,6 +143,7 @@ public class EventController extends PageController {
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
+
         // Validation round 2: Do our custom errors pass?
         var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
         var nameError = ValidationUtils.validateName(editSchedulableForm.getName());

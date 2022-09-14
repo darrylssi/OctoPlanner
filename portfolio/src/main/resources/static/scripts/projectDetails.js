@@ -3,18 +3,19 @@ const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages a
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
-const EVENT_TYPE = "event";
-const DEADLINE_TYPE = "deadline";
-const MILESTONE_TYPE = "milestone";
 
-/** Hides the confirm delete modal without deleting a sprint/event/deadline */
+/** Hides the deletion confirmation modal without deleting a sprint/event/deadline */
 function hideModal() {
     const modal = document.getElementById("deleteModal");
     modal.style.display = "none";
 }
 
-/** When the delete button is clicked, show a modal checking if the user is sure about deleting the object
- * Type  */
+/**
+ * Show a modal asking the user to confirm their deletion of the object with the given id, name, and type.
+ * @param id the id of the object, e.g. 12
+ * @param name the name of the object as a string
+ * @param type the type of the object, e.g. 'sprint', 'deadline', 'milestone', or 'event'
+ */
 function showDeleteModal(id, name, type) {
     const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
@@ -23,15 +24,22 @@ function showDeleteModal(id, name, type) {
     modal.style.display = "block";
 }
 
-/** sends a http request to delete the object with the given id */
+/**
+ * Sends an HTTP request to delete the object with the given type and ID.
+ * @param id the id of the object, e.g. 12
+ * @param type the type of the object, e.g. 'sprint', 'deadline', 'milestone', or 'event'
+ */
 function deleteObject(id, type) {
     const url = BASE_URL + "delete-" + type + "/" + id;
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        // Send a websocket message to update the page after the delete
+        // Send a websocket message to update the page after the deletion
         stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
         hideModal();
+        if (type === 'sprint') {
+            window.location.reload();
+        }
     }
     deleteRequest.send();
 }
@@ -52,6 +60,7 @@ function hideErrorBoxes(elem) {
  * Submits the given form's request in Javascript, allowing for in-place
  * updating of the page.
  * @param {HTMLFormElement} elem
+ * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
  */
 function sendFormViaAjax(elem, type) {
     // Delete any pre-existing errors on the form
@@ -102,6 +111,8 @@ function sendFormViaAjax(elem, type) {
         }
     }
     formRequest.send(formData);
+    resetAddForm(type);
+    showRemainingChars();
 }
 
 /**
@@ -109,6 +120,7 @@ function sendFormViaAjax(elem, type) {
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
+ * @param schedulable the schedulable object itself
  */
 function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, schedulable) {
     /* Capitalize only the first letter of the schedulableType string */
@@ -154,6 +166,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    showRemainingChars();
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
@@ -169,15 +182,16 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
  * Populates the edit schedulable form with the current details of the schedulable.
  * @param editForm Edit schedulable form
  * @param schedulable Schedulable object
+ * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
  */
 function prefillSchedulable(editForm, schedulable, type) {
     editForm.querySelector("#name").value = schedulable.name;
     editForm.querySelector("#description").value =  schedulable.description;
     editForm.querySelector("#startDate").value = schedulable.startDay;
-    if (type != 'milestone'){
+    if (type !== 'milestone'){
         editForm.querySelector("#startTime").value = schedulable.startTime;
     }
-    if (type == 'event'){
+    if (type === 'event'){
         editForm.querySelector("#endDate").value = schedulable.endDay;
         editForm.querySelector("#endTime").value = schedulable.endTime;
     }
@@ -288,4 +302,27 @@ function showRemainingChars() {
         const display = parent.getElementsByClassName('remaining-chars-field')[0];
         displayRemainingCharacters(input, display);
     }
+}
+
+/**
+ * Resets the add schedulable form after submission.
+ * @param type Type of schedulable to be added.
+ */
+function resetAddForm(type) {
+    const capitalisedType = type.charAt(0).toUpperCase() + type.slice(1);
+    let addForm = document.getElementById("add" + capitalisedType + "Form");
+    addForm.querySelector("#addSchedulableNameInput").value = "";
+    addForm.querySelector("#addSchedulableDescriptionInput").value =  "";
+
+    // add default dates
+    const today = new Date();
+    addForm.querySelector("#schedulableStartDate").value = today.toISOString().substring(0,10);
+    if (type !== 'milestone'){
+        addForm.querySelector("#schedulableStartTime").value = today.getHours() + ":" + (today.getMinutes());
+    }
+    if (type === 'event'){
+        addForm.querySelector("#schedulableEndDate").value = today.toISOString().substring(0,10);
+        addForm.querySelector("#schedulableEndTime").value = today.getHours() + ":" + (today.getMinutes()+1);
+    }
+
 }
