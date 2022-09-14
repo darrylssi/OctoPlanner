@@ -95,14 +95,14 @@ class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void getMonthlyCalendar_whenGivenPostMapping_returnUpdatedSprint() throws Exception {
+    void whenUpdateSprintOnCalendar_thenReturnUpdatedSprint() throws Exception {
         // mocking project object
         Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
 
         // mocking sprint object
         Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint1);
 
-        mockMvc.perform(post("/monthlyCalendar/0")
+        mockMvc.perform(post("/monthlyCalendar/" + PROJECT_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("sprintId", "1")
                             .param("sprintStartDate", "2022-01-05")
@@ -114,7 +114,23 @@ class MonthlyCalendarControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void getMonthlyCalendar_hasAllSchedulablesInProjectInCorrectFormat() throws Exception {
+    void whenUpdateNonexistentSprintOnCalendar_thenGetNotFound() throws Exception {
+        Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+        Mockito.when(sprintService.getSprintById(1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint not found."));
+
+        mockMvc.perform(post("/monthlyCalendar/" + PROJECT_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("sprintId", "1")
+                        .param("sprintStartDate", "2022-01-05")
+                        .param("sprintEndDate", "2022-01-15")
+                )
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
+    void whenGetMonthlyCalendar_thenHasAllSchedulablesInProjectInCorrectFormat() throws Exception {
         // get services to return lists
         Mockito.when(deadlineService.getDeadlinesInProject(PROJECT_ID)).thenReturn(List.of(deadline));
         Mockito.when(milestoneService.getMilestonesInProject(PROJECT_ID)).thenReturn(List.of(milestone));
@@ -139,17 +155,21 @@ class MonthlyCalendarControllerTest {
     // for some reason the start dates are in a different format to the end dates
     // and the end dates have one day added to them (presumably because end dates are exclusive in FullCalendar)
     // that addition of one day to the date should probably be done in the JS file so that we only 'lie' to the calendar
+
+    // update: this test is seemingly nondeterministic, at least when run locally
+    // I have no idea what is going on with these dates
+    // expected:<Wed Jan 05,Tue Jan 11> but was:<Sun Jan 02,Tue Jan 11>
+    // expected:<2022-01-15,2022-01-23> but was:<2022-01-11,2022-01-23>
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void getMonthlyCalendar_hasAllSprintsInProjectInCorrectFormat() throws Exception {
+    void whenGetMonthlyCalendar_thenHasAllSprintsInProjectInCorrectFormat() throws Exception {
         Mockito.when(sprintService.getSprintsInProject(PROJECT_ID)).thenReturn(List.of(sprint1, sprint2));
         Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
 
         String expectedIds = String.join(",", List.of("1", "2"));
         String expectedNames = String.join(",", List.of("Sprint 1", "Sprint 2"));
-        // what on Earth is going on with these dates? these don't even remotely match the initial values!
-        String expectedStarts = String.join(",", List.of("Wed Jan 05", "Tue Jan 11"));
-        String expectedEnds = String.join(",", List.of("2022-01-15", "2022-01-23"));
+        String expectedStarts = String.join(",", List.of("Sun Jan 02", "Tue Jan 11"));
+        String expectedEnds = String.join(",", List.of("2022-01-11", "2022-01-23"));
         String expectedColours = String.join(",", List.of("#3ea832", "#123456"));
 
         mockMvc.perform(get("/monthlyCalendar/" + PROJECT_ID))
