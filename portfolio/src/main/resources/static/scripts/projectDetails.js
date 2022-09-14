@@ -77,6 +77,9 @@ function sendFormViaAjax(elem, type) {
             // Success
             hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
+            if (url.indexOf("add") != -1) {
+                resetAddForm(type);
+            }
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -99,7 +102,6 @@ function sendFormViaAjax(elem, type) {
         }
     }
     formRequest.send(formData);
-    resetAddForm(type);
     showRemainingChars();
 }
 
