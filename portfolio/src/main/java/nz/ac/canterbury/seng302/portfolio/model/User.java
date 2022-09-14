@@ -13,21 +13,21 @@ public class User {
             message = "Username must be between " + MIN_NAME_LENGTH + " to " + MAX_USERNAME_LENGTH + " characters.")
     private String username;
 
-    @Size(min = MIN_NAME_LENGTH, max = MAX_DESC_LENGTH,
+    @Size(min = MIN_NAME_LENGTH, max = MAX_NAME_LENGTH,
             message = "First name must be between " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.")
     private String firstName;
 
-    @Size(max = MAX_NAME_LENGTH, message = "Middle name must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
+    @Size(max = MAX_OTHER_NAME_LENGTH, message = "Middle name must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
     private String middleName;
 
     @Size(min = MIN_NAME_LENGTH, max = MAX_NAME_LENGTH,
             message = "Last name must be between " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.")
     private String lastName;
 
-    @Size(max = MAX_NAME_LENGTH, message = "Nickname must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
+    @Size(max = MAX_OTHER_NAME_LENGTH, message = "Nickname must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
     private String nickname;
 
-    @Size(max = MAX_NAME_LENGTH, message = "Personal pronouns must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
+    @Size(max = MAX_OTHER_NAME_LENGTH, message = "Personal pronouns must have less than " + MAX_OTHER_NAME_LENGTH + " characters.")
     private String personalPronouns;
 
     @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH,
