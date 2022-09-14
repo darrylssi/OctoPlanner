@@ -48,7 +48,7 @@
                             <div class="col-lg-6">
                                 <label class="required" for="firstName"> First Name </label>
                                 <input type="text" class="form-control" id="firstName" placeholder="First Name"
-                                       th:field="*{firstName}" th:required="required" maxlength="20">
+                                       th:field="*{firstName}" th:required="required" maxlength="32">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"> </span>
                             </div>
                             <div class="col-lg-6">
@@ -63,7 +63,7 @@
                             <div class="col-lg-6">
                                 <label class="required" for="lastName"> Last Name </label>
                                 <input type="text" class="form-control" id="lastName" placeholder="Last Name"
-                                       th:field="*{lastName}" th:required="required" maxlength="20">
+                                       th:field="*{lastName}" th:required="required" maxlength="32">
                                 <span class="error text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"> </span>
                             </div>
                             <div class="col-lg-6">
