@@ -77,6 +77,9 @@ function sendFormViaAjax(elem, type) {
             // Success
             hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
+            if (url.indexOf("add") != -1) {
+                resetAddForm(type);
+            }
             //Update tooltips, because bootstrap needs to be told to do this
             setTimeout((schedulableId) => {
                 let schedulable = document.getElementById(`${schedulableId}`);
@@ -111,7 +114,6 @@ function sendFormViaAjax(elem, type) {
         }
     }
     formRequest.send(formData);
-    resetAddForm(type);
     showRemainingChars();
 }
 
