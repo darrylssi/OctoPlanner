@@ -5,13 +5,11 @@ import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,11 +55,13 @@ class MonthlyCalendarControllerTest {
     @MockBean
     MilestoneService milestoneService;
 
+    private static final int PROJECT_ID = 0;
     private static Deadline deadline = new Deadline("deadline1", "deaddesc", DateUtils.toDate("2022-02-01"));
     private static Milestone milestone = new Milestone("milestone1", "deaddesc", DateUtils.toDate("2022-02-02"));
     private static Event event = new Event("event1", "eventdesc", DateUtils.toDate("2022-02-02"), DateUtils.toDate("2022-02-20"));
+    private static Sprint sprint1 = new Sprint(PROJECT_ID, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
+    private static Sprint sprint2 = new Sprint(PROJECT_ID, "Sprint 2", "This is sprint 2", "2022-01-11", "2022-01-22", "#123456");
     private static Project project = new Project("Project 2022", "This is the first project", "2022-01-01", "2022-12-31");
-    private final int PROJECT_ID = 0;
 
     @BeforeAll
     static void setUp() {
@@ -71,6 +71,8 @@ class MonthlyCalendarControllerTest {
         milestone.setParentProject(project);
         event.setId(1);
         event.setParentProject(project);
+        sprint1.setId(1);
+        sprint2.setId(2);
     }
 
     @Test
@@ -97,9 +99,8 @@ class MonthlyCalendarControllerTest {
         // mocking project object
         Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
 
-        // initializing sprint object and mocking it
-        Sprint sprint = new Sprint(PROJECT_ID, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
-        Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint);
+        // mocking sprint object
+        Mockito.when(sprintService.getSprintById(1)).thenReturn(sprint1);
 
         mockMvc.perform(post("/monthlyCalendar/0")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -132,5 +133,31 @@ class MonthlyCalendarControllerTest {
                 .andExpect(model().attribute("schedulableTypes", expectedTypes))
                 .andExpect(model().attribute("schedulableStartDates", expectedStarts))
                 .andExpect(model().attribute("schedulableEndDates", expectedEnds));
+    }
+
+    // this test is a bit odd because of how the sprint details are sent to the page
+    // for some reason the start dates are in a different format to the end dates
+    // and the end dates have one day added to them (presumably because end dates are exclusive in FullCalendar)
+    // that addition of one day to the date should probably be done in the JS file so that we only 'lie' to the calendar
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
+    void getMonthlyCalendar_hasAllSprintsInProjectInCorrectFormat() throws Exception {
+        Mockito.when(sprintService.getSprintsInProject(PROJECT_ID)).thenReturn(List.of(sprint1, sprint2));
+        Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+
+        String expectedIds = String.join(",", List.of("1", "2"));
+        String expectedNames = String.join(",", List.of("Sprint 1", "Sprint 2"));
+        // what on Earth is going on with these dates? these don't even remotely match the initial values!
+        String expectedStarts = String.join(",", List.of("Wed Jan 05", "Tue Jan 11"));
+        String expectedEnds = String.join(",", List.of("2022-01-15", "2022-01-23"));
+        String expectedColours = String.join(",", List.of("#3ea832", "#123456"));
+
+        mockMvc.perform(get("/monthlyCalendar/" + PROJECT_ID))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("sprintIds", expectedIds))
+                .andExpect(model().attribute("sprintNames", expectedNames))
+                .andExpect(model().attribute("sprintStartDates", expectedStarts))
+                .andExpect(model().attribute("sprintEndDates", expectedEnds))
+                .andExpect(model().attribute("sprintColours", expectedColours));
     }
 }
