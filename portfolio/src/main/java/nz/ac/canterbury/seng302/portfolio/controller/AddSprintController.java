@@ -223,6 +223,11 @@ public class AddSprintController extends PageController {
         return ValidationUtils.validateName(sprintName);
     }
 
+    /**
+     * Adds the required values for the validation on the front-end.
+     * @param model Thymeleaf parameters
+     * @param project The project the sprint belongs to
+     */
     void addRequiredValues(Model model, Project project) {
         model.addAttribute("minNameLen", MIN_NAME_LENGTH);
         model.addAttribute("maxNameLen", MAX_NAME_LENGTH);
