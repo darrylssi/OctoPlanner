@@ -22,6 +22,29 @@ Both the Portfolio and IdentityProvider modules generally follow a Model-View-Co
 - `service` - to allow communication (by gRPC) between Portfolio and the IdP
 - `customthymeleaf` - to allow us to access certain features of the utilities from the thymeleaf front-end.
 
+## Dependencies
+The LensFolio application depends on the following libraries and APIs to run:
+- Spring Boot
+- Thymeleaf
+- FullCalendar
+- JSON Web Token
+- H2 database
+- Mariadb
+- Java Persistence API
+- Spring Websocket
+- SockJS
+- Stomp Websocket
+- Spring Messaging
+- Gradle
+- gRPC
+
+As well as the following to perform tests:
+- Cypress
+- Node and the NPM
+- JUnit
+- Jacoco
+- Cucumber
+
 ## Running on the VM
 Commits to dev and tagged commits to master deploy to the VM, accessible at https://csse-s302g8.canterbury.ac.nz/test/portfolio/ and https://csse-s302g8.canterbury.ac.nz/prod/portfolio respectively. They use the MariaDB database. More information on this topic, including how to access it, can be found here: https://eng-git.canterbury.ac.nz/seng302-2022/team-800/-/wikis/Working-with-the-VM.
 
