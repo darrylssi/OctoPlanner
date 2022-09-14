@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -247,6 +248,23 @@ public class ValidationUtils {
         }
 
         return error;
+    }
+
+    /**
+     * Creates a string object containing all the errors
+     */
+    public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors) {
+        if (dateErrors.isError() || nameErrors.isError()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: dateErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: nameErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            return errors.toString();
+        }
+        return "";
     }
 
 }

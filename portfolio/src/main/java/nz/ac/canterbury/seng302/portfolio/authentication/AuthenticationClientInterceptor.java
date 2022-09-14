@@ -5,8 +5,6 @@ import net.devh.boot.grpc.client.interceptor.GrpcGlobalClientInterceptor;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * This class is a global interceptor for all gRPC clients used by this application. What this means, is that
  * any time a gRPC client sends a request (e.g to the IdentityProvider), the message is 'intercepted' before it
@@ -33,8 +31,9 @@ public class AuthenticationClientInterceptor implements ClientInterceptor {
      */
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String sessionToken = CookieUtil.getValue(request, "lens-session-token");
+        // Check that the attributes aren't null, otherwise we send a null value as the token
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String sessionToken = attributes == null ? null : CookieUtil.getValue(attributes.getRequest(), "lens-session-token");
 
         // Every time we send a gRPC request, include a copy of our authentication token in the headers
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
