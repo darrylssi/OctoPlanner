@@ -166,4 +166,43 @@ public class DateUtils {
         }
         return startB.before(endA);
     }
+
+
+    /**
+     * FullCalendar displays events with an end date exclusive format. This function adds a day to
+     * the end date of a sprint so that the date can be used to display the sprint correctly in the calendar.
+     * @param date The project or sprint end date
+     * @return The updated new end date as a string to be passed to FullCalendar
+     */
+    public static String addOneDayToDate(Date date) {
+        // Converting date to LocalDate
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to current date
+        LocalDate newLocalDate = localDate.plusDays(1);
+
+        // Converting the new project/sprint LocalDate object to Date object
+        return DateUtils.toString(Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
+    /**
+     * FullCalendar displays events with an end date exclusive format. This function removes a day from
+     * the end date given by FullCalendar so that the correct date can be saved to the database.
+     * @param date The project or sprint end date
+     * @return The updated new end date as a date to be saved
+     */
+    public static Date removeOneDayFromDate(Date date) {
+        // Converting date to LocalDate
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to current project/sprint end date
+        LocalDate newLocalDate = localDate.minusDays(1);
+
+        // Converting the new project/sprint LocalDate object to Date object
+        return Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
 }

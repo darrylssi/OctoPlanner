@@ -21,8 +21,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -68,7 +66,7 @@ public class MonthlyCalendarController extends PageController {
 
         model.addAttribute("project", project);
         model.addAttribute("projectStartDate", project.getProjectStartDate().toString());
-        model.addAttribute("projectEndDate", addOneDayToEndDate(project.getProjectEndDate()));
+        model.addAttribute("projectEndDate", DateUtils.addOneDayToDate(project.getProjectEndDate()));
 
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
         if (!sprintList.isEmpty()) {
@@ -168,7 +166,7 @@ public class MonthlyCalendarController extends PageController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sprint " + sprintId + " does not exist");
         }
         sprintToUpdate.setStartDate(sprintStartDate);
-        sprintToUpdate.setEndDate(removeOneDayFromEndDate(sprintEndDate));
+        sprintToUpdate.setEndDate(DateUtils.removeOneDayFromDate(sprintEndDate));
         sprintService.saveSprint(sprintToUpdate);
 
         return "redirect:../monthlyCalendar/" + id;
@@ -185,67 +183,27 @@ public class MonthlyCalendarController extends PageController {
         // Initializing the array list
         ArrayList<String> sprintsDetailsList = new ArrayList<>();
 
-        StringBuilder sprintIds = new StringBuilder();
-        StringBuilder sprintNames = new StringBuilder();                // Initiating the sprint names list
-        StringBuilder sprintStartDates = new StringBuilder();           // Initiating the sprint start dates list
-        StringBuilder sprintEndDates = new StringBuilder();             // Initiating the sprint end dates list
-        StringBuilder sprintColours = new StringBuilder();             // Initiating the sprint colours list
+        ArrayList<String> sprintIds = new ArrayList<>();
+        ArrayList<String> sprintNames = new ArrayList<>();                // Initiating the sprint names list
+        ArrayList<String> sprintStartDates = new ArrayList<>();           // Initiating the sprint start dates list
+        ArrayList<String> sprintEndDates = new ArrayList<>();             // Initiating the sprint end dates list
+        ArrayList<String> sprintColours = new ArrayList<>();             // Initiating the sprint colours list
 
         // For loop to add each sprint ids, names, start date, end date and colours to the respective strings
         for (Sprint eachSprint: sprintList) {
-            sprintIds.append(eachSprint.getId()).append(",");
-            sprintNames.append(eachSprint.getSprintName()).append(",");
-            sprintStartDates.append(eachSprint.getSprintStartDate().toString(), 0, 10).append(",");
-            sprintEndDates.append(addOneDayToEndDate(eachSprint.getSprintEndDate())).append(",");
-            sprintColours.append(eachSprint.getSprintColour()).append(",");
+            sprintIds.add(String.valueOf(eachSprint.getId()));
+            sprintNames.add(eachSprint.getSprintName());
+            sprintStartDates.add(DateUtils.toString(eachSprint.getSprintStartDate()));
+            sprintEndDates.add(DateUtils.addOneDayToDate(eachSprint.getSprintEndDate()));
+            sprintColours.add(eachSprint.getSprintColour());
         }
 
-        // Removing the string's last character, which is "," and adding to the sprintsDetailsList
-        sprintsDetailsList.add(sprintIds.substring(0 , sprintIds.length()-1));
-        sprintsDetailsList.add(sprintNames.substring(0 , sprintNames.length()-1));
-        sprintsDetailsList.add(sprintStartDates.substring(0, sprintStartDates.length()-1));
-        sprintsDetailsList.add(sprintEndDates.substring(0, sprintEndDates.length()-1));
-        sprintsDetailsList.add(sprintColours.substring(0, sprintColours.length()-1));
+        sprintsDetailsList.add(String.join(",", sprintIds));
+        sprintsDetailsList.add(String.join(",", sprintNames));
+        sprintsDetailsList.add(String.join(",", sprintStartDates));
+        sprintsDetailsList.add(String.join(",", sprintEndDates));
+        sprintsDetailsList.add(String.join(",", sprintColours));
 
         return sprintsDetailsList;
-    }
-
-
-     /**
-      * FullCalendar displays events with an end date exclusive format. This function adds a day to
-      * the end date of a sprint so that the date can be used to display the sprint correctly in the calendar.
-     * @param endDate The project or sprint end date
-     * @return The updated new end date as a string to be passed to FullCalendar
-     */
-    private String addOneDayToEndDate(Date endDate) {
-        // Converting date to LocalDate
-        LocalDate localEndDate = endDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        // Adding 1 day to current project/sprint end date
-        LocalDate newLocalEndDate = localEndDate.plusDays(1);
-
-        // Converting the new project/sprint LocalDate object to Date object
-        return DateUtils.toString(Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-    }
-
-    /**
-     * FullCalendar displays events with an end date exclusive format. This function removes a day from
-     * the end date given by FullCalendar so that the correct date can be saved to the database.
-     * @param endDate The project or sprint end date
-     * @return The updated new end date as a date to be saved
-     */
-    private Date removeOneDayFromEndDate(Date endDate) {
-        // Converting date to LocalDate
-        LocalDate localEndDate = endDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        // Adding 1 day to current project/sprint end date
-        LocalDate newLocalEndDate = localEndDate.minusDays(1);
-
-        // Converting the new project/sprint LocalDate object to Date object
-        return Date.from(newLocalEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }

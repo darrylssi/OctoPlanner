@@ -168,7 +168,7 @@ class MonthlyCalendarControllerTest {
 
         String expectedIds = String.join(",", List.of("1", "2"));
         String expectedNames = String.join(",", List.of("Sprint 1", "Sprint 2"));
-        String expectedStarts = String.join(",", List.of("Sun Jan 02", "Tue Jan 11"));
+        String expectedStarts = String.join(",", List.of("2022-01-02", "2022-01-11"));
         String expectedEnds = String.join(",", List.of("2022-01-11", "2022-01-23"));
         String expectedColours = String.join(",", List.of("#3ea832", "#123456"));
 
