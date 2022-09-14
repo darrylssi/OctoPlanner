@@ -46,11 +46,16 @@
             <div th:text="${dateCreated}"></div>
 
             <!--/*
-                Only render if the logged in user's ID is this page's ID
+                Only render if the logged-in user's ID is this page's ID
             */-->
-            <a th:if="${isCurrentUser}" th:href="|./${id}/edit|">
-                <button class="btn btn-primary btn-lg">Edit Profile</button>
-            </a>
+            <div th:if="${isCurrentUser}">
+                <a th:href="|./${id}/edit|" style="float: right;">
+                    <button class="btn btn-primary btn-lg">Edit Profile</button>
+                </a>
+                <a th:href="|./${id}/edit#photoForm|" style="float: right; margin-right: 15px;">
+                    <button class="btn btn-primary btn-lg">Upload Profile Picture</button>
+                </a>
+            </div>
         </div>
     </div>
 
