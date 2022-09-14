@@ -83,7 +83,6 @@ function getSprintInfo() {
     let sprintEndDatesList = sprintEndDates.split(",");
     let sprintColoursList = sprintColours.split(",");
 
-
     // Creating one list for calendar sprints
     let sprints = [];
     for(let i = 0; i < sprintNamesList.length; i++) {
@@ -106,11 +105,14 @@ function getEventList() {
 }
 
 
-// Will return black or white based on the provided colour string
-// so that text shows up
-// based on https://www.w3.org/TR/AERT/#color-contrast
-// and https://stackoverflow.com/questions/11867545/change-text-color-based-on-brightness-of-the-covered-background-area
-// (Alex Ball's answer)
+/**
+ * Will return "black" or "white" based on the provided hex colour string. This is so that text is visible.
+ * based on https://www.w3.org/TR/AERT/#color-contrast
+ * and https://stackoverflow.com/questions/11867545/change-text-color-based-on-brightness-of-the-covered-background-area
+ * (Alex Ball's answer)
+ * @param hexColourString
+ * @return {string}
+ */
 function getTextColour(hexColourString) {
     let r = parseInt(hexColourString.slice(1, 3), 16);
     let g = parseInt(hexColourString.slice(3, 5), 16);
@@ -126,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedSprint = null;
     let sprintWithEvents = getEventList();
     let mouseoverSprint = false;
+
 
     // de-select sprint when mouse is clicked if mouse not over a sprint
     document.addEventListener('mousedown', () => {
@@ -230,7 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     return ;
             }
        },
-       // trying to resize just the icons
        // docs: https://fullcalendar.io/docs/classname-input
        // you can add "hidden" to the class string, and it will hide the icon without repositioning anything else
        eventClassNames: function(arg) {
@@ -239,11 +241,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
        }
     });
-    // On startup, calendar date starts from the given project start date
+
+    // Move calendar to project start date, update all the icons to have the right number, and render the calendar
     calendar.gotoDate(projectStartDate);
-
     updateIconObjectsWithSchedulables(calendar);
-
     calendar.render();
 });
 
