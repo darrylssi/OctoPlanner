@@ -38,7 +38,7 @@ function getStringFromDate(date) {
  * Months go from 1 to 12 (different from Date objects in JS!).
  * @return {*[]} array of icon event objects
  */
-function createSchedulableIconsForProject() {
+function getSchedulableIconInfo() {
     let icons = [];
     let start = getDateFromProjectDateString(projectStartDate);
     const end = getDateFromProjectDateString(projectEndDate);
@@ -71,7 +71,39 @@ function createSchedulableIconsForProject() {
 }
 
 
-let events = createSchedulableIconsForProject();
+/**
+ * Grabs all the sprint info from the HTML template and creates a list of FullCalendar events from it.
+ * @return {*[]}
+ */
+function getSprintInfo() {
+    // Converting the given sprint's string names, start date and end date to list
+    let sprintIdsList = sprintIds.split(",");
+    let sprintNamesList = sprintNames.split(",");
+    let sprintStartDatesList = sprintStartDates.split(",");
+    let sprintEndDatesList = sprintEndDates.split(",");
+    let sprintColoursList = sprintColours.split(",");
+
+
+    // Creating one list for calendar sprints
+    let sprints = [];
+    for(let i = 0; i < sprintNamesList.length; i++) {
+        sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
+            end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
+            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
+    }
+    return sprints;
+}
+
+
+/**
+ * Combines gets a list of sprint events and icon events, and returns their concatenation.
+ * @return {*[]} concatenation of sprint event list and icon event list
+ */
+function getEventList() {
+    const iconEvents = getSchedulableIconInfo();
+    const sprintEvents = getSprintInfo();
+    return iconEvents.sort((a, b) => a.id.localeCompare(b.id)).reverse().concat(sprintEvents);
+}
 
 
 // Will return black or white based on the provided colour string
@@ -88,32 +120,13 @@ function getTextColour(hexColourString) {
     return (brightness > 125) ? 'black' : 'white';
 }
 
+
 document.addEventListener('DOMContentLoaded', function() {
     let calendarEl = document.getElementById('calendar');
-
-    // Converting the given sprint's string names, start date and end date to list
-    let sprintIdsList = sprintIds.split(",");
-    let sprintNamesList = sprintNames.split(",");
-    let sprintStartDatesList = sprintStartDates.split(",");
-    let sprintEndDatesList = sprintEndDates.split(",");
-    let sprintColoursList = sprintColours.split(",");
-
-
-    // Creating one list for calendar sprints
-    let sprints = [];
-    for(let i = 0; i < sprintNamesList.length; i++) {
-        sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
-            end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
-            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
-    }
     let selectedSprint = null;
-
-
-    // Merges the sprints with events
-    let sprintWithEvents = events.sort((a, b) => a.id.localeCompare(b.id)).reverse().concat(sprints);
-
-
+    let sprintWithEvents = getEventList();
     let mouseoverSprint = false;
+
     // de-select sprint when mouse is clicked if mouse not over a sprint
     document.addEventListener('mousedown', () => {
         if(!mouseoverSprint){
@@ -173,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // adding current sprint border colour and width
                 selectedSprint.setProp('classNames', 'currentEventBorder');
-//                selectedSprint.setProp('classNames', 'hidden');
 
                 // allow editing on new selected sprint
                 selectedSprint.setProp('durationEditable', true);
