@@ -55,7 +55,6 @@ class MilestoneTests {
 
     @Test
     void saveNullMilestoneDescription_getException() {
-        milestone.setDescription(null);
         when(milestoneRepository.save(milestone)).thenThrow(DataIntegrityViolationException.class);
         assertThrows(DataIntegrityViolationException.class, () -> milestoneRepository.save(milestone));
     }
