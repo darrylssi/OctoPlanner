@@ -9,8 +9,9 @@ public class GlobalVars {
 
     public static final int MAX_DESC_LENGTH = 200; // Maximum number of characters a description field can have
 
-    public static final int MIN_NAME_LENGTH = 2;    // Minimum number of characters a name field can have
-    public static final int MAX_NAME_LENGTH = 32;   // Maximum number of characters a name field can have
+    public static final int MIN_NAME_LENGTH = 2;        // Minimum number of characters a name field can have
+    public static final int MAX_NAME_LENGTH = 32;       // Maximum number of characters a name field can have
+    public static final int MAX_OTHER_NAME_LENGTH = 20; // Maximum number of characters a middle name, nickname and pronouns can have
 
     public static final int MIN_PASSWORD_LENGTH = 7;    // Minimum number of characters a password field can have
     public static final int MAX_PASSWORD_LENGTH = 20;   // Maximum number of characters a password field can have
