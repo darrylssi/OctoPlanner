@@ -40,3 +40,16 @@ p, #calendarTitle {
 .fc .fc-daygrid-day.fc-day-today {
     background-color: #ff9bd588;
 }
+
+.hidden {
+    visibility:hidden;
+}
+
+/* Make the 'icon' events only take up as much space as they need to, to differentiate them from sprints */
+/* problem: the event icon has some weird padding that means it won't centre properly :)
+ might need to add a class to other elements in the event div to fix this */
+.schedulable-icon {
+    display: inline-block !important;
+    padding-left: 3px;
+    padding-right: 5px;
+}
