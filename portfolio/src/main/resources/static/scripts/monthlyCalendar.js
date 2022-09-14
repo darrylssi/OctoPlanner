@@ -242,34 +242,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // On startup, calendar date starts from the given project start date
     calendar.gotoDate(projectStartDate);
 
-    /**
-     * Updates the list icons for the calendar with the provided schedulable information.
-     * For each schedulable object, every day it occurs will have its icon's counter increased,
-     * and its name added to the icon's name list.
-     */
-    (function updateIconObjectsWithSchedulables() {
-        const sNames = schedulableNames.split(", ");
-        const sTypes = schedulableTypes.split(", ");
-        const sStarts = schedulableStartDates.split(", ");
-        const sEnds = schedulableEndDates.split(", ");
-
-        const count = sNames.length; // number of schedulables
-        for (let i = 0; i < count; i++) {
-            let start = getDateFromProjectDateString(sStarts[i]);
-            const end = getDateFromProjectDateString(sEnds[i]);
-
-            while (start <= end) {
-                const id = `${sTypes[i]}-${getStringFromDate(start)}`;
-                const icon = calendar.getEventById(id);
-                icon.setExtendedProp("num", icon.extendedProps.num + 1);
-                icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
-
-                let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
-                newStart.setDate(newStart.getDate() + 1);
-                start = newStart;
-            }
-        }
-    })();
+    updateIconObjectsWithSchedulables(calendar);
 
     calendar.render();
 });
+
+
+/**
+ * Updates the list icons for the calendar with the provided schedulable information.
+ * For each schedulable object, every day it occurs will have its icon's counter increased,
+ * and its name added to the icon's name list.
+ * @param calendar the calendar object to update. Must have icons for each day in the project.
+ */
+function updateIconObjectsWithSchedulables(calendar) {
+    const sNames = schedulableNames.split(", ");
+    const sTypes = schedulableTypes.split(", ");
+    const sStarts = schedulableStartDates.split(", ");
+    const sEnds = schedulableEndDates.split(", ");
+
+    const count = sNames.length; // number of schedulables
+    for (let i = 0; i < count; i++) {
+        let start = getDateFromProjectDateString(sStarts[i]);
+        const end = getDateFromProjectDateString(sEnds[i]);
+
+        while (start <= end) {
+            const id = `${sTypes[i]}-${getStringFromDate(start)}`;
+            const icon = calendar.getEventById(id);
+            icon.setExtendedProp("num", icon.extendedProps.num + 1);
+            icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+
+            let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
+            newStart.setDate(newStart.getDate() + 1);
+            start = newStart;
+        }
+    }
+}
