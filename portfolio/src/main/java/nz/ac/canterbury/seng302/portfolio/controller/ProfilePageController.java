@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
-import nz.ac.canterbury.seng302.portfolio.ModelAttributeInterceptor;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -71,7 +70,7 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
-                model.addAttribute("userProfilePhoto", new ModelAttributeInterceptor.NotString(user.getProfileImagePath()));
+                model.addAttribute("userProfilePhoto", user.getProfileImagePath());
             } else {
                 errors.add("Invalid ID");
             }

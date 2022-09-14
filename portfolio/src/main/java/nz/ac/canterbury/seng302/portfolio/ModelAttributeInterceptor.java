@@ -44,7 +44,7 @@ public class ModelAttributeInterceptor implements AsyncHandlerInterceptor {
      * https://www.baeldung.com/spring-redirect-and-forward
      * The methods all have model attributes in the URL.
      */
-    public record NotString(String string) {
+    private record NotString(String string) {
         @Override
         public String toString() {
             return string;
