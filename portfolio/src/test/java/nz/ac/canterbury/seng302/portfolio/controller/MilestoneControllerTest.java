@@ -15,12 +15,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -191,6 +196,16 @@ class MilestoneControllerTest {
         mockMvc.perform(post("/project/0/edit-milestone/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void editMilestoneMissingId_throw404() throws Exception {
+        when(milestoneService.getMilestoneById(anyInt()))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Milestone not found"));
+        this.mockMvc.perform(post("/project/0/edit-milestone/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason(containsString("Milestone not found")));
     }
 
 }
