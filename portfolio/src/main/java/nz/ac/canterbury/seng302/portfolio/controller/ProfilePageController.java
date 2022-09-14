@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import com.google.protobuf.Timestamp;
+import nz.ac.canterbury.seng302.portfolio.ModelAttributeInterceptor;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -59,7 +60,6 @@ public class ProfilePageController {
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
-
         boolean isCurrentUser = thisUser.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
 
@@ -71,6 +71,7 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
+                model.addAttribute("userProfilePhoto", new ModelAttributeInterceptor.NotString(user.getProfileImagePath()));
             } else {
                 errors.add("Invalid ID");
             }
