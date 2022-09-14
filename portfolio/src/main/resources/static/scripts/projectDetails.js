@@ -154,6 +154,7 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
+    showRemainingChars();
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
