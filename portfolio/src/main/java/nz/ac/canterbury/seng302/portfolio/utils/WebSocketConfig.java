@@ -31,10 +31,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        String sitePattern = "https://*.canterbury.ac.nz";
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("https://*.canterbury.ac.nz");
+                .setAllowedOriginPatterns(sitePattern);
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("https://*.canterbury.ac.nz")
+                .setAllowedOriginPatterns(sitePattern)
+                .withSockJS();
+        registry.addEndpoint("/events")
+                .setAllowedOriginPatterns(sitePattern);
+        registry.addEndpoint("/events")
+                .setAllowedOriginPatterns(sitePattern)
                 .withSockJS();
     }
 

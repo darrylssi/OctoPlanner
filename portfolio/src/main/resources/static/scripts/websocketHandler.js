@@ -1,18 +1,10 @@
 let stompClient = null;
-const eventTimeouts = new Map(); // holds event ids and setTimeout functions in a key/value pair mapping
-const EVENT_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing event messages after this many ms
+const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout functions in a key/value pair mapping
+const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
 
-/**
- * Sets html elements according to whether a WebSocket has been connected to or not
- * @param connected Boolean if a connection has been established to a WebSocket
- */
-function setConnected(connected) {
-    // Currently, does not contain any elements that need to be set according to the connected status
-    let response = document.getElementById('response');
-    if (response !== null ) {
-        response.innerHTML = '';
-    }
-}
+// logging consts to hide certain things while developing
+const editingLogs = false;
+const updateLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -21,11 +13,14 @@ function setConnected(connected) {
 function connect() {
     const socket = new SockJS(BASE_URL + 'ws');
     stompClient = Stomp.over(socket);
+    stompClient.debug = function (){return;}; // stop log spamming, from https://stackoverflow.com/questions/21767126/stompjs-javascript-client-logging-like-crazy-on-console
     stompClient.connect({}, function(frame) {
-        setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/editing-event', function(message) {
-            handleEventMessage(JSON.parse(message.body));
+        stompClient.subscribe('/topic/editing-schedulable', function(message) {
+            handleSchedulableMessage(JSON.parse(message.body));
+        });
+        stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
+            updateSchedulable(JSON.parse(schedulableMessageOutput.body));
         });
     });
 }
@@ -37,128 +32,196 @@ function disconnect() {
     if(stompClient != null) {
         stompClient.disconnect();
     }
-        setConnected(false);
         console.log("Disconnected");
 }
 
 /**
- * Sends a message to a WebSocket endpoint using data from an HTML element
+ * Sends a message saying that a user is editing the specified schedulable.
+ * Format: `schedulableType,schedulableId,userId'.
  */
-function sendEditingEventMessage(eventId) {
-    console.log("SENDING EDITING MESSAGE FOR EVENT: " + eventId)
+function sendEditingSchedulableMessage(schedulableId, type) {
+    if (editingLogs) {
+        console.log("SENDING EDITING MESSAGE FOR " + type.toUpperCase() + ": " + schedulableId);
+    }
     let user = document.getElementById('user').getAttribute('data-name');
     let userId = document.getElementById('userId').getAttribute('data-name');
-    let content = `${eventId},${userId}`;
+    let content = `${schedulableId},${type},${userId}`;
     stompClient.send("/app/ws", {},
     JSON.stringify({'from':user, 'content':content}));
 }
 
 /**
- * Sends a websocket message saying that a user has stopped editing an event
- * Won't send anything if eventId is undefined
+ * Sends a websocket message saying that a user has stopped editing a schedulable.
+ * Won't send anything if schedulableId is undefined
  */
-function sendStopEditingMessage(eventId) {
-    if (previousEvent !== undefined) {
-        console.log('SENDING STOP MESSAGE FOR EVENT: ' + eventId);
+function sendStopEditingMessage(schedulableId, type) {
+    if (currentSchedulable !== undefined) {
+        if (editingLogs) {
+            console.log('SENDING STOP MESSAGE FOR ' + type +': ' + schedulableId);
+        }
         let user = document.getElementById('user').getAttribute('data-name');
+        let content = `${schedulableId},${type}`
         stompClient.send("/app/ws", {},
-        JSON.stringify({'from':user, 'content':eventId}));
+        JSON.stringify({'from':user, 'content':content}));
     }
 }
 
 /**
- * Updates an HTML element to display a received WebSocket message
- * @param messageOutput JSON object received from the WebSocket
- */
-function showMessageOutput(messageOutput) {
-    const response = document.getElementById('response');
-    const p = document.createElement('p');
-    p.style.wordWrap = 'break-word';
-    p.appendChild(document.createTextNode(messageOutput.from +
-        messageOutput.text + " (" + messageOutput.time + ")"));
-    response.appendChild(p);
-}
-
-/**
- * Decides whether the event message means to show editing or hide editing.
+ * Decides whether the schedulable message means to show editing or hide editing.
  * @param editMessage JSON object received from the WebSocket
  */
-function handleEventMessage(editMessage) {
-    if (editMessage.content.split(',').length === 2) {
-        console.log('GOT EDITING MESSAGE ' + editMessage.content);
+function handleSchedulableMessage(editMessage) {
+    if (editMessage.content.split(',').length === 3) {
+        if (editingLogs) {
+            console.log('GOT EDITING MESSAGE ' + editMessage.content);
+        }
         showEditingMessage(editMessage);
     } else {
-        console.log('GOT STOP MESSAGE ' + editMessage.content);
+        if (editingLogs) {
+            console.log('GOT STOP MESSAGE ' + editMessage.content);
+        }
         hideEditMessage(editMessage);
     }
 }
 
 /**
- * Shows editing-event notifications on the page
+ * Shows editing-schedulable notifications on the page
  * @param editMessage JSON object received from the WebSocket
  */
 function showEditingMessage(editMessage) {
-    const eventId = editMessage.content.split(',')[0]; // couldn't seem to substitute these directly into the template string
+    const schedulableId = editMessage.content.split(',')[0]; // couldn't seem to substitute these directly into the template string
     const username = editMessage.from;
-    const userId = editMessage.content.split(',')[1]; // the id of the user editing the event
+    const type = editMessage.content.split(',')[1]; // Type of schedulable
+    const userId = editMessage.content.split(',')[2]; // the id of the user editing the schedulable
     const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
 
     if (userId !== docUserId) {
         // stops any existing timeouts so that the message is shown for the full length
-        stopEventTimeout(eventId);
+        stopSchedulableTimeout(schedulableId, type);
 
         // locate the correct elements on the page
-        const editingEventBoxClass = `event-${eventId}-editing-box`;
-        const editingEventTextBoxClass = `event-${eventId}-editing-text`;
-        const editingEventBoxes = document.getElementsByClassName(editingEventBoxClass);
-        const editingEventTextBoxes = document.getElementsByClassName(editingEventTextBoxClass);
+        const editingSchedulableBoxClass = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableTextBoxClass = `${type}-${schedulableId}-editing-text`;
+        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
+        const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
 
         // update the text and make it visible
-        for (const eventTextBox of editingEventTextBoxes) {
-            if (eventTextBox) {
-                eventTextBox.innerHTML = `${username} is editing this event`;
+        for (const schedulableTextBox of editingSchedulableTextBoxes) {
+            if (schedulableTextBox) {
+                schedulableTextBox.innerHTML = `${username} is editing this ${type}`;
             }
         }
-        for (const eventBox of editingEventBoxes) {
-            if (eventBox) {
-                eventBox.style.visibility = "visible";
+        for (const schedulableBox of editingSchedulableBoxes) {
+            if (schedulableBox) {
+                schedulableBox.style.visibility = "visible";
             }
         }
 
         // Hide it after 8s
-        eventTimeouts.set(eventId, setTimeout(function() {hideEditMessage(editMessage)}, EVENT_EDIT_MESSAGE_TIMEOUT));
+        schedulableTimeouts.set((schedulableId, type), setTimeout(function() {hideEditMessage(editMessage)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
     }
 }
 
 /**
- * Hides the editing message for the specified event and clears the timer running for it.
- * Will clear the messages from all event boxes for that event (such as if it spans many sprints).
+ * Hides the editing message for the specified schedulable and clears the timer running for it.
+ * Will clear the messages from all schedulable boxes for that schedulable (such as if it spans many sprints).
  * @param message the stop message that was received
  */
 function hideEditMessage(message) {
-    // this check is so that if you are editing an event that someone else is editing, you don't hide their message
+    // this check is so that if you are editing an schedulable that someone else is editing, you don't hide their message
     // when you close your form. Their message would reappear without this anyway but it avoids confusion.
     if (document.getElementById('user').getAttribute('data-name') !== message.from) {
-        const eventId = (message.content.split(',').length === 2) ? message.content.split(',')[0] : message.content;
+        const schedulableId = message.content.split(',')[0];
+        const type = message.content.split(',')[1];
 
 
-        const editingEventBoxId = `event-${eventId}-editing-box`;
-        const editingEventBoxes = document.getElementsByClassName(editingEventBoxId);
-        for (const eventBox of editingEventBoxes) {
-            if (eventBox) {
-                eventBox.style.visibility = "hidden";
+        const editingSchedulableBoxId = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxId);
+        for (const schedulableBox of editingSchedulableBoxes) {
+            if (schedulableBox) {
+                schedulableBox.style.visibility = "hidden";
             }
         }
-        stopEventTimeout(eventId);
+        stopSchedulableTimeout(schedulableId, type);
     }
 }
 
 /**
- * Stops the timeout for the specified event, if it exists
- * @param eventId the event to stop the timeout for
+ * Stops the timeout for the specified schedulable, if it exists
+ * @param schedulableId the schedulable to stop the timeout for
  */
-function stopEventTimeout(eventId) {
-    if (eventTimeouts.has(eventId)) {
-        clearTimeout(eventTimeouts.get(eventId));
+function stopSchedulableTimeout(schedulableId, type) {
+    if (schedulableTimeouts.has((schedulableId, type))) {
+        clearTimeout(schedulableTimeouts.get((schedulableId, type)));
+    }
+}
+
+/**
+* Updates all instances of an schedulable that has been changed using information sent through websockets
+* @param schedulableMessage the message sent through websockets with schedulable information
+*/
+function updateSchedulable(schedulableMessage) {
+    if (updateLogs) {
+        console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
+        console.log(schedulableMessage);
+    }
+
+    if(currentSchedulable.id === schedulableMessage.id && currentSchedulable.type === schedulableMessage.type) {
+        stopEditing();
+    }
+// get a list of schedulable list containers
+    const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
+
+// check each schedulable list container to see if it has the schedulable in it / should have the schedulable in it
+    for (let schedulableListContainer of schedulable_lists) {
+          //check if schedulable is there, then remove schedulable if it exists
+          let schedulable = schedulableListContainer.querySelector('#' + schedulableMessage.type + '-' + schedulableMessage.id);
+          if (schedulable !== null) {
+            schedulable.parentNode.parentNode.parentNode.remove();
+          }
+          // check if schedulable list container is in the list of ids the schedulable should be displayed in
+          let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
+        if(idIndex != -1) {
+
+            const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
+            const schedulableFragRequest = new XMLHttpRequest();
+            schedulableFragRequest.open("GET", url, true);
+            const tempIdIndex = idIndex;
+            schedulableFragRequest.onload = () => {
+                // Reload the page to get the updated list of sprints after the delete
+                createSchedulableDisplay(schedulableMessage, schedulableListContainer, tempIdIndex, schedulableFragRequest.response);
+            }
+            schedulableFragRequest.send();
+        }
+    }
+}
+
+/**
+* Creates a new schedulable display object and puts it into the correct place in the DOM
+* @param schedulableMessage the message sent by websockets containing schedulable info to be displayed
+* @param parent the parent object for the schedulable to be displayed in
+* @param idIndex the index of this schedulable used to access values in the id lists
+* @param schedulableHtml the html of this schedulable to be inserted into the page
+*/
+function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulableHtml) {
+    let newSchedulable = document.createElement("div");
+    newSchedulable.innerHTML = schedulableHtml;
+
+    // Force tooltip to update
+    setTimeout((schedulable) => {
+        let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+        if (tooltip) {
+            tooltip.update();
+        } else if (schedulable) {
+            tooltip = new bootstrap.Tooltip(schedulable, {
+                trigger: 'hover'
+            });
+        }
+    }, 250, newSchedulable.querySelector('.schedulable'));
+
+    if(schedulableMessage.nextSchedulableIds[idIndex] === '-1') {
+        parent.appendChild(newSchedulable);
+    } else {
+        parent.insertBefore(newSchedulable, parent.querySelector('#' + schedulableMessage.nextSchedulableIds[idIndex]).parentNode.parentNode.parentNode);
     }
 }

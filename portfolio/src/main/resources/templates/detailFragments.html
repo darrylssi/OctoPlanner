@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-
+<!-- Event fragment -->
 <div th:fragment="event">
     <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${event}"
          th:style="'background:linear-gradient(to right, '+ ${event.determineColour(sprints, false)} + '4c, '+ ${event.determineColour(sprints, true)} + '4c)'">
@@ -23,29 +23,28 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
                 </span>
-                <button class="edit-button edit-schedulable-button" th:onclick="return showEditEvent([[*{getId}]], [[${boxId}]], [[*{getName}]], [[*{getDescription}]], [[*{getStartDate}]], [[*{getEndDate}]], [[${projectStart}]], [[${projectEnd}]])">
+                <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${event}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                     </svg>
                 </button>
-                <button class="delete-button delete-schedulable-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getName()}" th:onclick="showDeleteEventModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'))">
+                <button class="delete-button delete-schedulable-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getName()}" th:onclick="showDeleteModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'), [[*{getType}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                         <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                     </svg>
                 </button>
             </div>
         </span>
-        <div th:replace="detailFragments :: eventEditForm(
-                event=${event},
+        <div th:replace="detailFragments :: schedulableEditForm(
+                schedulable=${event},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
-                maxDescLen=${maxDescLen},
-                editEventForm=${editeventForm})" />
+                maxDescLen=${maxDescLen})" />
     </div>
 </div>
 
-
+<!-- Deadline fragment -->
 <div th:fragment="deadline">
     <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${deadline}"
          th:style="'background:linear-gradient(to right, '+ ${deadline.determineColour(sprints, true)} + '4c, '+ ${deadline.determineColour(sprints, true)} + '4c)'">
@@ -62,51 +61,84 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'deadline-' + *{getId} + '-editing-text'"></span>
                 </span>
-                <button class="edit-button edit-schedulable-button" th:onclick="return showEditDeadline([[*{getId}]], [[${boxId}]], [[*{getName}]], [[*{getDescription}]], [[*{getStartDate.toString().substring(0,16)}]])">
+                <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${deadline}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                     </svg>
                 </button>
-                <button class="delete-button delete-schedulable-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getName()}" th:onclick="showDeleteDeadlineModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'))">
+                <button class="delete-button delete-schedulable-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getName()}" th:onclick="showDeleteModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'), [[*{getType}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                         <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                     </svg>
                 </button>
             </div>
         </span>
-        <!-- TODO Uncomment this once the editDeadlineForm fragment has been created -->
-        <!--
-        <div th:replace="detailFragments :: editDeadlineForm(
-                deadline=${deadline},
+        <div th:replace="detailFragments :: schedulableEditForm(
+                schedulable=${deadline},
                 boxId=${boxId},
                 minNameLen=${minNameLen},
                 maxNameLen=${maxNameLen},
-                maxDescLen=${maxDescLen},
-                projectStart=${projectStart},
-                projectEnd=${projectEnd})"/>
-                -->
+                maxDescLen=${maxDescLen})"/>
     </div>
 </div>
 
+<!-- Milestone fragment -->
+<div th:fragment="milestone">
+    <div th:class="schedulable-box" th:id="'schedulable-box-' + ${boxId}" th:object="${milestone}"
+         th:style="'background:linear-gradient(to right, '+ ${milestone.determineColour(sprints, true)} + '4c, '+ ${milestone.determineColour(sprints, true)} + '4c)'">
+        <span th:id="'milestone-' + *{getId}" class="schedulable" data-toggle="tooltip" data-placement="top" th:title="*{getDescription()}">
+            <div class="schedulable-left">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trophy" viewBox="0 0 16 16">
+                    <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z"/>
+                </svg>
+                <span th:text="*{getName}" ></span>
+                <span class="schedulable-date" th:text="|${#lensfolioDates.toDisplayString(milestone.getStartDate())}|" ></span>
+            </div>
+            <div class="schedulable-right" th:if="${canEdit}">
+                <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'milestone-' + *{getId} + '-editing-box'">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="fst-italic" th:class="'milestone-' + *{getId} + '-editing-text'"></span>
+                </span>
+                <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${milestone}]])">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                    </svg>
+                </button>
+                <button class="delete-button delete-schedulable-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getName()}" th:onclick="showDeleteModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'), [[*{getType}]])">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+                    </svg>
+                </button>
+            </div>
+        </span>
+        <div th:replace="detailFragments :: schedulableEditForm(
+                schedulable=${milestone},
+                boxId=${boxId},
+                minNameLen=${minNameLen},
+                maxNameLen=${maxNameLen},
+                maxDescLen=${maxDescLen})"/>
+    </div>
+</div>
 
-<div th:fragment="eventEditForm">
-    <div th:id="|editEventForm-${boxId}|" class="editSchedulableForm collapse">
+<div th:fragment="schedulableEditForm">
+    <div th:id="|edit${#strings.capitalize(schedulable.getType)}Form-${boxId}|" class="editSchedulableForm collapse">
         <div class="card">
-            <div class="card-header" id="edit-event-form-header" th:text="|Editing ${event.getName}|"></div>
+            <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${schedulable.getName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-event/{id}(id=${event.getId()})}" onsubmit="return sendFormViaAjax(this)" id="form" class="container-fluid js-form" method="post" th:object="${editEventForm}">
+                <form action="javascript:;" th:data-url="@{edit-{type}/{id}(id=${schedulable.getId()},type=${schedulable.getType()})}" th:formBoxId="|edit${#strings.capitalize(schedulable.getType)}Form-${boxId}|"
+                      th:onsubmit="return sendFormViaAjax(this, [[${schedulable.getType()}]])" id="form" class="container-fluid js-form" method="post" th:object="${editSchedulableForm}">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editEventNameFeedback" required>
+                                <input type="text" class="form-control" id="name" th:name="name" th:value="${schedulable.getName()}"  th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="editSchedulableNameFeedback" required>
                                 <label class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
-                                <small id="editEventNameFeedback" class="text-danger"></small>
                             </div>
+                            <small id="editSchedulableNameFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
+                                <input type="text" id="description" th:name="description" th:value="${schedulable.getDescription()}" th:maxlength="${maxDescLen}" class="form-control">
                                 <label class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -115,37 +147,37 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" th:field="*{startDate}" required aria-describedby="editEventStartDateFeedback">
+                                <input type="date" class="form-control" id="startDate" th:name="startDate" th:value="${schedulable.getStartDay()}" required th:min="${projectStart}" th:max="${projectEnd}" aria-describedby="editSchedulableStartDateFeedback">
                                 <label class="form-label">Start Date</label>
-                                <small id="editEventStartDateFeedback" class="text-danger"></small>
                             </div>
+                            <small id="editSchedulableStartDateFeedback" class="text-danger"></small>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() != 'milestone'}" class="col">
                             <div class="form-floating mb-3">
-                                <input type="time" class="form-control" th:field="*{startTime}" required aria-describedby="editEventStartTimeFeedback">
+                                <input type="time" class="form-control" id="startTime" th:name="startTime" th:value="${schedulable.getStartTime()}" required aria-describedby="editSchedulableStartTimeFeedback">
                                 <label class="form-label">Start Time</label>
-                                <small id="editEventStartTimeFeedback" class="text-danger"></small>
                             </div>
+                            <small id="editSchedulableStartTimeFeedback" class="text-danger"></small>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" th:field="*{endDate}" required aria-describedby="editEventEndDateFeedback">
+                                <input type="date" class="form-control" id="endDate" th:name="endDate" th:value="${schedulable.getEndDay()}" required th:min="${projectStart}" th:max="${projectEnd}" aria-describedby="editSchedulableEndDateFeedback">
                                 <label class="form-label">End Date</label>
-                                <small id="editEventEndDateFeedback" class="text-danger"></small>
                             </div>
+                            <small id="editSchedulableEndDateFeedback" class="text-danger"></small>
                         </div>
-                        <div class="col">
+                        <div th:if="${schedulable.getType() == 'event'}" class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="time" class="form-control" th:field="*{endTime}" required aria-describedby="editEventEndTimeFeedback">
+                                <input type="time" class="form-control" id="endTime" th:name="endTime" th:value="${schedulable.getEndTime()}" required aria-describedby="editSchedulableEndTimeFeedback">
                                 <label class="form-label">End Time</label>
-                                <small id="editEventEndTimeFeedback" class="text-danger"></small>
                             </div>
+                            <small id="editSchedulableEndTimeFeedback" class="text-danger"></small>
                         </div>
                     </div>
                     <div class="row justify-content-end">
                         <ul id="errors" class="col"></ul>
                         <div class="col col-md-4 col-lg-2">
-                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditEvent([[${event.getId}]], [[${boxId}]])">Cancel</button>
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${schedulable.getId}]], [[${boxId}]], [[${schedulable.getType}]])">Cancel</button>
                         </div>
                         <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
@@ -153,6 +185,69 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Schedulable Form -->
+<div th:fragment="schedulableAddForm">
+    <div class="card collapse" th:id="|add${#strings.capitalize(type)}Form|" th:classappend="${#fields.hasErrors('schedulableForm.*') OR !#arrays.isEmpty(schedulableFormError) ? 'show' : null}">
+        <div class="card-header" th:text="|New ${#strings.capitalize(type)}|"></div>
+        <div class="card-body">
+            <form action="javascript:;" th:data-url="@{add-{type}(type=${type})}" th:formBoxId="|add${#strings.capitalize(type)}Form|"
+                  th:onsubmit="return sendFormViaAjax(this, [[${type}]])" method="post" class="container-fluid js-form" th:object="${schedulableForm}">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSchedulableNameInput" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control" aria-describedby="schedulableNameFeedback">
+                            <label class="form-label" for="addSchedulableNameInput">Name</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+                        <small id="addSchedulableNameFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col-10">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description">
+                            <label for="addSchedulableDescriptionInput">Description</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" th:field="*{startDate}" class="form-control" id="schedulableStartDate" aria-describedby="schedulableStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="schedulableStartDate">Start Date</label>
+                        </div>
+                        <small id="addSchedulableStartDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div th:hidden="${type == 'milestone'}" class="col">
+                        <div class="form-floating mb-3">
+                            <input type="time" th:field="*{startTime}" class="form-control" id="schedulableStartTime" aria-describedby="schedulableStartTimeFeedback" required>
+                            <label for="schedulableStartTime">Start Time</label>
+                        </div>
+                        <small id="addSchedulableStartTimeFeedback" class="text-danger"></small>
+                    </div>
+                    <div th:hidden="${type != 'event'}" class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" th:field="*{endDate}" class="form-control" id="schedulableEndDate" aria-describedby="schedulableEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="schedulableEndDate">End Date</label>
+                        </div>
+                        <small id="addSchedulableEndDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div th:hidden="${type != 'event'}" class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="time" th:field="*{endTime}" class="form-control" id="schedulableEndTime" aria-describedby="schedulableEndDateFeedback" required>
+                            <label for="schedulableEndTime">End Time</label>
+                        </div>
+                        <small id="addSchedulableEndTimeFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

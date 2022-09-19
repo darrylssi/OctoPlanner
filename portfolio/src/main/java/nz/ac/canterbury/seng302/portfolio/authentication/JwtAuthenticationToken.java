@@ -27,6 +27,28 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
         return principal;
     }
 
+    @Override
+    public boolean equals(Object obj){
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        JwtAuthenticationToken jwtObj = (JwtAuthenticationToken) obj;
+        return (jwtObj.getToken() == this.token && jwtObj.getPrincipal() == this.principal);
+    }
+
+    @Override
+    /**
+     * This is required to be overwritten since equals is overwritten; however,
+     * this is not required to return different hash codes or expected to be
+     * used in a large hash table, so a constant return value is used.
+     */
+    public int hashCode() {
+        return 0;
+    }
+
     public void setToken( String token ) {
         this.token = token;
     }

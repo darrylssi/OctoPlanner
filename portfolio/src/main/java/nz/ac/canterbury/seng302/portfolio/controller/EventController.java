@@ -1,22 +1,16 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.controller.forms.EventForm;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-
-import java.util.TimeZone;
-import java.util.StringJoiner;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +20,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.Valid;
+import java.util.StringJoiner;
+import java.util.TimeZone;
 
 /**
  * Controller to handle requests related to events.
@@ -46,9 +44,12 @@ public class EventController extends PageController {
     /**
      * Endpoint for adding events to the database, or conveying errors
      * to the user
+     * @param principal Authenticated user
      * @param projectID The project this event will be bound to
-     * @param eventForm The form submitted by our lovely customers
+     * @param schedulableForm Form that stores information about the deadline
      * @param bindingResult Any errors that came up during validation
+     * @param userTimezone The user's time zone
+     * @param model Parameters sent to thymeleaf template
      * @return  A response of either 200 (success), 403 (forbidden),
      *          or 400 (Given event failed validation, replies with what errors occurred)
      */
@@ -56,7 +57,7 @@ public class EventController extends PageController {
     public ResponseEntity<String> postAddEvent(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectID,
-            @Valid EventForm eventForm,
+            @Valid SchedulableForm schedulableForm,
             BindingResult bindingResult,
             TimeZone userTimezone,
             Model model
@@ -68,8 +69,8 @@ public class EventController extends PageController {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        ValidationError dateErrors = null;
-        ValidationError nameErrors = null;
+        ValidationError dateErrors;
+        ValidationError nameErrors;
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
@@ -80,29 +81,27 @@ public class EventController extends PageController {
         }
         // Check that the dates are correct
         Project parentProject = projectService.getProjectById(projectID);
-        dateErrors = ValidationUtils.validateEventDates(eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone), parentProject);
-        nameErrors = ValidationUtils.validateName(eventForm.getName());
+        dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone), parentProject);
+        nameErrors = ValidationUtils.validateName(schedulableForm.getName());
         if (dateErrors.isError() || nameErrors.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameErrors), HttpStatus.BAD_REQUEST);
         }
         // Data is valid, add it to database
-        Event event = new Event(eventForm.getName(), eventForm.getDescription(), eventForm.startDatetimeToDate(userTimezone), eventForm.endDatetimeToDate(userTimezone));
+        Event event = new Event(schedulableForm.getName(), schedulableForm.getDescription(), schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone));
         event.setParentProject(parentProject);
-        eventService.saveEvent(event);
-        logger.info("Added new event: {}", event);
-        return ResponseEntity.ok("");
+
+        Event savedEvent = eventService.saveEvent(event);
+        logger.info("Added new Event {}", savedEvent.getId());
+
+        return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
     }
 
     /**
      * Handle edit requests for events. Validate the form and determine the response
-     * @param editventForm The form submitted by the user
+     * @param principal Authenticated user
+     * @param projectId The ID of the project the event belongs to
+     * @param eventId The ID of the event to be edited
+     * @param editSchedulableForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param userTimeZone  The timezone the user's based in
      * @return  A response of either 200 (success), 403 (forbidden),
@@ -114,7 +113,7 @@ public class EventController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @PathVariable("event_id") int eventId,
-            @Valid @ModelAttribute EventForm editEventForm,
+            @Valid @ModelAttribute SchedulableForm editSchedulableForm,
             BindingResult bindingResult,
             TimeZone userTimeZone
     ) {
@@ -134,28 +133,23 @@ public class EventController extends PageController {
             }
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
+
         // Validation round 2: Do our custom errors pass?
-        var dateErrors = ValidationUtils.validateEventDates(editEventForm.startDatetimeToDate(userTimeZone), editEventForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        var nameError = ValidationUtils.validateName(editEventForm.getName());
+        var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
+        var nameError = ValidationUtils.validateName(editSchedulableForm.getName());
         if (dateErrors.isError() || nameError.isError()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: dateErrors.getErrorMessages()) {
-                errors.add(err);
-            }
-            for (var err: nameError.getErrorMessages()) {
-                errors.add(err);
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
-        event.setName(editEventForm.getName());
-        event.setDescription(editEventForm.getDescription());
-        event.setStartDate(editEventForm.startDatetimeToDate(userTimeZone));
-        event.setEndDate(editEventForm.endDatetimeToDate(userTimeZone));
+        event.setName(editSchedulableForm.getName());
+        event.setDescription(editSchedulableForm.getDescription());
+        event.setStartDate(editSchedulableForm.startDatetimeToDate(userTimeZone));
+        event.setEndDate(editSchedulableForm.endDatetimeToDate(userTimeZone));
 
-        eventService.saveEvent(event);
+        Event savedEvent = eventService.saveEvent(event);
         logger.info("Edited event {}", eventId);
-        return ResponseEntity.ok("");
+
+        return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
     }
 
     /**
@@ -184,5 +178,4 @@ public class EventController extends PageController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
