@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.portfolio;
 
 import nz.ac.canterbury.seng302.portfolio.authentication.JwtAuthenticationFilter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // TODO remove if unused
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Value("${base-url}")
     private String baseURL;
@@ -48,8 +53,10 @@ public class SecurityConfig {
         security
             .httpBasic().disable();
         // Redirect to login page if unauthenticated
+        // TODO testing removing baseURL from here
         security
-            .formLogin().loginPage(baseURL + "login");
+//            .formLogin().loginPage(baseURL + "login");
+            .formLogin().loginPage("login");
 
         // let the H2 console embed itself in a frame
         security.headers().frameOptions().sameOrigin();
