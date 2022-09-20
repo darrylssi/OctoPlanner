@@ -8,12 +8,16 @@ import java.util.HashSet;
 import java.util.Set;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+/**
+ * Represents a user object.
+ */
 @Entity
 @Table(name = "Users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
@@ -32,6 +36,9 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated
     private Set<UserRole> roles;
+
+    @ManyToMany(mappedBy = "members")
+    private Set<Group> groups;
 
     protected User() {
     }
@@ -137,6 +144,14 @@ public class User {
 
     public void setCreated(Instant created) {
         this.created = created;
+    }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
     }
 
     public Set<UserRole> getRoles() {

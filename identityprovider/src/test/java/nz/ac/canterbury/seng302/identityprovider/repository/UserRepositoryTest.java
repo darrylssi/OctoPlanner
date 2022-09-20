@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.identityprovider;
+package nz.ac.canterbury.seng302.identityprovider.repository;
 
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import org.junit.jupiter.api.Test;

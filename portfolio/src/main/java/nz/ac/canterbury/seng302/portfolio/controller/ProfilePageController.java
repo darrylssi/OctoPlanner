@@ -46,7 +46,6 @@ public class ProfilePageController {
      * @param principal object that holds the principal data
      * @param id the user's id
      * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @author Andrew Hall <amh284@uclive.ac.nz>
      */
     @GetMapping("/users/{id}")
     public String getProfile(
