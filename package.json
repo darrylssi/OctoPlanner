@@ -3,7 +3,6 @@
     "@badeball/cypress-cucumber-preprocessor": "latest",
     "@cypress/webpack-preprocessor": "latest",
     "cypress": "latest",
-    "mysql": "^2.18.1",
     "ts-loader": "latest",
     "typescript": "latest"
   }

@@ -1,6 +1,3 @@
-const { expect } = require("chai")
-const { describe } = require("mocha")
-
 describe('Navigation', () => {
   it('provides a way to return to the login page', () => {
     cy.visit('/register')
@@ -9,23 +6,6 @@ describe('Navigation', () => {
     // Should be redirected to login
     cy.url().should('include', '/login')
   })
-})
-
-describe('Setup', () => {
-  it('does not already have test user', () => {
-    cy.fixture('users/student.json').then((user) => {
-      cy.task('queryDb', `SELECT COUNT(*) as "rowCount", id FROM USERS WHERE username=` + user.username).then((result) => {
-        if(result[0].rowCount != 0) {
-          cy.task('queryDb', `DELETE FROM USER_ROLES WHERE user_id=` + result[0].id).then((resRoles) => {
-            expect(resRoles.changedRows).to.greaterThanOrEqual(1)
-          })
-          cy.task('queryDb', `DELETE FROM USERS WHERE id=` + result[0].id).then((resUsers) => {
-            expect(resUsers.changedRows).to.equal(1)
-          })
-        }
-      })
-    })
-    })
 })
 
 describe('I can register a user', () => {
@@ -66,6 +46,7 @@ describe('I can register a user', () => {
     })
   })
 
+  // If this test is failing, make sure that the user doesn't already exist in the database
   it('adds user to database and redirects to profile page on successful register', () => {
     cy.fixture('users/student.json').then((user) => {
       cy.visit('/register')
@@ -83,10 +64,7 @@ describe('I can register a user', () => {
 
       cy.get('[data-cy="register-button"]').click()
 
-      // Should now exist in the db
-      cy.task('queryDb', `SELECT COUNT(*) as "rowCount" FROM USERS WHERE username=` + user.username).then((result) => {
-        expect(result[0].rowCount).to.equal(1)
-      })
+      // Ideally we would check here that the user is now in the database
       // Should be redirected to profile page
       cy.url().should('match', /users\/\d*/)
     })

@@ -7,7 +7,7 @@
     <div class="header">
         <div class="header-top-group">
             <div class="title">
-                <div class="title-name" th:text="${title}" />
+                <div class="title-name" th:text="${title}" data-cy="pageTitle" />
                 <div class="title-date" th:text="${subtitle}" />
             </div>
             <div class="title-username" th:text="${G_PrincipalData.getUsername}" />
@@ -26,13 +26,13 @@
         </div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${tab} == 0 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}project/0/|}">Project Details</a>
+                <a class="nav-link" th:classappend="${tab} == 0 ? active : ''" data-cy="navProjectDetails" th:href="@{|${@environment.getProperty('base-url')}project/0/|}">Project Details</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${tab} == 1 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
+                <a class="nav-link" th:classappend="${tab} == 1 ? active : ''" data-cy="navUsers" th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${tab} == 2 ? active : ''" th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
+                <a class="nav-link" th:classappend="${tab} == 2 ? active : ''" data-cy="navMonthlyCalendar" th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
             </li>
         </ul>
     </div>

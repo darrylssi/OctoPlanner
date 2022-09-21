@@ -22,36 +22,9 @@ describe('Navigation', () => {
   })
 })
 
-describe('Setup', () => {
-  it('already has the test user', () => {
-    cy.fixture('users/student.json').then((user) => {
-      cy.task('queryDb', `SELECT COUNT(*) as "rowCount" FROM USERS WHERE username=` + user.username).then((result) => {
-        if(result[0].rowCount != 1) {
-          cy.visit('/register')
-
-          cy.get('[data-cy="firstName"]').type(user.fname)
-          cy.get('[data-cy="middleName"]').type(user.mname)
-          cy.get('[data-cy="lastName"]').type(user.lname)
-          cy.get('[data-cy="nickname"]').type(user.nickname)
-          cy.get('[data-cy="username"]').type(user.username)
-          cy.get('[data-cy="email"]').type(user.email)
-          cy.get('[data-cy="pronouns"]').type(user.pronouns)
-          cy.get('[data-cy="bio"]').type(user.bio)
-          cy.get('[data-cy="password"]').type(user.password)
-          cy.get('[data-cy="passwordConfirm"]').type(user.password)
-
-          cy.get('[data-cy="register-button"]').click()
-
-          // Should be redirected to profile page
-          cy.url().should('match', /users\/\d*/)
-        }
-      })
-    })
-  })
-
-  it('is logged out', () => {
-    cy.getCookie('lens-session-token').should('not.exist')
-  })
+beforeEach(() => {
+  // Check the user is not logged in
+  cy.getCookie('lens-session-token').should('not.exist')
 })
 
 describe('I can log into an existing account', () => {
@@ -76,6 +49,21 @@ describe('I can log into an existing account', () => {
 
       // Should be redirected to profile page
       cy.url().should('match', /users\/\d*/)
+    })
+  })
+})
+
+describe('I cannot log into a nonexistent account', () => {
+  it('stays on same page on failure', () => {
+    cy.fixture('users/nonexistent_user.json').then((user) => {
+      cy.visit('/login')
+
+      cy.get('[data-cy="username"]').type(user.username)
+      cy.get('[data-cy="password"]').type(user.password)
+      cy.get('[data-cy="login-button"]').click()
+
+      // Should be redirected to profile page
+      cy.url().should('include', '/login')
     })
   })
 })
