@@ -245,9 +245,9 @@ class ValidationUtilsTest {
 
     @ParameterizedTest
     @CsvSource({"Emojis are not valid 🤨", "These too apparently %^"})
-    void testInvalidDescription_getErrorMessage(String name) {
-        ValidationError result = ValidationUtils.validateName(name);
+    void testInvalidDescription_getErrorMessage(String desc) {
+        ValidationError result = ValidationUtils.validateDescription(desc);
         assertTrue(result.isError());
-        assertEquals("Name can only have alphanumeric and . - _ characters", result.getFirstError());
+        assertEquals("Description can only have letters, numbers, punctuations, and spaces.", result.getFirstError());
     }
 }
