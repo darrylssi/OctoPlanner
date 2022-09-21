@@ -5,6 +5,9 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.NoSuchElementException;
 
 /**
  * This class contains server-side methods for dealing with groups in the IDP, such as
@@ -15,6 +18,9 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
 
     private static final Logger logger = LoggerFactory.getLogger(GroupServerService.class);
 
+    @Autowired
+    private GroupService groupService;
+
     @Override
     public void createGroup(CreateGroupRequest request, StreamObserver<CreateGroupResponse> responseObserver) {
         logger.info("createGroup() has been called");
@@ -24,7 +30,26 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
     @Override
     public void addGroupMembers(AddGroupMembersRequest request, StreamObserver<AddGroupMembersResponse> responseObserver) {
         logger.info("addGroupMembers() has been called");
-        // TODO implement this
+        AddGroupMembersResponse.Builder reply = AddGroupMembersResponse.newBuilder();
+        int numUsersAdded;
+
+        try {
+            numUsersAdded = groupService.addUsersToGroup(request.getGroupId(), request.getUserIdsList());
+        } catch (NoSuchElementException e) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage(e.getMessage());
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        reply
+                .setIsSuccess(true)
+                .setMessage(numUsersAdded + " users added to group " + request.getGroupId())
+                .build();
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
     }
 
     @Override

@@ -47,18 +47,20 @@ public class GroupService {
      * Adds a set of users to a group
      * @param groupId The id of the group to add users to
      * @param userIds The ids of the users to add to the group
+     * @return The number of users added to the group
      */
-    public void addUsersToGroup(int groupId, Set<Integer> userIds) {
+    public int addUsersToGroup(int groupId, List<Integer> userIds) {
         /* TODO check that the group being added to is not members without groups
         also remove users from members without groups if they are being added to a group that is not that
          */
         Group group = getGroup(groupId);
+        int count = 0;
         for (User user : userRepository.findAllById(userIds)) {
-            if (user != null) {
-                group.addMember(user);
-            }
+            group.addMember(user);
+            count++;
         }
         groupRepository.save(group);
+        return count;
     }
 
     /**
@@ -66,7 +68,7 @@ public class GroupService {
      * @param groupId The id of the group to remove users from
      * @param userIds The ids of the users to remove from the group
      */
-    public void removeUsersFromGroup(int groupId, Set<Integer> userIds) {
+    public void removeUsersFromGroup(int groupId, List<Integer> userIds) {
         // TODO check that the group being removed from isn't a special group - needs to be special cases for that
         Group group = getGroup(groupId);
         for (User user : userRepository.findAllById(userIds)) {

@@ -58,11 +58,11 @@ public class User {
         this.roles = new HashSet<>();
     }
 
-    public int getID() {
+    public int getId() {
         return this.id;
     }
 
-    public void setID(int id) {
+    public void setId(int id) {
         this.id = id;
     }
 

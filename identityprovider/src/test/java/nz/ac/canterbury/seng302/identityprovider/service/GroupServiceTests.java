@@ -79,16 +79,17 @@ class GroupServiceTests {
     @Test
     void test_addUsersToGroup() {
         // Prepare collections of user ids/users to use as mock data
-        Set<Integer> usersToAdd = new HashSet<>(testUserId1, testUserId2);
+        List<Integer> usersToAdd = List.of(testUserId1, testUserId2);
         Iterable<User> users = List.of(testUser1, testUser2);
         when(userRepository.findAllById(usersToAdd))
                 .thenReturn(users);
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
-        groupService.addUsersToGroup(testGroupId, usersToAdd);
+        int numUsersAdded = groupService.addUsersToGroup(testGroupId, usersToAdd);
 
         // Test that the users are added to the groups members, and that the group is added to the users joined groups
+        assertEquals(2, numUsersAdded);
         assertTrue(testGroup.getMembers().contains(testUser1));
         assertTrue(testGroup.getMembers().contains(testUser2));
         assertTrue(testUser1.getGroups().contains(testGroup));
@@ -98,7 +99,7 @@ class GroupServiceTests {
     @Test
     void test_removeOneUserFromGroup() {
         // Prepare collections of user ids/users to use as mock data
-        Set<Integer> usersToRemove = new HashSet<>(testUserId1);
+        List<Integer> usersToRemove = List.of(testUserId1);
         Iterable<User> users = List.of(testUser1);
         // Add users to group
         testGroup.addMember(testUser1);
@@ -121,7 +122,7 @@ class GroupServiceTests {
     @Test
     void test_removeListOfUsersFromGroup() {
         // Prepare collections of user ids/users to use as mock data
-        Set<Integer> usersToRemove = new HashSet<>(testUserId1, testUserId2);
+        List<Integer> usersToRemove = List.of(testUserId1, testUserId2);
         Iterable<User> users = List.of(testUser1, testUser2);
         // Add users to group
         testGroup.addMember(testUser1);
