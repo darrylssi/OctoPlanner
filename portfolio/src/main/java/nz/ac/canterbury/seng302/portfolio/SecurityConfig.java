@@ -49,9 +49,7 @@ public class SecurityConfig {
         security
             .httpBasic().disable();
         // Redirect to login page if unauthenticated
-        // TODO testing removing baseURL from here
         security
-//            .formLogin().loginPage(baseURL + "login");
             .formLogin().loginPage(LOGIN);
 
         // let the H2 console embed itself in a frame
