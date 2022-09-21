@@ -265,7 +265,7 @@ public class ValidationUtils {
      * Creates a string object containing all the errors
      */
     public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors, ValidationError descriptionErrors) {
-        if (dateErrors.isError() || nameErrors.isError()) {
+        if (dateErrors.isError() || nameErrors.isError() || descriptionErrors.isError()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: dateErrors.getErrorMessages()) {
                 errors.add(err);

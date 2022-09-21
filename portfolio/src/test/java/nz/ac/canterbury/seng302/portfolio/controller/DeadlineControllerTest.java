@@ -128,6 +128,19 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
+    void addInvalidDeadlineDescriptionAsTeacher_get400Response() throws Exception {
+        when(projectService.getProjectById(0)).thenReturn(parentProject);
+        mockMvc.perform(post("/project/0/add-deadline")
+                        .param("name", "New Deadline")
+                        .param("description", "This is an invalid description 😂")
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "12:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
     void addBlankDeadlineDateAsTeacher_get400Response() throws Exception {
         when(projectService.getProjectById(0)).thenReturn(parentProject);
 

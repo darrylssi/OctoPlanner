@@ -113,6 +113,18 @@ class MilestoneControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
+    void addInvalidDescriptionMilestoneAsTeacher_get400Response() throws Exception {
+        Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
+        mockMvc.perform(post("/project/0/add-milestone")
+                        .param("name", "New Milestone")
+                        .param("description", "This is invalid 😠")
+                        .param("startDate", "2022-09-09"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
     void addBlankDateMilestoneAsTeacher_get400Response() throws Exception {
         Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
         mockMvc.perform(post("/project/0/add-milestone")
