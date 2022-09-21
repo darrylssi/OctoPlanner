@@ -55,7 +55,26 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
     @Override
     public void removeGroupMembers(RemoveGroupMembersRequest request, StreamObserver<RemoveGroupMembersResponse> responseObserver) {
         logger.info("removeGroupMembers() has been called");
-        // TODO implement this
+        RemoveGroupMembersResponse.Builder reply = RemoveGroupMembersResponse.newBuilder();
+        int numUsersRemoved;
+
+        try {
+            numUsersRemoved = groupService.removeUsersFromGroup(request.getGroupId(), request.getUserIdsList());
+        } catch (NoSuchElementException e) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage(e.getMessage());
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        reply
+                .setIsSuccess(true)
+                .setMessage(numUsersRemoved+ " users removed from group " + request.getGroupId())
+                .build();
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
     }
 
     @Override

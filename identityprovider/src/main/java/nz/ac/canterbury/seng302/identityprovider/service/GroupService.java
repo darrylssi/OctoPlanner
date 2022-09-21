@@ -67,15 +67,17 @@ public class GroupService {
      * Removes a set of users from a group
      * @param groupId The id of the group to remove users from
      * @param userIds The ids of the users to remove from the group
+     * @return The number of users removed from the group
      */
-    public void removeUsersFromGroup(int groupId, List<Integer> userIds) {
+    public int removeUsersFromGroup(int groupId, List<Integer> userIds) {
         // TODO check that the group being removed from isn't a special group - needs to be special cases for that
         Group group = getGroup(groupId);
+        int count = 0;
         for (User user : userRepository.findAllById(userIds)) {
-            if (user != null) {
-                group.removeMember(user);
-            }
+            group.removeMember(user);
+            count++;
         }
         groupRepository.save(group);
+        return count;
     }
 }

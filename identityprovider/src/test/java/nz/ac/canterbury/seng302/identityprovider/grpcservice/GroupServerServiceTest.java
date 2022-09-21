@@ -180,4 +180,94 @@ class GroupServerServiceTest {
         assertFalse(response.getIsSuccess());
         assertEquals("There is no group with id " + testGroupId, response.getMessage());
     }
+
+    @Test
+    void testRemoveMembersFromGroup_getSuccess() {
+        // Prepare collections of user ids/users to use as mock data
+        List<Integer> userIds = List.of(testUserId1, testUserId2);
+        Iterable<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAllById(userIds))
+                .thenReturn(users);
+
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        // * When: We try to remove members from this group
+        StreamObserver<RemoveGroupMembersResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<RemoveGroupMembersResponse> captor = ArgumentCaptor.forClass(RemoveGroupMembersResponse.class);
+        RemoveGroupMembersRequest request = RemoveGroupMembersRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .addAllUserIds(userIds)
+                .build();
+        groupServerService.removeGroupMembers(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        RemoveGroupMembersResponse response = captor.getValue();
+
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+        assertEquals("2 users removed from group " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testRemoveZeroMembersFromGroup_getSuccess() {
+        // Prepare collections of user ids/users to use as mock data
+        List<Integer> userIds = Collections.emptyList();
+        Iterable<User> users = Collections.emptyList();
+        when(userRepository.findAllById(userIds))
+                .thenReturn(users);
+
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        // * When: We try to remove members from this group
+        StreamObserver<RemoveGroupMembersResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<RemoveGroupMembersResponse> captor = ArgumentCaptor.forClass(RemoveGroupMembersResponse.class);
+        RemoveGroupMembersRequest request = RemoveGroupMembersRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .addAllUserIds(userIds)
+                .build();
+        groupServerService.removeGroupMembers(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        RemoveGroupMembersResponse response = captor.getValue();
+
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+        assertEquals("0 users removed from group " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testRemoveMembersFromGroup_whenGroupDoesNotExist_getFailure(){
+        // Prepare collections of user ids/users to use as mock data
+        List<Integer> userIds = List.of(testUserId1, testUserId2);
+        Iterable<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAllById(userIds))
+                .thenReturn(users);
+
+        // * Given: There is no group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        // * When: We try to remove members from this group
+        StreamObserver<RemoveGroupMembersResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<RemoveGroupMembersResponse> captor = ArgumentCaptor.forClass(RemoveGroupMembersResponse.class);
+        RemoveGroupMembersRequest request = RemoveGroupMembersRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .addAllUserIds(userIds)
+                .build();
+        groupServerService.removeGroupMembers(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        RemoveGroupMembersResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
 }

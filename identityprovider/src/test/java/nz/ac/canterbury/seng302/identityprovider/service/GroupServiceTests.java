@@ -110,9 +110,10 @@ class GroupServiceTests {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
-        groupService.removeUsersFromGroup(testGroupId, usersToRemove);
+        int numUsersRemoved = groupService.removeUsersFromGroup(testGroupId, usersToRemove);
 
         // Test that user1 is removed, and user2 is still in the group
+        assertEquals(1, numUsersRemoved);
         assertFalse(testGroup.getMembers().contains(testUser1));
         assertTrue(testGroup.getMembers().contains(testUser2));
         assertFalse(testUser1.getGroups().contains(testGroup));
@@ -132,9 +133,10 @@ class GroupServiceTests {
                 .thenReturn(users);
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
-        groupService.removeUsersFromGroup(testGroupId, usersToRemove);
+        int numUsersRemoved = groupService.removeUsersFromGroup(testGroupId, usersToRemove);
 
         // Test that both users are removed from the group
+        assertEquals(2, numUsersRemoved);
         assertFalse(testGroup.getMembers().contains(testUser1));
         assertFalse(testGroup.getMembers().contains(testUser2));
         // Test that users no longer have the group in their set of joined groups
