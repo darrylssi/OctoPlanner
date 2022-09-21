@@ -138,9 +138,9 @@ public class EventController extends PageController {
         // Validation round 2: Do our custom errors pass?
         var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
         var nameError = ValidationUtils.validateName(editSchedulableForm.getName());
-        var descriptionError = ValidationUtils.validateDescription(editSchedulableForm.getDescription());
-        if (dateErrors.isError() || nameError.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError, descriptionError), HttpStatus.BAD_REQUEST);
+        var descriptionErrors = ValidationUtils.validateDescription(editSchedulableForm.getDescription());
+        if (dateErrors.isError() || nameError.isError() || descriptionErrors.isError()) {
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError, descriptionErrors), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
         event.setName(editSchedulableForm.getName());
