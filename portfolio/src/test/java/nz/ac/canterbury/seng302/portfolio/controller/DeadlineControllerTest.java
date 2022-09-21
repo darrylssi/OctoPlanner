@@ -240,6 +240,27 @@ class DeadlineControllerTest {
 
     @Test
     @WithMockPrincipal(TEACHER)
+    void editInvalidDeadlineDescriptionAsTeacher_get400Response() throws Exception {
+        // Creates a new deadline and sets the values
+        Deadline deadline = new Deadline("New Deadline", "This is a deadline", DateUtils.toDateTime("2022-09-09 12:00"));
+        deadline.setId(1);
+
+        when(deadlineService.saveDeadline(any())).thenReturn(deadline);
+        when(deadlineService.getDeadlineById(1)).thenReturn(deadline);
+        when(projectService.getProjectById(0)).thenReturn(parentProject);
+
+        // As the deadline has an inappropriate description, so appropriate error is shown
+        mockMvc.perform(post("/project/0/edit-deadline/1")
+                        .param("name", "Deadline")
+                        .param("description", "This is a deadline 😠‼️")
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "12:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
     void editMissingDeadlineId_throw404() throws Exception {
         // Creates a new deadline and sets the values
         Deadline deadline = new Deadline("New Deadline", "This is a deadline", DateUtils.toDateTime("2022-09-09 12:00"));

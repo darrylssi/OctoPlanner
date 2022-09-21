@@ -235,4 +235,19 @@ class ValidationUtilsTest {
         ValidationError result = ValidationUtils.validateName(name);
         assertFalse(result.isError());
     }
+
+    @ParameterizedTest
+    @CsvSource({"This is valid", "''", "This! 1s. v@Lid,", "ㅍ미ㅑㅇ", "123!!?"})
+    void testValidDescription(String desc) {
+        ValidationError result = ValidationUtils.validateDescription(desc);
+        assertFalse(result.isError());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Emojis are not valid 🤨", "These too apparently %^"})
+    void testInvalidDescription_getErrorMessage(String name) {
+        ValidationError result = ValidationUtils.validateName(name);
+        assertTrue(result.isError());
+        assertEquals("Name can only have alphanumeric and . - _ characters", result.getFirstError());
+    }
 }
