@@ -51,7 +51,7 @@ function getSchedulableIconInfo() {
             {
                 id: `deadline-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: 'this is a deadline' }
+                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: 'this is a<br>deadline' }
             },
             {
                 id: `milestone-${date}`,
@@ -184,7 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: info.event.extendedProps.description,
                     placement: "top",
                     trigger: "hover",
-                    container: "body"
+                    container: "body",
+                    html: true
                 });
             }
         },
@@ -221,6 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // hides the sprint overlap error message
                 document.getElementById("invalidDateRangeError").hidden = true;
+            } else if(info.event.extendedProps.type != 'sprint'){
+                //option to click on schedulable icons to display tooltips so that they can be viewed on mobile
+                //TODO test this on the VM to see if it actually works
+                bootstrap.Tooltip.getInstance(info.el).show();
             }
 
         },
