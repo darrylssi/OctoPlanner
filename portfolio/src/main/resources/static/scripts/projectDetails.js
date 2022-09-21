@@ -80,7 +80,7 @@ function sendFormViaAjax(elem, type) {
             if (url.indexOf("add") != -1) {
                 resetAddForm(type);
             }
-            //Update tooltips, because bootstrap needs to be told to do this
+            // Update tooltips, because bootstrap needs to be told to do this
             setTimeout((schedulableId) => {
                 let schedulable = document.getElementById(`${schedulableId}`);
                 let tooltip = bootstrap.Tooltip.getInstance(schedulable);
@@ -118,7 +118,7 @@ function sendFormViaAjax(elem, type) {
 }
 
 /**
- * An attempt to make this function deal with schedulable objects...
+ * An attempt to make this function deal with schedulable objects... TODO JSDoc needs to be better
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string

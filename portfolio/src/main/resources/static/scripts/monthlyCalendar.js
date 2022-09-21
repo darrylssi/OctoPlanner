@@ -211,6 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // submitting the form
                 form.submit();
+
+                // send websocket message TODO
+                stompClient.send("/app/sprints", {}, JSON.stringify({id: info.event.id, startStr: info.event.startStr, endStr: info.event.endStr}));
             }
         },
         // detect when mouse is over a sprint to deselect sprints when clicking outside them
@@ -278,3 +281,8 @@ function updateIconObjectsWithSchedulables(calendar) {
         }
     }
 }
+
+
+// TODO for sprint messages
+// need a function to handle them (i.e. gets the calendar object and changes the event)
+// need a function to send them when a sprint is saved from dragging!

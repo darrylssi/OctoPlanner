@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
@@ -74,6 +75,21 @@ public class MessageMappingController {
     @SendTo("/topic/editing-schedulable")
     public Message editingSchedulable(Message message) {
         return message;
+    }
+
+    /**
+     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
+     * or a SprintMessageOutput with the sprint's data if it does exist.
+     * @param sprintMessage data received from the websocket containing the sprint id and type
+     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     */
+    @MessageMapping("/sprints")
+    @SendTo("/topic/sprints")
+    public SprintMessageOutput sendSprintData(SprintMessage sprintMessage) {
+        Sprint updatedSprint = sprintService.getSprintById(sprintMessage.getId());
+        SprintMessageOutput sprintMessageOutput;
+
+        // TODO copy the rest
     }
 
     /**
