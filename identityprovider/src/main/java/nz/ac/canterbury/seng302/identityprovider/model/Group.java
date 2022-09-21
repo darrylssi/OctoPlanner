@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * Represents a group object.
- * Group objects are stored in a table called Group, as it is an @Entity.
+ * Group objects are stored in a table called Groups, as it is an @Entity.
  */
 @Entity
 @Table(name = "Groups")
@@ -57,7 +57,7 @@ public class Group {
 
     /**
      * Removes a user from this group
-     * All removes this group from the user's set of joined groups
+     * Also removes this group from the user's set of joined groups
      * @param user The user to remove from this group
      */
     public void removeMember(User user) {
