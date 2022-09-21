@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class SecurityConfig {
 
+
     @Value("${base-url}")
     private String baseURL;
 
@@ -48,8 +49,10 @@ public class SecurityConfig {
         security
             .httpBasic().disable();
         // Redirect to login page if unauthenticated
+        // TODO testing removing baseURL from here
         security
-            .formLogin().loginPage(baseURL + "login");
+//            .formLogin().loginPage(baseURL + "login");
+            .formLogin().loginPage(LOGIN);
 
         // let the H2 console embed itself in a frame
         security.headers().frameOptions().sameOrigin();
