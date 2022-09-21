@@ -51,44 +51,24 @@ function getSchedulableIconInfo() {
             {
                 id: `deadline-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'deadline', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: 'this is a deadline' }
             },
             {
                 id: `milestone-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'milestone', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'milestone', num: 0, schedulableNames: [], description: 'this is a milestone' }
             },
             {
                 id: `event-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'event', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'event', num: 0, schedulableNames: [], description: 'this is an event' }
             });
         let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
         newStart.setDate(newStart.getDate() + 1);
         start = newStart;
     }
     return icons;
-// note that the title here doesn't matter because it is overwritten with the html
-let events = [
-                 {
-                   id: 'b',
-                   title: 'deadlines',
-                   start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'deadline', num: 0, description: 'this is a deadline' }
-                 },
-                 {
-                   id: 'a',
-                   title: 'milestones',
-                   start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'milestone', num: 5, description: 'this is a milestone' }
-                 },
-                 {
-                   id: 'c',
-                   title: 'events',
-                   start: '2022-09-12T00:00:00',
-                   extendedProps: { type: 'event', num: 1, description: 'this is an event' }
-                 }
-             ];
+}
 
 // Will return black or white based on the provided colour string
 // so that text shows up
@@ -198,13 +178,15 @@ document.addEventListener('DOMContentLoaded', function() {
             next: ">"
         },
 
-        eventRender: function(info) {
-            $(info.el).tooltip({
-                title: info.event.extendedProps.description,
-                placement: "top",
-                trigger: "hover",
-                container: "body"
-            });
+        eventDidMount: function(info) {
+            if(info.event.extendedProps.type != 'sprint'){
+                var tooltip = new bootstrap.Tooltip(info.el, {
+                    title: info.event.extendedProps.description,
+                    placement: "top",
+                    trigger: "hover",
+                    container: "body"
+                });
+            }
         },
 
         eventOverlap: function (stillEvent, movingEvent) {
