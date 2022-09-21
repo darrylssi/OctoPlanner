@@ -39,7 +39,7 @@ public class GroupService {
         if (group != null) {
             return group;
         } else {
-            throw new IllegalArgumentException("There is no group with id " + id);
+            throw new NoSuchElementException("There is no group with id " + id);
         }
     }
 

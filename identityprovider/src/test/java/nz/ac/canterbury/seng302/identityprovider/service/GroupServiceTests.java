@@ -73,7 +73,7 @@ class GroupServiceTests {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> groupService.getGroup(testGroupId));
+        assertThrows(NoSuchElementException.class, () -> groupService.getGroup(testGroupId));
     }
 
     @Test
