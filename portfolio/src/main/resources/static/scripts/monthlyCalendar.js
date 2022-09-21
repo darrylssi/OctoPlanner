@@ -51,17 +51,17 @@ function getSchedulableIconInfo() {
             {
                 id: `deadline-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: 'this is a<br>deadline' }
+                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: '' }
             },
             {
                 id: `milestone-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'milestone', num: 0, schedulableNames: [], description: 'this is a milestone' }
+                extendedProps: { type: 'milestone', num: 0, schedulableNames: [], description: '' }
             },
             {
                 id: `event-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'event', num: 0, schedulableNames: [], description: 'this is an event' }
+                extendedProps: { type: 'event', num: 0, schedulableNames: [], description: '' }
             });
         let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
         newStart.setDate(newStart.getDate() + 1);
@@ -302,6 +302,11 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+            if (icon.extendedProps.description == '') {
+                icon.setExtendedProp("description", sNames[i]);
+            } else{
+                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + sNames[i])
+            }
 
             let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
             newStart.setDate(newStart.getDate() + 1);
