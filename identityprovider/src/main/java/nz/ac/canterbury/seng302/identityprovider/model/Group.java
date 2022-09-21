@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.identityprovider.model;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -22,7 +23,7 @@ public class Group {
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> members;
+    private Set<User> members = new HashSet<>();
 
     @NotNull
     @Size(min = 2, max = 32)
@@ -46,18 +47,34 @@ public class Group {
 
     /**
      * Adds a user to this group
+     * Also adds this group to the user's set of joined groups
      * @param user The user to add to the group
      */
     public void addMember(User user) {
         members.add(user);
+        user.joinGroup(this);
     }
 
     /**
      * Removes a user from this group
+     * All removes this group from the user's set of joined groups
      * @param user The user to remove from this group
      */
     public void removeMember(User user) {
         members.remove(user);
+        user.leaveGroup(this);
+    }
+
+    /**
+     * Removes all members from this group
+     * Also removes this group from all members sets of joined groups
+     * This should be used for removing this group from all members list of groups before deleting the group
+     */
+    public void removeAllMembers() {
+        for (User user : members) {
+            user.leaveGroup(this);
+        }
+        members.clear();
     }
 
     public int getId() {

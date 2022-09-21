@@ -38,7 +38,7 @@ public class User {
     private Set<UserRole> roles;
 
     @ManyToMany(mappedBy = "members")
-    private Set<Group> groups;
+    private Set<Group> groups = new HashSet<>();
 
     protected User() {
     }
@@ -182,6 +182,10 @@ public class User {
         }
     }
 
+    /**
+     * Combines the users first name, middle name (if they have one) and their last name into one String
+     * @return A String containing the user's full name
+     */
     public String getFullName() {
         if (this.middleName == null) {
             return this.firstName + " " + this.lastName;
@@ -192,5 +196,23 @@ public class User {
 
     public UserRole highestRole() {
         return roles.stream().max(Comparator.naturalOrder()).orElse(null);
+    }
+
+    /**
+     * Adds a group to the user's set of joined groups
+     * This does not add the user to the corresponding groups set of members
+     * @param group The group to add
+     */
+    public void joinGroup(Group group) {
+        this.groups.add(group);
+    }
+
+    /**
+     * Removes a group from the user's set of joined groups
+     * This does not remove the user from the corresponding groups set of members
+     * @param group The group to remove
+     */
+    public void leaveGroup(Group group) {
+        this.groups.remove(group);
     }
 }

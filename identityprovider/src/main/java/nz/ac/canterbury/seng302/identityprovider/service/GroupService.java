@@ -53,8 +53,7 @@ public class GroupService {
         also remove users from members without groups if they are being added to a group that is not that
          */
         Group group = getGroup(groupId);
-        Set<User> users = new HashSet<>((Collection<? extends User>) userRepository.findAllById(userIds));
-        for (User user : users) {
+        for (User user : userRepository.findAllById(userIds)) {
             if (user != null) {
                 group.addMember(user);
             }
@@ -68,10 +67,9 @@ public class GroupService {
      * @param userIds The ids of the users to remove from the group
      */
     public void removeUsersFromGroup(int groupId, Set<Integer> userIds) {
-        // TODO check that the group being removed from isnt a special group - needs to be special cases for that
+        // TODO check that the group being removed from isn't a special group - needs to be special cases for that
         Group group = getGroup(groupId);
-        Set<User> users = (Set<User>) userRepository.findAllById(userIds);
-        for (User user : users) {
+        for (User user : userRepository.findAllById(userIds)) {
             if (user != null) {
                 group.removeMember(user);
             }

@@ -12,12 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -34,32 +31,130 @@ class GroupServiceTests {
     private UserRepository userRepository;
 
     private Group testGroup;
-    private User testUser;
+    private User testUser1;
+    private User testUser2;
     private static final int testGroupId = 999;
-    private static final int testUserId = 999;
+    private static final int testUserId1 = 111;
+    private static final int testUserId2 = 222;
 
     @BeforeEach
     public void setup() {
         testGroup = new Group("test short name", "test long name");
-        testUser = new User("testUsername", "testPassword", "testFirstName",
-                "testMiddleName", "testLastName", "testNickname",
-                "testBio", "testPronouns", "testEmail@example.com");
-        testUser.addRole(UserRole.TEACHER);
+        testUser1 = new User("testUsername1", "testPassword1", "testFirstName1",
+                "testMiddleName1", "testLastName1", "testNickname1",
+                "testBio1", "testPronouns1", "testEmail1@example.com");
+        testUser1.addRole(UserRole.TEACHER);
+
+        testUser2 = new User("testUsername2", "testPassword2", "testFirstName2",
+                "testMiddleName2", "testLastName2", "testNickname2",
+                "testBio2", "testPronouns2", "testEmail2@example.com");
+        testUser2.addRole(UserRole.STUDENT);
+    }
+
+    @Test
+    void test_getAllGroups() {
+        when(groupRepository.findAll())
+                .thenReturn(List.of(testGroup));
+        List<Group> groups = groupService.getAllGroups();
+        assertEquals(1, groups.size());
+    }
+
+    @Test
+    void test_getGroupById() {
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        Group expected = groupService.getGroup(testGroupId);
+        assertEquals(testGroup, expected);
+    }
+
+    @Test
+    void test_getGroupById_throwsException() {
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () -> groupService.getGroup(testGroupId));
     }
 
     @Test
     void test_addUsersToGroup() {
-        Set<Integer> usersToAdd = new HashSet<>(testUserId);
-        // TODO figure out how to mock findAllById
-        //when(userRepository.findAllById(usersToAdd))
-        //        .thenReturn(testUserId);
+        // Prepare collections of user ids/users to use as mock data
+        Set<Integer> usersToAdd = new HashSet<>(testUserId1, testUserId2);
+        Iterable<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAllById(usersToAdd))
+                .thenReturn(users);
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
         groupService.addUsersToGroup(testGroupId, usersToAdd);
 
-        assertTrue(testGroup.getMembers().contains(testUser));
-        assertTrue(testUser.getGroups().contains(testGroup));
+        // Test that the users are added to the groups members, and that the group is added to the users joined groups
+        assertTrue(testGroup.getMembers().contains(testUser1));
+        assertTrue(testGroup.getMembers().contains(testUser2));
+        assertTrue(testUser1.getGroups().contains(testGroup));
+        assertTrue(testUser2.getGroups().contains(testGroup));
+    }
+
+    @Test
+    void test_removeOneUserFromGroup() {
+        // Prepare collections of user ids/users to use as mock data
+        Set<Integer> usersToRemove = new HashSet<>(testUserId1);
+        Iterable<User> users = List.of(testUser1);
+        // Add users to group
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+
+        when(userRepository.findAllById(usersToRemove))
+                .thenReturn(users);
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        groupService.removeUsersFromGroup(testGroupId, usersToRemove);
+
+        // Test that user1 is removed, and user2 is still in the group
+        assertFalse(testGroup.getMembers().contains(testUser1));
+        assertTrue(testGroup.getMembers().contains(testUser2));
+        assertFalse(testUser1.getGroups().contains(testGroup));
+        assertTrue(testUser2.getGroups().contains(testGroup));
+    }
+
+    @Test
+    void test_removeListOfUsersFromGroup() {
+        // Prepare collections of user ids/users to use as mock data
+        Set<Integer> usersToRemove = new HashSet<>(testUserId1, testUserId2);
+        Iterable<User> users = List.of(testUser1, testUser2);
+        // Add users to group
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+
+        when(userRepository.findAllById(usersToRemove))
+                .thenReturn(users);
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+        groupService.removeUsersFromGroup(testGroupId, usersToRemove);
+
+        // Test that both users are removed from the group
+        assertFalse(testGroup.getMembers().contains(testUser1));
+        assertFalse(testGroup.getMembers().contains(testUser2));
+        // Test that users no longer have the group in their set of joined groups
+        assertFalse(testUser1.getGroups().contains(testGroup));
+        assertFalse(testUser2.getGroups().contains(testGroup));
+    }
+
+    @Test
+    void test_removeAllUsersFromGroup() {
+        // Add users to group
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+
+        testGroup.removeAllMembers();
+
+        // Test that all users are removed from the group
+        assertFalse(testGroup.getMembers().contains(testUser1));
+        assertFalse(testGroup.getMembers().contains(testUser2));
+        // Test that users no longer have the group in their set of joined groups
+        assertFalse(testUser1.getGroups().contains(testGroup));
+        assertFalse(testUser2.getGroups().contains(testGroup));
     }
 
 }
