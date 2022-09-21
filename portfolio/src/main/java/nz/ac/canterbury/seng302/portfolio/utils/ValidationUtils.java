@@ -228,7 +228,7 @@ public class ValidationUtils {
 
     /**
      * Checks whether the name contains only valid characters
-     * @param name Project/Sprint name to be tested
+     * @param name Name to be tested
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
     public static ValidationError validateName(String name) {
@@ -250,6 +250,12 @@ public class ValidationUtils {
         return error;
     }
 
+    /**
+     * Checks whether the description contains only valid characters.
+     * Description only allows letters from any language, numbers, punctuation, and whitespace separators.
+     * @param description Description to be tested
+     * @return ValidationError object that contains a list of error messages
+     */
     public static ValidationError validateDescription(String description) {
         ValidationError error = new ValidationError();
         String regex = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$";
