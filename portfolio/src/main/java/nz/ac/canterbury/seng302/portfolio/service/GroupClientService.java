@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.List;
 
 @Service
 public class GroupClientService {
@@ -40,7 +40,7 @@ public class GroupClientService {
      * @param userIds A set containing the member's user ids to add to the group
      * @return An AddGroupMembersResponse, containing the success of the request
      */
-    public AddGroupMembersResponse addGroupMembers(final int groupId, final Set<Integer> userIds) {
+    public AddGroupMembersResponse addGroupMembers(final int groupId, final List<Integer> userIds) {
         logger.info("Sending request to add members to the group with id {}", groupId);
         AddGroupMembersRequest addGroupMembersRequest = AddGroupMembersRequest.newBuilder()
                 .setGroupId(groupId)
@@ -55,7 +55,7 @@ public class GroupClientService {
      * @param userIds A set containing the member's user ids to remove from the group
      * @return A RemoveGroupMembersResponse, containing the success of the request
      */
-    public RemoveGroupMembersResponse removeGroupMembers(final int groupId, final Set<Integer> userIds) {
+    public RemoveGroupMembersResponse removeGroupMembers(final int groupId, final List<Integer> userIds) {
         logger.info("Sending request to remove members from the group with id {}", groupId);
         RemoveGroupMembersRequest removeGroupMembersRequest = RemoveGroupMembersRequest.newBuilder()
                 .setGroupId(groupId)
