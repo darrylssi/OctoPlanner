@@ -8,7 +8,6 @@ function saveCookies() {
                 secure: false,  // Manually set this to false in the test environment, otherwise cy.visit doesn't send it
                 ...rest,
             };
-            cy.log(name)
         });
     });
 }
@@ -18,7 +17,6 @@ function loadCookies() {
         const { name, value, ...rest } = cookiesCache[key];
 
         cy.setCookie(name, value, rest);
-        cy.log(name)
     });
 }
 
