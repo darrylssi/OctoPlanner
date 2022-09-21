@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -80,7 +81,14 @@ public class DateUtils {
     }
 
     /**
-     * Converts a String to a Date in yyyy--MM-dd HH:mm format.
+     * Converts a Date Time object to a String with yyyy-MM-dd HH:mm format.
+     * @param date Date Time object to be converted to String
+     * @return String object
+     */
+    public static String toDateTimeString(Date date) { return new SimpleDateFormat(DATETIME_FORMAT).format(date); }
+
+    /**
+     * Converts a String to a Date in yyyy-MM-dd HH:mm format.
      * @param dateTime String to be converted to Date
      * @return Date object
      */
@@ -103,6 +111,16 @@ public class DateUtils {
         return c.getTime().equals(dayAfter);
     }
 
+    // https://stackoverflow.com/questions/22929237
+    /**
+     * Converts a LocalDate object to a Date object.
+     * @param localDate The LocalDate to convert
+     * @return The converted Date object
+     */
+    public static Date localDateToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
+
     // https://stackoverflow.com/a/23885950
     /**
      * <p>Combines a LocalDate and a LocalTime into a Date object, normalized by the given's timezone</p>
@@ -119,16 +137,72 @@ public class DateUtils {
 
     /**
      * Takes the start and ends of two time periods and checks whether they overlap
+     * Returns true if the times overlap, including if the start of one period equals the end of the other
      * @param startA the start time of the first time period
      * @param endA the end time of the first time period
      * @param startB the start time of the second time period
      * @param endB the end time of the second time period
      * @return true if the time periods overlap
      */
-    public static boolean timesOverlap(Date startA, Date endA, Date startB, Date endB){
-        if (!startA.before(startB)){
+    public static boolean timesOverlapIncl(Date startA, Date endA, Date startB, Date endB){
+        if (startB.before(startA)){
             return !startA.after(endB);
         }
-        return !endA.before(startB);
+        return !startB.after(endA);
+    }
+
+    /**
+     * Takes the start and ends of two time periods and checks whether they overlap
+     * Returns true if the times overlap, excluding if the start of one period equals the end of the other
+     * @param startA the start time of the first time period
+     * @param endA the end time of the first time period
+     * @param startB the start time of the second time period
+     * @param endB the end time of the second time period
+     * @return true if the time periods overlap
+     */
+    public static boolean timesOverlapExcl(Date startA, Date endA, Date startB, Date endB){
+        if (startB.before(startA)){
+            return endB.after(startA);
+        }
+        return startB.before(endA);
+    }
+
+
+    /**
+     * FullCalendar displays events with an end date exclusive format. This function adds a day to
+     * the end date of a sprint so that the date can be used to display the sprint correctly in the calendar.
+     * @param date The project or sprint end date
+     * @return The updated new end date as a string to be passed to FullCalendar
+     */
+    public static String addOneDayToDate(Date date) {
+        // Converting date to LocalDate
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to current date
+        LocalDate newLocalDate = localDate.plusDays(1);
+
+        // Converting the new project/sprint LocalDate object to Date object
+        return DateUtils.toString(Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
+    /**
+     * FullCalendar displays events with an end date exclusive format. This function removes a day from
+     * the end date given by FullCalendar so that the correct date can be saved to the database.
+     * @param date The project or sprint end date
+     * @return The updated new end date as a date to be saved
+     */
+    public static Date removeOneDayFromDate(Date date) {
+        // Converting date to LocalDate
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Adding 1 day to current project/sprint end date
+        LocalDate newLocalDate = localDate.minusDays(1);
+
+        // Converting the new project/sprint LocalDate object to Date object
+        return Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }

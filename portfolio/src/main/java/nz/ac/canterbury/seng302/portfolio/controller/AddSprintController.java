@@ -21,8 +21,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
+
 import javax.validation.Valid;
 import java.util.*;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Controller for the add sprint details page
@@ -74,6 +76,7 @@ public class AddSprintController extends PageController {
         model.addAttribute("projectName", project.getProjectName());
         model.addAttribute("sprintName", labelUtils.nextLabel(id));
         model.addAttribute("sprintDescription", "");
+        addRequiredValues(model, project);
 
         // Calculate the default sprint start date
         Date sprintStart;
@@ -174,6 +177,7 @@ public class AddSprintController extends PageController {
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("invalidName", invalidName.getFirstError());
+            addRequiredValues(model, parentProject);
 
             return ADD_SPRINT_TEMPLATE;
         }
@@ -217,6 +221,19 @@ public class AddSprintController extends PageController {
      */
     static ValidationError getNameValidationError(String sprintName) {
         return ValidationUtils.validateName(sprintName);
+    }
+
+    /**
+     * Adds the required values for the validation on the front-end.
+     * @param model Thymeleaf parameters
+     * @param project The project the sprint belongs to
+     */
+    void addRequiredValues(Model model, Project project) {
+        model.addAttribute("minNameLen", MIN_NAME_LENGTH);
+        model.addAttribute("maxNameLen", MAX_NAME_LENGTH);
+        model.addAttribute("maxDescLen", MAX_DESC_LENGTH);
+        model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
+        model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
     }
 
 }

@@ -4,12 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
-import javax.persistence.ManyToOne;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -20,38 +18,32 @@ import org.springframework.boot.test.context.SpringBootTest;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.Deadline;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 
 /**
- * Class containing the step definitions for the event_validation Cucumber
+ * Class containing the step definitions for the account_credited Cucumber
  * feature
  */
 @SpringBootTest
-public class EventStepDefinition extends RunCucumberTest {
+public class DeadlineStepDefinition extends RunCucumberTest {
 
+    private static final int ID = 1;
     private SimpleDateFormat dateFormatter;
     private SimpleDateFormat dateTimeFormatter;
-    @ManyToOne
-    private static Project parentProject;
-    private Event event;
-
-    // TODO make this code less bad - milestone and event step defs should probably be in a single file for schedulable step defs
-    // very sussy roundabout way of letting the milestone step defs access the parent project
-    public static Project getParentProject() {
-        return parentProject;
-    }
+    private Project parentProject;
+    private Deadline deadline;
 
     /**
-     * Validates event against its javax validation annotations
+     * Validates deadline against its javax validation annotations
      * @return Constraint errors
      */
-    Set<ConstraintViolation<Event>> checkJavaxConstraints() {
+    Set<ConstraintViolation<Deadline>> checkJavaxConstraints() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        return validator.validate(event);
+        return validator.validate(deadline);
     }
 
     /**
@@ -59,10 +51,10 @@ public class EventStepDefinition extends RunCucumberTest {
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        return ValidationUtils.validateEventDates(event.getStartDate(), event.getEndDate(), parentProject);
+        return ValidationUtils.validateDeadlineDate(deadline.getStartDate(), parentProject);
     }
 
-    public EventStepDefinition() {
+    public DeadlineStepDefinition() {
         this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         this.dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
@@ -75,19 +67,18 @@ public class EventStepDefinition extends RunCucumberTest {
         parentProject = new Project("name", "desc", projStartDate, projEndDate);
     }
 
-    @When("the user creates an event called {string}, starting at {string}, ending on {string}, with a description {string}")
-    public void the_user_creates_an_event_called_starting_at_ending_on_with_a_description(
-            String name, String startDate, String endDate, String description) throws Exception {
-        event = new Event();
-        event.setName(name);
-        event.setDescription(description);
-        event.setStartDate(dateTimeFormatter.parse(startDate));
-        event.setEndDate(dateTimeFormatter.parse(endDate));
+    @When("the user creates a deadline called {string} on {string}, with a description {string}")
+    public void the_user_creates_a_deadline_called_on_with_a_description(
+            String name, String date, String description) throws Exception {
+        deadline = new Deadline();
+        deadline.setName(name);
+        deadline.setDescription(description);
+        deadline.setStartDate(dateTimeFormatter.parse(date));
     }
 
-    @Then("an event called {string} exists starting at {string}, ending at {string}, with a description {string}")
-    public void an_event_called_exists_starting_at_ending_on_with_a_description(
-        String name, String startDate, String endDate, String description
+    @Then("a deadline called {string} exists on {string}, with a description {string}")
+    public void a_deadline_called_exists_on_with_a_description(
+            String name, String date, String description
     ) {
         // 1. Check the constraint annotations
         var javaxErrors = checkJavaxConstraints();
@@ -97,11 +88,17 @@ public class EventStepDefinition extends RunCucumberTest {
         assertThat(validationErrors.getErrorMessages(), is(empty()));
     }
 
-    @Then("creating the event should fail")
-    public void adding_event_should_fail() {
+    @Then("creating the deadline should fail")
+    public void adding_deadline_should_fail() {
         var javaxErrors = checkJavaxConstraints();
+        assertThat(javaxErrors, is(not(empty())));
+        // Note: Unfortunately I don't know how to check if EITHER
+        // javaxErrors or validationErrors is(not(empty())), so the
+        // feature file must have constaint errors to see any
+        // validation errors
         var validationErrors = checkValidator();
-        assertTrue(!javaxErrors.isEmpty() || !validationErrors.getErrorMessages().isEmpty());
+        assertThat(validationErrors.getErrorMessages(), is(not(empty())));
     }
 
 }
+

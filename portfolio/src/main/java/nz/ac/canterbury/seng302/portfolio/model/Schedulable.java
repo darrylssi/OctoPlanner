@@ -27,6 +27,20 @@ public interface Schedulable extends Comparable<Schedulable>{
     Date getEndDate();
     void setEndDate(Date endDate);
 
+    /**
+     * Gets the start day of this schedulable as a String.
+     * @return format "yyyy-mm-dd"
+     */
+    String getStartDay();
+    String getStartTime();
+    /**
+     * Gets the end day of this schedulable as a String.
+     * If there is no end date, returns the same as getStartDay().
+     * @return format "yyyy-mm-dd"
+     */
+    String getEndDay();
+    String getEndTime();
+
     String getType();
 
     /**

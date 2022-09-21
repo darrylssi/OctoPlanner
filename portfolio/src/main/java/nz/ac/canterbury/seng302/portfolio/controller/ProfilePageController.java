@@ -59,7 +59,6 @@ public class ProfilePageController {
 
         ArrayList<String> errors = new ArrayList<>();
         model.addAttribute("errors", errors);
-
         boolean isCurrentUser = thisUser.getID() == id; // User's logged in, and this page is about them
         model.addAttribute("isCurrentUser", isCurrentUser);
 
@@ -71,6 +70,7 @@ public class ProfilePageController {
                 model.addAttribute("id", id);
                 model.addAttribute("dateCreated", getDateCreated(user.getCreated()));
                 model.addAttribute("roles", user.getRolesList());
+                model.addAttribute("userProfilePhoto", user.getProfileImagePath());
             } else {
                 errors.add("Invalid ID");
             }

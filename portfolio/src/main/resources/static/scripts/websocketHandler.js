@@ -4,19 +4,7 @@ const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messa
 
 // logging consts to hide certain things while developing
 const editingLogs = false;
-const updateLogs = true;
-
-/**
- * Sets html elements according to whether a WebSocket has been connected to or not
- * @param connected Boolean if a connection has been established to a WebSocket
- */
-function setConnected(connected) {
-    // Currently, does not contain any elements that need to be set according to the connected status
-    let response = document.getElementById('response');
-    if (response !== null ) {
-        response.innerHTML = '';
-    }
-}
+const updateLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -27,12 +15,11 @@ function connect() {
     stompClient = Stomp.over(socket);
     stompClient.debug = function (){return;}; // stop log spamming, from https://stackoverflow.com/questions/21767126/stompjs-javascript-client-logging-like-crazy-on-console
     stompClient.connect({}, function(frame) {
-        setConnected(true);
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/editing-schedulable', function(message) {
             handleSchedulableMessage(JSON.parse(message.body));
         });
-        stompClient.subscribe('/topic/schedulable', function(schedulableMessageOutput) {
+        stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
             updateSchedulable(JSON.parse(schedulableMessageOutput.body));
         });
     });
@@ -45,12 +32,12 @@ function disconnect() {
     if(stompClient != null) {
         stompClient.disconnect();
     }
-        setConnected(false);
         console.log("Disconnected");
 }
 
 /**
- * Sends a message to a WebSocket endpoint using data from an HTML element
+ * Sends a message saying that a user is editing the specified schedulable.
+ * Format: `schedulableType,schedulableId,userId'.
  */
 function sendEditingSchedulableMessage(schedulableId, type) {
     if (editingLogs) {
@@ -64,33 +51,19 @@ function sendEditingSchedulableMessage(schedulableId, type) {
 }
 
 /**
- * Sends a websocket message saying that a user has stopped editing an schedulable
+ * Sends a websocket message saying that a user has stopped editing a schedulable.
  * Won't send anything if schedulableId is undefined
  */
 function sendStopEditingMessage(schedulableId, type) {
-    if (previousSchedulable !== undefined) {
+    if (currentSchedulable !== undefined) {
         if (editingLogs) {
             console.log('SENDING STOP MESSAGE FOR ' + type +': ' + schedulableId);
         }
         let user = document.getElementById('user').getAttribute('data-name');
-        let content = `${schedulableId}, ${type}`
+        let content = `${schedulableId},${type}`
         stompClient.send("/app/ws", {},
         JSON.stringify({'from':user, 'content':content}));
     }
-}
-
-/**
- * Updates an HTML element to display a received WebSocket message
- * @param messageOutput JSON object received from the WebSocket
- */
-function showMessageOutput(messageOutput) {
-
-    const response = document.getElementById('response');
-    const p = document.createElement('p');
-    p.style.wordWrap = 'break-word';
-    p.appendChild(document.createTextNode(messageOutput.from +
-        messageOutput.text + " (" + messageOutput.time + ")"));
-    response.appendChild(p);
 }
 
 /**
@@ -127,8 +100,8 @@ function showEditingMessage(editMessage) {
         stopSchedulableTimeout(schedulableId, type);
 
         // locate the correct elements on the page
-        const editingSchedulableBoxClass = `event-${schedulableId}-editing-box`;
-        const editingSchedulableTextBoxClass = `event-${schedulableId}-editing-text`;
+        const editingSchedulableBoxClass = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableTextBoxClass = `${type}-${schedulableId}-editing-text`;
         const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
         const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
 
@@ -190,6 +163,11 @@ function stopSchedulableTimeout(schedulableId, type) {
 function updateSchedulable(schedulableMessage) {
     if (updateLogs) {
         console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
+        console.log(schedulableMessage);
+    }
+
+    if(currentSchedulable.id === schedulableMessage.id && currentSchedulable.type === schedulableMessage.type) {
+        stopEditing();
     }
 // get a list of schedulable list containers
     const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
@@ -205,7 +183,7 @@ function updateSchedulable(schedulableMessage) {
           let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
         if(idIndex != -1) {
 
-            const url = BASE_URL + schedulableMessage.type + "-frag/" + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
+            const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
             const schedulableFragRequest = new XMLHttpRequest();
             schedulableFragRequest.open("GET", url, true);
             const tempIdIndex = idIndex;
@@ -228,6 +206,19 @@ function updateSchedulable(schedulableMessage) {
 function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulableHtml) {
     let newSchedulable = document.createElement("div");
     newSchedulable.innerHTML = schedulableHtml;
+
+    // Force tooltip to update
+    setTimeout((schedulable) => {
+        let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+        if (tooltip) {
+            tooltip.update();
+        } else if (schedulable) {
+            tooltip = new bootstrap.Tooltip(schedulable, {
+                trigger: 'hover'
+            });
+        }
+    }, 250, newSchedulable.querySelector('.schedulable'));
+
     if(schedulableMessage.nextSchedulableIds[idIndex] === '-1') {
         parent.appendChild(newSchedulable);
     } else {

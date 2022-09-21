@@ -19,12 +19,13 @@ public class SchedulableMessageOutput {
     public static final String LIST_IN_ID_FORMAT = "schedulables-in-%d"; // id of sprint box
     public static final String LIST_AFTER_ID_FORMAT = "schedulables-after-%d"; // id of box after sprint
     public static final String LIST_BEFORE_ALL_ID_NAME = "schedulables-before"; // id of first box
-    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "schedulable-%d"; // id of a schedulable (used for the next schedulable)
+    public static final String NEXT_SCHEDULABLE_ID_FORMAT = "%s-%d"; // id of a schedulable (used for the next schedulable)
     public static final String SCHEDULABLE_BEFORE_ALL_ID_FORMAT = "%d-before"; // id of schedulable in first box
     public static final String SCHEDULABLE_IN_ID_FORMAT = "%d-in-%d"; // id of schedulable in sprint box
     public static final String SCHEDULABLE_AFTER_ID_FORMAT = "%d-after-%d"; // id of schedulable after sprint box
 
     private int id;
+    private String type;
     // NOTE if you change the names of these lists (or any of these variables), you will need to change them in websocketHandler.js
     private List<String> schedulableListIds; // List of all display boxes that this schedulable is included in
     private List<String> nextSchedulableIds; // List of schedulables displayed immediately after this schedulable in each box
@@ -44,6 +45,7 @@ public class SchedulableMessageOutput {
      */
     public SchedulableMessageOutput(Schedulable schedulable, List<Sprint> sprints, List<Schedulable> schedulables) {
         this.id = schedulable.getId();
+        this.type = schedulable.getType();
 
         // Set the lists
         this.generateLists(schedulable, sprints, schedulables);
@@ -69,35 +71,35 @@ public class SchedulableMessageOutput {
         if(sprints.isEmpty()){
             // get the id of the schedulable that is displayed after this schedulable so that they appear in the correct order
             nextSchedulableIds.add(getNextSchedulable(schedulables, schedulable.getParentProject().getProjectStartDate(),
-                    schedulable.getParentProject().getProjectEndDate(), schedulable));
+                    schedulable.getParentProject().getProjectEndDate(), schedulable, true));
             setSchedulableLocationIds(BoxLocation.FIRST, -1);
         } else if(sprints.get(0).getSprintStartDate().after(schedulable.getStartDate())) {
             // get the id of the schedulable that is displayed after this schedulable so that they appear in the correct order
             nextSchedulableIds.add(getNextSchedulable(schedulables, schedulable.getParentProject().getProjectStartDate(),
-                    sprints.get(0).getSprintStartDate(), schedulable));
+                    sprints.get(0).getSprintStartDate(), schedulable, true));
             setSchedulableLocationIds(BoxLocation.FIRST, -1);
         }
 
         //get list of all schedulable box ids to include the schedulable on the project details page
         for (int i = 0; i < sprints.size(); i++) {
             // Check if the schedulable overlaps with the sprint at index i
-            if(DateUtils.timesOverlap(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
+            if(DateUtils.timesOverlapIncl(sprints.get(i).getSprintStartDate(), sprints.get(i).getSprintEndDate(),
                     schedulable.getStartDate(), schedulable.getEndDate())){
                 nextSchedulableIds.add(getNextSchedulable(schedulables, sprints.get(i).getSprintStartDate(),
-                        sprints.get(i).getSprintEndDate(), schedulable));
+                        sprints.get(i).getSprintEndDate(), schedulable, false));
                 setSchedulableLocationIds(BoxLocation.INSIDE, sprints.get(i).getId());
             }
             // Check if schedulable occurs between the end of this sprint and the start of the next one
-            if((sprints.size() > i+1) && DateUtils.timesOverlap(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
+            if((sprints.size() > i+1) && DateUtils.timesOverlapExcl(sprints.get(i).getSprintEndDate(), sprints.get(i+1).getSprintStartDate(),
                     schedulable.getStartDate(), schedulable.getEndDate())) {
                 nextSchedulableIds.add(getNextSchedulable(schedulables, sprints.get(i).getSprintEndDate(),
-                        sprints.get(i+1).getSprintStartDate(), schedulable));
+                        sprints.get(i+1).getSprintStartDate(), schedulable, true));
                 setSchedulableLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
             }
             // If this sprint is the last sprint, check if the schedulable occurs after the end of this sprint
             if(sprints.size() == i+1 && sprints.get(i).getSprintEndDate().before(schedulable.getEndDate())){
                 nextSchedulableIds.add(getNextSchedulable(schedulables, sprints.get(i).getSprintEndDate(),
-                        schedulable.getParentProject().getProjectEndDate(), schedulable));
+                        schedulable.getParentProject().getProjectEndDate(), schedulable, false));
                 setSchedulableLocationIds(BoxLocation.AFTER, sprints.get(i).getId());
             }
         }
@@ -127,18 +129,22 @@ public class SchedulableMessageOutput {
     }
 
     /**
-     * Gets the next schedulable within a certain time period
+     * Given a schedulable, gets the next schedulable within a certain time period
      * @param schedulables the list of all schedulables
      * @param periodStart the start of the time period
      * @param periodEnd the end of the time period
+     * @param updatedSchedulable the schedulable being updated
+     * @param exclusive whether the period is exclusive of the start and end dates
      * @return the box id of the next schedulable or -1 if there is no next schedulable
      */
-    private String getNextSchedulable(List<Schedulable> schedulables, Date periodStart, Date periodEnd, Schedulable updatedSchedulable){
+    private String getNextSchedulable(List<Schedulable> schedulables, Date periodStart, Date periodEnd, Schedulable updatedSchedulable, boolean exclusive){
         for (Schedulable schedulable : schedulables) {
             if (schedulable.getStartDate().after(updatedSchedulable.getStartDate()) &&
-                    DateUtils.timesOverlap(periodStart, periodEnd,
-                            schedulable.getStartDate(), schedulable.getEndDate())) {
-                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getId()));
+                    (exclusive && DateUtils.timesOverlapExcl(periodStart, periodEnd,
+                        schedulable.getStartDate(), schedulable.getEndDate()) ||
+                            (!exclusive && DateUtils.timesOverlapIncl(periodStart, periodEnd,
+                                    schedulable.getStartDate(), schedulable.getEndDate())))){
+                return (String.format(NEXT_SCHEDULABLE_ID_FORMAT, schedulable.getType(), schedulable.getId()));
             }
         }
         return "-1";
@@ -151,6 +157,10 @@ public class SchedulableMessageOutput {
     public int getId(){
         return  id;
     }
+
+    public void setType(String type) { this.type = type; }
+
+    public String getType() { return type; }
 
     public List<String> getSchedulableListIds() {
         return schedulableListIds;

@@ -18,6 +18,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "project_id")
     private int id;
 
     @Column (nullable = false)
@@ -44,6 +45,10 @@ public class Project {
 
     @OneToMany(mappedBy = "parentProject")
     private Set<Event> events;
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Deadline> deadlines;
+    @OneToMany(mappedBy = "parentProject")
+    private Set<Milestone> milestones;
 
     protected Project() {
         this.projectCreationDate = new Date();
