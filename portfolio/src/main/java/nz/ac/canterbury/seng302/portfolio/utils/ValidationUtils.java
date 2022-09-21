@@ -250,16 +250,30 @@ public class ValidationUtils {
         return error;
     }
 
+    public static ValidationError validateDescription(String description) {
+        ValidationError error = new ValidationError();
+        String regex = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(description);
+        if(!matcher.matches()) {
+            error.addErrorMessage("Description can only have letters, numbers, punctuations, and spaces.");
+        }
+        return error;
+    }
+
     /**
      * Creates a string object containing all the errors
      */
-    public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors) {
+    public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors, ValidationError descriptionErrors) {
         if (dateErrors.isError() || nameErrors.isError()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: dateErrors.getErrorMessages()) {
                 errors.add(err);
             }
             for (var err: nameErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: descriptionErrors.getErrorMessages()) {
                 errors.add(err);
             }
             return errors.toString();

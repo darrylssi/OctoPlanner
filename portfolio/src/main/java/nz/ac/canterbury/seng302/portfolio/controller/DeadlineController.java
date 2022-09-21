@@ -156,9 +156,6 @@ public class DeadlineController extends PageController {
      * @return a response entity that contains any errors that were found. Bad Request if there were errors, Ok if there are none
      */
     private ResponseEntity<String> validateDeadline(SchedulableForm schedulableForm, BindingResult bindingResult, Project parentProject, TimeZone userTimeZone) {
-        ValidationError dateErrors;
-        ValidationError nameErrors;
-
         // list of errors that can be removed as they are not applicable to milestones
         List<String> notApplicableErrors = new ArrayList<>(List.of("End date cannot be blank", "End time cannot be blank"));
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
@@ -178,9 +175,10 @@ public class DeadlineController extends PageController {
             }
         }
         // Check that the date is correct
-        dateErrors = ValidationUtils.validateDeadlineDate(schedulableForm.startDatetimeToDate(userTimeZone), parentProject);
-        nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors);
+        ValidationError dateErrors = ValidationUtils.validateDeadlineDate(schedulableForm.startDatetimeToDate(userTimeZone), parentProject);
+        ValidationError nameErrors = ValidationUtils.validateName(schedulableForm.getName());
+        ValidationError descriptionErrors = ValidationUtils.validateDescription(schedulableForm.getDescription());
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descriptionErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }

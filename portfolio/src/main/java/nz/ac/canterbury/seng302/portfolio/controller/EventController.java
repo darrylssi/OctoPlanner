@@ -83,8 +83,9 @@ public class EventController extends PageController {
         Project parentProject = projectService.getProjectById(projectID);
         dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone), parentProject);
         nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        if (dateErrors.isError() || nameErrors.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameErrors), HttpStatus.BAD_REQUEST);
+        ValidationError descriptionErrors = ValidationUtils.validateDescription(schedulableForm.getDescription());
+        if (dateErrors.isError() || nameErrors.isError() || descriptionErrors.isError()) {
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameErrors, descriptionErrors), HttpStatus.BAD_REQUEST);
         }
         // Data is valid, add it to database
         Event event = new Event(schedulableForm.getName(), schedulableForm.getDescription(), schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone));
@@ -137,8 +138,9 @@ public class EventController extends PageController {
         // Validation round 2: Do our custom errors pass?
         var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
         var nameError = ValidationUtils.validateName(editSchedulableForm.getName());
+        var descriptionError = ValidationUtils.validateDescription(editSchedulableForm.getDescription());
         if (dateErrors.isError() || nameError.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError, descriptionError), HttpStatus.BAD_REQUEST);
         }
         // Set new event details
         event.setName(editSchedulableForm.getName());
