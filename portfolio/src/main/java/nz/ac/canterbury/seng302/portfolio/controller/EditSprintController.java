@@ -97,7 +97,7 @@ public class EditSprintController extends PageController {
 
         Project parentProject = projectService.getProjectById(projectId);
 
-        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
+        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(DateUtils.toDate(sprintStartDate), DateUtils.toDate(sprintEndDate),
                 id, parentProject, sprintService.getSprintsInProject(projectId));
 
         ValidationError invalidName = AddSprintController.getNameValidationError(sprintName);

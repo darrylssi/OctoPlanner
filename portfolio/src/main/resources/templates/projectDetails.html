@@ -50,7 +50,7 @@
     <hr/>
 <!--Add Schedulable Buttons-->
     <div class="flex-row">
-        <a class="btn btn-primary btn-lg" th:if="${canEdit}" th:href="|../../add-sprint/${project.getId}|">
+        <a class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addSprintForm">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
             </svg>
@@ -86,9 +86,15 @@
 <div th:if="${canEdit}"
      th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
          projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
+    <div th:replace="detailFragments :: sprintAddForm(
+                    projectId=${project.getId()},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectStart=${projectStart},
+                    projectEnd=${projectEnd})" />
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='event',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
@@ -96,7 +102,6 @@
                     projectEnd=${projectEnd})" />
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='deadline',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
@@ -104,7 +109,6 @@
                     projectEnd=${projectEnd})" />
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='milestone',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},

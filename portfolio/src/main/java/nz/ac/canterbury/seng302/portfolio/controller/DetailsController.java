@@ -1,11 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +26,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
@@ -68,11 +67,13 @@ public class DetailsController extends PageController {
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 SchedulableForm schedulableForm,
+                SprintForm sprintForm,
                 TimeZone userTimezone,
                 Model model
     ){
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateSchedulableForm(schedulableForm, userTimezone.toZoneId());
+        prePopulateSprintForm(sprintForm, userTimezone.toZoneId(), id, model);
         populateProjectDetailsModel(model, id, thisUser);
 
         /* Return the name of the Thymeleaf template */
@@ -109,6 +110,7 @@ public class DetailsController extends PageController {
         model.addAttribute("project", project);
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
+        model.addAttribute("parentProjectId", parentProjectId);
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
@@ -184,6 +186,54 @@ public class DetailsController extends PageController {
             schedulableForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
             schedulableForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
+    }
+
+    /**
+     * Populates the sprint form with default values
+     * @param sprintForm the sprint form being populated
+     * @param userTimezone the timezone this is occurring in
+     * @param projectId the id of the parent project
+     * @param model the model to be sent to thymeleaf
+     */
+    private void prePopulateSprintForm(SprintForm sprintForm, ZoneId userTimezone, int projectId, Model model){
+        sprintForm.setDescription("");
+        sprintForm.setName(labelUtils.nextLabel(projectId));
+        Project project = projectService.getProjectById(projectId);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(projectId);
+
+        // Calculate the default sprint start date
+        Date sprintStart;
+        Calendar c = Calendar.getInstance();
+        if (sprintList.isEmpty()) { // Use project start date when there are no sprints
+            sprintStart = project.getProjectStartDate();
+            c.setTime(sprintStart);
+        } else {
+            Date lastSprintEnd = sprintList.get(sprintList.size()-1).getSprintEndDate();
+            c.setTime(lastSprintEnd);
+            c.add(Calendar.DAY_OF_MONTH, 1);    // Day after last sprint ends
+            sprintStart = c.getTime();
+        }
+
+        // This only happens when the last sprint finishes on the same day as the project
+        if (sprintStart.after(project.getProjectEndDate())) {
+            model.addAttribute("invalidDateRange",
+                    "There is no room for more sprints in this project");
+        }
+
+        // Calculate the default sprint end date
+        Date sprintEnd;
+        c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
+
+        // Checks that the default end date is within the project dates
+        if (ValidationUtils.datesOutsideProject(sprintStart, c.getTime(),
+                project.getProjectStartDate(), project.getProjectEndDate())){
+            sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
+        } else {
+            sprintEnd = c.getTime();
+        }
+
+        sprintForm.setStartDate(DateUtils.dateToLocalDate(sprintStart, userTimezone));
+        sprintForm.setEndDate(DateUtils.dateToLocalDate(sprintEnd, userTimezone));
     }
 
     /**

@@ -13,13 +13,13 @@
 
 <div th:replace="fragments :: header(title='Adding Sprint', subtitle=${projectName})"></div>
 
-<div class="card">
+<div class="card" th:fragment="addSprint">
     <div class="card-body" style="">
-        <form th:action="@{../add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprint}" modelAttribute="sprint">
+        <form th:action="@{../add-sprint/{id}(id = ${parentProjectId})}" method="post" th:object="${sprintForm}" modelAttribute="sprint">
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="sprintName" th:name="sprintName" th:value="${sprintName}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control">
+                        <input type="text" id="sprintName" th:name="sprintName" th:value="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control">
                         <label class="form-label" for="sprintName">Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>

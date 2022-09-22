@@ -252,5 +252,53 @@
     </div>
 </div>
 
+<!-- Add Sprint Form -->
+<div th:fragment="sprintAddForm">
+    <div class="card collapse" th:id="|addSprintForm|" th:classappend="${#fields.hasErrors('sprintForm.*') OR !#arrays.isEmpty(sprintFormError) ? 'show' : null}">
+        <div class="card-header" th:text="|New Sprint|"></div>
+        <div class="card-body">
+            <form action="javascript:;" th:data-url="@{../../add-sprint/{id}(id = ${projectId})}" th:formBoxId="|addSprintForm|"
+                  th:onsubmit="return sendFormViaAjax(this, 'sprint')" method="post" class="container-fluid js-form" th:object="${sprintForm}">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSprintNameInput" th:field="*{name}" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required class="form-control" aria-describedby="sprintNameFeedback">
+                            <label class="form-label" for="addSprintNameInput">Name</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+                        <small id="addSprintNameFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col-10">
+                        <div class="form-floating input-group mb-3 limited-text-input">
+                            <input type="text" id="addSprintDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description">
+                            <label for="addSprintDescriptionInput">Description</label>
+                            <span class="input-group-text remaining-chars-field">...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="date" th:field="*{startDate}" class="form-control" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="sprintStartDate">Start Date</label>
+                        </div>
+                        <small id="addSprintStartDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3 has-validation">
+                            <input type="date" th:field="*{endDate}" class="form-control" id="sprintEndDate" aria-describedby="sprintEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <label for="sprintEndDate">End Date</label>
+                        </div>
+                        <small id="addSsprintEndDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
