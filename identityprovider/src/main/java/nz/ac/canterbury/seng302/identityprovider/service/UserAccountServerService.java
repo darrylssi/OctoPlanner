@@ -47,7 +47,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private Path profileImageFolder;
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
@@ -284,7 +284,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setNanos((int) ((millis % 1000) * 1000000)).build();
         user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
 
         reply
                 .setIsSuccess(true)
@@ -305,7 +305,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     public void getUserAccountById(GetUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         logger.info("getUserAccountById has been called");
 
-        User user = repository.findById(request.getId());
+        User user = userRepository.findById(request.getId());
         if (user != null) {
             UserResponse reply = buildUserResponse(user);
             responseObserver.onNext(reply);
@@ -346,7 +346,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         }
 
         List<UserResponse> userResponses = paginatedUsers.stream().map(this::buildUserResponse).toList();
-        int numUsersInDatabase = (int) repository.count();
+        int numUsersInDatabase = (int) userRepository.count();
         reply
             .addAllUsers(userResponses)
             .setResultSetSize(numUsersInDatabase);
@@ -388,7 +388,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     /**
      * <p>Holds shared functionality for adding/deleting user roles.</p>
      *
-     * Sends a succesful reply if the operation was successful
+     * Sends a successful reply if the operation was successful
      * Gives a Status.NOT_FOUND error if the user ID is invalid
      */
     private void modifyUserRole(
@@ -459,7 +459,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("editUser() has been called");
         EditUserResponse.Builder reply = EditUserResponse.newBuilder();
 
-        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = userRepository.findById(request.getUserId()); // Attempts to get the user from the database
 
         List<ValidationError> errors = validator.validateEditUserRequest(request, user);
 
@@ -488,7 +488,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         user.setPersonalPronouns(request.getPersonalPronouns());
         user.setEmail(request.getEmail());
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
         reply
                 .setIsSuccess(true)
                 .setMessage("User edited successfully");
@@ -506,7 +506,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("changeUserPassword() has been called");
         ChangePasswordResponse.Builder reply = ChangePasswordResponse.newBuilder();
 
-        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = userRepository.findById(request.getUserId()); // Attempts to get the user from the database
 
         List<ValidationError> errors = validator.validateChangePasswordRequest(request, user);
 
@@ -531,7 +531,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         String hashedPassword = encoder.encode(request.getNewPassword());
         user.setPassword(hashedPassword);
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
         reply
                 .setIsSuccess(true)
                 .setMessage("User's password changed successfully");

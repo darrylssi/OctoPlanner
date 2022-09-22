@@ -8,8 +8,11 @@ import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -74,21 +77,75 @@ class GroupServerServiceTest {
     void testCreateGroup_whenValid() {
         StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
         CreateGroupRequest request = CreateGroupRequest.newBuilder()
                 .setShortName("test valid short name")
                 .setLongName("test valid long name")
                 .build();
         groupServerService.createGroup(request, observer);
 
-        // TODO uncomment these lovely assertions when the methods have been implemented
-        //verify(observer, times(1)).onCompleted();
-        //verify(observer, times(1)).onNext(captor.capture());
-        //CreateGroupResponse response = captor.getValue();
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
 
-        //assertTrue(response.getIsSuccess());
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+    }
 
-        // TODO and get rid of this one
-        assertEquals("test long name", testGroup.getLongName());
+    @ParameterizedTest
+    @CsvSource({"'',Group short name cannot be empty",
+            "a,Group short name must be between 2 and 32 characters",
+            "Thirty-Three Character Long Name3,Group short name must be between 2 and 32 characters"})
+    void testCreateGroup_whenShortNameInvalid(String shortName, String errorMessage) {
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName(shortName)
+                .setLongName("test valid long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText(errorMessage)
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testCreateGroup_whenLongNameTooLong() {
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("test valid short name")
+                .setLongName("One hundred and twenty-nine character long long name Lorem ipsum dolor sit amet, " +
+                        "consectetur adipiscing elit, sed do eiusmod temp")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name must not exceed 128 characters")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
     }
 
     @Test
@@ -265,6 +322,51 @@ class GroupServerServiceTest {
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
         RemoveGroupMembersResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testDeleteGroup_whenValid() {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete a group
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
+
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+    }
+
+    @Test
+    void testDeleteGroup_whenGroupDoesNotExist() {
+        // * Given: There is no group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete a group
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
