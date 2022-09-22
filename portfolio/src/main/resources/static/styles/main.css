@@ -334,3 +334,13 @@ button:hover {
 .bi-calendar-event,.bi-calendar-deadline, .bi-calendar-milestone, .bi-hourglass-bottom{
     margin: 5px;
 }
+
+.warning-container {
+    position: fixed;
+    width: 60%;
+    min-width: 20em;
+    top: 2px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 1;
+}

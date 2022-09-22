@@ -122,4 +122,10 @@ public class MessageMappingController {
 
         return schedulableMessageOutput;
     }
+
+    @MessageMapping("/date-change")
+    @SendTo("/topic/date-change")
+    public Message datesHaveChanged(Message message) {
+        return message;
+    }
 }
