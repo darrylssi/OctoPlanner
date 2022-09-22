@@ -227,42 +227,26 @@ public class ValidationUtils {
     }
 
     /**
-     * Checks whether the name contains only valid characters
-     * @param name Name to be tested
-     * @return A ValidationError with a boolean error flag and a list of error messages
+     * Checks whether a text contains only valid characters.
+     * Text cannot be null. This allows letters from any languages, numbers, punctuation and spaces.
+     * For names, commas are not allowed.
+     * @param text Usually name or description
+     * @param regex Pattern that describes the text
+     * @param message Error message when the text does not match the pattern
+     * @return ValidationError object that contains the error message
      */
-    public static ValidationError validateName(String name) {
+    public static ValidationError validateText(String text, String regex, String message) {
         ValidationError error = new ValidationError();
 
-        if (name == null) {
-            error.addErrorMessage("Must enter a sprint name");
+        if (text == null) {
+            error.addErrorMessage("Cannot be null.");
             return error;
         }
 
-        /* string can only have alphanumeric and _ . - symbols */
-        String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(name);
+        Matcher matcher = pattern.matcher(text);
         if(!matcher.matches()) {
-            error.addErrorMessage("Name can only have alphanumeric and . - _ characters");
-        }
-
-        return error;
-    }
-
-    /**
-     * Checks whether the description contains only valid characters.
-     * Description only allows letters from any language, numbers, punctuation, and whitespace separators.
-     * @param description Description to be tested
-     * @return ValidationError object that contains a list of error messages
-     */
-    public static ValidationError validateDescription(String description) {
-        ValidationError error = new ValidationError();
-        String regex = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(description);
-        if(!matcher.matches()) {
-            error.addErrorMessage("Description can only have letters, numbers, punctuations, and spaces.");
+            error.addErrorMessage(message);
         }
         return error;
     }

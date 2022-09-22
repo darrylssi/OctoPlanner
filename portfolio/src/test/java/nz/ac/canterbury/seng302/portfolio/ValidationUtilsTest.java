@@ -1,9 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio;
 
+import net.bytebuddy.agent.builder.AgentBuilder;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -215,38 +217,38 @@ class ValidationUtilsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"!@#", "''", "' '", "Sprint @"})
-    void testInvalidSprintName_getErrorMessage(String name) {
-        ValidationError result = ValidationUtils.validateName(name);
+    @CsvSource({"!@#", "''", "' '", "Sprint @", "Event, 1"})
+    void testInvalidName_getErrorMessage(String name) {
+        ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Name can only have alphanumeric and . - _ characters", result.getFirstError());
+        assertEquals("Name can only have letters, numbers, punctuation except commas, and spaces.", result.getFirstError());
     }
 
     @Test
-    void testNullSprintName_getErrorMessage() {
-        ValidationError result = ValidationUtils.validateName(null);
+    void testNullText_getErrorMessage() {
+        ValidationError result = ValidationUtils.validateText(null, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Must enter a sprint name", result.getFirstError());
+        assertEquals("Cannot be null", result.getFirstError());
     }
 
     @ParameterizedTest
     @CsvSource({"Sprint 1", "Sprint_1", "Sprint-1", "Sprint.1"})
-    void testValidSprintName(String name) {
-        ValidationError result = ValidationUtils.validateName(name);
+    void testValidName(String name) {
+        ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertFalse(result.isError());
     }
 
     @ParameterizedTest
     @CsvSource({"This is valid", "''", "This! 1s. v@Lid,", "ㅍ미ㅑㅇ", "123!!?"})
     void testValidDescription(String desc) {
-        ValidationError result = ValidationUtils.validateDescription(desc);
+        ValidationError result = ValidationUtils.validateText(desc, GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
         assertFalse(result.isError());
     }
 
     @ParameterizedTest
     @CsvSource({"Emojis are not valid 🤨", "These too apparently %^"})
     void testInvalidDescription_getErrorMessage(String desc) {
-        ValidationError result = ValidationUtils.validateDescription(desc);
+        ValidationError result = ValidationUtils.validateText(desc, GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
         assertTrue(result.isError());
         assertEquals("Description can only have letters, numbers, punctuations, and spaces.", result.getFirstError());
     }

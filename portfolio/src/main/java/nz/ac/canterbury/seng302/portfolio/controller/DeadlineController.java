@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -176,9 +177,9 @@ public class DeadlineController extends PageController {
         }
         // Check that the date is correct
         ValidationError dateErrors = ValidationUtils.validateDeadlineDate(schedulableForm.startDatetimeToDate(userTimeZone), parentProject);
-        ValidationError nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        ValidationError descriptionErrors = ValidationUtils.validateDescription(schedulableForm.getDescription());
-        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descriptionErrors);
+        ValidationError nameErrors = ValidationUtils.validateText(schedulableForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError descErrors = ValidationUtils.validateText(schedulableForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }
