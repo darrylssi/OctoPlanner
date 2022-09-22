@@ -1,4 +1,4 @@
-Feature: Events
+ Feature: Events
   Scenario Outline: Adding valid events
     Given the parent project starts at <ParentStart> and ends on <ParentEnd>
     When the user creates an event called <Name>, starting at <EventStart>, ending on <EventEnd>, with a description <Desc>

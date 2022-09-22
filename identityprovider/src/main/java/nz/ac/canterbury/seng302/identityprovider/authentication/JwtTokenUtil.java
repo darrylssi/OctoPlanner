@@ -154,7 +154,7 @@ public class JwtTokenUtil implements Serializable {
 		List<String> userRoles = user.getRoles().stream().map(UserRole::toString).toList();
 		String commaSeparatedUserRoles = String.join(",", userRoles);
 		commaSeparatedUserRoles = commaSeparatedUserRoles.toLowerCase();    // Because the hard-coded roles were lower-case
-		return generateTokenForUser(user.getUsername(), user.getID(), user.getFullName(), commaSeparatedUserRoles);
+		return generateTokenForUser(user.getUsername(), user.getId(), user.getFullName(), commaSeparatedUserRoles);
 	}
 
 	/**

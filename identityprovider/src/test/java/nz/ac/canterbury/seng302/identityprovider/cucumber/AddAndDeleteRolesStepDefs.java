@@ -3,14 +3,13 @@ package nz.ac.canterbury.seng302.identityprovider.cucumber;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import nz.ac.canterbury.seng302.identityprovider.model.User;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import java.util.Locale;
 
-import nz.ac.canterbury.seng302.identityprovider.model.User;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AddAndDeleteRolesStepDefs {
     private User testUser;
