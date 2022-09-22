@@ -210,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById("invalidDateRangeError").hidden = true;
             } else if(info.event.extendedProps.type != 'sprint'){
                 //option to click on schedulable icons to display tooltips so that they can be viewed on mobile
-                //TODO test this on the VM to see if it actually works
                 bootstrap.Tooltip.getInstance(info.el).show();
             }
 
