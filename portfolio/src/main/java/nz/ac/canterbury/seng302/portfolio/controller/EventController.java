@@ -178,7 +178,7 @@ public class EventController extends PageController {
 
         ValidationError dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimeZone), schedulableForm.endDatetimeToDate(userTimeZone), parentProject);
         ValidationError nameErrors = ValidationUtils.validateText(schedulableForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
-        ValidationError descErrors = ValidationUtils.validateText(schedulableForm.getName(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        ValidationError descErrors = ValidationUtils.validateText(schedulableForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
         String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);

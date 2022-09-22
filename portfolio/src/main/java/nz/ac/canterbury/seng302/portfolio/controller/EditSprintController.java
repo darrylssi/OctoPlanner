@@ -8,6 +8,8 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +102,7 @@ public class EditSprintController extends PageController {
         ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintService.getSprintsInProject(projectId));
 
-        ValidationError invalidName = AddSprintController.getNameValidationError(sprintName);
+        ValidationError invalidName = ValidationUtils.validateText(sprintName, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {

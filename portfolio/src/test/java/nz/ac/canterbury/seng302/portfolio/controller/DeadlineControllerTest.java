@@ -118,12 +118,12 @@ class DeadlineControllerTest {
 
         // Sends inappropriate deadline name, so the appropriate error is shown
         mockMvc.perform(post("/project/0/add-deadline")
-                        .param("name", "New Deadline!")
+                        .param("name", "New Deadline 🤯🏋️")
                         .param("description", "This is a deadline")
                         .param("startDate", "2022-09-09")
                         .param("startTime", "12:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
     }
 
     @Test
@@ -230,12 +230,12 @@ class DeadlineControllerTest {
 
         // As the deadline has an inappropriate name, so appropriate error is shown
         mockMvc.perform(post("/project/0/edit-deadline/1")
-                        .param("name", "!@#$")
+                        .param("name", "🤯")
                         .param("description", "This is a deadline")
                         .param("startDate", "2022-09-09")
                         .param("startTime", "12:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
     }
 
     @Test

@@ -217,22 +217,22 @@ class ValidationUtilsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"!@#", "''", "' '", "Sprint @", "Event, 1"})
+    @CsvSource({ "''", "' '", "🤯"})
     void testInvalidName_getErrorMessage(String name) {
         ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Name can only have letters, numbers, punctuation except commas, and spaces.", result.getFirstError());
+        assertEquals("Name can only have letters, numbers, punctuations except commas, and spaces.", result.getFirstError());
     }
 
     @Test
     void testNullText_getErrorMessage() {
         ValidationError result = ValidationUtils.validateText(null, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Cannot be null", result.getFirstError());
+        assertEquals("Cannot be null.", result.getFirstError());
     }
 
     @ParameterizedTest
-    @CsvSource({"Sprint 1", "Sprint_1", "Sprint-1", "Sprint.1"})
+    @CsvSource({"!@#", "Sprint @", "Sprint 1", "Sprint_1", "Sprint-1", "Sprint.1"})
     void testValidName(String name) {
         ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertFalse(result.isError());
