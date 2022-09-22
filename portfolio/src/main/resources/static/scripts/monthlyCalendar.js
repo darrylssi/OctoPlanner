@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.submit();
 
                 // send websocket message TODO
-                stompClient.send("/app/sprints", {}, JSON.stringify({id: info.event.id, startStr: info.event.startStr, endStr: info.event.endStr}));
+                stompClient.send("/app/date-change", {}, JSON.stringify({id: info.event.id, startStr: info.event.startStr, endStr: info.event.endStr}));
             }
         },
         // detect when mouse is over a sprint to deselect sprints when clicking outside them

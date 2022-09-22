@@ -25,6 +25,7 @@ public class GlobalVars {
     public static final String EVENT_TYPE = "event";
     public static final String DEADLINE_TYPE = "deadline";
     public static final String MILESTONE_TYPE = "milestone";
+    public static final String SPRINT_TYPE = "sprint";
 
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
