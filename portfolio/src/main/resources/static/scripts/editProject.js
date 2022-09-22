@@ -11,40 +11,27 @@ function setNewMax() {
     document.getElementById('projectStartDate').setAttribute('max', newEnd);
 }
 
-// Set project min date to last year
-// A teacher can start a project up to a year ago (UPi AC4)
-var today = new Date();
-var dd = today.getDate();
-var mm = today.getMonth() + 1;
-var yyyy = today.getFullYear()-1;
-if (dd < 10) {
-    dd = '0' + dd;
-}
-if (mm < 10) {
-    mm = '0' + mm;
-}
-today = yyyy + '-' + mm + '-' + dd;
-document.getElementById('projectStartDate').setAttribute('min', today);
-
-// To hide the modal when the transaction is cancelled
-function hideModal() {
-    const modal = document.getElementById("longProjectModal");
-    modal.style.display = "none";
+// Set the min start date of the project to be the year before it was created
+function setMinDate(creationDate) {
+    mindate = new Date(creationDate);
+    mindate.setFullYear(mindate.getFullYear()-1)
+    document.getElementById('projectStartDate').setAttribute('min', mindate.toISOString().substring(0,10));
 }
 
 // Checks whether the project is longer than 10 years
 // If it is, the confirmation modal is shown
 function showLongProjectModal(e) {
     e.preventDefault();
+    document.getElementById('deleteButton').innerText = "Confirm";
     const startDate = new Date(document.getElementById('projectStartDate').value);
     const startString = startDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).replace(/ /g, '/');;
     const endDate = new Date(document.getElementById('projectEndDate').value);
     const endString = endDate.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).replace(/ /g, '/');;
-    const modal = document.getElementById("longProjectModal");
+    const modal = document.getElementById("deleteModal");
     const title = document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you " +
             "want to create a project from " + startString + " to " + endString + "?";
     if ((endDate.getFullYear() - startDate.getFullYear()) > 10) {
-        const confirmButton = document.getElementById("confirmButton");
+        const confirmButton = document.getElementById("deleteButton");
         confirmButton.onclick = () => {saveProject()}
         modal.style.display = "block";
     } else {

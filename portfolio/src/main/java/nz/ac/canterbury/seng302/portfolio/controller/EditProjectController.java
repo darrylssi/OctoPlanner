@@ -41,35 +41,6 @@ public class EditProjectController extends PageController {
     private SprintService sprintService;
 
     /**
-     * Show the edit-project page.
-     * @param id ID of the project to be edited
-     * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @return Edit-project page
-     */
-    @GetMapping("/edit-project/{id}")
-    public String projectForm(@AuthenticationPrincipal AuthState principal,
-                              @PathVariable("id") int id,
-                              Model model
-    ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-
-        /* Add project details to the model */
-        try {
-            Project project = projectService.getProjectById(id);
-            model.addAttribute("id", id);
-            model.addAttribute("project", project);
-            model.addAttribute("projectStartDate", DateUtils.toString(project.getProjectStartDate()));
-            model.addAttribute("projectEndDate", DateUtils.toString(project.getProjectEndDate()));
-            model.addAttribute("projectDescription", project.getProjectDescription());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found", e);
-        }
-
-        /* Return the name of the Thymeleaf template */
-        return "editProject";
-    }
-
-    /**
      * A post request for editing a project with a given ID.
      * @param id ID of the project to be edited
      * @param projectName (New) name of the project
@@ -79,8 +50,8 @@ public class EditProjectController extends PageController {
      * @return Details page
      * @throws ResponseStatusException If the date cannot be parsed
      */
-    @PostMapping("/edit-project/{id}")
-    public String projectSave(
+    @PostMapping("project/{id}/edit-project")
+    public String postEditProject(
             @AuthenticationPrincipal AuthState principal,
             @Valid Project project,
             BindingResult result,
@@ -109,7 +80,7 @@ public class EditProjectController extends PageController {
             model.addAttribute("projectDescription", projectDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getErrorMessages());
             model.addAttribute("invalidName", invalidName.getErrorMessages());
-            return "editProject";
+            return "redirect:/project/" + id;
         }
 
         /* Set (new) project details to the corresponding project */
@@ -120,7 +91,7 @@ public class EditProjectController extends PageController {
         projectService.saveProject(newProject);
 
         /* Redirect to the details' page when done */
-        return "redirect:../project/" + id;
+        return "redirect:/project/" + id;
     }
 
 }
