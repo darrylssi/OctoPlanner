@@ -8,12 +8,16 @@ import java.util.HashSet;
 import java.util.Set;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+/**
+ * Represents a user object.
+ */
 @Entity
 @Table(name = "Users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
@@ -33,6 +37,9 @@ public class User {
     @Enumerated
     private Set<UserRole> roles;
 
+    @ManyToMany(mappedBy = "members")
+    private Set<Group> groups = new HashSet<>();
+
     protected User() {
     }
 
@@ -51,11 +58,11 @@ public class User {
         this.roles = new HashSet<>();
     }
 
-    public int getID() {
+    public int getId() {
         return this.id;
     }
 
-    public void setID(int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -139,6 +146,14 @@ public class User {
         this.created = created;
     }
 
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
+
     public Set<UserRole> getRoles() {
         return roles;
     }
@@ -167,6 +182,10 @@ public class User {
         }
     }
 
+    /**
+     * Combines the users first name, middle name (if they have one) and their last name into one String
+     * @return A String containing the user's full name
+     */
     public String getFullName() {
         if (this.middleName == null) {
             return this.firstName + " " + this.lastName;
@@ -177,5 +196,23 @@ public class User {
 
     public UserRole highestRole() {
         return roles.stream().max(Comparator.naturalOrder()).orElse(null);
+    }
+
+    /**
+     * Adds a group to the user's set of joined groups
+     * This does not add the user to the corresponding groups set of members
+     * @param group The group to add
+     */
+    public void joinGroup(Group group) {
+        this.groups.add(group);
+    }
+
+    /**
+     * Removes a group from the user's set of joined groups
+     * This does not remove the user from the corresponding groups set of members
+     * @param group The group to remove
+     */
+    public void leaveGroup(Group group) {
+        this.groups.remove(group);
     }
 }

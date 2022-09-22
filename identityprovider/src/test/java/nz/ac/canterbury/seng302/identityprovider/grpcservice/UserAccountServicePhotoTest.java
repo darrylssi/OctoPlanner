@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.identityprovider;
+package nz.ac.canterbury.seng302.identityprovider.grpcservice;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
