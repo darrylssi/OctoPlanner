@@ -1,4 +1,3 @@
-
 Feature: I can add a role to a user
   Scenario: Add a new role to a user
     Given There is a user with the role "STUDENT"

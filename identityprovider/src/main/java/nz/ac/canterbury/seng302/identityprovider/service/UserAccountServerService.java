@@ -288,7 +288,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         reply
                 .setIsSuccess(true)
-                .setNewUserId(user.getID())
+                .setNewUserId(user.getId())
                 .setMessage("User created successfully");
 
         responseObserver.onNext(reply.build());
@@ -371,7 +371,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private List<User> paginatedUsersOrderedByRole(int page, int limit, boolean isAscending) {
         ArrayList<User> users = new ArrayList<>(userService.getAllUsers());
         if (isAscending)
-            users.sort((a, b) -> a.highestRole().getNumber() - b.highestRole().getNumber());
+            users.sort(Comparator.comparingInt(a -> a.highestRole().getNumber()));
         else
             users.sort((a, b) -> b.highestRole().getNumber() - a.highestRole().getNumber());
 
@@ -400,7 +400,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         UserRole role = request.getRole();
 
         try {
-            boolean success = false;
+            boolean success;
             String successMessage = "Role successfully added";
             String failMessage = "Couldn't add role: User already had this role.";
 
@@ -547,7 +547,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @return A gRPC-ready response object with the user's fields copied in.
      */
     private UserResponse buildUserResponse(User user) {
-        int id = user.getID();
+        int id = user.getId();
         ArrayList<UserRole> sortedRoles = new ArrayList<>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());
 
