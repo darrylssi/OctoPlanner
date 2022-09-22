@@ -12,14 +12,11 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -141,31 +138,6 @@ public class DetailsController extends PageController {
         model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         model.addAttribute("tab", 0);
-    }
-
-    /**
-     * Deletes a sprint and redirects back to the project view
-     * @param principal used to check if the user is authorised to delete sprints
-     * @param sprintId the id of the sprint to be deleted
-     * @return a redirect to the project view
-     */
-    @DeleteMapping("/delete-sprint/{sprintId}")
-    @ResponseBody
-    public ResponseEntity<String> deleteSprint(
-                @AuthenticationPrincipal AuthState principal,
-                @PathVariable(name="sprintId") int sprintId
-        ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete sprints
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
-        try {
-            sprintService.deleteSprint(sprintId);
-            return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**

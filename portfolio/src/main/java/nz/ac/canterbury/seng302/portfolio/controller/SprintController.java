@@ -1,9 +1,11 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
+import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
@@ -13,24 +15,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.*;
 
 /**
- * Controller for the add sprint details page
+ * Controller for endpoints for adding and editing sprints
  */
 @Controller
-public class AddSprintController extends PageController {
+public class SprintController extends PageController {
 
     @Autowired
     private ProjectService projectService;              // Initializes the ProjectService object
@@ -38,6 +39,9 @@ public class AddSprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
+
+    private static final String EDIT_SPRINT_TEMPLATE = "editSprint";
+    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
 
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
@@ -110,6 +114,128 @@ public class AddSprintController extends PageController {
         sprintService.saveSprint(sprint);
         return new ResponseEntity<>("Sprint Updated", HttpStatus.OK);
     }
+
+    /**
+     * Show the edit-sprint page.
+     * @param id ID of the sprint to be edited
+     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+     * @return Edit-sprint page
+     */
+    @GetMapping("/edit-sprint/{id}")
+    public String sprintForm(
+            @PathVariable("id") int id,
+            @AuthenticationPrincipal AuthState principal,
+            Model model
+    ) {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
+        /* Add sprint details to the model */
+        Sprint sprint = sprintService.getSprintById(id);
+        if (sprint == null) {
+            configureError(model, ErrorType.NOT_FOUND, "/edit-sprint" + id);
+        } else {
+            sprint.setId(id);
+            model.addAttribute("id", id);
+            model.addAttribute("sprint", sprint);
+            model.addAttribute("projectId", sprint.getParentProjectId());
+            model.addAttribute("sprintId", sprint.getId());
+            model.addAttribute("sprintName", sprint.getSprintName());
+            model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
+            model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
+            model.addAttribute("sprintDescription", sprint.getSprintDescription());
+        }
+        /* Return the name of the Thymeleaf template */
+        return EDIT_SPRINT_TEMPLATE;
+    }
+
+    /**
+     * A post request for editing a sprint with a given ID.
+     *
+     * @param id                ID of the sprint to be edited
+     * @param projectId         ID of the sprint's parent project
+     * @param sprintName        (New) name of the sprint
+     * @param sprintStartDate   (New) start date of the sprint
+     * @param sprintEndDate     (New) end date of the sprint
+     * @param sprintDescription (New) description of the sprint
+     * @return Details page
+     */
+    @PostMapping("/edit-sprint/{id}")
+    public String sprintSave(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("id") int id,
+            @RequestParam(name = "projectId") int projectId,
+            @RequestParam(name = "sprintName") String sprintName,
+            @RequestParam(name = "sprintStartDate") String sprintStartDate,
+            @RequestParam(name = "sprintEndDate") String sprintEndDate,
+            @RequestParam(name = "sprintDescription") String sprintDescription,
+            @Valid @ModelAttribute("sprint") Sprint sprint,
+            BindingResult result,
+            Model model
+    ) throws ResponseStatusException {
+        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+
+        Project parentProject = projectService.getProjectById(projectId);
+
+        ValidationError dateOutOfRange = SprintController.getDateValidationError(DateUtils.toDate(sprintStartDate), DateUtils.toDate(sprintEndDate),
+                id, parentProject, sprintService.getSprintsInProject(projectId));
+
+        ValidationError invalidName = SprintController.getNameValidationError(sprintName);
+
+        // Checking if there are errors in the input, and also doing the valid dates validation
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
+            model.addAttribute("id", id);
+            model.addAttribute("sprint", sprint);
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("sprintId", id);
+            model.addAttribute("sprintName", sprintName);
+            model.addAttribute("sprintStartDate", sprintStartDate);
+            model.addAttribute("sprintEndDate", sprintEndDate);
+            model.addAttribute("sprintDescription", sprintDescription);
+            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
+            model.addAttribute("invalidName", invalidName.getFirstError());
+            return EDIT_SPRINT_TEMPLATE;
+        }
+
+        // Adding the new sprint object
+        sprint.setParentProjectId(parentProject.getId());
+        sprint.setSprintName(sprintName);
+        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
+        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
+        sprint.setSprintDescription(sprintDescription);
+        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+        sprint.setSprintColour(sprintService.getSprintById(id).getSprintColour());
+
+        sprintService.saveSprint(sprint);
+        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
+        return REDIRECT_TO_PROJECT + projectId;
+    }
+
+
+    /**
+     * Deletes a sprint
+     * @param principal used to check if the user is authorised to delete sprints
+     * @param sprintId the id of the sprint to be deleted
+     * @return a response entity with the result of the delete request: unauthorised, server error or ok
+     */
+    @DeleteMapping("/delete-sprint/{sprintId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteSprint(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="sprintId") int sprintId
+    ) {
+        PrincipalData thisUser = PrincipalData.from(principal);
+        // Check if the user is authorised to delete sprints
+        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
+            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            sprintService.deleteSprint(sprintId);
+            return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     /**
      * Sends the sprints dates and relevant parameters for them to be tested against to be validated
