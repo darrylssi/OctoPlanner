@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.portfolio;
 
-import net.bytebuddy.agent.builder.AgentBuilder;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
@@ -217,7 +216,7 @@ class ValidationUtilsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "''", "' '", "🤯"})
+    @CsvSource({ "''", "' '", "🤯", "'hello, world'"})
     void testInvalidName_getErrorMessage(String name) {
         ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
