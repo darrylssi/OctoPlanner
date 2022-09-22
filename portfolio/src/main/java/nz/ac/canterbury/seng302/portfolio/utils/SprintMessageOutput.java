@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 
 import java.util.Date;
 
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.SPRINT_TYPE;
 
 /**
  * A message object sent through websockets holding information about an updated sprint
@@ -13,7 +12,6 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.SPRINT_TYPE;
 public class SprintMessageOutput {
 
     private int id;
-    private String type;
     private String name;
     private Date startDate;
     private Date endDate;
@@ -30,7 +28,6 @@ public class SprintMessageOutput {
      */
     public SprintMessageOutput(Sprint sprint) {
         this.id = sprint.getId();
-        this.type = SPRINT_TYPE;
         this.name = sprint.getSprintName();
         this.startDate = sprint.getSprintStartDate();
         this.endDate = sprint.getSprintEndDate();
@@ -43,10 +40,6 @@ public class SprintMessageOutput {
     public int getId(){
         return  id;
     }
-
-    public void setType(String type) { this.type = type; }
-
-    public String getType() { return type; }
 
     public void setName(String name) { this.name = name; }
 

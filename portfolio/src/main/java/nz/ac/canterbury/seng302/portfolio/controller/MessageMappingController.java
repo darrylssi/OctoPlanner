@@ -3,10 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
-import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessage;
-import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessageOutput;
-import nz.ac.canterbury.seng302.portfolio.utils.Message;
-import nz.ac.canterbury.seng302.portfolio.utils.SprintMessageOutput;
+import nz.ac.canterbury.seng302.portfolio.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +45,6 @@ public class MessageMappingController {
     MilestoneService milestoneService;
     @Autowired
     SprintService sprintService;
-    @Autowired
-    ProjectService projectService;
 
     /**
      * Called when a user disconnects from their websocket connection.
@@ -67,6 +62,29 @@ public class MessageMappingController {
     }
 
     /**
+     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
+     * or a SprintMessageOutput with the sprint's data if it does exist.
+     * @param sprintMessage data received from the websocket containing the sprint id and type
+     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     */
+    @MessageMapping("/sprints")
+    @SendTo("/topic/sprints")
+    public SprintMessageOutput sendSprintData(SprintMessage sprintMessage) {
+        SprintMessageOutput sprintMessageOutput;
+        try {
+            Sprint updatedSprint = sprintService.getSprintById(sprintMessage.getId());
+            sprintMessageOutput = new SprintMessageOutput(updatedSprint);
+        } catch (ResponseStatusException e) {
+            // Send back an empty message if the sprint is not found
+            logger.error(e.getMessage());
+            sprintMessageOutput = new SprintMessageOutput();
+            sprintMessageOutput.setId(sprintMessage.getId());
+        }
+
+        return sprintMessageOutput;
+    }
+
+    /**
      * Websocket message mapping for editing schedulables
      * @param message Data to send through the websocket
      * @return An output that gets sent to the endpoint in the @SendTo parameter
@@ -75,34 +93,6 @@ public class MessageMappingController {
     @SendTo("/topic/editing-schedulable")
     public Message editingSchedulable(Message message) {
         return message;
-    }
-
-    /**
-     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
-     * or a SprintMessageOutput with the sprint's data if it does exist.
-     * @param message data received from the websocket containing the sprint id and type
-     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
-     */
-    @MessageMapping("/date-change")
-    @SendTo("/topic/date-change")
-    public SprintMessageOutput sendSprintData(SchedulableMessage message) {
-        SprintMessageOutput sprintMessageOutput;
-        try {
-            if (SPRINT_TYPE.equals(message.getType())) {
-                Sprint updatedSprint = sprintService.getSprintById(message.getId());
-                sprintMessageOutput = new SprintMessageOutput(updatedSprint);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message.getType() + " is not a sprint type!");
-            }
-        } catch (ResponseStatusException e) {
-            // Send back an empty message if the sprint is not found
-            logger.error(e.getMessage());
-            sprintMessageOutput = new SprintMessageOutput();
-            sprintMessageOutput.setId(message.getId());
-            sprintMessageOutput.setType(message.getType());
-        }
-
-        return sprintMessageOutput;
     }
 
     /**
