@@ -546,7 +546,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @param user The user object to extract fields from
      * @return A gRPC-ready response object with the user's fields copied in.
      */
-    private UserResponse buildUserResponse(User user) {
+    public UserResponse buildUserResponse(User user) {
         int id = user.getId();
         ArrayList<UserRole> sortedRoles = new ArrayList<>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());

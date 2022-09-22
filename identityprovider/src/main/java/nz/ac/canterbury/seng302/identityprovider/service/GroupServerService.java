@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.Group;
+import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
@@ -29,6 +30,9 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private UserAccountServerService userAccountServerService;
 
     /**
      * Creates a new group, adds it to the database and returns a CreateGroupResponse
@@ -160,10 +164,37 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         responseObserver.onCompleted();
     }
 
+    /**
+     * Gets a group's details in the form of a GetGroupDetailsResponse
+     * If the group does not exist, all the fields in the GetGroupDetailsResponse will be blank
+     * @param request An object containing the id of the group to retrieve details from
+     */
     @Override
     public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GetGroupDetailsResponse> responseObserver) {
         logger.info("getGroupDetails() has been called");
-        // TODO implement this
+        GetGroupDetailsResponse.Builder reply = GetGroupDetailsResponse.newBuilder();
+
+        Group group;
+        try {
+            group = groupService.getGroup(request.getGroupId());
+        } catch (NoSuchElementException e) {
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        // Create a UserResponse for each group member
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : group.getMembers()) {
+            userResponses.add(userAccountServerService.buildUserResponse(user));
+        }
+
+        reply
+                .setShortName(group.getShortName())
+                .setLongName(group.getLongName())
+                .addAllMembers(userResponses);
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
     }
 
     /**

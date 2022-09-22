@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,12 +65,14 @@ class GroupServerServiceTest {
                 "testMiddleName1", "testLastName1", "testNickname1",
                 "testBio1", "testPronouns1", "testEmail1@example.com");
         testUser1.setId(testUserId1);
+        testUser1.setCreated(Instant.now());
         testUser1.addRole(UserRole.TEACHER);
 
         testUser2 = new User("testUsername2", "testPassword2", "testFirstName2",
                 "testMiddleName2", "testLastName2", "testNickname2",
                 "testBio2", "testPronouns2", "testEmail2@example.com");
         testUser2.setId(testUserId2);
+        testUser2.setCreated(Instant.now());
         testUser2.addRole(UserRole.STUDENT);
     }
 
@@ -371,5 +374,56 @@ class GroupServerServiceTest {
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
         assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testGetGroupDetails_whenValid() {
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        // * When: We try to get a group's details
+        GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.getGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        GetGroupDetailsResponse response = captor.getValue();
+
+        // * Then: We get the group's details
+        assertEquals(testGroup.getShortName(), response.getShortName());
+        assertEquals(testGroup.getLongName(), response.getLongName());
+        assertTrue(testGroup.getMembers().contains(testUser1));
+        assertTrue(testGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
+    void testGetGroupDetails_whenGroupDoesNotExist() {
+        // * Given: There is no group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        // * When: We try to get a group's details
+        GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.getGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        GetGroupDetailsResponse response = captor.getValue();
+
+        // * Then: We don't get any details
+        assertEquals("", response.getShortName());
+        assertEquals("", response.getLongName());
+        assertEquals(0, response.getMembersCount());
     }
 }
