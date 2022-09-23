@@ -54,7 +54,8 @@ public class DetailsController extends PageController {
      * Get request to view project details page.
      * @param principal Authenticated user
      * @param id ID of the project to be shown
-     * @param schedulableForm The form submitted by the user
+     * @param schedulableForm The form for adding schedulables
+     * @param sprintForm the form for adding sprints
      * @param userTimezone The user's time zone
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
