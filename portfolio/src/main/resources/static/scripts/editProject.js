@@ -20,7 +20,8 @@ function setMinDate(creationDate) {
 
 // Checks whether the project is longer than 10 years
 // If it is, the confirmation modal is shown
-function showLongProjectModal(e) {
+// This reuses the confirmation modal for deleting sprints or schedulables
+function showLongProjectModal(elem, e) {
     e.preventDefault();
     document.getElementById('deleteButton').innerText = "Confirm";
     const startDate = new Date(document.getElementById('projectStartDate').value);
@@ -35,12 +36,63 @@ function showLongProjectModal(e) {
         confirmButton.onclick = () => {saveProject()}
         modal.style.display = "block";
     } else {
-        saveProject();
+        saveProject(elem);
     }
 }
 
-// Submits the form
-function saveProject() {
-    const form  = document.getElementById('project');
-    form.submit();
+/**
+ * This submits the form and shows error messages if there are any.
+ * @param elem HTML Form element
+ */
+function saveProject(elem) {
+
+    // Remove existing error messages
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            // Upon success, hide the edit project form and reload the page
+            hideEditSchedulable('1', '1', 'project');
+            window.location.reload();
+        } else {
+            // Otherwise, show the error messages
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                let field = "name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
+                    field = 'endDate';
+                } else if (errorMsg.indexOf('date') !== -1 || errorMsg.indexOf('sprint') !== -1) {
+                    field = 'startDate'
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+/**
+ * Shows the edit project form.
+ * @param project Project object to be edited
+ */
+function showEditProjectForm(project) {
+
+    // Sets the min project start date
+    setMinDate(project.projectCreationDate);
+
+    // Pre-fills the edit project form with the details of the project being edited
+    let editForm = document.getElementById("editProjectForm-1");
+    hideErrorBoxes(editForm);
+    editForm.querySelector("#projectName").value = project.projectName;
+    editForm.querySelector("#projectDescription").value = project.projectDescription;
+    editForm.querySelector("#projectStartDate").value = new Date(project.projectStartDate).toISOString().substring(0,10);
+    editForm.querySelector("#projectEndDate").value = new Date(project.projectEndDate).toISOString().substring(0,10);
 }

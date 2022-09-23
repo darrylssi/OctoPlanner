@@ -10,7 +10,7 @@
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${project.getProjectName}|"></div>
             <div class="card-body">
-                <form th:action="@{edit-project}" onsubmit="showLongProjectModal(event)" method="post" th:object="${project}" id="project">
+                <form action="javascript:;" th:data-url="@{edit-project}" th:onsubmit="showLongProjectModal(this, event)" method="post" th:object="${project}" id="project">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
@@ -18,10 +18,7 @@
                                 <label for="projectName" class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
-                            <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" class="text-danger"> </span>
-                            <ul th:if="${invalidName}">
-                                <li th:each="nameError: ${invalidName}" th:text="${nameError}" class="text-danger"></li>
-                            </ul>
+                            <small id="nameFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
@@ -37,6 +34,7 @@
                                 <input type="date" class="form-control" id="projectStartDate" th:name="projectStartDate" th:value="${projectStartDate}" required th:max="${projectEndDate}" onchange="setNewMin()">
                                 <label for="projectStartDate" class="form-label">Start Date</label>
                             </div>
+                            <small id="startDateFeedback" class="text-danger"></small>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
@@ -44,6 +42,7 @@
                                 <label for="projectEndDate" class="form-label">End Date</label>
                             </div>
                         </div>
+                        <small id="endDateFeedback" class="text-danger"></small>
                     </div>
                     <div class="row justify-content-end">
                         <ul id="errors" class="col"></ul>
