@@ -73,8 +73,7 @@ public class DetailsController extends PageController {
         prePopulateSprintForm(sprintForm, userTimezone.toZoneId(), id, model);
         populateProjectDetailsModel(model, id, thisUser);
 
-        /* Return the name of the Thymeleaf template */
-        return PROJECT_DETAILS_TEMPLATE_NAME;
+        return PROJECT_DETAILS_TEMPLATE_NAME;   // Return the name of the Thymeleaf template
     }
 
     /**
