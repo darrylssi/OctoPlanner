@@ -287,6 +287,19 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+            let schedulableTooltip = `${sNames[i]} <tiny>${sStarts[i]}</tiny>`;
+            // Work out what to add to tooltip based on
+            switch(icon.extendedProps.type) {
+                case 'event':
+                    break;
+                case 'deadline':
+                    break;
+                case 'milestone':
+                    break;
+                default:
+                    // This shouldn't ever be reached
+                    break;
+            }
             if (icon.extendedProps.description == '') {
                 icon.setExtendedProp("description", sNames[i]);
             } else{
