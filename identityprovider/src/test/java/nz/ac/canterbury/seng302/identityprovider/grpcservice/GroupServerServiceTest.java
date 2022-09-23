@@ -8,8 +8,11 @@ import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -18,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,34 +65,90 @@ class GroupServerServiceTest {
                 "testMiddleName1", "testLastName1", "testNickname1",
                 "testBio1", "testPronouns1", "testEmail1@example.com");
         testUser1.setId(testUserId1);
+        testUser1.setCreated(Instant.now());
         testUser1.addRole(UserRole.TEACHER);
 
         testUser2 = new User("testUsername2", "testPassword2", "testFirstName2",
                 "testMiddleName2", "testLastName2", "testNickname2",
                 "testBio2", "testPronouns2", "testEmail2@example.com");
         testUser2.setId(testUserId2);
+        testUser2.setCreated(Instant.now());
         testUser2.addRole(UserRole.STUDENT);
     }
 
     @Test
-    void testCreateGroup_whenValid() {
+    void testCreateGroup_whenValid_getSuccess() {
         StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
         CreateGroupRequest request = CreateGroupRequest.newBuilder()
                 .setShortName("test valid short name")
                 .setLongName("test valid long name")
                 .build();
         groupServerService.createGroup(request, observer);
 
-        // TODO uncomment these lovely assertions when the methods have been implemented
-        //verify(observer, times(1)).onCompleted();
-        //verify(observer, times(1)).onNext(captor.capture());
-        //CreateGroupResponse response = captor.getValue();
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
 
-        //assertTrue(response.getIsSuccess());
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+    }
 
-        // TODO and get rid of this one
-        assertEquals("test long name", testGroup.getLongName());
+    @ParameterizedTest
+    @CsvSource({"'',Group short name cannot be empty",
+            "a,Group short name must be between 2 and 32 characters",
+            "Thirty-Three Character Long Name3,Group short name must be between 2 and 32 characters"})
+    void testCreateGroup_whenShortNameInvalid_getFailure(String shortName, String errorMessage) {
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName(shortName)
+                .setLongName("test valid long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText(errorMessage)
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testCreateGroup_whenLongNameTooLong_getFailure() {
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to create a group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("test valid short name")
+                .setLongName("One hundred and twenty-nine character long long name Lorem ipsum dolor sit amet, " +
+                        "consectetur adipiscing elit, sed do eiusmod temp")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name must not exceed 128 characters")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
     }
 
     @Test
@@ -269,5 +329,105 @@ class GroupServerServiceTest {
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
         assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testDeleteGroup_whenValid_getSuccess() {
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete a group
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
+
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+        assertFalse(testUser1.getGroups().contains(testGroup));
+        assertFalse(testUser2.getGroups().contains(testGroup));
+    }
+
+    @Test
+    void testDeleteGroup_whenGroupDoesNotExist_getFailure() {
+        // * Given: There is no group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete a group
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testGetGroupDetails_whenValid_detailsRetrieved() {
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        // * When: We try to get a group's details
+        GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.getGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        GetGroupDetailsResponse response = captor.getValue();
+
+        // * Then: We get the group's details
+        assertEquals(testGroup.getShortName(), response.getShortName());
+        assertEquals(testGroup.getLongName(), response.getLongName());
+        assertTrue(testGroup.getMembers().contains(testUser1));
+        assertTrue(testGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
+    void testGetGroupDetails_whenGroupDoesNotExist_noDetailsReturned() {
+        // * Given: There is no group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(null);
+
+        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        // * When: We try to get a group's details
+        GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .build();
+        groupServerService.getGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        GetGroupDetailsResponse response = captor.getValue();
+
+        // * Then: We don't get any details
+        assertEquals("", response.getShortName());
+        assertEquals("", response.getLongName());
+        assertEquals(0, response.getMembersCount());
     }
 }
