@@ -199,7 +199,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
 
     /**
      * Validates the constraints of a group object
-     * If an empty list if returned, then no validation errors were found
+     * If an empty list is returned, then no validation errors were found
      * @param group The group to validate
      * @return A list of ValidationErrors
      */

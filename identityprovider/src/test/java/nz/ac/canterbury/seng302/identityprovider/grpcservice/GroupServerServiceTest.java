@@ -99,7 +99,7 @@ class GroupServerServiceTest {
     @CsvSource({"'',Group short name cannot be empty",
             "a,Group short name must be between 2 and 32 characters",
             "Thirty-Three Character Long Name3,Group short name must be between 2 and 32 characters"})
-    void testCreateGroup_whenShortNameInvalid(String shortName, String errorMessage) {
+    void testCreateGroup_whenShortNameInvalid_getFailure(String shortName, String errorMessage) {
         StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
         // * When: We try to create a group
@@ -125,7 +125,7 @@ class GroupServerServiceTest {
     }
 
     @Test
-    void testCreateGroup_whenLongNameTooLong() {
+    void testCreateGroup_whenLongNameTooLong_getFailure() {
         StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
         // * When: We try to create a group
@@ -333,6 +333,8 @@ class GroupServerServiceTest {
 
     @Test
     void testDeleteGroup_whenValid() {
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
         // * Given: There is a group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
@@ -351,10 +353,12 @@ class GroupServerServiceTest {
 
         // * Then: The request succeeds
         assertTrue(response.getIsSuccess());
+        assertFalse(testUser1.getGroups().contains(testGroup));
+        assertFalse(testUser2.getGroups().contains(testGroup));
     }
 
     @Test
-    void testDeleteGroup_whenGroupDoesNotExist() {
+    void testDeleteGroup_whenGroupDoesNotExist_getFailure() {
         // * Given: There is no group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
@@ -404,7 +408,7 @@ class GroupServerServiceTest {
     }
 
     @Test
-    void testGetGroupDetails_whenGroupDoesNotExist() {
+    void testGetGroupDetails_whenGroupDoesNotExist_noDetailsReturned() {
         // * Given: There is no group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
