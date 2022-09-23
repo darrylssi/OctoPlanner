@@ -27,6 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.*;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 /**
  * Controller for the edit project details page
  */
