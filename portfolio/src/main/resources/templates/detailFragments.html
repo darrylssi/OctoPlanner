@@ -282,7 +282,7 @@
                             <input type="date" th:field="*{startDate}" class="form-control" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="sprintStartDate">Start Date</label>
                         </div>
-                        <small id="addSprintStartDateFeedback" class="text-danger"></small>
+                        <small id="addSprintStartDateFeedback" class="text-danger" th:text="${sprintStartError}"></small>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3 has-validation">

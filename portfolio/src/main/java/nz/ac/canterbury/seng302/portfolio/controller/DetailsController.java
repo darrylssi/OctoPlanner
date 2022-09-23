@@ -107,7 +107,6 @@ public class DetailsController extends PageController {
         model.addAttribute("project", project);
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
-        model.addAttribute("parentProjectId", parentProjectId);
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
@@ -172,6 +171,7 @@ public class DetailsController extends PageController {
         sprintForm.setName(labelUtils.nextLabel(projectId));
         Project project = projectService.getProjectById(projectId);
         List<Sprint> sprintList = sprintService.getSprintsInProject(projectId);
+        sprintList.sort(Comparator.comparing(Sprint::getSprintEndDate));
 
         // Calculate the default sprint start date
         Date sprintStart;
@@ -188,7 +188,7 @@ public class DetailsController extends PageController {
 
         // This only happens when the last sprint finishes on the same day as the project
         if (sprintStart.after(project.getProjectEndDate())) {
-            model.addAttribute("invalidDateRange",
+            model.addAttribute("sprintStartError",
                     "There is no room for more sprints in this project");
         }
 
