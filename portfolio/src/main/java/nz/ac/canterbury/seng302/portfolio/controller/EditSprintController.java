@@ -35,102 +35,102 @@ public class EditSprintController extends PageController {
     @Autowired
     private SprintLabelService labelUtils;
 
-    private static final String EDIT_SPRINT_TEMPLATE = "editSprint";
-    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
+    private static final String REDIRECT_TO_PROJECT = "redirect:/project/";
 
-    /**
-     * Show the edit-sprint page.
-     * @param id ID of the sprint to be edited
-     * @param model Parameters sent to thymeleaf template to be rendered into HTML
-     * @return Edit-sprint page
-     */
-    @GetMapping("/edit-sprint/{id}")
-    public String sprintForm(
-            @PathVariable("id") int id,
-            @AuthenticationPrincipal AuthState principal,
-            Model model
-    ) {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+//    /**
+//     * Show the edit-sprint page.
+//     * @param id ID of the sprint to be edited
+//     * @param model Parameters sent to thymeleaf template to be rendered into HTML
+//     * @return Edit-sprint page
+//     */
+//    @GetMapping("/edit-sprint/{id}")
+//    public String sprintForm(
+//            @PathVariable("id") int id,
+//            @AuthenticationPrincipal AuthState principal,
+//            Model model
+//    ) {
+//        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+//
+//        /* Add sprint details to the model */
+//        Sprint sprint = sprintService.getSprintById(id);
+//        if (sprint == null) {
+//            configureError(model, ErrorType.NOT_FOUND, "/edit-sprint" + id);
+//        } else {
+//            sprint.setId(id);
+//            model.addAttribute("id", id);
+//            model.addAttribute("sprint", sprint);
+//            model.addAttribute("projectId", sprint.getParentProjectId());
+//            model.addAttribute("sprintId", sprint.getId());
+//            model.addAttribute("sprintName", sprint.getSprintName());
+//            model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
+//            model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
+//            model.addAttribute("sprintDescription", sprint.getSprintDescription());
+//        }
+//        /* Return the name of the Thymeleaf template */
+//        return REDIRECT_TO_PROJECT + sprint.getParentProjectId();
+//    }
 
-        /* Add sprint details to the model */
-        Sprint sprint = sprintService.getSprintById(id);
-        if (sprint == null) {
-            configureError(model, ErrorType.NOT_FOUND, "/edit-sprint" + id);
-        } else {
-            sprint.setId(id);
-            model.addAttribute("id", id);
-            model.addAttribute("sprint", sprint);
-            model.addAttribute("projectId", sprint.getParentProjectId());
-            model.addAttribute("sprintId", sprint.getId());
-            model.addAttribute("sprintName", sprint.getSprintName());
-            model.addAttribute("sprintStartDate", DateUtils.toString(sprint.getSprintStartDate()));
-            model.addAttribute("sprintEndDate", DateUtils.toString(sprint.getSprintEndDate()));
-            model.addAttribute("sprintDescription", sprint.getSprintDescription());
-        }
-        /* Return the name of the Thymeleaf template */
-        return EDIT_SPRINT_TEMPLATE;
-    }
-
-    /**
-     * A post request for editing a sprint with a given ID.
-     *
-     * @param id                ID of the sprint to be edited
-     * @param projectId         ID of the sprint's parent project
-     * @param sprintName        (New) name of the sprint
-     * @param sprintStartDate   (New) start date of the sprint
-     * @param sprintEndDate     (New) end date of the sprint
-     * @param sprintDescription (New) description of the sprint
-     * @return Details page
-     */
-    @PostMapping("/edit-sprint/{id}")
-    public String sprintSave(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable("id") int id,
-            @RequestParam(name = "projectId") int projectId,
-            @RequestParam(name = "sprintName") String sprintName,
-            @RequestParam(name = "sprintStartDate") String sprintStartDate,
-            @RequestParam(name = "sprintEndDate") String sprintEndDate,
-            @RequestParam(name = "sprintDescription") String sprintDescription,
-            @Valid @ModelAttribute("sprint") Sprint sprint,
-            BindingResult result,
-            Model model
-    ) throws ResponseStatusException {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-
-        Project parentProject = projectService.getProjectById(projectId);
-
-        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getSprintsInProject(projectId));
-
-        ValidationError invalidName = ValidationUtils.validateText(sprintName, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
-
-        // Checking if there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
-            model.addAttribute("id", id);
-            model.addAttribute("sprint", sprint);
-            model.addAttribute("projectId", projectId);
-            model.addAttribute("sprintId", id);
-            model.addAttribute("sprintName", sprintName);
-            model.addAttribute("sprintStartDate", sprintStartDate);
-            model.addAttribute("sprintEndDate", sprintEndDate);
-            model.addAttribute("sprintDescription", sprintDescription);
-            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            model.addAttribute("invalidName", invalidName.getFirstError());
-            return EDIT_SPRINT_TEMPLATE;
-        }
-
-        // Adding the new sprint object
-        sprint.setParentProjectId(parentProject.getId());
-        sprint.setSprintName(sprintName);
-        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
-        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
-        sprint.setSprintDescription(sprintDescription);
-        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
-        sprint.setSprintColour(sprintService.getSprintById(id).getSprintColour());
-
-        sprintService.saveSprint(sprint);
-        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
-        return REDIRECT_TO_PROJECT + projectId;
-    }
+//    /**
+//     * A post request for editing a sprint with a given ID.
+//     *
+//     * @param id                ID of the sprint to be edited
+//     * @param projectId         ID of the sprint's parent project
+//     * @param sprintName        (New) name of the sprint
+//     * @param sprintStartDate   (New) start date of the sprint
+//     * @param sprintEndDate     (New) end date of the sprint
+//     * @param sprintDescription (New) description of the sprint
+//     * @return Details page
+//     */
+//    @PostMapping("/edit-sprint-post")
+//    public String postEditSprint(
+//            @AuthenticationPrincipal AuthState principal,
+//            @PathVariable("id") int id,
+//            @RequestParam(name = "projectId") int projectId,
+//            @RequestParam(name = "sprintName") String sprintName,
+//            @RequestParam(name = "sprintStartDate") String sprintStartDate,
+//            @RequestParam(name = "sprintEndDate") String sprintEndDate,
+//            @RequestParam(name = "sprintDescription") String sprintDescription,
+//            @Valid @ModelAttribute Sprint sprint,
+//            BindingResult result,
+//            Model model
+//    ) throws ResponseStatusException {
+//        System.out.println("Hello -> me");
+//        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+//
+//        Project parentProject = projectService.getProjectById(projectId);
+//
+//        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
+//                id, parentProject, sprintService.getSprintsInProject(projectId));
+//
+//        ValidationError invalidName = AddSprintController.getNameValidationError(sprintName);
+//
+//        // Checking if there are errors in the input, and also doing the valid dates validation
+//        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
+//            model.addAttribute("id", id);
+//            model.addAttribute("sprint", sprint);
+//            model.addAttribute("projectId", projectId);
+//            model.addAttribute("sprintId", id);
+//            model.addAttribute("sprintName", sprintName);
+//            model.addAttribute("sprintStartDate", sprintStartDate);
+//            model.addAttribute("sprintEndDate", sprintEndDate);
+//            model.addAttribute("sprintDescription", sprintDescription);
+//            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
+//            model.addAttribute("invalidName", invalidName.getFirstError());
+//            return REDIRECT_TO_PROJECT + projectId;
+//        }
+//
+//        // Adding the new sprint object
+//        sprint.setParentProjectId(parentProject.getId());
+//        sprint.setSprintName(sprintName);
+//        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
+//        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
+//        sprint.setSprintDescription(sprintDescription);
+//        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
+//        sprint.setSprintColour(sprintService.getSprintById(id).getSprintColour());
+//
+//        sprintService.saveSprint(sprint);
+//        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
+//        return REDIRECT_TO_PROJECT + projectId;
+//    }
 
 }
