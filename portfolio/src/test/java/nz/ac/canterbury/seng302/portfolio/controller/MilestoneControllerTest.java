@@ -104,11 +104,23 @@ class MilestoneControllerTest {
     void addInvalidNameMilestoneAsTeacher_get400Response() throws Exception {
         Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
         mockMvc.perform(post("/project/0/add-milestone")
-                        .param("name", "New Milestone!")
+                        .param("name", "New Milestone 🏋️🏋️")
                         .param("description", "This is a milestone")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void addInvalidDescriptionMilestoneAsTeacher_get400Response() throws Exception {
+        Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
+        mockMvc.perform(post("/project/0/add-milestone")
+                        .param("name", "New Milestone")
+                        .param("description", "This is invalid 😠")
+                        .param("startDate", "2022-09-09"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
     }
 
     @Test
@@ -183,11 +195,27 @@ class MilestoneControllerTest {
         Mockito.when(milestoneService.getMilestoneById(1)).thenReturn(milestone);
         Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
         mockMvc.perform(post("/project/0/edit-milestone/1")
-                        .param("name", "!@#$")
+                        .param("name", "🤯🤯")
                         .param("description", "This is a milestone")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void editInvalidDescriptionMilestoneAsTeacher_get400Response() throws Exception {
+        Milestone milestone = new Milestone("New Milestone", "This is a milestone", DateUtils.toDate("2022-09-09"));
+        milestone.setId(1);
+        Mockito.when(milestoneService.saveMilestone(any())).thenReturn(milestone);
+        Mockito.when(milestoneService.getMilestoneById(1)).thenReturn(milestone);
+        Mockito.when(projectService.getProjectById(0)).thenReturn(parentProject);
+        mockMvc.perform(post("/project/0/edit-milestone/1")
+                        .param("name", "Milestone")
+                        .param("description", "This is a milestone 🥰")
+                        .param("startDate", "2022-09-09"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
     }
 
     @Test
