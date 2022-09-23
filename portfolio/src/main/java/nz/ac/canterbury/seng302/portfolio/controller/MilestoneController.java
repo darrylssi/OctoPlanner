@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -117,8 +118,6 @@ public class MilestoneController extends PageController {
      * @return a response entity that contains any errors that were found. Bad Request if there were errors, Ok if there are none
      */
     private ResponseEntity<String> validateMilestone(SchedulableForm schedulableForm, BindingResult bindingResult, Project parentProject) {
-        ValidationError dateErrors;
-        ValidationError nameErrors;
         // list of errors that can be removed as they are not applicable to milestones
         List<String> notApplicableErrors = new ArrayList<>(List.of("Start time cannot be blank", "End date cannot be blank", "End time cannot be blank"));
         // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
@@ -136,9 +135,10 @@ public class MilestoneController extends PageController {
             }
         }
         // Check that the date is correct
-        dateErrors = ValidationUtils.validateMilestoneDate(DateUtils.localDateToDate(schedulableForm.getStartDate()), parentProject);
-        nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors);
+        ValidationError dateErrors = ValidationUtils.validateMilestoneDate(DateUtils.localDateToDate(schedulableForm.getStartDate()), parentProject);
+        ValidationError nameErrors = ValidationUtils.validateText(schedulableForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError descErrors = ValidationUtils.validateText(schedulableForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }

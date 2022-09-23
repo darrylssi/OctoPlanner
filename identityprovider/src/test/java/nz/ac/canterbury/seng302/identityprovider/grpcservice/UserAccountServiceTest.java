@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.identityprovider;
+package nz.ac.canterbury.seng302.identityprovider.grpcservice;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -20,6 +20,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Contains tests for the UserAccountServerService class
+ */
 @SpringBootTest
 @DirtiesContext
 @SuppressWarnings("unchecked")

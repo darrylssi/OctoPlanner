@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class AuthenticateServerService extends AuthenticationServiceImplBase{
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticateServerService.class);
+    private static final String LOGIN_FAIL_MSG_FORMAT = "Login attempt by {} failed: incorrect username or password";
 
     @Autowired
     private UserService userService;
@@ -30,24 +31,21 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
      */
     @Override
     public void authenticate(AuthenticateRequest request, StreamObserver<AuthenticateResponse> responseObserver) {
-        logger.info("authenticate() has been called");
         AuthenticateResponse.Builder reply = AuthenticateResponse.newBuilder();
 
         User user = userService.getUserByUsername(request.getUsername());
+        logger.info("authenticate() has been called by {}", request.getUsername());
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        if (user == null) {
-            reply
-            .setMessage("Username or password is incorrect.")
-            .setSuccess(false)
-            .setToken("");
-        } else if (!encoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || !encoder.matches(request.getPassword(), user.getPassword())) {
+            logger.info(LOGIN_FAIL_MSG_FORMAT, request.getUsername());
             reply
             .setMessage("Username or password is incorrect.")
             .setSuccess(false)
             .setToken("");
         } else if (request.getUsername().equals(user.getUsername())) {
+            logger.info("Login attempt by {} succeeded", request.getUsername());
             String token = jwtTokenService.generateTokenForUser(user);
             reply
                 .setEmail(user.getEmail())
@@ -56,9 +54,10 @@ public class AuthenticateServerService extends AuthenticationServiceImplBase{
                 .setMessage("Logged in successfully!")
                 .setSuccess(true)
                 .setToken(token)
-                .setUserId(user.getID())
+                .setUserId(user.getId())
                 .setUsername(user.getUsername());
         } else {
+            logger.info(LOGIN_FAIL_MSG_FORMAT, request.getUsername());
             reply
             .setMessage("Log in attempt failed: username or password incorrect")
             .setSuccess(false)

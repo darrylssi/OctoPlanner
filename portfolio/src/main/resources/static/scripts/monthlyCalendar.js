@@ -50,17 +50,17 @@ function getSchedulableIconInfo() {
             {
                 id: `deadline-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'deadline', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'deadline', num: 0, schedulableNames: [], description: '' }
             },
             {
                 id: `milestone-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'milestone', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'milestone', num: 0, schedulableNames: [], description: '' }
             },
             {
                 id: `event-${date}`,
                 start: `${date}${time}`,
-                extendedProps: { type: 'event', num: 0, schedulableNames: [] }
+                extendedProps: { type: 'event', num: 0, schedulableNames: [], description: '' }
             });
         let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
         newStart.setDate(newStart.getDate() + 1);
@@ -162,6 +162,19 @@ document.addEventListener('DOMContentLoaded', function() {
             prev: "<",
             next: ">"
         },
+
+        eventDidMount: function(info) {
+            if(info.event.extendedProps.type != 'sprint'){
+                var tooltip = new bootstrap.Tooltip(info.el, {
+                    title: info.event.extendedProps.description,
+                    placement: "top",
+                    trigger: "hover",
+                    container: "body",
+                    html: true
+                });
+            }
+        },
+
         eventOverlap: function (stillEvent, movingEvent) {
             if (stillEvent.extendedProps.type === 'sprint') {
                 // shows the sprint overlap error message
@@ -194,6 +207,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // hides the sprint overlap error message
                 document.getElementById("invalidDateRangeError").hidden = true;
+            } else if(info.event.extendedProps.type != 'sprint'){
+                //option to click on schedulable icons to display tooltips so that they can be viewed on mobile
+                bootstrap.Tooltip.getInstance(info.el).show();
             }
 
         },
@@ -232,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const deadlineContent = deadlineIcon + " " + arg.event.extendedProps.num.toString();
                     return { html: deadlineContent }
                 default:
-                    return ;
+                    return;
             }
        },
        // docs: https://fullcalendar.io/docs/classname-input
@@ -273,6 +289,11 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+            if (icon.extendedProps.description == '') {
+                icon.setExtendedProp("description", sNames[i]);
+            } else{
+                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + sNames[i])
+            }
 
             let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
             newStart.setDate(newStart.getDate() + 1);
