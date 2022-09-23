@@ -2,8 +2,6 @@ const milestoneIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height
 const deadlineIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16"><path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/></svg>';
 const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"> <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>';
 
-const editingLogs = false;
-
 /**
  * Takes the project start and end dates from monthlyCalendar.html and returns them as JS Date objects.
  * NOTE: JS Date objects start months at 0, not 1!
@@ -210,11 +208,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById("sprintStartDate").value = info.event.startStr;
                 document.getElementById("sprintEndDate").value = info.event.endStr;
 
-                // send websocket message TODO
+                // send websocket message
                 sendSprintUpdatedMessage(info.event.id);
 
                 // submitting the form
-//                form.submit();
+               form.submit();
             }
         },
         // detect when mouse is over a sprint to deselect sprints when clicking outside them
@@ -284,27 +282,19 @@ function updateIconObjectsWithSchedulables(calendar) {
 }
 
 
-// TODO for sprint messages
-// need a function to handle them (i.e. gets the calendar object and changes the event)
-// need a function to send them when a sprint is saved from dragging!
 /**
- * Decides whether the schedulable message means to show editing or hide editing.
- * @param editMessage JSON object received from the WebSocket
+ * Handles an incoming sprint update message by adding/updating/removing the relevant sprint event in the calendar.
+ * Should also log something if the logging variable is true.
+ * @param sprintMessage the message containing information about the sprint. Name, dates etc.
  */
 function handleSprintUpdateMessage(sprintMessage) {
-    console.log('GOT a SPRINT MESSAGE ' + sprintMessage);
-    console.log(sprintMessage.endDate);
-    console.log(sprintMessage.startDate);
-    console.log(sprintMessage.id);
-    console.log(sprintMessage.name);
-    // real sprint
-    if (sprintMessage.name === null) {
-        if (editingLogs) {
-            console.log('GOT SPRINT MESSAGE ' + sprintMessage.name);
-        }
-    } else { // not real sprint
-        if (editingLogs) {
-            console.log('GOT SPRINT MESSAGE ' + sprintMessage.id);
-        }
+    // logging
+    if (sprintLogs) {
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
     }
+
+    // TODO way to handle this:
+    // for deleting, the message should come back as if the sprint doesn't exist, so we check that, then delete the sprint event
+    // for updating, the message will have all parameters and we can find the sprint event
+    // for adding, the message will have all parameters but we can't find the sprint event, so make a new one
 }

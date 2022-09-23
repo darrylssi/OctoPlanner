@@ -1,5 +1,7 @@
 const currentSchedulable = {type:"", id:-1}; // the current schedulable being edited by THIS user (only one can be edited at a time)
 const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
+const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
+const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout functions in a key/value pair mapping
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
@@ -77,7 +79,7 @@ function sendFormViaAjax(elem, type) {
             // Success
             hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
-            if (url.indexOf("add") != -1) {
+            if (url.indexOf("add") !== -1) {
                 resetAddForm(type);
             }
             // Update tooltips, because bootstrap needs to be told to do this
@@ -334,6 +336,7 @@ function hideEditMessage(message) {
 /**
  * Stops the timeout for the specified schedulable, if it exists
  * @param schedulableId the schedulable to stop the timeout for
+ * @param type the type of schedulable, e.g. event, deadline, or milestone
  */
 function stopSchedulableTimeout(schedulableId, type) {
     if (schedulableTimeouts.has((schedulableId, type))) {
@@ -342,7 +345,7 @@ function stopSchedulableTimeout(schedulableId, type) {
 }
 
 /**
-* Updates all instances of an schedulable that has been changed using information sent through websockets
+* Updates all instances of a schedulable that has been changed using information sent through websockets
 * @param schedulableMessage the message sent through websockets with schedulable information
 */
 function updateSchedulable(schedulableMessage) {
@@ -366,7 +369,7 @@ function updateSchedulable(schedulableMessage) {
           }
           // check if schedulable list container is in the list of ids the schedulable should be displayed in
           let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
-        if(idIndex != -1) {
+        if(idIndex !== -1) {
 
             const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
             const schedulableFragRequest = new XMLHttpRequest();

@@ -1,10 +1,21 @@
-let stompClient = null;
-const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout functions in a key/value pair mapping
-const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
+/**
+ * This file contains WebSocket methods and variables that are common to all pages that use WebSockets.
+ * That means it should deal with sending messages, but probably not receiving them, unless the action to be taken
+ * upon receiving the message is the same across all pages.
+ *
+ * The JS files for each HTML template should contain functions for handling received messages. They can also call the
+ * functions in this file for sending messages, and refer to the logging constants in this file.
+ *
+ * IMPORTANTLY, this file should be imported into HTML pages BEFORE their individual JS files.
+ * Additionally, when adding websockets to a page, you'll need import statements for Stomp and SockJS.
+ */
 
-// logging consts to hide certain things while developing
+let stompClient = null;
+
+// Show or hide console logs from various websocket functions.
 const editingLogs = false;
 const updateLogs = false;
+const sprintLogs = false;
 
 /**
  * Sets up a connection to a WebSocket

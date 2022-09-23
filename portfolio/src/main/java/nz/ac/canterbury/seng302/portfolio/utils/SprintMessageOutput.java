@@ -8,6 +8,7 @@ import java.util.Date;
 /**
  * A message object sent through websockets holding information about an updated sprint
  * Contains all information used by javascript to update the sprint on the planner.
+ * If the specified sprint cannot be found, then only the id field will have a value.
  */
 public class SprintMessageOutput {
 
@@ -19,8 +20,7 @@ public class SprintMessageOutput {
     /**
      * Empty constructor used to send an empty message for a nonexistent sprint
      */
-    public SprintMessageOutput() {
-    }
+    public SprintMessageOutput() { }
 
     /**
      * Constructor to create a message about an updated sprint
