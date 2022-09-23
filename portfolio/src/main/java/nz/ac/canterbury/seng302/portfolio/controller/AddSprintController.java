@@ -162,7 +162,7 @@ public class AddSprintController extends PageController {
         ValidationError dateOutOfRange = getDateValidationError(sprintStartDate, sprintEndDate,
                 id, parentProject, sprintList);
 
-        ValidationError invalidName = getNameValidationError(sprintName);
+        ValidationError invalidName = ValidationUtils.validateText(sprintName, NAME_REGEX, NAME_ERROR_MESSAGE);
 
         // Checking it there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
@@ -212,15 +212,6 @@ public class AddSprintController extends PageController {
         assert start != null;
         return ValidationUtils.validateSprintDates(id, start, end,
                 parentProject, sprintList);
-    }
-
-    /**
-     * Checks whether the sprint name is valid
-     * @param sprintName The sprint name to be tested
-     * @return A validation error object, with a boolean error flag and a string list of error messages
-     */
-    static ValidationError getNameValidationError(String sprintName) {
-        return ValidationUtils.validateName(sprintName);
     }
 
     /**
