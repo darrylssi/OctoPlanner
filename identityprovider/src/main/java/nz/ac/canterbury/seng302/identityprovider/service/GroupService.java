@@ -109,10 +109,19 @@ public class GroupService {
     }
 
     /**
-     * When the app starts up, gets all users with the teacher role and adds them to the teaching staff group
+     * When the app starts up, populates the Teaching Staff group and Members Without A Group
      */
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
+    public void populateDefaultGroups() {
+        populateTeachingStaffGroup();
+        populateMembersWithoutAGroup();
+    }
+
+    /**
+     * Gets all users with the teacher role and adds them to the Teaching Staff group
+     */
+    @Transactional
     public void populateTeachingStaffGroup() {
         List<User> teachers = userRepository.findAllByRoles(UserRole.TEACHER);
         Group teachingStaff;
@@ -123,5 +132,25 @@ public class GroupService {
         }
         teachingStaff.setMembers(new HashSet<>(teachers));
         groupRepository.save(teachingStaff);
+    }
+
+    /**
+     * Gets all users without a group and adds them to the group 'Members Without A Group'
+     */
+    @Transactional
+    public void populateMembersWithoutAGroup() {
+        Iterable<User> users = userRepository.findAll();
+        Group membersWithoutAGroup;
+        try {   // Wrapped in try catch to avoid causing problems when app is started with mock database
+            membersWithoutAGroup = getGroup(MEMBERS_WITHOUT_GROUPS_ID);
+        } catch (NoSuchElementException e) {
+            return;
+        }
+        for (User user : users) {
+            if (user.getGroups().isEmpty()) {
+                membersWithoutAGroup.addMember(user);
+            }
+        }
+        groupRepository.save(membersWithoutAGroup);
     }
 }
