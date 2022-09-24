@@ -63,12 +63,12 @@ public class GroupService {
         if (groupId == MEMBERS_WITHOUT_GROUPS_ID) { // If trying to add to members without groups, do nothing
             return 0;
         }
-
         Group group = getGroup(groupId);
         int count = 0;
         for (User user : userRepository.findAllById(userIds)) {
             group.addMember(user);
-            if (groupId == TEACHER_GROUP_ID) {  // If adding to teaching staff, give teacher role
+            // If adding to teaching staff, give teacher role
+            if (groupId == TEACHER_GROUP_ID) {
                 user.addRole(UserRole.TEACHER);
                 userRepository.save(user);
             }

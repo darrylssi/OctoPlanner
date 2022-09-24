@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @SpringBootTest
@@ -62,6 +63,8 @@ class UserServiceTests {
     void test_UserCanBeGivenARole() {
         when(userRepository.findById(userID))
                 .thenReturn(testUser);
+        when(groupRepository.findById(TEACHER_GROUP_ID))
+                .thenReturn(testGroup);
         // When: A user is given the 'TEACHER' role
         userService.addRoleToUser(userID, UserRole.TEACHER);
         // Then: The user's account will show them as a 'TEACHER'
@@ -94,6 +97,8 @@ class UserServiceTests {
                 .thenReturn(testUser);
         when(groupRepository.findById(TEACHER_GROUP_ID))
                 .thenReturn(testGroup);
+        when(userRepository.findAllById(List.of(userID)))
+                .thenReturn(List.of(testUser));
         // When: We add the Teacher role to a user
         userService.addRoleToUser(userID, UserRole.TEACHER);
         // Then: The user is added to the Teaching Staff group
@@ -104,10 +109,13 @@ class UserServiceTests {
 
     @Test
     void test_removeTeacherRoleFromUser_userRemovedFromTeachingGroup() {
+        testGroup.addMember(testUser);
         when(userRepository.findById(userID))
                 .thenReturn(testUser);
         when(groupRepository.findById(TEACHER_GROUP_ID))
                 .thenReturn(testGroup);
+        when(userRepository.findAllById(List.of(userID)))
+                .thenReturn(List.of(testUser));
         // When: We remove the Teacher role from a user
         userService.removeRoleFromUser(userID, UserRole.TEACHER);
         // Then: The user is removed from the Teaching Staff group
