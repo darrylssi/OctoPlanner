@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import nz.ac.canterbury.seng302.identityprovider.model.Group;
+import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
 import nz.ac.canterbury.seng302.identityprovider.model.User;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,6 +28,9 @@ public class UserService {
 
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     /**
      * Gets all users from the repository
@@ -96,6 +102,7 @@ public class UserService {
      * @throws NoSuchElementException The ID does not match any user
      * @return <code>true</code> if the user didn't already have this role
      */
+    @Transactional
     public boolean addRoleToUser(int id, UserRole role) throws NoSuchElementException {
         User user = getUser(id);            // Throw NoSuchElementException if the user ID is wrong
         if (user == null) {
@@ -103,7 +110,9 @@ public class UserService {
         }
         // If the user is getting the Teacher role, add them to the Teaching Staff group
         if (role == UserRole.TEACHER) {
-            groupService.addUsersToGroup(TEACHER_GROUP_ID, List.of(user.getId()));
+            Group teachingStaff = groupService.getGroup(TEACHER_GROUP_ID);
+            teachingStaff.addMember(user);
+            groupRepository.save(teachingStaff);
         }
 
         boolean ret = user.addRole(role);
@@ -119,6 +128,7 @@ public class UserService {
      * @throws NoSuchElementException The ID does not match any user
      * @return <code>false</code> if it's their only role, or they don't have the role. <code>true</code> otherwise
      */
+    @Transactional
     public boolean removeRoleFromUser(int id, UserRole role) throws NoSuchElementException {
         boolean success;
         User user = getUser(id);            // Throw NoSuchElementException if the user ID is wrong
@@ -127,7 +137,9 @@ public class UserService {
         }
         // If the user is losing the Teacher role, remove them from the Teaching Staff group
         if (role == UserRole.TEACHER) {
-            groupService.removeUsersFromGroup(TEACHER_GROUP_ID, List.of(user.getId()));
+            Group teachingStaff = groupService.getGroup(TEACHER_GROUP_ID);
+            teachingStaff.removeMember(user);
+            groupRepository.save(teachingStaff);
         }
 
         // Can't delete their last role
