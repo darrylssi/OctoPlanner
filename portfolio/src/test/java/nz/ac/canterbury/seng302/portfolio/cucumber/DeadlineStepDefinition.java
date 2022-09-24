@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.Set;
@@ -30,10 +31,8 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 @SpringBootTest
 public class DeadlineStepDefinition extends RunCucumberTest {
 
-    private static final int ID = 1;
     private SimpleDateFormat dateFormatter;
     private SimpleDateFormat dateTimeFormatter;
-    private Project parentProject;
     private Deadline deadline;
 
     /**
@@ -51,20 +50,12 @@ public class DeadlineStepDefinition extends RunCucumberTest {
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        return ValidationUtils.validateDeadlineDate(deadline.getStartDate(), parentProject);
+        return ValidationUtils.validateDeadlineDate(deadline.getStartDate(), deadline.getParentProject());
     }
 
     public DeadlineStepDefinition() {
         this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         this.dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-    }
-
-    @Given("the parent project starts at {string} and ends on {string}")
-    public void the_parent_project_has_an_id_of(String startDate_s, String endDate_s) throws Exception {
-        var projStartDate = this.dateFormatter.parse(startDate_s);
-        var projEndDate = this.dateFormatter.parse(endDate_s);
-
-        parentProject = new Project("name", "desc", projStartDate, projEndDate);
     }
 
     @When("the user creates a deadline called {string} on {string}, with a description {string}")
@@ -74,6 +65,7 @@ public class DeadlineStepDefinition extends RunCucumberTest {
         deadline.setName(name);
         deadline.setDescription(description);
         deadline.setStartDate(dateTimeFormatter.parse(date));
+        deadline.setParentProject(SchedulableStepDefinition.parentProject);
     }
 
     @Then("a deadline called {string} exists on {string}, with a description {string}")
@@ -91,13 +83,8 @@ public class DeadlineStepDefinition extends RunCucumberTest {
     @Then("creating the deadline should fail")
     public void adding_deadline_should_fail() {
         var javaxErrors = checkJavaxConstraints();
-        assertThat(javaxErrors, is(not(empty())));
-        // Note: Unfortunately I don't know how to check if EITHER
-        // javaxErrors or validationErrors is(not(empty())), so the
-        // feature file must have constaint errors to see any
-        // validation errors
         var validationErrors = checkValidator();
-        assertThat(validationErrors.getErrorMessages(), is(not(empty())));
+        assertTrue(!javaxErrors.isEmpty() || !validationErrors.getErrorMessages().isEmpty());
     }
 
 }

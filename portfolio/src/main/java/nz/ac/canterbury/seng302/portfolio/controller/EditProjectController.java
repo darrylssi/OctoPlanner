@@ -28,6 +28,8 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 /**
  * Controller for the edit project details page
  */
@@ -99,7 +101,7 @@ public class EditProjectController extends PageController {
         ValidationError dateOutOfRange = ValidationUtils.validateProjectDates(projectStartDate, projectEndDate,
                 newProject.getProjectCreationDate(), sprintList);
 
-        ValidationError invalidName = ValidationUtils.validateName(projectName);
+        ValidationError invalidName = ValidationUtils.validateText(projectName, NAME_REGEX, NAME_ERROR_MESSAGE);
 
         /* Return editProject template with user input */
         if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
