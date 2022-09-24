@@ -79,7 +79,7 @@ class GroupServerServiceTest {
     }
 
     @Test
-    void testCreateGroup_whenValid() {
+    void testCreateGroup_whenValid_getSuccess() {
         StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
         // * When: We try to create a group
@@ -334,7 +334,7 @@ class GroupServerServiceTest {
     }
 
     @Test
-    void testDeleteGroup_whenValid() {
+    void testDeleteGroup_whenValid_getSuccess() {
         testGroup.addMember(testUser1);
         testGroup.addMember(testUser2);
         // * Given: There is a group with this id
@@ -429,7 +429,7 @@ class GroupServerServiceTest {
     }
 
     @Test
-    void testGetGroupDetails_whenValid() {
+    void testGetGroupDetails_whenValid_detailsRetrieved() {
         testGroup.addMember(testUser1);
         testGroup.addMember(testUser2);
         // * Given: There is a group with this id
