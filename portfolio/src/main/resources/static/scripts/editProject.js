@@ -33,7 +33,7 @@ function showLongProjectModal(elem, e) {
             "want to create a project from " + startString + " to " + endString + "?";
     if ((endDate.getFullYear() - startDate.getFullYear()) > 10) {
         const confirmButton = document.getElementById("deleteButton");
-        confirmButton.onclick = () => {saveProject()}
+        confirmButton.onclick = () => {saveProject(elem)}
         modal.style.display = "block";
     } else {
         saveProject(elem);
@@ -104,4 +104,6 @@ function showEditProjectForm(project) {
     editForm.querySelector("#projectEndDate").value = new Date(endDate).toISOString().substring(0,10);
 
     showRemainingChars();
+    setNewMax();
+    setNewMin();
 }
