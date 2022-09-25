@@ -59,6 +59,85 @@ function hideErrorBoxes(elem) {
 }
 
 /**
+ * This submits the form and shows error messages if there are any.
+ * @param elem HTML Form element
+ */
+function saveSprint(sprintId, elem) {
+    console.log("in save sprint");
+
+    // Remove existing error messages
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            // Upon success, hide the edit project form and reload the page
+            hideEditSchedulable('1', sprintId, 'sprint');
+            window.location.reload();
+        } else {
+            // Otherwise, show the error messages
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                let field = "name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
+                    field = 'endDate';
+                } else if (errorMsg.indexOf('date') !== -1 || errorMsg.indexOf('sprint') !== -1) {
+                    field = 'startDate'
+                } else if (errorMsg.indexOf('exceed') !== -1) {
+                    field = 'description'
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+/**
+ * The function shows the selected sprint edit form. All of the other sprint edit forms are closed.
+ * @param sprint Gets the selected edit sprint object
+ */
+function showEditSprintForm(sprint) {
+    /* Search for the edit form */
+    let editForm = document.getElementById("editSprintForm-" + sprint.id);
+    hideErrorBoxes(editForm);
+
+    /* Collapse element, send stop message, and take no further action if the selected form is open */
+    if (editForm != null && editForm.classList.contains("show")) {
+        hideEditSchedulable('1', sprint.id, 'sprint');
+        return;
+    }
+
+    /* Collapse any edit forms already on the page. If we find any, delay
+       opening the new form by EDIT_FORM_CLOSE_DELAY. */
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
+    let different = false;
+    for (let element of collapseElementList) {
+        new bootstrap.Collapse(element).hide();
+        /* Check whether any form is for a different form, to see whether
+           we need to send a stop editing message */
+        if (element.id.indexOf("editSprintForm-" + sprint.id) === -1) {
+            different = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+        }
+    }
+
+    /* Get this form to show after a delay that allows any other open forms to collapse */
+    setTimeout((formId) => {
+        let shownForm = document.getElementById(formId)
+        new bootstrap.Collapse(shownForm).show();
+        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
+    }, delay, "editSprintForm-" + sprint.id);
+}
+
+/**
  * Submits the given form's request in Javascript, allowing for in-place
  * updating of the page.
  * @param {HTMLFormElement} elem
@@ -170,7 +249,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
-    showRemainingChars();
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 

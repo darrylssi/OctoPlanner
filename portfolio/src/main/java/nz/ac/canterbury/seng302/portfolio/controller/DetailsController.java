@@ -17,7 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import javax.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -108,6 +108,7 @@ public class DetailsController extends PageController {
         model.addAttribute("project", project);
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
+        model.addAttribute("sprintForm", new SprintForm());
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
@@ -138,68 +139,6 @@ public class DetailsController extends PageController {
         model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         model.addAttribute("tab", 0);
-    }
-
-    /**
-     * A post request for editing a sprint with a given ID.
-     *
-     * @param id                ID of the sprint to be edited
-     * @param projectId         ID of the sprint's parent project
-     * @param sprintName        (New) name of the sprint
-     * @param sprintStartDate   (New) start date of the sprint
-     * @param sprintEndDate     (New) end date of the sprint
-     * @param sprintDescription (New) description of the sprint
-     * @return Details page
-     */
-    @PostMapping("/project/{projectId}/edit-sprint/{id}")
-    public String postEditSprint(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable("id") int id,
-            @RequestParam(name = "projectId") int projectId,
-            @RequestParam(name = "sprintName") String sprintName,
-            @RequestParam(name = "sprintStartDate") String sprintStartDate,
-            @RequestParam(name = "sprintEndDate") String sprintEndDate,
-            @RequestParam(name = "sprintDescription") String sprintDescription,
-            @Valid @ModelAttribute("sprint") Sprint sprint,
-            BindingResult result,
-            Model model
-    ) throws ResponseStatusException {
-        requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-
-        Project parentProject = projectService.getProjectById(sprint.getParentProjectId());
-
-        ValidationError dateOutOfRange = AddSprintController.getDateValidationError(sprintStartDate, sprintEndDate,
-                id, parentProject, sprintService.getSprintsInProject(sprint.getParentProjectId()));
-
-        ValidationError invalidName = AddSprintController.getNameValidationError(sprintName);
-
-        // Checking if there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
-            model.addAttribute("id", id);
-            model.addAttribute("sprint", sprint);
-            model.addAttribute("projectId", sprint.getParentProjectId());
-            model.addAttribute("sprintId", id);
-            model.addAttribute("sprintName", sprintName);
-            model.addAttribute("sprintStartDate", sprintStartDate);
-            model.addAttribute("sprintEndDate", sprintEndDate);
-            model.addAttribute("sprintDescription", sprintDescription);
-            model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
-            model.addAttribute("invalidName", invalidName.getFirstError());
-            return "redirect:/project/" + sprint.getParentProjectId();
-        }
-
-        // Adding the new sprint object
-        sprint.setParentProjectId(parentProject.getId());
-        sprint.setSprintName(sprintName);
-        sprint.setStartDate(DateUtils.toDate(sprintStartDate));
-        sprint.setEndDate(DateUtils.toDate(sprintEndDate));
-        sprint.setSprintDescription(sprintDescription);
-        sprint.setSprintLabel("");  //temporarily set sprint label to blank because it is a required field
-        sprint.setSprintColour(sprintService.getSprintById(id).getSprintColour());
-
-        sprintService.saveSprint(sprint);
-        labelUtils.refreshProjectSprintLabels(parentProject); //refresh sprint labels because order of sprints may have changed
-        return "redirect:/project/0"; //+ sprint.getParentProjectId();
     }
 
     /**

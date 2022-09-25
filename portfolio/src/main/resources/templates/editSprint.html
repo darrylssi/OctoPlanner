@@ -2,37 +2,32 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <link th:href="|../styles/main.css|" rel="stylesheet" />
-    <link th:href="|../styles/form.css|" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-
 </head>
 <body>
 <div th:fragment="sprintEditForm">
-    <div id="editSprintForm-1" class="collapse">
+    <div th:id="|editSprintForm-${sprint.getId}|" class="collapse">
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${sprint.getSprintName}|"></div>
             <div class="card-body">
-                <form th:action="@{edit-sprint/{id}(id = ${sprint.getId})}" th:object="${sprint}" modelAttribute="sprint"
-                      method="post" id="sprint">
-                    <input th:type="hidden" th:value="*{parentProjectId}" th:name="projectId">
+                <form action="javascript:;" th:data-url="@{edit-sprint}" th:onsubmit="saveSprint([[${sprint.getId}]], this)" method="post"
+                      th:object="${sprintForm}" id="sprint">
+                    <input th:type="hidden" th:value="${projectId}" th:name="projectId">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" id="sprintName" th:value="*{sprintName}" th:name="sprintName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" aria-describedby="sprintNameFeedback" required>
+                                <input type="text" class="form-control" id="sprintName" th:value="${sprintName}" th:name="sprintName" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
                                 <label for="sprintName" class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
-                            <small id="sprintNameFeedback" class="text-danger"></small>
+                            <small id="nameFeedback" class="text-danger"></small>
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text"  class="form-control" id="sprintDescription" th:value="*{sprintDescription}" th:name="sprintDescription" th:maxlength="${maxDescLen}">
+                                <input type="text"  class="form-control" id="sprintDescription" th:value="${sprintDescription}" th:name="sprintDescription" th:maxlength="${maxDescLen}">
                                 <label for="sprintDescription" class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
+                            <small id="descriptionFeedback" class="text-danger"></small>
                         </div>
                     </div>
                     <div class="row">
@@ -41,18 +36,20 @@
                                 <input type="date" class="form-control" id="sprintStartDate" th:value="${sprintStartDate}" th:name="sprintStartDate" required th:min="${projectStart}" th:max="${projectEnd}" onchange="setNewMin()">
                                 <label for="sprintStartDate" class="form-label">Start Date</label>
                             </div>
+                            <small id="startDateFeedback" class="text-danger"></small>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
                                 <input type="date" class="form-control" id="sprintEndDate" th:value="${sprintEndDate}" th:name="sprintEndDate" required th:min="${projectStart}" th:max="${projectEnd}">
                                 <label for="sprintEndDate" class="form-label">End Date</label>
                             </div>
+                            <small id="endDateFeedback" class="text-danger"></small>
                         </div>
                     </div>
                     <div class="row justify-content-end">
                         <ul id="errors" class="col"></ul>
                         <div class="col col-md-4 col-lg-2">
-                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="hideEditSchedulable('1', '1', 'sprint    ')">Cancel</button>
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="hideEditSchedulable('1', [[${sprint.getId}]], 'sprint')">Cancel</button>
                         </div>
                         <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
