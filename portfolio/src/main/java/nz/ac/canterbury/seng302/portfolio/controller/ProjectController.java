@@ -89,6 +89,14 @@ public class ProjectController extends PageController {
         }
     }
 
+    /**
+     * This validates projects when they are edited.
+     * @param projectForm Form containing details of a project
+     * @param bindingResult Any errors that occurred while constraint checking the form
+     * @param sprintList List of sprints in the project
+     * @param creationDate Date when the project was created
+     * @return A response entity that contains any errors that were found; Bad Request if there are errors, Ok if there are none
+     */
     private ResponseEntity<String> validateProject(ProjectForm projectForm, BindingResult bindingResult, List<Sprint> sprintList, Date creationDate) {
 
         if (bindingResult.hasErrors()) {

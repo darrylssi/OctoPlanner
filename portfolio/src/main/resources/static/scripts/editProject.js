@@ -104,6 +104,7 @@ function showEditProjectForm(project) {
     editForm.querySelector("#projectEndDate").value = new Date(endDate).toISOString().substring(0,10);
 
     showRemainingChars();
+    // Sets max start date and min end date
     setNewMax();
     setNewMin();
 }

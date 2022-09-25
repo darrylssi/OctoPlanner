@@ -10,6 +10,9 @@ import java.time.LocalDate;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.DATE_FORMAT;
 
+/**
+ * Project form that is given to the user inside templates.
+ */
 public class ProjectForm {
 
     @NotBlank(message="Name cannot be blank")
