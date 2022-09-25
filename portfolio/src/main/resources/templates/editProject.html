@@ -10,11 +10,11 @@
         <div class="card">
             <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${project.getProjectName}|"></div>
             <div class="card-body">
-                <form action="javascript:;" th:data-url="@{edit-project}" th:onsubmit="showLongProjectModal(this, event)" method="post" th:object="${project}" id="project">
+                <form action="javascript:;" th:data-url="@{edit-project}" th:onsubmit="showLongProjectModal(this, event)" method="post" th:object="${projectForm}" id="project">
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" id="projectName" th:field="*{projectName}"  th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
+                                <input type="text" class="form-control" id="projectName" th:field="*{name}"  th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
                                 <label for="projectName" class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -22,7 +22,7 @@
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" id="projectDescription" th:field="*{projectDescription}" th:maxlength="${maxDescLen}" class="form-control">
+                                <input type="text" id="projectDescription" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
                                 <label for="projectDescription" class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -32,14 +32,14 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" id="projectStartDate" th:name="projectStartDate" th:value="${projectStartDate}" required th:max="${projectEndDate}" onchange="setNewMin()">
+                                <input type="date" class="form-control" id="projectStartDate" th:field="*{startDate}" required th:max="${projectEndDate}" onchange="setNewMin()">
                                 <label for="projectStartDate" class="form-label">Start Date</label>
                             </div>
                             <small id="startDateFeedback" class="text-danger"></small>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" id="projectEndDate" th:name="projectEndDate" th:value="${projectEndDate}" required th:min="${projectStartDate}" onchange="setNewMax()">
+                                <input type="date" class="form-control" id="projectEndDate" th:field="*{endDate}" required th:min="${projectStartDate}" onchange="setNewMax()">
                                 <label for="projectEndDate" class="form-label">End Date</label>
                             </div>
                         </div>
@@ -62,6 +62,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

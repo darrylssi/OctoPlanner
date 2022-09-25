@@ -86,7 +86,6 @@ function saveProject(elem) {
  * @param project Project object to be edited
  */
 function showEditProjectForm(project) {
-
     // Sets the min project start date
     setMinDate(project.projectCreationDate);
 
@@ -95,6 +94,14 @@ function showEditProjectForm(project) {
     hideErrorBoxes(editForm);
     editForm.querySelector("#projectName").value = project.projectName;
     editForm.querySelector("#projectDescription").value = project.projectDescription;
-    editForm.querySelector("#projectStartDate").value = new Date(project.projectStartDate).toISOString().substring(0,10);
-    editForm.querySelector("#projectEndDate").value = new Date(project.projectEndDate).toISOString().substring(0,10);
+
+    let startDate = new Date(project.projectStartDate);
+    startDate.setDate(startDate.getDate()+1);
+    editForm.querySelector("#projectStartDate").value = startDate.toISOString().substring(0,10);
+
+    let endDate = new Date(project.projectEndDate);
+    endDate.setDate(endDate.getDate()+1);
+    editForm.querySelector("#projectEndDate").value = new Date(endDate).toISOString().substring(0,10);
+
+    showRemainingChars();
 }
