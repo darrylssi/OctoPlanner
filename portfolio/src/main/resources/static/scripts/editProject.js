@@ -68,6 +68,8 @@ function saveProject(elem) {
                     field = 'endDate';
                 } else if (errorMsg.indexOf('date') !== -1 || errorMsg.indexOf('sprint') !== -1) {
                     field = 'startDate'
+                } else if (errorMsg.indexOf('exceed') !== -1) {
+                    field = 'description'
                 }
                 field += 'Feedback';
                 const errorBox = elem.querySelector(`[id*="` + field + `"]`);
