@@ -274,6 +274,31 @@ class GroupServiceTests {
     }
 
     @Test
+    void test_removeUsersFromGroup_notAddedToMembersWithoutAGroup() {
+        // Prepare collections of user ids/users to use as mock data
+        List<Integer> usersToRemove = List.of(testUserId1, testUserId2);
+        Iterable<User> users = List.of(testUser1, testUser2);
+        Group testGroup2 = new Group("test short name2", "test long name2");
+        // Add users to groups
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+        testGroup2.addMember(testUser1);
+        testGroup2.addMember(testUser2);
+
+        when(userRepository.findAllById(usersToRemove))
+                .thenReturn(users);
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        int numUsersRemoved = groupService.removeUsersFromGroup(testGroupId, usersToRemove);
+
+        // Test that the users were not added to Members Without A Group
+        assertEquals(2, numUsersRemoved);
+        assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser1));
+        assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
     void test_addUsersToGroup_removedFromMembersWithoutAGroup() {
         // Prepare collections of user ids/users to use as mock data
         List<Integer> usersToAdd = List.of(testUserId1, testUserId2);
@@ -293,6 +318,44 @@ class GroupServiceTests {
         assertEquals(2, numUsersAdded);
         assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser1));
         assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser2));
+    }
 
+    @Test
+    void test_populateMembersWithoutAGroup_noUsersHaveGroups_twoUsersAdded() {
+        // Prepare collections of users to use as mock data
+        List<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAll())
+                .thenReturn(users);
+
+        groupService.populateMembersWithoutAGroup();
+        assertTrue(testMembersWithoutAGroup.getMembers().contains(testUser1));
+        assertTrue(testMembersWithoutAGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
+    void test_populateMembersWithoutAGroup_oneUserHasGroup_oneUserAdded() {
+        // Prepare collections of users to use as mock data
+        List<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAll())
+                .thenReturn(users);
+        testGroup.addMember(testUser1);
+
+        groupService.populateMembersWithoutAGroup();
+        assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser1));
+        assertTrue(testMembersWithoutAGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
+    void test_populateMembersWithoutAGroup_bothUsersHaveGroups_noUsersAdded() {
+        // Prepare collections of users to use as mock data
+        List<User> users = List.of(testUser1, testUser2);
+        when(userRepository.findAll())
+                .thenReturn(users);
+        testGroup.addMember(testUser1);
+        testGroup.addMember(testUser2);
+
+        groupService.populateMembersWithoutAGroup();
+        assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser1));
+        assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser2));
     }
 }
