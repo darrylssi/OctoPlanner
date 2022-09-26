@@ -1,72 +1,66 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Edit Project</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <link th:href="|../styles/main.css|" rel="stylesheet" />
-    <link th:href="|../styles/form.css|" rel="stylesheet" />
-    <link th:href="|../styles/modals.css|" rel="stylesheet" />
-    <script th:src="|../scripts/editProject.js|"></script>
+    <!-- Keeping SonarQube happy -->
+    <title></title>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-<div id="longProjectModal" class="modal">
-    <div class="modal-content container">
-        <div class="row">
-            <div class="modal-title"></div></div>
-        <br/>
-        <div class="row">
-            <div class="col-2">
-                <button onclick="hideModal()" class="btn btn-neutral btn-lg">Cancel</button>
-            </div><div class="col">
-            <button id="confirmButton" class="btn btn-primary btn-lg">Confirm</button>
-        </div>
+<div th:fragment="projectEditForm">
+    <div id="editProjectForm-1" class="collapse">
+        <div class="card">
+            <div class="card-header" id="edit-schedulable-form-header" th:text="|Editing ${project.getProjectName}|"></div>
+            <div class="card-body">
+                <form action="javascript:;" th:data-url="@{edit-project}" th:onsubmit="showLongProjectModal(this, event)" method="post" th:object="${projectForm}" id="project">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" class="form-control" id="projectName" th:field="*{name}"  th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
+                                <label for="projectName" class="form-label">Name</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                            <small id="nameFeedback" class="text-danger"></small>
+                        </div>
+                        <div class="col-10">
+                            <div class="form-floating input-group mb-3 limited-text-input">
+                                <input type="text" id="projectDescription" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control">
+                                <label for="projectDescription" class="form-label">Description</label>
+                                <span class="input-group-text remaining-chars-field">...</span>
+                            </div>
+                            <small id="descriptionFeedback" class="text-danger"></small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" id="projectStartDate" th:field="*{startDate}" required th:max="${projectEndDate}" onchange="setNewMin()">
+                                <label for="projectStartDate" class="form-label">Start Date</label>
+                            </div>
+                            <small id="startDateFeedback" class="text-danger"></small>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-3 has-validation">
+                                <input type="date" class="form-control" id="projectEndDate" th:field="*{endDate}" required th:min="${projectStartDate}" onchange="setNewMax()">
+                                <label for="projectEndDate" class="form-label">End Date</label>
+                            </div>
+                        </div>
+                        <small id="endDateFeedback" class="text-danger"></small>
+                    </div>
+                    <div class="row justify-content-end">
+                        <ul id="errors" class="col"></ul>
+                        <div class="col col-md-4 col-lg-2">
+                            <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="hideEditSchedulable('1', '1', 'project')">Cancel</button>
+                        </div>
+                        <div class="col col-md-3 col-lg-2">
+                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                        </div>
+                    </div>
+                    <ul th:if="${invalidDateRange}">
+                        <li th:each="dateError: ${invalidDateRange}" th:text="${dateError}" th:class="error"></li>
+                    </ul>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<div th:replace="fragments :: header(title='Edit Project')"></div>
-<div class="content">
-    <form th:action="@{../edit-project/{id}(id = ${id})}" onsubmit="showLongProjectModal(event)"
-          method="post" th:object="${project}" id="project">
-        <label for="projectName" class="required">Project Name</label> <br/>
-        <input id="projectName" type="text" th:field="*{projectName}">
-        <span th:if="${#fields.hasErrors('projectName')}" th:errors="*{projectName}" th:errorclass="error" class="error"/>
-        <ul th:if="${invalidName}">
-            <li th:each="nameError: ${invalidName}" th:text="${nameError}" th:class="error"></li>
-        </ul>
-        <br/>
-        <div class="horizontal-group">
-            <div class="horizontal-group-element" >
-                <label for="projectStartDate" class="required">Project Start Date</label> <br/>
-                <input id="projectStartDate" type="date" th:name="projectStartDate" th:value="${projectStartDate}" th:max="${projectEndDate}"
-                       onchange="setNewMin()" th:required="required">
-            </div>
-            <div class="horizontal-group-element" >
-                <label for="projectEndDate" class="required">Project End Date</label> <br/>
-                <input id="projectEndDate" type="date" th:name="projectEndDate" th:value="${projectEndDate}" th:min="${projectStartDate}"
-                       onchange="setNewMax()" th:required="required">
-            </div>
-            <div class="horizontal-group-element" id="element-description" >
-                <label for="projectDescription">Project Description</label> <br/>
-                <textarea class="description-input" id="projectDescription" th:field="*{projectDescription}"></textarea>
-                <span th:if="${#fields.hasErrors('projectDescription')}" th:errors="*{projectDescription}" th:errorclass="error" class="error"/>
-            </div>
-        </div>
-<ul th:if="${invalidDateRange}">
-    <li th:each="dateError: ${invalidDateRange}" th:text="${dateError}" th:class="error"></li>
-</ul>
-<br/>
-<div class="buttons">
-    <a th:href="|../project/${id}|" class="btn btn-neutral btn-lg">
-            Cancel
-    </a>
-    <button class="btn btn-primary btn-lg" type="submit">
-        Save
-    </button>
-</div>
-</form>
-
 </div>
 </body>
 </html>
