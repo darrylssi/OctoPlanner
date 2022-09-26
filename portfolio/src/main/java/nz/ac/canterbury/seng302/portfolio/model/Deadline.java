@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
@@ -32,6 +33,7 @@ public class Deadline implements Schedulable {
 
     @Column (nullable = false)
     @Size(max=MAX_DESC_LENGTH, message="The deadline description must not exceed " + MAX_DESC_LENGTH + " characters.")
+    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$", message = "Description can only have letters, numbers, punctuations, and spaces.")
     private String deadlineDescription;
 
     @Column (nullable = false)
