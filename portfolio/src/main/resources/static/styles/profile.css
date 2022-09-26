@@ -4,7 +4,8 @@
 }
 
 .profile-image {
-    width: 80%;
+    max-width: 80%;
+    max-height: 200px;
 }
 
 .photo {
