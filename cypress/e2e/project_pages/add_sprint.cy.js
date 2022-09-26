@@ -51,9 +51,9 @@ describe('I can add a valid sprint', () => {
     cy.contains('Add Sprint').click()
     cy.get('[id="addSprintNameInput"]')
         .clear()
-      .type('New Sprint')
+      .type('This is a sprint')
     cy.get('[data-cy="add-sprint-save"]').click()
-    cy.contains('New Sprint').should('be.visible')
+    cy.contains('This is a sprint').should('be.visible')
   })
 
   it('adds a sprint with a changed description', () => {
