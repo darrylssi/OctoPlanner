@@ -1,6 +1,13 @@
-.profile-image {
+.edit-image {
     height: 150px;
     width: 150px;
+}
+
+.profile-image {
+    width: 80%;
+}
+
+.photo {
     border-radius: 150px;
     background-position: center;
     background-size: cover;

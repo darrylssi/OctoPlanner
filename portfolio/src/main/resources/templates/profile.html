@@ -3,6 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profile</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -23,8 +24,10 @@
 
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div class="sprint-block">
-            <img class="profile-image" th:src="${userProfilePhoto}" alt="User profile photo">
-            <div class="detail-block">
+            <div class="col-4 text-center">
+                <img class="profile-image photo" th:src="${userProfilePhoto}" alt="User profile photo">
+            </div>
+            <div class="detail-block col-8">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />
                     <div th:if="*{getPersonalPronouns} != ''" class="sprint-date" th:text="|Pronouns: *{getPersonalPronouns()}|" />
@@ -38,8 +41,8 @@
                 </div>
             </div>
         </div>
-        <div th:if="*{getBio()} != ''" class="detail-block">
-            <div class="sprint-description" th:text="*{getBio()}"/>
+        <div th:if="*{getBio()} != ''" class="detail-block mt-3">
+            <div class="sprint-description" th:text="*{getBio()}" style="word-wrap: break-word; width: 100%"/>
 
     </div>
         <div  style="justify-content:space-between" class="sprint-block">
