@@ -7,6 +7,7 @@ table {
     margin-left: auto;
     margin-right: auto;
     table-layout: fixed;
+    min-width: 480px;
 }
 
 thead {
