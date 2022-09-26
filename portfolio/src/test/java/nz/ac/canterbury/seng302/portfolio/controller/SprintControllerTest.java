@@ -104,12 +104,12 @@ class SprintControllerTest {
     void addNameWithInvalidSymbols_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/add-sprint/0")
-                        .param("name", "A@!#@#!")
+                        .param("name", "<Sprint, name>")
                         .param("description", "desc")
                         .param("startDate", "2022-06-20")
                         .param("endDate", "2022-06-21"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Name can only have alphanumeric and . - _ characters")));
+                .andExpect(content().string(containsString("Name can only have letters, numbers, punctuations except commas, and spaces.")));
     }
 
     @Test

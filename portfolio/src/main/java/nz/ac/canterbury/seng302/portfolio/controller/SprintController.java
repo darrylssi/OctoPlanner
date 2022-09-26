@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
@@ -89,9 +90,10 @@ public class SprintController extends PageController {
         ValidationError dateOutOfRange = getDateValidationError(DateUtils.localDateToDate(sprintForm.getStartDate()), DateUtils.localDateToDate(sprintForm.getEndDate()),
                 projectId, parentProject, sprintList);
 
-        ValidationError invalidName = getNameValidationError(sprintForm.getName());
-        if (dateOutOfRange.isError() || invalidName.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateOutOfRange, invalidName), HttpStatus.BAD_REQUEST);
+        ValidationError invalidName = ValidationUtils.validateText(sprintForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError invalidDescription = ValidationUtils.validateText(sprintForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        if (dateOutOfRange.isError() || invalidName.isError() || invalidDescription.isError()) {
+            return new ResponseEntity<>(ValidationUtils.joinErrors(dateOutOfRange, invalidName, invalidDescription), HttpStatus.BAD_REQUEST);
         }
 
         // Fetch system colour for sprint
@@ -179,10 +181,11 @@ public class SprintController extends PageController {
         ValidationError dateOutOfRange = SprintController.getDateValidationError(DateUtils.toDate(sprintStartDate), DateUtils.toDate(sprintEndDate),
                 id, parentProject, sprintService.getSprintsInProject(projectId));
 
-        ValidationError invalidName = SprintController.getNameValidationError(sprintName);
+        ValidationError invalidName = ValidationUtils.validateText(sprintName, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError invalidDescription = ValidationUtils.validateText(sprintDescription, GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
-        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError()) {
+        if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError() || invalidDescription.isError()) {
             model.addAttribute("id", id);
             model.addAttribute("sprint", sprint);
             model.addAttribute("projectId", projectId);
@@ -252,15 +255,6 @@ public class SprintController extends PageController {
         assert sprintStartDate != null;
         return ValidationUtils.validateSprintDates(id, sprintStartDate, sprintEndDate,
                 parentProject, sprintList);
-    }
-
-    /**
-     * Checks whether the sprint name is valid
-     * @param sprintName The sprint name to be tested
-     * @return A validation error object, with a boolean error flag and a string list of error messages
-     */
-    static ValidationError getNameValidationError(String sprintName) {
-        return ValidationUtils.validateName(sprintName);
     }
 
 }
