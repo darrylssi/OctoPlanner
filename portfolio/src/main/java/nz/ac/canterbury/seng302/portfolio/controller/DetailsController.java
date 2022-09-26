@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.controller.forms.ProjectForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
@@ -107,6 +108,7 @@ public class DetailsController extends PageController {
         model.addAttribute("project", project);
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
+        model.addAttribute("projectForm", new ProjectForm());
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
