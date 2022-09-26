@@ -16,6 +16,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
 
+/**
+ * Class containing the step definitions for the create_group Cucumber feature
+ */
 @SpringBootTest
 public class CreateGroupStepDefs {
 
