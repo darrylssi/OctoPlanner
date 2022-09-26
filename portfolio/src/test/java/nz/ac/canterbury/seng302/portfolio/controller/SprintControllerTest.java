@@ -114,6 +114,19 @@ class SprintControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
+    void addDescriptionWithInvalidSymbols_thenShowError() throws Exception {
+        when(sprintService.getSprintById(1)).thenReturn(sprint);
+        this.mockMvc.perform(post("/add-sprint/0")
+                        .param("name", "sprint name")
+                        .param("description", "\uD83D\uDE03\uD83D\uDE03")
+                        .param("startDate", "2022-06-20")
+                        .param("endDate", "2022-06-21"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Description can only have letters, numbers, punctuations, and spaces.")));
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
     void addWithShortName_thenShowError() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(post("/add-sprint/0")
@@ -234,7 +247,7 @@ class SprintControllerTest {
     //edit sprint tests
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void editSprintValidId() throws Exception {
+    void editSprintValidId_get200Response() throws Exception {
         when(sprintService.getSprintById(1)).thenReturn(sprint);
         this.mockMvc.perform(get("/edit-sprint/1"))
                 .andExpect(status().isOk());

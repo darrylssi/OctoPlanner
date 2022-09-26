@@ -1,3 +1,9 @@
+/*
+ * These tests require a teacher user to be available. Please use the user defined in teacher.json and make sure they
+ * have the teacher role.
+ * These tests may fail if there are existing sprints in the database, and if the project dates don't include May 2023
+ */
+
 let cookiesCache = {}
 
 function saveCookies() {
@@ -104,6 +110,17 @@ describe("I can't add an invalid sprint", () => {
       .type('<New Sprint>')
     cy.get('[data-cy="add-sprint-save"]').click()
     cy.contains(' Name can only have letters, numbers, punctuations except commas, and spaces.').should('be.visible')
+  })
+
+  it("doesn't add a sprint with an invalid description", () => {
+    loadCookies()
+    cy.visit('/project/0')
+    cy.contains('Add Sprint').click()
+    cy.get('[id="addSprintDescriptionInput"]')
+        .clear()
+        .type('😃')
+    cy.get('[data-cy="add-sprint-save"]').click()
+    cy.contains('Description can only have letters, numbers, punctuations, and spaces.').should('be.visible')
   })
 
   it("doesn't add a sprint overlapping another sprint", () => {
