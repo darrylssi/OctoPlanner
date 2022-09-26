@@ -19,6 +19,9 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+/**
+ * Class containing the step definitions for the teaching_staff_group Cucumber feature
+ */
 @SpringBootTest
 public class TeachingStaffGroupStepDefs {
 
