@@ -150,14 +150,29 @@ class EventControllerTest {
     void addInvalidNameEventAsTeacher_get400Response() throws Exception {
         Mockito.when(projectService.getProjectById(0)).thenReturn(event.getParentProject());
         mockMvc.perform(post("/project/0/add-event")
-                        .param("name", "New Event!")
+                        .param("name", "New Event 🏋️")
                         .param("description", "This is an event")
                         .param("startDate", "2022-09-09")
                 .param("startTime", "12:00")
                 .param("endDate", "2022-09-14")
                 .param("endTime", "12:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void addInvalidDescriptionEventAsTeacher_get400Response() throws Exception {
+        Mockito.when(projectService.getProjectById(0)).thenReturn(event.getParentProject());
+        mockMvc.perform(post("/project/0/add-event")
+                        .param("name", "New Event")
+                        .param("description", "This is invalid 🥺")
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "12:00")
+                        .param("endDate", "2022-09-14")
+                        .param("endTime", "12:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
     }
 
     @Test
@@ -265,13 +280,33 @@ class EventControllerTest {
         Mockito.when(eventService.getEventById(1)).thenReturn(editEvent);
         Mockito.when(projectService.getProjectById(0)).thenReturn(event.getParentProject());
         mockMvc.perform(post("/project/0/edit-event/1")
-                        .param("name", "!@#$")
+                        .param("name", "🤯🤯")
                         .param("description", "This is an event")
                         .param("startDate", "2022-09-09")
                         .param("startTime", "00:00")
                         .param("endDate", "2022-09-14")
                         .param("endTime", "00:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have alphanumeric and . - _ characters"));
+                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void editInvalidDescriptionEventAsTeacher_get400Response() throws Exception {
+        Event editEvent = new Event("New Event", "This is an event", DateUtils.toDate("2022-09-09"), DateUtils.toDate("2022-09-14"));
+        editEvent.setId(1);
+        editEvent.setParentProject(event.getParentProject());
+        Mockito.when(eventService.saveEvent(any())).thenReturn(editEvent);
+        Mockito.when(eventService.getEventById(1)).thenReturn(editEvent);
+        Mockito.when(projectService.getProjectById(0)).thenReturn(event.getParentProject());
+        mockMvc.perform(post("/project/0/edit-event/1")
+                        .param("name", "Event")
+                        .param("description", "This is an event 🤯")
+                        .param("startDate", "2022-09-09")
+                        .param("startTime", "00:00")
+                        .param("endDate", "2022-09-14")
+                        .param("endTime", "00:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
     }
 }

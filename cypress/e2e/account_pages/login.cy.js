@@ -22,27 +22,48 @@ describe('Navigation', () => {
   })
 })
 
+beforeEach(() => {
+  // Check the user is not logged in
+  cy.getCookie('lens-session-token').should('not.exist')
+})
+
 describe('I can log into an existing account', () => {
   it('shows typed data', () => {
     cy.visit('/login')
 
     cy.get('[data-cy="username"]')
-      .type('example_username')
-      .should('have.value', 'example_username')
+      .type('cy-username')
+      .should('have.value', 'cy-username')
     cy.get('[data-cy="password"]')
-      .type('example_password')
-      .should('have.value', 'example_password')
+      .type('cy-password')
+      .should('have.value', 'cy-password')
   })
 
   it('redirects to profile page on successful login', () => {
-    cy.visit('/login')
+    cy.fixture('users/student.json').then((user) => {
+      cy.visit('/login')
 
-    // This will be reliant on your user database
-    cy.get('[data-cy="username"]').type('cypress_test_username')
-    cy.get('[data-cy="password"]').type('cypress_test_password')
-    cy.get('[data-cy="login-button"]').click()
+      cy.get('[data-cy="username"]').type(user.username)
+      cy.get('[data-cy="password"]').type(user.password)
+      cy.get('[data-cy="login-button"]').click()
 
-    // Should be redirected to profile page
-    cy.url().should('match', /users\/\d*/)
+      // Should be redirected to profile page
+      cy.url().should('match', /users\/\d*/)
+    })
+  })
+})
+
+describe('I cannot log into a nonexistent account', () => {
+  it('stays on same page on failure', () => {
+    cy.fixture('users/nonexistent_user.json').then((user) => {
+      cy.visit('/login')
+
+      cy.get('[data-cy="username"]').type(user.username)
+      cy.get('[data-cy="password"]').type(user.password)
+      cy.get('[data-cy="login-button"]').click()
+
+      // Should be redirected to profile page
+      cy.url().should('include', '/login')
+    })
   })
 })
