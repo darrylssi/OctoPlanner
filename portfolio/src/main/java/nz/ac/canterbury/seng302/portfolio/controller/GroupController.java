@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.StringJoiner;
@@ -119,6 +118,39 @@ public class GroupController extends PageController{
         String errorString = ValidationUtils.joinErrors(new ValidationError(), shortNameErrors, longNameErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
+    }
+
+    /**
+     * Deletes a group based on the given id
+     * @param principal used to check if the user is authorised to delete group
+     * @param groupId the id of the group to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/delete-group/{groupId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name = "groupId") int groupId
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        try {
+            GetGroupDetailsResponse group = groupClientService.getGroupDetails(groupId);
+
+            if (group.getShortName() != "Teaching staff" && group.getShortName() != "Members without groups") {
+                groupClientService.deleteGroup(groupId);
+                return new ResponseEntity<>("Group deleted.", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

@@ -7,6 +7,8 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.DeleteGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,6 +49,8 @@ public class GroupControllerTest {
 
     private GroupForm groupForm;                                // Initialises the group form object
     private Group group;                                        // Initialises the group object
+    private GetGroupDetailsResponse groupDetails;
+    private DeleteGroupResponse deleteGroupResponse;
 
     @BeforeEach
     void setup() {
@@ -59,7 +66,33 @@ public class GroupControllerTest {
         group = new Group();
         group.setId(1);
         group.setParentProject(parentProject);
+        group.setGroupShortName("Test Group");
+        group.setGroupLongName("Test Project Group 2022");
+        groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
+
+        // Gets the group details at group id 1
+        groupDetails = groupClientService.getGroupDetails(1);
+
+        // Gets the group delete response at group id 1
+        deleteGroupResponse = groupClientService.deleteGroup(1);
     }
+
+//    @Test
+//    @WithMockPrincipal(TEACHER)
+//    void deleteGroupAsTeacher_get200Response() throws Exception {
+//        System.out.println(groupDetails.getShortName());
+//        System.out.println(groupDetails.getLongName());
+//
+//        Mockito.when(projectService.getProjectById(0)).
+//                thenReturn(group.getParentProject());
+//        Mockito.when(groupClientService.getGroupDetails(anyInt())).
+//                thenReturn(groupDetails);
+//        Mockito.when(groupClientService.deleteGroup(anyInt())).
+//                thenReturn(deleteGroupResponse);
+//        mockMvc.perform(delete("/delete-group/1"))
+//                .andExpect(status().isOk())
+//                .andExpect(status().reason(containsString("Group deleted.")));
+//    }
 
     @Test
     @WithMockPrincipal(TEACHER)
