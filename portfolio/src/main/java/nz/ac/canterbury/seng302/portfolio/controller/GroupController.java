@@ -85,7 +85,7 @@ public class GroupController extends PageController{
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
             Group group = new Group();
 
-            // Set details of new milestone object
+            // Set details of new group object
             group.setParentProject(parentProject);
             group.setGroupShortName(groupForm.getShortName());
             group.setGroupLongName(groupForm.getLongName());
