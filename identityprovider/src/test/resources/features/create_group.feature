@@ -1,4 +1,4 @@
-Feature: As a teacher, I can create a group
+Feature: I can create a group
   Scenario Outline: Creating a valid new group
     When I try to create a group with short name <ShortName> and long name <LongName>
     Then the group should be saved to the database

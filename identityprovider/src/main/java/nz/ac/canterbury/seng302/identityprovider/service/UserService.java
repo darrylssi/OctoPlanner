@@ -1,9 +1,8 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,11 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
+
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private GroupService groupService;
 
     /**
      * Gets all users from the repository
@@ -96,7 +100,15 @@ public class UserService {
         if (user == null) {
             throw new NoSuchElementException("No user has an ID of " + id);
         }
-        boolean ret = user.addRole(role);
+        boolean ret;
+        // If the user is getting the Teacher role, add them to the Teaching Staff group
+        if (role == UserRole.TEACHER) {
+            ret = !user.getRoles().contains(UserRole.TEACHER);
+            groupService.addUsersToGroup(TEACHER_GROUP_ID, List.of(id));
+            return ret;
+        }
+
+        ret = user.addRole(role);
         userRepository.save(user);
         return ret;
     }
@@ -115,6 +127,12 @@ public class UserService {
         if (user == null) {
             throw new NoSuchElementException("No user has an ID of " + id);
         }
+        // If the user is losing the Teacher role, remove them from the Teaching Staff group
+        if (role == UserRole.TEACHER) {
+            groupService.removeUsersFromGroup(TEACHER_GROUP_ID, List.of(id));
+            return true;
+        }
+
         // Can't delete their last role
         if (user.getRoles().size() <= 1) {
             success = false;
