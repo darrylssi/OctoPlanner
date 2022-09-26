@@ -15,7 +15,7 @@ let stompClient = null;
 // Show or hide console logs from various websocket functions.
 const editingLogs = false;
 const updateLogs = false;
-const sprintLogs = false;
+const sprintLogs = true;
 
 /**
  * Sets up a connection to a WebSocket

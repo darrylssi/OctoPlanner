@@ -2,6 +2,8 @@ const milestoneIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height
 const deadlineIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16"><path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/></svg>';
 const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"> <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>';
 
+let calendar;
+
 /**
  * Takes the project start and end dates from monthlyCalendar.html and returns them as JS Date objects.
  * NOTE: JS Date objects start months at 0, not 1!
@@ -89,6 +91,9 @@ function getSprintInfo() {
             end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
             textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
     }
+    if (sprintLogs) {
+        console.log(sprints); // TODO remove
+    }
     return sprints;
 }
 
@@ -144,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 
 
-    let calendar = new FullCalendar.Calendar(calendarEl, {
+    calendar = new FullCalendar.Calendar(calendarEl, {
         eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
         eventDurationEditable: false,                          // sprints can't be edited by default
         timeZone: 'UTC',
@@ -311,11 +316,32 @@ function updateIconObjectsWithSchedulables(calendar) {
 function handleSprintUpdateMessage(sprintMessage) {
     // logging
     if (sprintLogs) {
-        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + "\nID " + sprintMessage.id +
+        " START: " + sprintMessage.startDate + " END: " + sprintMessage.endDate);
     }
 
     // TODO way to handle this:
     // for deleting, the message should come back as if the sprint doesn't exist, so we check that, then delete the sprint event
     // for updating, the message will have all parameters and we can find the sprint event
     // for adding, the message will have all parameters but we can't find the sprint event, so make a new one
+
+    // get null if event doesn't exist
+    // get null name if sprint doesn't exist
+
+    let sprint = calendar.getEventById(sprintMessage.id);
+
+    if (sprintMessage.name === null) { // sprint isn't real or was deleted
+        if (sprint !== null) {
+            sprint.remove();
+        }
+    } else if (sprint !== null) { // update sprint details
+        sprint.setStart(sprintMessage.startDate);
+        sprint.setEnd(sprintMessage.endDate);
+        sprint.setProp("title", sprintMessage.name);
+    } else { // create new sprint
+        calendar.addEvent({id: sprintMessage.id, title: sprintMessage.name,
+            start:sprintMessage.startDate, end: sprintMessage.endDate});
+    }
+
+    console.log(calendar.getEventById(sprintMessage.id));
 }
