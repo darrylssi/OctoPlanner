@@ -15,6 +15,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
  */
 @Entity
+@Table (name = "Sprint")
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

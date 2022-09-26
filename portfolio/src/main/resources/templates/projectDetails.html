@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
     <title th:text="${project.getProjectName}"></title>
@@ -161,12 +161,9 @@
                     </button>
                 </div>
                 <div class="break"></div>
-
                 <!-- For edit sprint -->
                 <div th:replace="editSprint :: sprintEditForm(
                     sprint=${sprint},
-                    sprintName=${sprint.getSprintName},
-                    sprintDescription=${sprint.getSprintDescription},
                     sprintStartDate=${#dates.format(sprint.getSprintStartDate, dateISOFormat)},
                     sprintEndDate=${#dates.format(sprint.getSprintEndDate, dateISOFormat)},
                     minNameLen=${minNameLen},
@@ -174,9 +171,9 @@
                     maxDescLen=${maxDescLen},
                     projectId=${project.getId()},
                     projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())},)"></div>
-                <div class="break"></div>
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})"></div>
 
+                <div class="break"></div>
                 <!-- The schedulables inside the sprint -->
                 <div class="schedulable-list-container" th:id="'schedulables-in-' + *{getId}">
                     <div th:if="${!#arrays.isEmpty(schedulables)} and ${schedulable.getStartDate()} <= *{getSprintEndDate} and ${schedulable.getEndDate()} >= *{getSprintStartDate}"

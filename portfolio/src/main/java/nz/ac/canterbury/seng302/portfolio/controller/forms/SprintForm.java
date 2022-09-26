@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.DATE_FORMAT;
 
+/**
+ * Sprint form that is given to the user inside templates.
+ */
 public class SprintForm {
     @NotBlank(message="Name cannot be blank")
     @Size(min=MIN_NAME_LENGTH,
@@ -40,7 +43,7 @@ public class SprintForm {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description.trim();
     }
 
     public LocalDate getStartDate() {

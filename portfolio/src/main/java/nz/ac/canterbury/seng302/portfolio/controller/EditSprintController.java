@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.StringJoiner;
-
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
 
@@ -82,7 +81,6 @@ public class EditSprintController extends PageController {
         } else {
             return validationResponse;
         }
-
     }
 
     /**
@@ -94,7 +92,8 @@ public class EditSprintController extends PageController {
      * @param sprintList List of sprints in the project
      * @return A response entity that contains any errors that were found; Bad Request if there are errors, Ok if there are none
      */
-    private ResponseEntity<String> validateSprint(Project parentProject, int sprintId, SprintForm sprintForm, BindingResult bindingResult, List<Sprint> sprintList) {
+    private ResponseEntity<String> validateSprint(Project parentProject, int sprintId, SprintForm sprintForm,
+                                                  BindingResult bindingResult, List<Sprint> sprintList) {
 
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");

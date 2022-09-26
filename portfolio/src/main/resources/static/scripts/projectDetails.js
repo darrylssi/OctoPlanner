@@ -63,8 +63,6 @@ function hideErrorBoxes(elem) {
  * @param elem HTML Form element
  */
 function saveSprint(sprintId, elem) {
-    console.log("in save sprint");
-
     // Remove existing error messages
     hideErrorBoxes(elem);
 
@@ -128,6 +126,7 @@ function showEditSprintForm(sprint) {
             different = true;  // Extracted to a variable to avoid sending extra messages (worst case)
         }
     }
+    showRemainingChars();   // Used to update the remaining number of chars for name and description
 
     /* Get this form to show after a delay that allows any other open forms to collapse */
     setTimeout((formId) => {

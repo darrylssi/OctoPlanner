@@ -86,7 +86,6 @@ public class DetailsController extends PageController {
         return "redirect:" + id + '/';
     }
 
-
     /**
      * <p>Pre-populates all the data needed in the model</p>
      *
