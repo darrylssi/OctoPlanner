@@ -45,6 +45,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Test class for post and delete requests for sprint handled by the sprint controller
+ */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = SprintController.class)
 @AutoConfigureMockMvc(addFilters = false)

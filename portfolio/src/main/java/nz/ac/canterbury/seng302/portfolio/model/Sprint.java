@@ -157,6 +157,10 @@ public class Sprint {
         this.sprintStartDate = DateUtils.toDate(date);
     }
 
+    public String getStartDay() {
+        return DateUtils.toString(sprintStartDate);
+    }
+
     public Date getSprintEndDate() {
         return sprintEndDate;
     }
@@ -167,6 +171,10 @@ public class Sprint {
      */
     public String getEndDateString() {
         return DateUtils.toDisplayString(this.sprintEndDate);
+    }
+
+    public String getEndDay() {
+        return DateUtils.toString(sprintEndDate);
     }
 
     public void setEndDate(Date newEndDate) {

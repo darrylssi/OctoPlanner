@@ -52,7 +52,7 @@
                             <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="hideEditSchedulable('1', [[${sprint.getId}]], 'sprint')">Cancel</button>
                         </div>
                         <div class="col col-md-3 col-lg-2">
-                            <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
+                            <button type="submit" data-cy="edit-sprint-save" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
                     <ul th:if="${invalidDateRange}">

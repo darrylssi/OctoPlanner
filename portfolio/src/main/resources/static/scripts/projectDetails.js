@@ -106,6 +106,7 @@ function showEditSprintForm(sprint) {
     /* Search for the edit form */
     let editForm = document.getElementById("editSprintForm-" + sprint.id);
     hideErrorBoxes(editForm);
+    prefillSchedulable(editForm, sprint, 'sprint');
 
     /* Collapse element, send stop message, and take no further action if the selected form is open */
     if (editForm != null && editForm.classList.contains("show")) {
@@ -270,16 +271,26 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
  * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
  */
 function prefillSchedulable(editForm, schedulable, type) {
-    editForm.querySelector("#name").value = schedulable.name;
-    editForm.querySelector("#description").value =  schedulable.description;
-    editForm.querySelector("#startDate").value = schedulable.startDay;
-    if (type !== 'milestone'){
-        editForm.querySelector("#startTime").value = schedulable.startTime;
+    if (type === 'sprint') {
+        console.log();
+        editForm.querySelector("#sprintName").value = schedulable.sprintName;
+        editForm.querySelector("#sprintDescription").value =  schedulable.sprintDescription;
+        editForm.querySelector("#sprintStartDate").value = schedulable.startDay;
+        editForm.querySelector("#sprintEndDate").value =  schedulable.endDay;
+    } else {
+        editForm.querySelector("#name").value = schedulable.name;
+        editForm.querySelector("#description").value = schedulable.description;
+        editForm.querySelector("#startDate").value = schedulable.startDay;
+
+        if (type !== 'milestone'){
+                editForm.querySelector("#startTime").value = schedulable.startTime;
+        }
+        if (type === 'event'){
+            editForm.querySelector("#endDate").value = schedulable.endDay;
+            editForm.querySelector("#endTime").value = schedulable.endTime;
+        }
     }
-    if (type === 'event'){
-        editForm.querySelector("#endDate").value = schedulable.endDay;
-        editForm.querySelector("#endTime").value = schedulable.endTime;
-    }
+
 }
 
 /**
