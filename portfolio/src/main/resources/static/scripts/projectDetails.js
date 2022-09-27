@@ -76,24 +76,28 @@ function sendFormViaAjax(elem, type) {
 
     formRequest.onload = () => {
         if (formRequest.status === 200) {
-            // Success
-            hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
-            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
-            if (url.indexOf("add") !== -1) {
-                resetAddForm(type);
-            }
-            // Update tooltips, because bootstrap needs to be told to do this
-            setTimeout((schedulableId) => {
-                let schedulable = document.getElementById(`${schedulableId}`);
-                let tooltip = bootstrap.Tooltip.getInstance(schedulable);
-                if (tooltip) {
-                    tooltip.update();
-                } else if (schedulable) {
-                    tooltip = new bootstrap.Tooltip(schedulable, {
-                        trigger: 'hover'
-                    });
+            if (type === 'sprint'){
+                window.location.reload();
+            } else {
+                // Success
+                hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
+                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
+                if (url.indexOf("add") !== -1) {
+                    resetAddForm(type);
                 }
-            }, 250, type + "-" + formRequest.response);
+                // Update tooltips, because bootstrap needs to be told to do this
+                setTimeout((schedulableId) => {
+                    let schedulable = document.getElementById(`${schedulableId}`);
+                    let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+                    if (tooltip) {
+                        tooltip.update();
+                    } else if (schedulable) {
+                        tooltip = new bootstrap.Tooltip(schedulable, {
+                            trigger: 'hover'
+                        });
+                    }
+                }, 250, type + "-" + formRequest.response);
+            }
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
