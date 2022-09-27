@@ -285,7 +285,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * @param group The group to validate
      * @return A list of ValidationErrors
      */
-    List<ValidationError> getValidationErrors(Group group) {
+    private List<ValidationError> getValidationErrors(Group group) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         List<ValidationError> errors = new ArrayList<>();
