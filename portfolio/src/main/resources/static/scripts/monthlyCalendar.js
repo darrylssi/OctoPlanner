@@ -17,6 +17,7 @@ function getDatePlusDays(originalDate, numDays) {
     return newDate;
 }
 
+
 /**
  * Takes the project start and end dates from monthlyCalendar.html and returns them as JS Date objects.
  * NOTE: JS Date objects start months at 0, not 1!
@@ -32,6 +33,7 @@ function getDateFromProjectDateString(originalDateString) {
     });
     return new Date(year, month - 1, day);
 }
+
 
 /**
  * Returns a string corresponding to the given date object.
@@ -100,7 +102,7 @@ function getSprintInfo() {
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
             end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
-            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
+            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'});
     }
     return sprints;
 }
@@ -164,6 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
         eventOrder: "-id",
+        displayEventTime: false,
 
         // Restricts the calendar dates based on the given project dates
         validRange: {
@@ -328,8 +331,8 @@ function updateIconObjectsWithSchedulables(calendar) {
 function handleSprintUpdateMessage(sprintMessage) {
     // logging
     if (sprintLogs) {
-        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + "\nID " + sprintMessage.id +
-        " START: " + sprintMessage.startDate + " END: " + sprintMessage.endDate);
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id + " COLOUR: " + sprintMessage.colour +
+        "\nSTART: " + sprintMessage.startDate + " END: " + sprintMessage.endDate);
     }
 
     let sprint = calendar.getEventById(sprintMessage.id);
@@ -338,15 +341,25 @@ function handleSprintUpdateMessage(sprintMessage) {
     let newStart = getDatePlusDays(sprintMessage.startDate, 1);
     let newEnd = getDatePlusDays(sprintMessage.endDate, 2);
 
-    if (sprintMessage.name === null) { // sprint isn't real or was deleted (UNTESTED)
+    if (sprintMessage.name === null) { // sprint isn't real or was deleted (WORKS)
         if (sprint !== null) {
             sprint.remove();
         }
-    } else if (sprint !== null) { // update sprint details (WORKS)
+    } else if (sprint !== null) { // update sprint details (WORKS... except on events that have been added. No idea why!)
         sprint.setStart(newStart);
         sprint.setEnd(newEnd);
         sprint.setProp("title", sprintMessage.name);
     } else { // create new sprint (UNTESTED)
-        calendar.addEvent({id: sprintMessage.id, title: sprintMessage.name, start: newStart, end: newEnd});
+        calendar.addEvent({
+            id: sprintMessage.id,
+            title: sprintMessage.name,
+            start: newStart,
+            end: newEnd,
+            backgroundColor: sprintMessage.colour,
+            textColor: getTextColour(sprintMessage.colour),
+            classNames: 'defaultEventBorder',
+            allDay: true,
+            extendedProps: { type: 'sprint' }
+        });
     }
 }
