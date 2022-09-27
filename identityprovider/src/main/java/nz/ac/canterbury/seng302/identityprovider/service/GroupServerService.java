@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
+
 /**
  * This class contains server-side methods for dealing with groups in the IDP, such as
  * methods dealing with creating, updating, deleting groups and adding/removing members from groups
@@ -136,9 +139,24 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      */
     @Override
     public void deleteGroup(DeleteGroupRequest request, StreamObserver<DeleteGroupResponse> responseObserver) {
-        // TODO this should not allow deleting Teaching Staff and Members Without A Group (once implemented)
         logger.info("deleteGroup() has been called");
         DeleteGroupResponse.Builder reply = DeleteGroupResponse.newBuilder();
+
+        if (request.getGroupId() == TEACHER_GROUP_ID) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("The group \"Teaching Staff\" cannot be deleted");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        } else if (request.getGroupId() == MEMBERS_WITHOUT_GROUPS_ID) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("The group \"Members Without A Group\" cannot be deleted");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
 
         Group group;
         try {

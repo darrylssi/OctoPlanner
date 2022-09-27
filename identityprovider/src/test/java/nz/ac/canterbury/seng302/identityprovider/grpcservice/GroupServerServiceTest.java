@@ -25,6 +25,8 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -378,6 +380,52 @@ class GroupServerServiceTest {
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
         assertEquals("There is no group with id " + testGroupId, response.getMessage());
+    }
+
+    @Test
+    void testDeleteGroup_whenDeletingTeachingStaff_getFailure() {
+        // * Given: This group is the teaching staff group
+        when(groupRepository.findById(TEACHER_GROUP_ID))
+                .thenReturn(testGroup);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete the teaching staff group
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(TEACHER_GROUP_ID)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("The group \"Teaching Staff\" cannot be deleted", response.getMessage());
+    }
+
+    @Test
+    void testDeleteGroup_whenDeletingMembersWithoutAGroup_getFailure() {
+        // * Given: This group is the group for members without groups
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testGroup);
+
+        StreamObserver<DeleteGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<DeleteGroupResponse> captor = ArgumentCaptor.forClass(DeleteGroupResponse.class);
+        // * When: We try to delete the group for members without groups
+        DeleteGroupRequest request = DeleteGroupRequest.newBuilder()
+                .setGroupId(MEMBERS_WITHOUT_GROUPS_ID)
+                .build();
+        groupServerService.deleteGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        DeleteGroupResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("The group \"Members Without A Group\" cannot be deleted", response.getMessage());
     }
 
     @Test

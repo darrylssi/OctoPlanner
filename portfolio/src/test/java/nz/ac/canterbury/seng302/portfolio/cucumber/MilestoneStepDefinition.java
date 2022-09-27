@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.cucumber;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.portfolio.model.Milestone;
@@ -7,6 +8,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
+import org.assertj.core.util.DateUtil;
 import org.hamcrest.Matchers;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -14,6 +16,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.util.Date;
 import java.util.Set;
 
 import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.anyOf;
@@ -33,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class MilestoneStepDefinition extends RunCucumberTest{
 
+    private Project project;
     private Milestone milestone;
 
     /**
@@ -50,10 +54,8 @@ public class MilestoneStepDefinition extends RunCucumberTest{
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        // TODO this is SUS!!! Should really just be parentProject without having to get it from EventStepDefinition
-        return ValidationUtils.validateMilestoneDate(milestone.getStartDate(), EventStepDefinition.getParentProject());
+        return ValidationUtils.validateMilestoneDate(milestone.getStartDate(), milestone.getParentProject());
     }
-
 
     @When("the user creates a milestone called {string}, on {string}, with a description {string}")
     public void the_user_creates_a_milestone_called_on_with_a_description(
@@ -62,6 +64,7 @@ public class MilestoneStepDefinition extends RunCucumberTest{
         milestone.setName(name);
         milestone.setStartDate(DateUtils.toDate(date));
         milestone.setDescription(description);
+        milestone.setParentProject(SchedulableStepDefinition.parentProject);
     }
 
     @Then("there are no errors in creating the milestone")
