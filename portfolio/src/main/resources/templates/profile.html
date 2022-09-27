@@ -3,6 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profile</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -21,10 +22,12 @@
         <th th:text="${errMsg}"></th>
         <br>
 
-    <div class="content" th:if="${userExists}" th:object="${profileInfo}">
-        <div class="sprint-block">
-            <img class="profile-image" th:src="${userProfilePhoto}" alt="User profile photo">
-            <div class="detail-block">
+    <div class="container mt-3" style="max-width: 100%;" th:if="${userExists}" th:object="${profileInfo}">
+        <div class="row mx-1">
+            <div class="col-lg-2 text-center">
+                <img class="profile-image photo" th:src="${userProfilePhoto}" alt="User profile photo">
+            </div>
+            <div class="profile-detail col-lg-10">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />
                     <div th:if="*{getPersonalPronouns} != ''" class="sprint-date" th:text="|Pronouns: *{getPersonalPronouns()}|" />
@@ -38,23 +41,24 @@
                 </div>
             </div>
         </div>
-        <div th:if="*{getBio()} != ''" class="detail-block">
-            <div class="sprint-description" th:text="*{getBio()}"/>
+        <div th:if="*{getBio()} != ''" class="profile-detail my-3 mx-1">
+            <div class="sprint-description" th:text="*{getBio()}" style="word-wrap: break-word; width: 100%"/>
 
     </div>
-        <div  style="justify-content:space-between" class="sprint-block">
-            <div th:text="${dateCreated}"></div>
-
-            <!--/*
-                Only render if the logged-in user's ID is this page's ID
-            */-->
-            <div th:if="${isCurrentUser}">
-                <a th:href="|./${id}/edit|" style="float: right;">
-                    <button class="btn btn-primary btn-lg">Edit Profile</button>
-                </a>
-                <a th:href="|./${id}/edit#photoForm|" style="float: right; margin-right: 15px;">
-                    <button class="btn btn-primary btn-lg">Upload Profile Picture</button>
-                </a>
+        <div class="row">
+            <div class="col-lg-6">
+                <div th:text="${dateCreated}"></div>
+            </div>
+            <div class="col-lg-6">
+                <!--/* Only render if the logged-in user's ID is this page's ID*/-->
+                <div th:if="${isCurrentUser}" class="text-end mt-2">
+                    <a th:href="|./${id}/edit|">
+                        <button class="btn btn-primary btn-lg">Edit Profile</button>
+                    </a>
+                    <a th:href="|./${id}/edit#photoForm|">
+                        <button class="btn btn-primary btn-lg">Upload Profile Picture</button>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
