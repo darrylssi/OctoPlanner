@@ -274,7 +274,7 @@ class GroupServiceTests {
     }
 
     @Test
-    void test_removeUsersFromGroup_notAddedToMembersWithoutAGroup() {
+    void test_removeUsersFromOneGroup_notAddedToMembersWithoutAGroup() {
         // Prepare collections of user ids/users to use as mock data
         List<Integer> usersToRemove = List.of(testUserId1, testUserId2);
         Iterable<User> users = List.of(testUser1, testUser2);
