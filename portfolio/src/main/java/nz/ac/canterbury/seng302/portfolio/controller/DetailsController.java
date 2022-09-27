@@ -13,6 +13,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -253,4 +254,23 @@ public class DetailsController extends PageController {
 
         return "detailFragments :: " + schedulableType;
     }
+
+
+    @GetMapping("/sched/{type}")
+    public ResponseEntity<List<Schedulable>> getSchedulables(
+            @PathVariable(name="type") String schedulableType
+    ){
+        List<Schedulable> schedulableList = new ArrayList<>();
+        if (EVENT_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(eventService.getAllEvents());
+        } else if (DEADLINE_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(deadlineService.getAllDeadlines());
+        } else if (MILESTONE_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(milestoneService.getAllMilestones());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableType + " is not a type of schedulable!");
+        }
+        return new ResponseEntity<>(schedulableList, HttpStatus.OK);
+    }
+
 }
