@@ -152,7 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                 // de-select sprint
-                selectedSprint.setProp('durationEditable', false);
+                // undefined has different behaviour to false here!
+                // false means that the sprint cannot be updated AT ALL, even programmatically in here
+                // whereas undefined just means that the user can't click and drag to resize it
+                // idk why it's like this, but it is what it is
+                selectedSprint.setProp('durationEditable', undefined);
                 selectedSprint = null;
             }
         }
@@ -160,13 +164,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     calendar = new FullCalendar.Calendar(calendarEl, {
-        eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
-        eventDurationEditable: false,                          // sprints can't be edited by default
+        eventResizableFromStart: (sprintsEditable === "true"),  // when resizing sprints, can be done from start as well as end
+        eventDurationEditable: false,                           // sprints can't be edited by default
         timeZone: 'UTC',
         themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
         eventOrder: "-id",
-        displayEventTime: false,
+        displayEventTime: false,                                // stops time being displayed, sometimes happens on new sprints
 
         // Restricts the calendar dates based on the given project dates
         validRange: {
@@ -211,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                     // remove editing from previous sprint
-                    selectedSprint.setProp('durationEditable', false);
+                    selectedSprint.setProp('durationEditable', undefined);
                 }
                 selectedSprint = info.event;
 
