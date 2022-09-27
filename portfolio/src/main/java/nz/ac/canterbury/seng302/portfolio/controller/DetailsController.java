@@ -117,15 +117,7 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event, deadline and milestone lists and sorts them based on their start dates
-        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
-        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
-        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
-
-        List<Schedulable> schedulableList = new ArrayList<>();
-        schedulableList.addAll(eventList);
-        schedulableList.addAll(deadlineList);
-        schedulableList.addAll(milestoneList);
+        List<Schedulable> schedulableList = getAllSchedulables(parentProjectId);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
@@ -252,5 +244,22 @@ public class DetailsController extends PageController {
         model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         return "detailFragments :: " + schedulableType;
+    }
+
+    /**
+     * Gets a list of all schedulables in the project
+     * @param parentProjectId The id of the project to get schedulables from
+     * @return A list of all schedulables in the project
+     */
+    public List<Schedulable> getAllSchedulables(int parentProjectId) {
+        // Gets the event, deadline and milestone lists and sorts them based on their start dates
+        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
+        List<Schedulable> schedulableList = new ArrayList<>();
+        schedulableList.addAll(eventList);
+        schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
+        return schedulableList;
     }
 }

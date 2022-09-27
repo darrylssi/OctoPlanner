@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import org.springframework.stereotype.Component;
@@ -83,7 +84,8 @@ public class ValidationUtils {
      * @param sprintList A list of sprints in the same project to be compared to
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
-    public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
+    public static ValidationError validateProjectDates(Date start, Date end, Date creation,
+                                                       List<Sprint> sprintList, List<Schedulable> schedulableList) {
         // Initial error flag = false (no errors yet)
         ValidationError error = new ValidationError();
 
@@ -97,6 +99,14 @@ public class ValidationUtils {
             if (datesOutsideProject(sprint.getSprintStartDate(), sprint.getSprintEndDate(), start, end)) {
                 error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
+                        " is outside the project dates");
+            }
+        }
+
+        for (Schedulable schedulable : schedulableList) {
+            if (datesOutsideProject(schedulable.getStartDate(), schedulable.getEndDate(), start, end)) {
+                error.addErrorMessage(schedulable.getName() + ": " +
+                        schedulable.getStartDate() + " - " + schedulable.getEndDate() +
                         " is outside the project dates");
             }
         }

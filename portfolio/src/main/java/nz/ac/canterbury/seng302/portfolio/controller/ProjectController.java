@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.ProjectForm;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -40,6 +41,9 @@ public class ProjectController extends PageController {
     @Autowired
     private SprintService sprintService;
 
+    @Autowired
+    private DetailsController detailsController;
+
     /**
      * Post request for editing a project with the given ID.
      * @param principal The authenticated or currently logged in user
@@ -66,7 +70,9 @@ public class ProjectController extends PageController {
 
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
 
-        ResponseEntity<String> validationResponse = validateProject(projectForm, bindingResult, sprintList,
+        List<Schedulable> schedulableList = detailsController.getAllSchedulables(id);
+
+        ResponseEntity<String> validationResponse = validateProject(projectForm, bindingResult, sprintList, schedulableList,
                 newProject.getProjectCreationDate());
 
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
@@ -90,10 +96,14 @@ public class ProjectController extends PageController {
      * @param projectForm Form containing details of a project
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @param sprintList List of sprints in the project
+     * @param schedulableList List of schedulables in the project
      * @param creationDate Date when the project was created
-     * @return A response entity that contains any errors that were found; Bad Request if there are errors, Ok if there are none
+     * @return A response entity that contains any errors that were found;
+     * Bad Request if there are errors, Ok if there are none
      */
-    private ResponseEntity<String> validateProject(ProjectForm projectForm, BindingResult bindingResult, List<Sprint> sprintList, Date creationDate) {
+    private ResponseEntity<String> validateProject(ProjectForm projectForm, BindingResult bindingResult,
+                                                   List<Sprint> sprintList, List<Schedulable> schedulableList,
+                                                   Date creationDate) {
 
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
@@ -104,7 +114,7 @@ public class ProjectController extends PageController {
         }
 
         ValidationError dateErrors = ValidationUtils.validateProjectDates(DateUtils.localDateToDate(projectForm.getStartDate()),
-                DateUtils.localDateToDate(projectForm.getEndDate()), creationDate, sprintList);
+                DateUtils.localDateToDate(projectForm.getEndDate()), creationDate, sprintList, schedulableList);
         ValidationError nameErrors = ValidationUtils.validateText(projectForm.getName(), NAME_REGEX, NAME_ERROR_MESSAGE);
         String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, new ValidationError());
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;

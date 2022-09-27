@@ -56,6 +56,7 @@ public class ProjectTests {
     private Sprint sprint1;
     private Sprint sprint2;
     private final List<Sprint> sprintList = new ArrayList<>();
+    private final List<Schedulable> schedulableList = new ArrayList<>();
 
     /**
      * This exists to check that dates are equivalent for the purposes of these tests. It checks
@@ -105,7 +106,7 @@ public class ProjectTests {
     }
 
     @Test
-    void searchById_getProject() throws Exception {
+    void searchById_getProject() {
         Mockito.when(projectService.getProjectById(baseProject.getId())).thenReturn(baseProject);
 
         Project foundProject = projectService.getProjectById(baseProject.getId());
@@ -165,7 +166,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -181,7 +182,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-20");
         Date end = DateUtils.toDate("2022-01-20");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -197,7 +198,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-01");
         Date end = DateUtils.toDate("2022-02-10");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint2.getSprintLabel() + ": " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
@@ -213,7 +214,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-27");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         /* Then: the validation should return a success */
         assertEquals("" , actual);
@@ -231,7 +232,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-26");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +
