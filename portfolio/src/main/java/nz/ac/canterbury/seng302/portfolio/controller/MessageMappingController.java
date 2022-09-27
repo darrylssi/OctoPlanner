@@ -75,7 +75,14 @@ public class MessageMappingController {
     @MessageMapping("/sprints")
     @SendTo("/topic/sprints")
     public synchronized SprintMessageOutput sendSprintData(SprintMessage sprintMessage) throws InterruptedException {
-        wait(100);
+        // wait statements must be in a while loop, so it is in a while loop
+        // the loop should end if the sprint changes, but that breaks live updates (at least on localhost)
+        // so it ends after 250 ms every time instead
+        int count = 0;
+        while (count < 250) {
+            count++;
+            wait(1);
+        }
         SprintMessageOutput sprintMessageOutput;
         try {
             Sprint updatedSprint = sprintService.getSprintById(sprintMessage.getId());
