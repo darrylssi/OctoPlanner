@@ -1,7 +1,16 @@
+@import "themeColors.css";
+
 .group-block {
     padding: 5px;
     background-color: white;
     border-radius: 8px;
     margin: 10px;
     flex-grow: 1;
+}
+
+.show-users {
+    color: var(--primary-dark);
+    font-weight: bold;
+    background-color: white;
+    border: none;
 }
