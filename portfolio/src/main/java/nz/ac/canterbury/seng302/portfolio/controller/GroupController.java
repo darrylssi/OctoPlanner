@@ -1,11 +1,8 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.User;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,9 +26,6 @@ public class GroupController extends PageController{
 
     //TODO update this when the template is actually created or just get rid of the TODO
     public static final String GROUPS_TEMPLATE_NAME = "groups";
-
-    @Autowired
-    UserAccountClientService userAccountClientService;
 
     @Autowired
     GroupClientService groupClientService;
@@ -54,6 +47,13 @@ public class GroupController extends PageController{
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }
 
+    /**
+     * A post mapping to add a list of users to a group
+     * @param principal the user adding members to a group. used for authentication
+     * @param groupId the id of the group being added to
+     * @param userIds a list of the ids of the users being added
+     * @return a response entity describing whether the action was successful
+     */
     @PostMapping("/groups/{group_id}/add-members")
     public ResponseEntity<String> addMembers(
             @AuthenticationPrincipal AuthState principal,
@@ -70,8 +70,10 @@ public class GroupController extends PageController{
 
         if (addGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.OK);
+        } else if (addGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)){
+            return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
-            return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

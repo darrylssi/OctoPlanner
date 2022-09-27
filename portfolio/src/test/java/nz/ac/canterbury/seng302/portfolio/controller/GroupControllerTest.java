@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = GroupController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class GroupControllerTest {
+class GroupControllerTest {
     @MockBean
     GroupClientService groupClientService;
 
@@ -42,22 +42,11 @@ public class GroupControllerTest {
     @Autowired
     MockMvc mvc;
 
-    @BeforeEach
-    void setUp(){
-        when(userAccountClientService.getUserAccountById(1)).thenReturn(UserResponse.newBuilder().build());
-        when(userAccountClientService.getUserAccountById(2)).thenReturn(UserResponse.newBuilder().build());
-    }
-
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
     void addUsersToGroupAsTeacher_get200Response() throws Exception{
         AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users added to group 1").build();
         when(groupClientService.addGroupMembers(1, List.of(1, 2))).thenReturn(addGroupMembersResponse);
-
-
-        GetGroupDetailsResponse groupDetailsResponse = GetGroupDetailsResponse.newBuilder().addAllMembers(new ArrayList<>()).build();
-        when(groupClientService.getGroupDetails(1)).thenReturn(groupDetailsResponse);
-
 
         mvc.perform(post("/groups/1/add-members")
                 .param("user_id", "1")
@@ -68,20 +57,15 @@ public class GroupControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void addUsersToGroupAsTeacher() throws Exception{
-        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users added to group 1").build();
-        when(groupClientService.addGroupMembers(1, List.of(1, 2))).thenReturn(addGroupMembersResponse);
+    void addUsersToNonexistantGroupAsTeacher_get404Response() throws Exception{
+        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 5").build();
+        when(groupClientService.addGroupMembers(5, List.of(1, 2))).thenReturn(addGroupMembersResponse);
 
-
-        GetGroupDetailsResponse groupDetailsResponse = GetGroupDetailsResponse.newBuilder().addAllMembers(new ArrayList<>()).build();
-        when(groupClientService.getGroupDetails(1)).thenReturn(groupDetailsResponse);
-
-
-        mvc.perform(post("/groups/1/add-members")
+        mvc.perform(post("/groups/5/add-members")
                         .param("user_id", "1")
                         .param("user_id", "2"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("2 users added to group 1"));
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("There is no group with id 5"));
     }
 
     @Test
