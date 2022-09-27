@@ -103,11 +103,11 @@ public class ValidationUtils {
             }
         }
 
+        // Checking against all schedulable dates (Events, Deadlines, Milestones)
         for (Schedulable schedulable : schedulableList) {
             if (datesOutsideProject(schedulable.getStartDate(), schedulable.getEndDate(), start, end)) {
-                error.addErrorMessage(schedulable.getName() + ": " +
-                        schedulable.getStartDate() + " - " + schedulable.getEndDate() +
-                        " is outside the project dates");
+                error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
+                        "\" is outside the project dates");
             }
         }
 

@@ -51,17 +51,19 @@ class MonthlyCalendarControllerTest {
     @MockBean
     DeadlineService deadlineService;                    // initializing the DeadlineService
     @MockBean
-    EventService eventService;
+    EventService eventService;                          // initializing the EventService
     @MockBean
-    MilestoneService milestoneService;
+    MilestoneService milestoneService;                  // initializing the MilestoneService
+    @MockBean
+    DetailsController detailsController;                // initializing the DetailsController
 
     private static final int PROJECT_ID = 0;
-    private static Deadline deadline = new Deadline("deadline1", "deaddesc", DateUtils.toDate("2022-02-01"));
-    private static Milestone milestone = new Milestone("milestone1", "deaddesc", DateUtils.toDate("2022-02-02"));
-    private static Event event = new Event("event1", "eventdesc", DateUtils.toDate("2022-02-02"), DateUtils.toDate("2022-02-20"));
-    private static Sprint sprint1 = new Sprint(PROJECT_ID, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
-    private static Sprint sprint2 = new Sprint(PROJECT_ID, "Sprint 2", "This is sprint 2", "2022-01-11", "2022-01-22", "#123456");
-    private static Project project = new Project("Project 2022", "This is the first project", "2022-01-01", "2022-12-31");
+    private static final Deadline deadline = new Deadline("deadline1", "deaddesc", DateUtils.toDate("2022-02-01"));
+    private static final Milestone milestone = new Milestone("milestone1", "deaddesc", DateUtils.toDate("2022-02-02"));
+    private static final Event event = new Event("event1", "eventdesc", DateUtils.toDate("2022-02-02"), DateUtils.toDate("2022-02-20"));
+    private static final Sprint sprint1 = new Sprint(PROJECT_ID, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
+    private static final Sprint sprint2 = new Sprint(PROJECT_ID, "Sprint 2", "This is sprint 2", "2022-01-11", "2022-01-22", "#123456");
+    private static final Project project = new Project("Project 2022", "This is the first project", "2022-01-01", "2022-12-31");
 
     @BeforeAll
     static void setUp() {
@@ -131,11 +133,11 @@ class MonthlyCalendarControllerTest {
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
     void whenGetMonthlyCalendar_thenHasAllSchedulablesInProjectInCorrectFormat() throws Exception {
-        // get services to return lists
-        Mockito.when(deadlineService.getDeadlinesInProject(PROJECT_ID)).thenReturn(List.of(deadline));
-        Mockito.when(milestoneService.getMilestonesInProject(PROJECT_ID)).thenReturn(List.of(milestone));
-        Mockito.when(eventService.getEventByParentProjectId(PROJECT_ID)).thenReturn(List.of(event));
+        // get services to return list of schedulables
         Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+        Mockito.when(detailsController.getAllSchedulablesInProject(PROJECT_ID))
+                .thenReturn(List.of(deadline, milestone, event));
+
 
         // create expected lists
         String expectedNames = String.join(", ", List.of("deadline1", "milestone1", "event1"));

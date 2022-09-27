@@ -117,7 +117,7 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        List<Schedulable> schedulableList = getAllSchedulables(parentProjectId);
+        List<Schedulable> schedulableList = getAllSchedulablesInProject(parentProjectId);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
@@ -251,7 +251,7 @@ public class DetailsController extends PageController {
      * @param parentProjectId The id of the project to get schedulables from
      * @return A list of all schedulables in the project
      */
-    public List<Schedulable> getAllSchedulables(int parentProjectId) {
+    public List<Schedulable> getAllSchedulablesInProject(int parentProjectId) {
         // Gets the event, deadline and milestone lists and sorts them based on their start dates
         List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
         List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);

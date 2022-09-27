@@ -70,7 +70,7 @@ public class ProjectController extends PageController {
 
         List<Sprint> sprintList = sprintService.getSprintsInProject(id);
 
-        List<Schedulable> schedulableList = detailsController.getAllSchedulables(id);
+        List<Schedulable> schedulableList = detailsController.getAllSchedulablesInProject(id);
 
         ResponseEntity<String> validationResponse = validateProject(projectForm, bindingResult, sprintList, schedulableList,
                 newProject.getProjectCreationDate());
