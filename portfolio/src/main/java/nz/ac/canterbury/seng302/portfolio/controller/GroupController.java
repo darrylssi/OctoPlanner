@@ -58,26 +58,15 @@ public class GroupController extends PageController{
     public ResponseEntity<String> addMembers(
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("group_id") int groupId,
-            @RequestParam("user_id") int[] userIds
+            @RequestParam("user_id") List<Integer> userIds
     ){
         try {
             requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         } catch (ResponseStatusException ex) {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
-        List<UserResponse> usersInGroup = groupClientService.getGroupDetails(groupId).getMembersList();
-        List<Integer> idsToAdd = new ArrayList<>();
 
-        for (int userId: userIds) {
-            UserResponse userResponse = userAccountClientService.getUserAccountById(userId);
-            if(userResponse == null){
-                return new ResponseEntity<>("One or more users do not exist.", HttpStatus.NOT_FOUND);
-            }else if(!usersInGroup.contains(userResponse)) {
-                idsToAdd.add(userId);
-            }
-        }
-
-        AddGroupMembersResponse addGroupMembersResponse = groupClientService.addGroupMembers(groupId, idsToAdd);
+        AddGroupMembersResponse addGroupMembersResponse = groupClientService.addGroupMembers(groupId, userIds);
 
         if (addGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.OK);
