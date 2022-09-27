@@ -43,21 +43,5 @@ class DetailsControllerTest {
     @MockBean
     private UserAccountClientService userAccountClientService;
 
-    @Test
-    @WithMockPrincipal(TEACHER)
-    void deleteSprintAsTeacher_get200Response() throws Exception {
-        Mockito.doNothing().when(sprintService).deleteSprint(anyInt());
-        mockMvc.perform(delete("/delete-sprint/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Sprint deleted."));
-    }
-
-    @Test
-    @WithMockPrincipal(STUDENT)
-    void deleteSprintAsStudent_get401Response() throws Exception {
-        Mockito.doNothing().when(sprintService).deleteSprint(anyInt());
-        mockMvc.perform(delete("/delete-sprint/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("User not authorised."));
-    }
+    //TODO add tests that test the model attributes of get requests.
 }

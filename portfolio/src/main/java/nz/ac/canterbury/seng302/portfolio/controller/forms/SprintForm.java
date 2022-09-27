@@ -1,15 +1,19 @@
 package nz.ac.canterbury.seng302.portfolio.controller.forms;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.DATE_FORMAT;
 
 /**
- * Sprint form that is given to the user inside templates.
+ * <p>SprintForm class that's given to the user inside templates.</p>
+ *
+ * This proxy exists for security reasons, as directly giving Sprint objects from the
+ * database flags Sonarqube errors.
  */
 public class SprintForm {
     @NotBlank(message="Name cannot be blank")

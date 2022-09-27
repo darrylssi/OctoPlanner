@@ -3,10 +3,11 @@
 table {
     border-collapse: collapse;
     font-size: 1em;
-    width: 60%;
+    width: 95%;
     margin-left: auto;
     margin-right: auto;
     table-layout: fixed;
+    min-width: 480px;
 }
 
 thead {
