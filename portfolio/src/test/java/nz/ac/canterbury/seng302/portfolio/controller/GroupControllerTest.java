@@ -137,18 +137,53 @@ class GroupControllerTest {
     void editValidGroupAsTeacher_get200Response() throws Exception {
         String shortName = "Test Valid Short Name";
         String longName = "Test Valid Long Name";
+        // Given: The group service returns a success
         ModifyGroupDetailsResponse response = ModifyGroupDetailsResponse.newBuilder()
                 .setIsSuccess(true)
                 .setMessage("Group edited successfully")
                 .build();
         when(groupClientService.modifyGroupDetails(GROUP_ID,
                 shortName,longName)).thenReturn(response);
-
-        this.mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID)
+        // When: We attempt to edit a group
+        // Then: The request returns an OK (200) status and the message from the service is displayed
+        mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID)
                         .param("shortName", shortName)
                         .param("longName", longName))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Group edited successfully"));
         verify(groupClientService).modifyGroupDetails(GROUP_ID, shortName, longName);
+    }
+
+    /**
+     * This test case may happen when attempting to edit default groups, even if the short and long names are valid
+     */
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void editInvalidGroupAsTeacher_get400Response() throws Exception {
+        String shortName = "Test Valid Short Name";
+        String longName = "Test Valid Long Name";
+        // Given: The group service returns a failure
+        ModifyGroupDetailsResponse response = ModifyGroupDetailsResponse.newBuilder()
+                .setIsSuccess(false)
+                .setMessage("Group could not be edited")
+                .build();
+        when(groupClientService.modifyGroupDetails(GROUP_ID,
+                shortName,longName)).thenReturn(response);
+        // When: We attempt to edit a group
+        // Then: The request returns a Bad Request (400) status and the message from the service is displayed
+        mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID)
+                        .param("shortName", shortName)
+                        .param("longName", longName))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Group could not be edited"));
+        verify(groupClientService).modifyGroupDetails(GROUP_ID, shortName, longName);
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void editGroupAsStudent_forbidden() throws Exception {
+        this.mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 }

@@ -128,8 +128,11 @@ public class GroupController extends PageController{
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
             ModifyGroupDetailsResponse editResponse = groupClientService.modifyGroupDetails(groupId,
                     editGroupForm.getShortName(), editGroupForm.getLongName());
-
-            return ResponseEntity.ok(editResponse.getMessage());
+            if (editResponse.getIsSuccess()) {
+                return ResponseEntity.ok(editResponse.getMessage());
+            } else {
+                return new ResponseEntity<>(editResponse.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         } else {
             return validationResponse;
         }
