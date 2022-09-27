@@ -38,8 +38,6 @@ class GroupControllerTest {
     @Autowired
     MockMvc mvc;
 
-    // remove users as teacher, remove from nonexistent group, remove as student
-
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
     void removeUsersFromGroupAsTeacher_get200Response() throws Exception {
