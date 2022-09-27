@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,42 @@ public class GroupController extends PageController{
     }
 
     /**
+     * Handles edit requests for groups
+     * @param principal Authenticated user
+     * @param projectId The id of the project the group belongs to
+     * @param groupId The id of the group to edit
+     * @param editGroupForm Form submitted by the user
+     * @param bindingResult Any errors that occurred while constraint checking the form
+     * @return A response of either 200 (success), 403 (forbidden),
+     *         or 400 (Given the group failed validation, replies with what errors occurred)
+     */
+    @PostMapping("/project/{projectId}/edit-group/{groupId}")
+    public ResponseEntity<String> postEditGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable("projectId") int projectId,
+            @PathVariable("groupId") int groupId,
+            @Valid GroupForm editGroupForm,
+            BindingResult bindingResult
+    ) {
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        // Validate form
+        ResponseEntity<String> validationResponse = validateGroup(editGroupForm, bindingResult);
+        if (validationResponse.getStatusCode() == HttpStatus.OK) {
+            ModifyGroupDetailsResponse editResponse = groupClientService.modifyGroupDetails(groupId,
+                    editGroupForm.getShortName(), editGroupForm.getLongName());
+
+            return ResponseEntity.ok(editResponse.getMessage());
+        } else {
+            return validationResponse;
+        }
+    }
+
+    /**
      * A method to validate groups when they are added or edited
      * @param groupForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
@@ -120,5 +157,4 @@ public class GroupController extends PageController{
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }
-
 }
