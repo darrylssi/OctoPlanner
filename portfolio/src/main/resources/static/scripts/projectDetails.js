@@ -265,14 +265,13 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 }
 
 /**
- * Populates the edit schedulable form with the current details of the schedulable.
- * @param editForm Edit schedulable form
- * @param schedulable Schedulable object
- * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ * Populates the edit sprint/schedulable form with the current details of the sprint/schedulable.
+ * @param editForm Edit sprint/schedulable form
+ * @param schedulable Sprint/Schedulable object
+ * @param type the type of the sprint/schedulable, e.g. 'sprint', 'deadline', 'milestone', or 'event'
  */
 function prefillSchedulable(editForm, schedulable, type) {
     if (type === 'sprint') {
-        console.log();
         editForm.querySelector("#sprintName").value = schedulable.sprintName;
         editForm.querySelector("#sprintDescription").value =  schedulable.sprintDescription;
         editForm.querySelector("#sprintStartDate").value = schedulable.startDay;

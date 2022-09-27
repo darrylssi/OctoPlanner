@@ -94,7 +94,6 @@ public class EditSprintController extends PageController {
      */
     private ResponseEntity<String> validateSprint(Project parentProject, int sprintId, SprintForm sprintForm,
                                                   BindingResult bindingResult, List<Sprint> sprintList) {
-
         if (bindingResult.hasErrors()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: bindingResult.getAllErrors()) {
