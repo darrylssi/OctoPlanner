@@ -2,33 +2,29 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.ProjectForm;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SchedulableForm;
+import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
@@ -59,7 +55,8 @@ public class DetailsController extends PageController {
      * Get request to view project details page.
      * @param principal Authenticated user
      * @param id ID of the project to be shown
-     * @param schedulableForm The form submitted by the user
+     * @param schedulableForm The form for adding schedulables
+     * @param sprintForm the form for adding sprints
      * @param userTimezone The user's time zone
      * @param model Parameters sent to thymeleaf template
      * @return Project details page
@@ -69,11 +66,13 @@ public class DetailsController extends PageController {
                 @AuthenticationPrincipal AuthState principal,
                 @PathVariable(name="id") int id,
                 SchedulableForm schedulableForm,
+                SprintForm sprintForm,
                 TimeZone userTimezone,
                 Model model
     ){
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateSchedulableForm(schedulableForm, userTimezone.toZoneId());
+        prePopulateSprintForm(sprintForm, userTimezone.toZoneId(), id, model);
         populateProjectDetailsModel(model, id, thisUser);
 
         return PROJECT_DETAILS_TEMPLATE_NAME;   // Return the name of the Thymeleaf template
@@ -143,31 +142,6 @@ public class DetailsController extends PageController {
     }
 
     /**
-     * Deletes a sprint and redirects back to the project view
-     * @param principal used to check if the user is authorised to delete sprints
-     * @param sprintId the id of the sprint to be deleted
-     * @return a redirect to the project view
-     */
-    @DeleteMapping("/delete-sprint/{sprintId}")
-    @ResponseBody
-    public ResponseEntity<String> deleteSprint(
-                @AuthenticationPrincipal AuthState principal,
-                @PathVariable(name="sprintId") int sprintId
-        ) {
-        PrincipalData thisUser = PrincipalData.from(principal);
-        // Check if the user is authorised to delete sprints
-        if (!thisUser.hasRoleOfAtLeast(UserRole.TEACHER)) {
-            return new ResponseEntity<>("User not authorised.", HttpStatus.UNAUTHORIZED);
-        }
-        try {
-            sprintService.deleteSprint(sprintId);
-            return new ResponseEntity<>("Sprint deleted.", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
      * Pre-populates the event form with default values, if they don't already exist
      * @param schedulableForm The schedulableForm object from your endpoint args
      * @param userTimezone The user's time zone for calculating the correct start dates
@@ -185,6 +159,55 @@ public class DetailsController extends PageController {
             schedulableForm.setEndDate(LocalDate.ofInstant(inOneMinute, userTimezone));
             schedulableForm.setEndTime(LocalTime.ofInstant(inOneMinute, userTimezone));
         }
+    }
+
+    /**
+     * Populates the sprint form with default values
+     * @param sprintForm the sprint form being populated
+     * @param userTimezone the timezone this is occurring in
+     * @param projectId the id of the parent project
+     * @param model the model to be sent to thymeleaf
+     */
+    private void prePopulateSprintForm(SprintForm sprintForm, ZoneId userTimezone, int projectId, Model model){
+        sprintForm.setDescription("");
+        sprintForm.setName(labelUtils.nextLabel(projectId));
+        Project project = projectService.getProjectById(projectId);
+        List<Sprint> sprintList = sprintService.getSprintsInProject(projectId);
+        sprintList.sort(Comparator.comparing(Sprint::getSprintEndDate));
+
+        // Calculate the default sprint start date
+        Date sprintStart;
+        Calendar c = Calendar.getInstance();
+        if (sprintList.isEmpty()) { // Use project start date when there are no sprints
+            sprintStart = project.getProjectStartDate();
+            c.setTime(sprintStart);
+        } else {
+            Date lastSprintEnd = sprintList.get(sprintList.size()-1).getSprintEndDate();
+            c.setTime(lastSprintEnd);
+            c.add(Calendar.DAY_OF_MONTH, 1);    // Day after last sprint ends
+            sprintStart = c.getTime();
+        }
+
+        // This only happens when the last sprint finishes on the same day as the project
+        if (sprintStart.after(project.getProjectEndDate())) {
+            model.addAttribute("sprintStartError",
+                    "There is no room for more sprints in this project");
+        }
+
+        // Calculate the default sprint end date
+        Date sprintEnd;
+        c.add(Calendar.DAY_OF_MONTH, 21);   // 3 weeks after sprint starts
+
+        // Checks that the default end date is within the project dates
+        if (ValidationUtils.datesOutsideProject(sprintStart, c.getTime(),
+                project.getProjectStartDate(), project.getProjectEndDate())){
+            sprintEnd = project.getProjectEndDate();    // Use project end date if there is an overlap
+        } else {
+            sprintEnd = c.getTime();
+        }
+
+        sprintForm.setStartDate(DateUtils.dateToLocalDate(sprintStart, userTimezone));
+        sprintForm.setEndDate(DateUtils.dateToLocalDate(sprintEnd, userTimezone));
     }
 
     /**
