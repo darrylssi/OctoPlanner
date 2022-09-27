@@ -136,6 +136,16 @@ public class DateUtils {
     }
 
     /**
+     * Converts a Date object into a LocalDate object
+     * @param date the date to be converted
+     * @param userTimezone the current user timezone
+     * @return the given date as a LocalDate
+     */
+    public static LocalDate dateToLocalDate(Date date, ZoneId userTimezone) {
+        return date.toInstant().atZone(userTimezone).toLocalDate();
+    }
+
+    /**
      * Takes the start and ends of two time periods and checks whether they overlap
      * Returns true if the times overlap, including if the start of one period equals the end of the other
      * @param startA the start time of the first time period
