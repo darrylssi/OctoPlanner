@@ -150,6 +150,70 @@ class GroupServerServiceTest {
     }
 
     @Test
+    void testCreateGroup_whenShortNameNotUnique_getFailure() {
+        // * Given: There is another group with the same short name
+        Group other = new Group("duplicate shortname", "valid long name");
+        other.setId(testGroupId);   // Give other group an ID so the two groups do not have the same ID
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to modify the group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("duplicate shortname")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText("Group short name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testCreateGroup_whenLongNameNotUnique_getFailure() {
+        // * Given: There is another group with the same long name
+        Group other = new Group("valid short name", "duplicate long name");
+        other.setId(testGroupId);   // Give other group an ID so the two groups do not have the same ID
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to modify the group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("edit valid short name")
+                .setLongName("duplicate long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
     void testAddUsersToGroup_getSuccess() {
         // Prepare collections of user ids/users to use as mock data
         List<Integer> userIds = List.of(testUserId1, testUserId2);
