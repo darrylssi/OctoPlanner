@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -45,13 +44,11 @@ class GroupServerServiceTest {
     @MockBean
     private GroupRepository groupRepository;
 
-    @InjectMocks
-    private GroupService groupService = spy(GroupService.class);
-
     @MockBean
     private UserRepository userRepository;
 
     private Group testGroup;
+    private Group testMembersWithoutAGroup;
     private User testUser1;
     private User testUser2;
     private static final int testGroupId = 999;
@@ -60,8 +57,9 @@ class GroupServerServiceTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
         testGroup = new Group("test short name", "test long name");
+        testMembersWithoutAGroup = new Group("Members Without A Group",
+                "test long name for members without a group");
         testGroup.setId(testGroupId);
         testUser1 = new User("testUsername1", "testPassword1", "testFirstName1",
                 "testMiddleName1", "testLastName1", "testNickname1",
@@ -164,6 +162,8 @@ class GroupServerServiceTest {
         // * Given: There is a group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * When: We try to add members to this group
         StreamObserver<AddGroupMembersResponse> observer = mock(StreamObserver.class);
@@ -254,6 +254,8 @@ class GroupServerServiceTest {
         // * Given: There is a group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * When: We try to remove members from this group
         StreamObserver<RemoveGroupMembersResponse> observer = mock(StreamObserver.class);
