@@ -80,10 +80,20 @@ public class GroupControllerTest {
 //    @Test
 //    @WithMockPrincipal(TEACHER)
 //    void deleteGroupAsTeacher_get200Response() throws Exception {
-//        System.out.println(groupDetails.getShortName());
-//        System.out.println(groupDetails.getLongName());
+//        Mockito.when(groupClientService.deleteGroup(anyInt())).
+//                thenReturn(deleteGroupResponse);
+//        mockMvc.perform(delete("/delete-group/1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(String.valueOf(deleteGroupResponse)));
+//    }
+
+//    @Test
+//    @WithMockPrincipal(TEACHER)
+//    void deleteGroupAsTeacher1_get200Response() throws Exception {
+////        System.out.println(groupDetails.getShortName());
+////        System.out.println(groupDetails.getLongName());
 //
-//        Mockito.when(projectService.getProjectById(0)).
+//        Mockito.when(projectService.getProjectById(anyInt())).
 //                thenReturn(group.getParentProject());
 //        Mockito.when(groupClientService.getGroupDetails(anyInt())).
 //                thenReturn(groupDetails);

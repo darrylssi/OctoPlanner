@@ -139,10 +139,10 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
+        GetGroupDetailsResponse groupDetails = groupClientService.getGroupDetails(groupId);
+        System.out.println("Group details-> " + groupDetails);
         try {
-            GetGroupDetailsResponse group = groupClientService.getGroupDetails(groupId);
-
-            if (group.getShortName() != "Teaching staff" && group.getShortName() != "Members without groups") {
+            if (groupDetails.getShortName() != "Teaching staff" && groupDetails.getShortName() != "Members without groups") {
                 groupClientService.deleteGroup(groupId);
                 return new ResponseEntity<>("Group deleted.", HttpStatus.OK);
             } else {
