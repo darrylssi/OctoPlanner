@@ -27,7 +27,7 @@
             <div class="col-lg-2 text-center">
                 <img class="profile-image photo" th:src="${userProfilePhoto}" alt="User profile photo">
             </div>
-            <div class="detail-block col-lg-10">
+            <div class="profile-detail col-lg-10">
                 <div>
                     <div class="sprint-title" style="font-size: x-large" th:text="${fullName}" />
                     <div th:if="*{getPersonalPronouns} != ''" class="sprint-date" th:text="|Pronouns: *{getPersonalPronouns()}|" />
@@ -41,7 +41,7 @@
                 </div>
             </div>
         </div>
-        <div th:if="*{getBio()} != ''" class="detail-block my-3 mx-1">
+        <div th:if="*{getBio()} != ''" class="profile-detail my-3 mx-1">
             <div class="sprint-description" th:text="*{getBio()}" style="word-wrap: break-word; width: 100%"/>
 
     </div>

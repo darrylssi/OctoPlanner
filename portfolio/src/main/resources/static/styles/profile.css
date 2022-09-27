@@ -13,3 +13,9 @@
     background-position: center;
     background-size: cover;
 }
+
+.profile-detail {
+    padding: 5px;
+    background-color: white;
+    border-radius: 8px;
+}

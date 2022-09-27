@@ -70,12 +70,12 @@
 
 .detail-block {
     padding: 5px;
-    /*min-height: 100px;*/
+    min-height: 100px;
     background-color: white;
     border-radius: 8px;
-    /*margin: 5px;*/
-    /*flex-grow: 1;*/
-    /*width:calc(100% - 10px);*/
+    margin: 5px;
+    flex-grow: 1;
+    width:calc(100% - 10px);
 }
 
 .sprint-block {
