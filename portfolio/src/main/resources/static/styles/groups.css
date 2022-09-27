@@ -1,0 +1,7 @@
+.group-block {
+    padding: 5px;
+    background-color: white;
+    border-radius: 8px;
+    margin: 10px;
+    flex-grow: 1;
+}

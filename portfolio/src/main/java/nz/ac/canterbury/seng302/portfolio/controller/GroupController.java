@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class GroupController extends PageController{
 
-    //TODO update this when the template is actually created or just get rid of the TODO
     public static final String GROUPS_TEMPLATE_NAME = "groups";
 
     /**
@@ -26,9 +25,7 @@ public class GroupController extends PageController{
             @AuthenticationPrincipal AuthState principal,
             Model model
     ) {
-        /*
-        Insert code that does things with the page here
-         */
+        model.addAttribute("tab", 3);
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }
 }
