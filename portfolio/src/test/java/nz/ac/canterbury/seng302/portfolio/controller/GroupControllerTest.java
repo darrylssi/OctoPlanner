@@ -4,10 +4,7 @@ import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
@@ -57,7 +53,7 @@ class GroupControllerTest {
 
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
-    void addUsersToNonexistantGroupAsTeacher_get404Response() throws Exception{
+    void addUsersToNonexistentGroupAsTeacher_get404Response() throws Exception{
         AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 5").build();
         when(groupClientService.addGroupMembers(5, List.of(1, 2))).thenReturn(addGroupMembersResponse);
 
