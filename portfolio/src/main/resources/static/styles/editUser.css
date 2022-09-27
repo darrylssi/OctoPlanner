@@ -3,6 +3,7 @@
     display: flex;
     justify-content: center;
     margin: auto;
+    padding-top: 8px;
 }
 
 .content form .user-info {
@@ -13,41 +14,51 @@
     margin: auto;
 }
 
-form .user-info .input-box {
-    margin: 13px 0 5px 0;
-    width: 50%;
-    max-width: 50%;
-    height: 100px;
-    max-height: 100%;
+form .input-row {
+    max-width: 80%;
+    margin: auto;
 }
 
-.user-info .input-box label {
+form .row .col input {
+    border-color: black;
+}
+
+form .row .col .username {
+    height: 35px;
+}
+
+form .buttons-centre {
+    position: relative;
+    display: contents;
+}
+
+.user-info label {
     height: 30%;
     display: block;
     font-size: 18px;
     margin: 15px 1px 5px 1px;
 }
 
-.user-info .input-box input {
+.user-info input {
     width: 91%;
     height: 35%;
     font-size: 15px;
 }
 
-.user-info .input-box .error {
+.user-info .error {
     color: red;
 }
 
-.user-info .input-box .select-box {
+.user-info .select-box {
     width: 93.5%;
     height: 42%;
 }
 
-.user-info .input-box .textarea {
-    height: 35%;
-    width: 91%;
-    max-width: 91%;
+.user-info .textarea {
+    height: 15%;
+    max-width: 664px;
     resize: none;
+    border-color: black;
 }
 
 .required:after {
