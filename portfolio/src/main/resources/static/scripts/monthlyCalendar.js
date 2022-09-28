@@ -304,8 +304,11 @@ function updateIconObjectsWithSchedulables(calendar) {
     }
 }
 
+/**
+ * Update the calendar using the information sent through the websocket
+ * @param schedulableMessage Message sent through the websocket
+ */
 function updateCalendar(schedulableMessage) {
-    console.log('update calendar');
     const url = BASE_URL + "sched/" + schedulableMessage.type;
     const schedulableFragRequest = new XMLHttpRequest();
     schedulableFragRequest.open("GET", url, true);
@@ -316,6 +319,12 @@ function updateCalendar(schedulableMessage) {
     schedulableFragRequest.send();
 }
 
+
+/**
+ * Rerender the calendar with the new schedulable details
+ * @param response Response from the GET request containing the list of all schedulables
+ * @param message Message sent through the websocket
+ */
 function rerenderCalendar(response, message) {
     removeSchedulables(message.type);
     let schedulables = JSON.parse(response);
@@ -329,7 +338,7 @@ function rerenderCalendar(response, message) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat(schedulable.name));
-            if (icon.extendedProps.description == '') {
+            if (icon.extendedProps.description === '') {
                 icon.setExtendedProp("description", schedulable.name);
             } else{
                 icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + schedulable.name);
@@ -343,8 +352,12 @@ function rerenderCalendar(response, message) {
     calendar.render();
 }
 
+
+/**
+ * Remove from the calendar all schedulables of a given type.
+ * @param type Type of the schedulable to be removed
+ */
 function removeSchedulables(type) {
-    console.log('removing ' + type);
     let events = calendar.getEvents();
     for (let i = 0; i < events.length; i++) {
         if (events[i].id.includes(type) && events[i].num !== 0) {
