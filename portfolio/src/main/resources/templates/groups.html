@@ -28,17 +28,22 @@
         </div>
     </div>
     <hr/>
-    <div class="row collapse" th:id="|group-*{key}|">
-        <div class="col">
-            <table class="table">
-                <tr th:each="user:*{value.getMembersList()}" >
-                    <td th:text="${user.getFirstName()}"></td>
-                </tr>
-            </table>
-        </div>
+    <div th:if="${#arrays.isEmpty(group.value.getMembersList())}" style="text-align:center">
+        <strong>[ This group has no members. ]</strong>
     </div>
-    <div class="row text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{key}|">
-        <div class="col"><button class="show-users" th:text="|Show users (*{value.getMembersList().size()})|"></button></div>
+    <div th:if="${!#arrays.isEmpty(group.value.getMembersList())}">
+        <div class="row collapse" th:id="|group-*{key}|">
+            <div class="col">
+                <table class="table">
+                    <tr th:each="user:*{value.getMembersList()}" >
+                        <td th:text="${user.getFirstName()}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{key}|">
+            <div class="col"><button class="show-users" th:text="|Show users (*{value.getMembersList().size()})|"></button></div>
+        </div>
     </div>
 </div>
 
