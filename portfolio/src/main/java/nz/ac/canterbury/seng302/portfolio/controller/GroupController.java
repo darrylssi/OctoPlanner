@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
@@ -45,6 +46,9 @@ public class GroupController extends PageController{
             @AuthenticationPrincipal AuthState principal,
             Model model
     ) {
+        boolean hasEditPermissions = PrincipalData.from(principal).hasRoleOfAtLeast(UserRole.TEACHER);
+        model.addAttribute("canEdit", hasEditPermissions);
+
         model.addAttribute("tab", 3);
         Map<Integer, GetGroupDetailsResponse> groups = new HashMap<>();
         groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
