@@ -2,26 +2,14 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Group;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
-import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
-import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.RemoveGroupMembersResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -311,7 +295,7 @@ class GroupControllerTest {
         RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users removed from group 3").build();
         when(groupClientService.removeGroupMembers(3, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
 
-        mvc.perform(delete("/groups/3/remove-members")
+        mockMvc.perform(delete("/groups/3/remove-members")
                         .param("user_id", "3")
                         .param("user_id", "8"))
                 .andExpect(status().isOk())
@@ -324,7 +308,7 @@ class GroupControllerTest {
         RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 6").build();
         when(groupClientService.removeGroupMembers(6, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
 
-        mvc.perform(delete("/groups/6/remove-members")
+        mockMvc.perform(delete("/groups/6/remove-members")
                         .param("user_id", "3")
                         .param("user_id", "8"))
                 .andExpect(status().isNotFound())
@@ -334,7 +318,7 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(STUDENT)
     void removeUsersFromGroupAsStudent_forbidden() throws Exception {
-        mvc.perform(delete("/groups/1/remove-members")
+        mockMvc.perform(delete("/groups/1/remove-members")
                         .param("user_id", "2")
                         .param("user_id", "51"))
                 .andExpect(status().isForbidden())
