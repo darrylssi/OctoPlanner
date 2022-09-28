@@ -113,8 +113,8 @@ public class SprintController extends PageController {
         sprint.setSprintLabel(labelUtils.nextLabel(projectId));
         sprint.setSprintColour(sprintColour);
 
-        sprintService.saveSprint(sprint);
-        return new ResponseEntity<>("Sprint Updated", HttpStatus.OK);
+        Sprint savedSprint = sprintService.saveSprint(sprint);
+        return ResponseEntity.ok(String.valueOf(savedSprint.getId()));
     }
 
     /**

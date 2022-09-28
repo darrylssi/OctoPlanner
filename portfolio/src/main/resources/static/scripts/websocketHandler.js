@@ -16,6 +16,7 @@ let stompClient = null;
 const editingLogs = false;
 const updateLogs = false;
 const sprintLogs = false;
+const projectLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -35,6 +36,9 @@ function connect() {
         });
         stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
             handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
+        });
+        stompClient.subscribe('/topic/projects', function(projectMessageOutput) {
+            handleProjectUpdateMessage(JSON.parse(projectMessageOutput.body));
         });
     });
 }
@@ -57,6 +61,16 @@ function sendSprintUpdatedMessage(sprintId) {
         console.log("SENDING UPDATED SPRINT MESSAGE FOR " + sprintId);
     }
     stompClient.send("/app/sprints", {}, JSON.stringify({'id':`${sprintId}`}));
+}
+
+/**
+ * Sends a message saying that the specified project was updated.
+ */
+function sendProjectUpdatedMessage(projectId) {
+    if (editingLogs) {
+        console.log("SENDING UPDATED PROJECT MESSAGE FOR " + projectId);
+    }
+    stompClient.send("/app/projects", {}, JSON.stringify({'id':`${projectId}`}));
 }
 
 /**

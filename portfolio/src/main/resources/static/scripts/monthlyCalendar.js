@@ -319,3 +319,16 @@ function handleSprintUpdateMessage(sprintMessage) {
     // for updating, the message will have all parameters and we can find the sprint event
     // for adding, the message will have all parameters but we can't find the sprint event, so make a new one
 }
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}

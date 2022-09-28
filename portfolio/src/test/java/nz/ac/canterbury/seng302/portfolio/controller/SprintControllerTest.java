@@ -94,7 +94,9 @@ class SprintControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addValidSprint_get200Response() throws Exception {
-        Mockito.doNothing().when(sprintService).saveSprint(any());
+        Sprint thisSprint = new Sprint(PROJECT_ID, "Sprint 1", "", DateUtils.toDate("2022-09-09"),
+                        DateUtils.toDate("2022-10-09"), "#abcdef");
+        when(sprintService.saveSprint(any())).thenReturn(thisSprint);
         this.mockMvc.perform(post("/add-sprint/0")
                         .param("name", "Sprint 1")
                         .param("description", "")

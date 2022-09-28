@@ -58,6 +58,7 @@ function saveProject(elem) {
         if (formRequest.status === 200) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', '1', 'project');
+            sendProjectUpdatedMessage(formRequest.response);
             window.location.reload();
         } else {
             // Otherwise, show the error messages
