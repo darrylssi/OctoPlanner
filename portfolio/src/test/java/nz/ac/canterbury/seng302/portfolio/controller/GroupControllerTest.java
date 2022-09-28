@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
@@ -41,17 +42,9 @@ class GroupControllerTest {
     @Autowired
     MockMvc mvc;
 
-    @Test
-    @WithMockPrincipal(UserRole.TEACHER)
-    void removeUsersFromGroupAsTeacher_get200Response() throws Exception {
-        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users removed from group 3").build();
-        when(groupClientService.removeGroupMembers(3, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
 
-        mvc.perform(delete("/groups/3/remove-members")
-                        .param("user_id", "3")
-                        .param("user_id", "8"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("2 users removed from group 3"));
+    @Test
+    @WithMockPrincipal(TEACHER)
     void addUsersToGroupAsTeacher_get200Response() throws Exception{
         AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users added to group 1").build();
         when(groupClientService.addGroupMembers(1, List.of(1, 2))).thenReturn(addGroupMembersResponse);
@@ -64,22 +57,7 @@ class GroupControllerTest {
     }
 
     @Test
-    @WithMockPrincipal(UserRole.TEACHER)
-    void removeUsersFromNonexistentGroupAsTeacher_get404Response() throws Exception {
-        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 6").build();
-        when(groupClientService.removeGroupMembers(6, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
-
-        mvc.perform(delete("/groups/6/remove-members")
-                .param("user_id", "3")
-                .param("user_id", "8"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("There is no group with id 6"));
-    }
-
-    @Test
-    @WithMockPrincipal(UserRole.STUDENT)
-    void removeUsersFromGroupAsStudent_forbidden() throws Exception {
-        mvc.perform(delete("/groups/1/remove-members")
+    @WithMockPrincipal(TEACHER)
     void addUsersToNonexistentGroupAsTeacher_get404Response() throws Exception{
         AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 5").build();
         when(groupClientService.addGroupMembers(5, List.of(1, 2))).thenReturn(addGroupMembersResponse);
@@ -101,4 +79,39 @@ class GroupControllerTest {
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void removeUsersFromGroupAsTeacher_get200Response() throws Exception {
+        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users removed from group 3").build();
+        when(groupClientService.removeGroupMembers(3, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
+
+        mvc.perform(delete("/groups/3/remove-members")
+                        .param("user_id", "3")
+                        .param("user_id", "8"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("2 users removed from group 3"));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void removeUsersFromNonexistentGroupAsTeacher_get404Response() throws Exception {
+        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 6").build();
+        when(groupClientService.removeGroupMembers(6, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
+
+        mvc.perform(delete("/groups/6/remove-members")
+                        .param("user_id", "3")
+                        .param("user_id", "8"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("There is no group with id 6"));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void removeUsersFromGroupAsStudent_forbidden() throws Exception {
+        mvc.perform(delete("/groups/1/remove-members")
+                        .param("user_id", "2")
+                        .param("user_id", "51"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
+    }
 }
