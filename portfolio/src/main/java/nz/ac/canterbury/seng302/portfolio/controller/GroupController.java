@@ -55,6 +55,7 @@ public class GroupController extends PageController{
         groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
 
         model.addAttribute("groups", groups);
+        model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
 
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }

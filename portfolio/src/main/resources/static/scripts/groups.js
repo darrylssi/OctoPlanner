@@ -7,3 +7,11 @@ function toggleUsersButton(button) {
     button.innerHTML=button.getAttribute("showText");
     button.setAttribute("showText", currentText);
 }
+
+/**
+* Calls toggleUsersButton with the button of the group with the given id
+* @param group_id the group id of the button to be toggled
+*/
+function toggleById(group_id) {
+    toggleUsersButton(document.getElementById("user-button-" + group_id));
+}
