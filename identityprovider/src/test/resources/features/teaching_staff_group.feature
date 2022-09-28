@@ -6,3 +6,7 @@ Feature: The Teaching Staff group always exists
   Scenario: The Teaching Staff group cannot be deleted
     When I try to delete the Teaching Staff group
     Then the request to delete Teaching Staff fails
+
+  Scenario: The Teaching Staff group cannot be edited
+    When I try to edit the Teaching Staff group
+    Then the request to edit Teaching Staff fails
