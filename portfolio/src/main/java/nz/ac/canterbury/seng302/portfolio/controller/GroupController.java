@@ -207,6 +207,42 @@ public class GroupController extends PageController{
     }
 
     /**
+     * Deletes a group based on the given id
+     * @param principal used to check if the user is authorised to delete group
+     * @param groupId the id of the group to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/groups/{groupId}/remove-group")
+    @ResponseBody
+    public ResponseEntity<String> deleteGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name = "groupId") int groupId
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        GetGroupDetailsResponse groupDetailsResponse = groupClientService.getGroupDetails(groupId);
+
+        if (groupDetailsResponse.getShortName() != "Teaching staff" && groupDetailsResponse.getShortName() != "Members without groups") {
+            DeleteGroupResponse deleteGroupResponse = groupClientService.deleteGroup(groupId);
+
+            if (deleteGroupResponse.getIsSuccess()) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.OK);
+            } else if (deleteGroupResponse.getMessage().equals("There is no group with id " + groupId)) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
      * Mapping for an endpoint to remove users from a group
      * @param principal Authenticated user
      * @param groupId id of the group to remove members from
@@ -236,36 +272,4 @@ public class GroupController extends PageController{
         }
     }
 
-//    /**
-//     * Deletes a group based on the given id
-//     * @param principal used to check if the user is authorised to delete group
-//     * @param groupId the id of the group to be deleted
-//     * @return a redirect to the project view
-//     */
-//    @DeleteMapping("/delete-group/{groupId}")
-//    @ResponseBody
-//    public ResponseEntity<String> deleteGroup(
-//            @AuthenticationPrincipal AuthState principal,
-//            @PathVariable(name = "groupId") int groupId
-//    ) {
-//        // Check if the user is authorised for this
-//        try {
-//            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-//        } catch (ResponseStatusException ex) {
-//            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
-//        }
-//
-//        GetGroupDetailsResponse groupDetails = groupClientService.getGroupDetails(groupId);
-//        System.out.println("Group details-> " + groupDetails);
-//        try {
-//            if (groupDetails.getShortName() != "Teaching staff" && groupDetails.getShortName() != "Members without groups") {
-//                groupClientService.deleteGroup(groupId);
-//                return new ResponseEntity<>("Group deleted.", HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 }
