@@ -36,10 +36,11 @@ function deleteObject(id, type) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        // Send a websocket message to update the page after the deletion
-        stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
         hideModal();
-        if (type === 'sprint') {
+        if (type !== 'sprint') {
+            // Send a schedulable websocket message to update the page after the deletion, for non-sprints
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
+        } else {
             window.location.reload();
         }
     }
