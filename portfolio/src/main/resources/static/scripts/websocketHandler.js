@@ -31,8 +31,8 @@ function connect() {
             handleSchedulableMessage(JSON.parse(message.body));
         });
         stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
-            updateSchedulable(JSON.parse(schedulableMessageOutput.body));
             updateCalendar(JSON.parse(schedulableMessageOutput.body));
+            updateSchedulable(JSON.parse(schedulableMessageOutput.body));
         });
         stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
             handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
