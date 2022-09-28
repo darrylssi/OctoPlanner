@@ -111,8 +111,8 @@ public class MonthlyCalendarController extends PageController {
 
     /**
      * Returns a list with four strings, each comma separated (actually ", " separated).
-     * The strings are, in order, the names, types, start days, and end days of the provided schedulable objects.
-     * Note: the "days" means that the dates are in "yyyy-mm-dd" format. Not sure why they're like that, but they are.
+     * The strings are, in order, the names, types, start dates, and end dates of the provided schedulable objects.
+     * Note: the dates are in "yyyy-mm-dd HH:mm" format.
      * @param schedulableList list of schedulable objects
      * @return list of 4 strings as described above
      */
@@ -121,22 +121,22 @@ public class MonthlyCalendarController extends PageController {
 
         ArrayList<String> schedulableNames = new ArrayList<>();
         ArrayList<String> schedulableTypes = new ArrayList<>();
-        ArrayList<String> schedulableStartDays = new ArrayList<>();
-        ArrayList<String> schedulableEndDays = new ArrayList<>();
+        ArrayList<String> schedulableStartDates = new ArrayList<>();
+        ArrayList<String> schedulableEndDates = new ArrayList<>();
 
         for (Schedulable schedulable: schedulableList) {
             schedulableNames.add(schedulable.getName());
             schedulableTypes.add(schedulable.getType());
-            schedulableStartDays.add(schedulable.getStartDay());
-            schedulableEndDays.add(schedulable.getEndDay());
+            schedulableStartDates.add(DateUtils.toDateTimeString(schedulable.getStartDate()));
+            schedulableEndDates.add(DateUtils.toDateTimeString(schedulable.getEndDate()));
         }
 
         schedulableDetailsList.add(String.join(", ", schedulableNames));
         schedulableDetailsList.add(String.join(", ", schedulableTypes));
-        schedulableDetailsList.add(String.join(", ", schedulableStartDays));
-        schedulableDetailsList.add(String.join(", ", schedulableEndDays));
+        schedulableDetailsList.add(String.join(", ", schedulableStartDates));
+        schedulableDetailsList.add(String.join(", ", schedulableEndDates));
 
-        return  schedulableDetailsList;
+        return schedulableDetailsList;
     }
 
     /**

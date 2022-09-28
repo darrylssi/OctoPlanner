@@ -8,6 +8,8 @@ import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupService;
 import nz.ac.canterbury.seng302.shared.identityprovider.DeleteGroupRequest;
 import nz.ac.canterbury.seng302.shared.identityprovider.DeleteGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsRequest;
+import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsResponse;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +36,8 @@ public class DefaultGroupStepDefs {
 
     private Group testTeacherGroup = null;
     private Group testMembersWithoutAGroup = null;
-    private DeleteGroupResponse response;
+    private DeleteGroupResponse deleteGroupResponse;
+    private ModifyGroupDetailsResponse modifyGroupDetailsResponse;
 
     @When("I try to access the Teaching Staff group")
     public void iTryToAccessTheTeachingStaffGroup() {
@@ -67,7 +70,7 @@ public class DefaultGroupStepDefs {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        response = captor.getValue();
+        deleteGroupResponse = captor.getValue();
     }
 
     @When("I try to delete the Members Without A Group group")
@@ -81,18 +84,62 @@ public class DefaultGroupStepDefs {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        response = captor.getValue();
+        deleteGroupResponse = captor.getValue();
     }
 
     @Then("the request to delete Teaching Staff fails")
     public void theRequestToDeleteTeachingStaffFails() {
-        assertFalse(response.getIsSuccess());
-        assertEquals("The group \"Teaching Staff\" cannot be deleted", response.getMessage());
+        assertFalse(deleteGroupResponse.getIsSuccess());
+        assertEquals("The group \"Teaching Staff\" cannot be deleted", deleteGroupResponse.getMessage());
     }
 
     @Then("the request to delete Members Without A Group fails")
     public void theRequestToDeleteMembersWithoutAGroupFails() {
-        assertFalse(response.getIsSuccess());
-        assertEquals("The group \"Members Without A Group\" cannot be deleted", response.getMessage());
+        assertFalse(deleteGroupResponse.getIsSuccess());
+        assertEquals("The group \"Members Without A Group\" cannot be deleted", deleteGroupResponse.getMessage());
+    }
+
+    @When("I try to edit the Teaching Staff group")
+    public void iTryToEditTheTeachingStaffGroup() {
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(TEACHER_GROUP_ID)
+                .setShortName("Edited short name")
+                .setLongName("Edited long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        modifyGroupDetailsResponse = captor.getValue();
+    }
+
+    @Then("the request to edit Teaching Staff fails")
+    public void theRequestToEditTeachingStaffFails() {
+        assertFalse(modifyGroupDetailsResponse.getIsSuccess());
+        assertEquals("The group \"Teaching Staff\" cannot be edited", modifyGroupDetailsResponse.getMessage());
+    }
+
+    @When("I try to edit the Members Without A Group group")
+    public void iTryToEditTheMembersWithoutAGroupGroup() {
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(MEMBERS_WITHOUT_GROUPS_ID)
+                .setShortName("Edited short name")
+                .setLongName("Edited long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        modifyGroupDetailsResponse = captor.getValue();
+    }
+
+    @Then("the request to edit Members Without A Group fails")
+    public void theRequestToEditMembersWithoutAGroupFails() {
+        assertFalse(modifyGroupDetailsResponse.getIsSuccess());
+        assertEquals("The group \"Members Without A Group\" cannot be edited", modifyGroupDetailsResponse.getMessage());
     }
 }
