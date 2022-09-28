@@ -291,7 +291,7 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
-            if (icon.extendedProps.description == '') {
+            if (icon.extendedProps.description === '') {
                 icon.setExtendedProp("description", sNames[i]);
             } else{
                 icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + sNames[i])
@@ -308,13 +308,13 @@ function updateIconObjectsWithSchedulables(calendar) {
  * Update the calendar using the information sent through the websocket
  * @param schedulableMessage Message sent through the websocket
  */
-function updateCalendar(schedulableMessage) {
-    const url = BASE_URL + "sched/" + schedulableMessage.type;
+function updateCalendar(message) {
+    const url = BASE_URL + "project/" + projectId + "/schedulables/" + message.type;
     const schedulableFragRequest = new XMLHttpRequest();
     schedulableFragRequest.open("GET", url, true);
     schedulableFragRequest.onload = () => {
         // Reload the page to get the updated list of sprints after the delete
-        rerenderCalendar(schedulableFragRequest.response, schedulableMessage);
+        rerenderCalendar(schedulableFragRequest.response, message);
     }
     schedulableFragRequest.send();
 }
@@ -332,7 +332,6 @@ function rerenderCalendar(response, message) {
         let schedulable = schedulables[i];
         let start = getDateFromProjectDateString(schedulable.startDay);
         const end = getDateFromProjectDateString(schedulable.endDay);
-
         while (start <= end) {
             const id = `${message.type}-${getStringFromDate(start)}`;
             const icon = calendar.getEventById(id);
@@ -360,7 +359,7 @@ function rerenderCalendar(response, message) {
 function removeSchedulables(type) {
     let events = calendar.getEvents();
     for (let i = 0; i < events.length; i++) {
-        if (events[i].id.includes(type) && events[i].num !== 0) {
+        if (events[i].id.includes(type) && events[i].extendedProps.num !== 0) {
             const icon = calendar.getEventById(events[i].id);
             icon.setExtendedProp("num", 0);
         }

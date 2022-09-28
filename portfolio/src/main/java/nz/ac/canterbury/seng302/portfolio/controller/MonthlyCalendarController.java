@@ -11,6 +11,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 
 /**
@@ -208,4 +211,30 @@ public class MonthlyCalendarController extends PageController {
 
         return sprintsDetailsList;
     }
+
+
+    /**
+     * Get all schedulables of a given type.
+     * @param id ID of the project the schedulables belong to
+     * @param schedulableType Type of schedulable to be taken
+     * @return ResponseEntity object with the list of schedulables
+     */
+    @GetMapping("/project/{id}/schedulables/{type}")
+    public ResponseEntity<List<Schedulable>> getAllSchedulables(
+            @PathVariable(name="id") int id,
+            @PathVariable(name="type") String schedulableType
+    ){
+        List<Schedulable> schedulableList = new ArrayList<>();
+        if (EVENT_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(eventService.getAllEvents());
+        } else if (DEADLINE_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(deadlineService.getAllDeadlines());
+        } else if (MILESTONE_TYPE.equals(schedulableType)) {
+            schedulableList.addAll(milestoneService.getAllMilestones());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableType + " is not a type of schedulable!");
+        }
+        return new ResponseEntity<>(schedulableList, HttpStatus.OK);
+    }
+
 }

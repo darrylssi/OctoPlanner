@@ -255,22 +255,4 @@ public class DetailsController extends PageController {
         return "detailFragments :: " + schedulableType;
     }
 
-
-    @GetMapping("/sched/{type}")
-    public ResponseEntity<List<Schedulable>> getSchedulables(
-            @PathVariable(name="type") String schedulableType
-    ){
-        List<Schedulable> schedulableList = new ArrayList<>();
-        if (EVENT_TYPE.equals(schedulableType)) {
-            schedulableList.addAll(eventService.getAllEvents());
-        } else if (DEADLINE_TYPE.equals(schedulableType)) {
-            schedulableList.addAll(deadlineService.getAllDeadlines());
-        } else if (MILESTONE_TYPE.equals(schedulableType)) {
-            schedulableList.addAll(milestoneService.getAllMilestones());
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, schedulableType + " is not a type of schedulable!");
-        }
-        return new ResponseEntity<>(schedulableList, HttpStatus.OK);
-    }
-
 }
