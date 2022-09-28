@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.RemoveGroupMembersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,9 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,6 +52,15 @@ class GroupControllerTest {
                         .param("user_id", "8"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("2 users removed from group 3"));
+    void addUsersToGroupAsTeacher_get200Response() throws Exception{
+        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(true).setMessage("2 users added to group 1").build();
+        when(groupClientService.addGroupMembers(1, List.of(1, 2))).thenReturn(addGroupMembersResponse);
+
+        mvc.perform(post("/groups/1/add-members")
+                .param("user_id", "1")
+                .param("user_id", "2"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("2 users added to group 1"));
     }
 
     @Test
@@ -67,9 +80,25 @@ class GroupControllerTest {
     @WithMockPrincipal(UserRole.STUDENT)
     void removeUsersFromGroupAsStudent_forbidden() throws Exception {
         mvc.perform(delete("/groups/1/remove-members")
+    void addUsersToNonexistentGroupAsTeacher_get404Response() throws Exception{
+        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 5").build();
+        when(groupClientService.addGroupMembers(5, List.of(1, 2))).thenReturn(addGroupMembersResponse);
+
+        mvc.perform(post("/groups/5/add-members")
+                        .param("user_id", "1")
+                        .param("user_id", "2"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("There is no group with id 5"));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void editEventAsStudent_forbidden() throws Exception {
+        mvc.perform(post("/groups/1/add-members")
                 .param("user_id", "1")
                 .param("user_id", "2"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }
+
 }
