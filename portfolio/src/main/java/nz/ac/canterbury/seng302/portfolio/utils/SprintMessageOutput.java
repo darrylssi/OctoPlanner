@@ -14,6 +14,7 @@ public class SprintMessageOutput {
 
     private int id;
     private String name;
+    private String colour;
     private Date startDate;
     private Date endDate;
 
@@ -31,6 +32,7 @@ public class SprintMessageOutput {
         this.name = sprint.getSprintName();
         this.startDate = sprint.getSprintStartDate();
         this.endDate = sprint.getSprintEndDate();
+        this.colour = sprint.getSprintColour();
     }
 
     public void setId(int id) {
@@ -44,6 +46,10 @@ public class SprintMessageOutput {
     public void setName(String name) { this.name = name; }
 
     public String getName() { return this.name; }
+
+    public void setColour(String colour) { this.colour = colour; }
+
+    public String getColour() { return this.colour; }
 
     public void setStartDate(Date startDate) { this.startDate = startDate; }
 
