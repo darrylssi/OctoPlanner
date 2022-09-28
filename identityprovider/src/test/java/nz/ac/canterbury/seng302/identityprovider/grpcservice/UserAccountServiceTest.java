@@ -24,6 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,6 +49,7 @@ class UserAccountServiceTest {
 
     private User testUser;
     private Group testTeacherGroup;
+    private Group testMembersWithoutAGroup;
 
     private static final int testUserID = 999;
     private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
@@ -55,6 +57,8 @@ class UserAccountServiceTest {
     @BeforeEach
     public void setup() {
         testTeacherGroup = new Group("test short name", "test long name");
+        testMembersWithoutAGroup = new Group("Members Without A Group",
+                "test long name for members without a group");
         testUser = new User("testUser", encoder.encode("testPassword"), "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
@@ -95,7 +99,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
-
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * Given: A user doesn't have a role
         assertFalse(testUser.getRoles().contains(UserRole.TEACHER));
@@ -125,6 +130,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * Given: A user has a role
         testUser.addRole(UserRole.TEACHER);
@@ -155,6 +162,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
                 .setUserId(testUserID)
