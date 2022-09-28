@@ -1,14 +1,14 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
-import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.model.Group;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
+
 import javax.validation.Valid;
 import java.util.StringJoiner;
 
@@ -117,10 +118,21 @@ public class GroupController extends PageController{
             @Valid GroupForm editGroupForm,
             BindingResult bindingResult
     ) {
+        // Check that user has Teacher role or above
         try {
             requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         } catch (ResponseStatusException ex) {
-            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+            /*
+            It is easier to check whether the user has the Teacher role than trying to check
+            whether the user is part of the group, so checking Teacher role happens first
+            */
+            PrincipalData thisUser = PrincipalData.from(principal);
+            GetGroupDetailsResponse thisGroup = groupClientService.getGroupDetails(groupId);
+
+            // Checks that the user is in the group
+            if (thisGroup.getMembersList().stream().noneMatch(o -> thisUser.getID() ==  o.getId())) {
+                return new ResponseEntity<>("You are not a part of this group", HttpStatus.FORBIDDEN);
+            }
         }
 
         // Validate form

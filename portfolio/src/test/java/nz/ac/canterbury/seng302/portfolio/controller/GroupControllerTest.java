@@ -9,7 +9,9 @@ import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.ModifyGroupDetailsResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +50,7 @@ class GroupControllerTest {
     @MockBean
     private UserAccountClientService userAccountClientService;
 
+    static final int USER_ID = 1;
     static final int GROUP_ID = 2;
     private GroupForm groupForm;                                // Initialises the group form object
     private Group group;                                        // Initialises the group object
@@ -66,6 +69,24 @@ class GroupControllerTest {
         group = new Group();
         group.setId(GROUP_ID);
         group.setParentProject(parentProject);
+
+        // Define the user for the tests; this is done to provide access to the edit page
+        UserResponse testUser = UserResponse.newBuilder()
+                .setUsername("test_user")
+                .setFirstName("Testy")
+                .setMiddleName("")
+                .setLastName("McUserFace")
+                .setNickname("Test")
+                .setBio("")
+                .setPersonalPronouns("they/them")
+                .setEmail("test@user.site")
+                .setProfileImagePath("")
+                .setId(USER_ID)
+                .build();
+        GetGroupDetailsResponse testGroup = GetGroupDetailsResponse.newBuilder()
+                .addMembers(testUser)
+                .build();
+        when(groupClientService.getGroupDetails(GROUP_ID)).thenReturn(testGroup);
 
         when(projectService.getProjectById(0)).
                 thenReturn(group.getParentProject());
@@ -133,8 +154,30 @@ class GroupControllerTest {
     }
 
     @Test
+    @WithMockPrincipal(value = STUDENT, id = USER_ID)
+    void editValidGroupAsMemberOfGroup_get200Response() throws Exception {
+        String shortName = "Test Valid Short Name";
+        String longName = "Test Valid Long Name";
+        // Given: The group service returns a success
+        ModifyGroupDetailsResponse response = ModifyGroupDetailsResponse.newBuilder()
+                .setIsSuccess(true)
+                .setMessage("Group edited successfully")
+                .build();
+        when(groupClientService.modifyGroupDetails(GROUP_ID,
+                shortName,longName)).thenReturn(response);
+        // When: We attempt to edit a group
+        // Then: The request returns an OK (200) status and the message from the service is displayed
+        mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID)
+                        .param("shortName", shortName)
+                        .param("longName", longName))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Group edited successfully"));
+        verify(groupClientService).modifyGroupDetails(GROUP_ID, shortName, longName);
+    }
+
+    @Test
     @WithMockPrincipal(TEACHER)
-    void editValidGroupAsTeacher_get200Response() throws Exception {
+    void editValidGroupAsTeacherWhoIsNotInGroup_get200Response() throws Exception {
         String shortName = "Test Valid Short Name";
         String longName = "Test Valid Long Name";
         // Given: The group service returns a success
@@ -158,8 +201,33 @@ class GroupControllerTest {
      * This test case may happen when attempting to edit default groups, even if the short and long names are valid
      */
     @Test
+    @WithMockPrincipal(value = STUDENT, id = USER_ID)
+    void editInvalidGroupAsMemberOfGroup_get400Response() throws Exception {
+        String shortName = "Test Valid Short Name";
+        String longName = "Test Valid Long Name";
+        // Given: The group service returns a failure
+        ModifyGroupDetailsResponse response = ModifyGroupDetailsResponse.newBuilder()
+                .setIsSuccess(false)
+                .setMessage("Group could not be edited")
+                .build();
+        when(groupClientService.modifyGroupDetails(GROUP_ID,
+                shortName,longName)).thenReturn(response);
+        // When: We attempt to edit a group
+        // Then: The request returns a Bad Request (400) status and the message from the service is displayed
+        mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID)
+                        .param("shortName", shortName)
+                        .param("longName", longName))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Group could not be edited"));
+        verify(groupClientService).modifyGroupDetails(GROUP_ID, shortName, longName);
+    }
+
+    /**
+     * This test case may happen when attempting to edit default groups, even if the short and long names are valid
+     */
+    @Test
     @WithMockPrincipal(TEACHER)
-    void editInvalidGroupAsTeacher_get400Response() throws Exception {
+    void editInvalidGroupAsTeacherWhoIsNotInGroup_get400Response() throws Exception {
         String shortName = "Test Valid Short Name";
         String longName = "Test Valid Long Name";
         // Given: The group service returns a failure
@@ -180,10 +248,11 @@ class GroupControllerTest {
     }
 
     @Test
-    @WithMockPrincipal(STUDENT)
-    void editGroupAsStudent_forbidden() throws Exception {
+    @WithMockPrincipal(value = STUDENT)
+    void editGroupWhenNotMemberOfGroupAndNotTeacher_forbidden() throws Exception {
+        // Default ID is -1
         this.mockMvc.perform(post("/project/0/edit-group/" + GROUP_ID))
                 .andExpect(status().isForbidden())
-                .andExpect(content().string("You do not have permission to access this endpoint"));
+                .andExpect(content().string("You are not a part of this group"));
     }
 }
