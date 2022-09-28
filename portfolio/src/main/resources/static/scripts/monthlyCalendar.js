@@ -5,6 +5,20 @@ const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16
 let calendar;
 
 /**
+ * Returns a new date that is the original date plus the specified number of days.
+ * If this seems odd it's because of the advice of https://stackoverflow.com/a/19691491
+ * @param originalDate the original date, as something recognise by the Date constructor (string or Date)
+ * @param numDays integer number of days to increase date by, e.g. 1
+ * @returns {Date} Date object increased by that number
+ */
+function getDatePlusDays(originalDate, numDays) {
+    let newDate = new Date(originalDate);
+    newDate.setDate(newDate.getDate() + numDays);
+    return newDate;
+}
+
+
+/**
  * Takes the project start and end dates from monthlyCalendar.html and returns them as JS Date objects.
  * NOTE: JS Date objects start months at 0, not 1!
  * https://stackoverflow.com/questions/15677869/how-to-convert-a-string-of-numbers-to-an-array-of-numbers
@@ -19,6 +33,7 @@ function getDateFromProjectDateString(originalDateString) {
     });
     return new Date(year, month - 1, day);
 }
+
 
 /**
  * Returns a string corresponding to the given date object.
@@ -64,9 +79,7 @@ function getSchedulableIconInfo() {
                 start: `${date}${time}`,
                 extendedProps: { type: 'event', num: 0, schedulableNames: [], description: '' }
             });
-        let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
-        newStart.setDate(newStart.getDate() + 1);
-        start = newStart;
+        start = getDatePlusDays(start, 1);
     }
     return icons;
 }
@@ -89,7 +102,7 @@ function getSprintInfo() {
     for(let i = 0; i < sprintNamesList.length; i++) {
         sprints.push( {id: sprintIdsList[i], title: sprintNamesList[i], start: sprintStartDatesList[i],
             end: sprintEndDatesList[i], extendedProps: { type: 'sprint' }, backgroundColor: sprintColoursList[i],
-            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'})
+            textColor: getTextColour(sprintColoursList[i]), classNames: 'defaultEventBorder'});
     }
     return sprints;
 }
@@ -139,7 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                 // de-select sprint
-                selectedSprint.setProp('durationEditable', false);
+                // undefined has different behaviour to false here!
+                // false means that the sprint cannot be updated AT ALL, even programmatically in here
+                // whereas undefined just means that the user can't click and drag to resize it
+                // idk why it's like this, but it is what it is
+                selectedSprint.setProp('durationEditable', undefined);
                 selectedSprint = null;
             }
         }
@@ -147,12 +164,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     calendar = new FullCalendar.Calendar(calendarEl, {
-        eventResizableFromStart: (sprintsEditable === "true"), // when resizing sprints, can be done from start as well as end
-        eventDurationEditable: false,                          // sprints can't be edited by default
+        eventResizableFromStart: (sprintsEditable === "true"),  // when resizing sprints, can be done from start as well as end
+        eventDurationEditable: false,                           // sprints can't be edited by default
         timeZone: 'UTC',
         themeSystem: 'bootstrap5',
         initialView: 'dayGridMonth',
         eventOrder: "-id",
+        displayEventTime: false,                                // stops time being displayed, sometimes happens on new sprints
 
         // Restricts the calendar dates based on the given project dates
         validRange: {
@@ -166,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         eventDidMount: function(info) {
-            if(info.event.extendedProps.type != 'sprint'){
+            if(info.event.extendedProps.type !== 'sprint'){
                 var tooltip = new bootstrap.Tooltip(info.el, {
                     title: info.event.extendedProps.description,
                     placement: "top",
@@ -197,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectedSprint.setProp('classNames', 'defaultEventBorder');
 
                     // remove editing from previous sprint
-                    selectedSprint.setProp('durationEditable', false);
+                    selectedSprint.setProp('durationEditable', undefined);
                 }
                 selectedSprint = info.event;
 
@@ -209,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // hides the sprint overlap error message
                 document.getElementById("invalidDateRangeError").hidden = true;
-            } else if(info.event.extendedProps.type != 'sprint'){
+            } else if(info.event.extendedProps.type !== 'sprint'){
                 //option to click on schedulable icons to display tooltips so that they can be viewed on mobile
                 bootstrap.Tooltip.getInstance(info.el).show();
             }
@@ -230,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sendSprintUpdatedMessage(info.event.id);
 
                 // submitting the form
-               form.submit();
+                form.submit();
             }
         },
         // detect when mouse is over a sprint to deselect sprints when clicking outside them
@@ -369,17 +387,45 @@ function removeSchedulables(type) {
 
 /**
  * Handles an incoming sprint update message by adding/updating/removing the relevant sprint event in the calendar.
- * Should also log something if the logging variable is true.
+ * Logs the incoming message if the logging variable is true.
+ *
+ * Because dates are annoying and FullCalendar is a bit odd, the message's start date is increased by 1
+ * and the end date by 2 so that they make sense on the calendar. DON'T use the output of this function for
+ * anything other than the planner without taking that into account, or you'll get the wrong dates.
  * @param sprintMessage the message containing information about the sprint. Name, dates etc.
  */
 function handleSprintUpdateMessage(sprintMessage) {
     // logging
     if (sprintLogs) {
-        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id + " COLOUR: " + sprintMessage.colour +
+        "\nSTART: " + sprintMessage.startDate + " END: " + sprintMessage.endDate);
     }
 
-    // TODO way to handle this:
-    // for deleting, the message should come back as if the sprint doesn't exist, so we check that, then delete the sprint event
-    // for updating, the message will have all parameters and we can find the sprint event
-    // for adding, the message will have all parameters but we can't find the sprint event, so make a new one
+    let sprint = calendar.getEventById(sprintMessage.id);
+
+    // make start date 1 day ahead and end date 2 days ahead, because FullCalendar is just Like That
+    let newStart = getDatePlusDays(sprintMessage.startDate, 1);
+    let newEnd = getDatePlusDays(sprintMessage.endDate, 2);
+
+    if (sprintMessage.name === null) { // sprint isn't real or was deleted
+        if (sprint !== null) {
+            sprint.remove();
+        }
+    } else if (sprint !== null) { // update sprint details
+        sprint.setStart(newStart);
+        sprint.setEnd(newEnd);
+        sprint.setProp("title", sprintMessage.name);
+    } else { // create new sprint
+        calendar.addEvent({
+            id: sprintMessage.id,
+            title: sprintMessage.name,
+            start: newStart,
+            end: newEnd,
+            backgroundColor: sprintMessage.colour,
+            textColor: getTextColour(sprintMessage.colour),
+            classNames: 'defaultEventBorder',
+            allDay: true,
+            extendedProps: { type: 'sprint' }
+        });
+    }
 }

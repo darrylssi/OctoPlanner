@@ -1,62 +1,50 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Date;
-
-import org.assertj.core.api.Assertions;
+import nz.ac.canterbury.seng302.portfolio.model.Event;
+import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
+import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import java.util.Date;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.EventRepository;
-import org.springframework.web.server.ResponseStatusException;
-
+/**
+ * Holds unit tests for the EventService class.
+ */
 @SpringBootTest
 class EventServiceTest {
-
-    private static final int ID = 1;
-
     @Autowired
     private EventService eventService;
-    
+
     @MockBean
     private EventRepository eventRepository;
-    
+
     private Event event;
 
     @BeforeEach
     void setUp() {
-        event = new Event();
-        event.setId(ID);
-        event.setName("Test Event");
-        event.setDescription("Testing patience, once course at a time");
-        event.setStartDate(new Date());
-        event.setEndDate(new Date());
+        event = new Event("name", "description", new Date(), new Date());
     }
 
     @Test
     void getEventValidId_thenReturnEvent() {
-        when(eventRepository.findEventById(ID))
+        when(eventRepository.findEventById(1))
                 .thenReturn(event);
 
-        Assertions.assertThat(eventService.getEventById(ID)).isEqualTo(event);
+        assertThat(eventService.getEventById(1)).isEqualTo(event);
     }
 
     @Test
     void getEventInvalidId_thenThrowException() {
-        when(eventRepository.findEventById(ID+1)).thenReturn(null);
-        Exception e = assertThrows(ResponseStatusException.class, () -> eventService.getEventById(ID + 1));
+        Exception e = assertThrows(Exception.class, () -> eventService.getEventById(2));
         String expectedMessage = "Event not found.";
-        assertThat(e.getMessage(), containsString(expectedMessage));
+        assertTrue(e.getMessage().contains(expectedMessage));
     }
 
     @Test
