@@ -26,7 +26,7 @@
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
         <div th:text="${dateCreated}"></div>
         <div class="centre-box">
-            <img class="profile-image" th:src="${G_ProfilePic}" alt="User profile photo"><br/>
+            <img class="edit-image photo" th:src="${G_ProfilePic}" alt="User profile photo"><br/>
         </div>
         <form th:action="@{./edit}"
             method="post">
