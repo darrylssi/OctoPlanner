@@ -1,8 +1,11 @@
 const currentSchedulable = {type:"", id:-1}; // the current schedulable being edited by THIS user (only one can be edited at a time)
 const SCHEDULABLE_EDIT_MESSAGE_FREQUENCY = 1800; // how often editing messages are sent while someone is editing a schedulable
+const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
+const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout functions in a key/value pair mapping
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EDIT_NOTIFICATIONS = ['event', 'deadline', 'milestone'];
 
 /** Hides the deletion confirmation modal without deleting a sprint/event/deadline */
 function hideModal() {
@@ -35,9 +38,11 @@ function deleteObject(id, type) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         // Send a websocket message to update the page after the deletion
-        stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
-        hideModal();
-        if (type === 'sprint') {
+        if (type in EDIT_NOTIFICATIONS) {
+            stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
+            hideModal();
+        } else {
+            sendSprintUpdatedMessage(id);
             window.location.reload();
         }
     }
@@ -54,6 +59,86 @@ function hideErrorBoxes(elem) {
         feedbackBox.innerHTML = '';
         feedbackBox.style.display = 'none';
     }
+}
+
+/**
+ * This submits the form and shows error messages if there are any.
+ * @param elem HTML Form element
+ */
+function saveSprint(sprintId, elem) {
+    // Remove existing error messages
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            // Upon success, hide the edit project form and reload the page
+            hideEditSchedulable('1', sprintId, 'sprint');
+            sendSprintUpdatedMessage(sprintId);
+            window.location.reload();
+        } else {
+            // Otherwise, show the error messages
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                let field = "name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
+                    field = 'endDate';
+                } else if (errorMsg.indexOf('date') !== -1 || errorMsg.indexOf('sprint') !== -1) {
+                    field = 'startDate'
+                } else if (errorMsg.indexOf('exceed') !== -1) {
+                    field = 'description'
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+/**
+ * The function shows the selected sprint edit form. All of the other sprint edit forms are closed.
+ * @param sprint Gets the selected edit sprint object
+ */
+function showEditSprintForm(sprint) {
+    /* Search for the edit form */
+    let editForm = document.getElementById("editSprintForm-" + sprint.id);
+    hideErrorBoxes(editForm);
+    prefillSchedulable(editForm, sprint, 'sprint');
+
+    /* Collapse element, send stop message, and take no further action if the selected form is open */
+    if (editForm != null && editForm.classList.contains("show")) {
+        hideEditSchedulable('1', sprint.id, 'sprint');
+        return;
+    }
+
+    /* Collapse any edit forms already on the page. If we find any, delay
+       opening the new form by EDIT_FORM_CLOSE_DELAY. */
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
+    let different = false;
+    for (let element of collapseElementList) {
+        new bootstrap.Collapse(element).hide();
+        /* Check whether any form is for a different form, to see whether
+           we need to send a stop editing message */
+        if (element.id.indexOf("editSprintForm-" + sprint.id) === -1) {
+            different = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+        }
+    }
+    showRemainingChars();   // Used to update the remaining number of chars for name and description
+
+    /* Get this form to show after a delay that allows any other open forms to collapse */
+    setTimeout((formId) => {
+        let shownForm = document.getElementById(formId)
+        new bootstrap.Collapse(shownForm).show();
+        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
+    }, delay, "editSprintForm-" + sprint.id);
 }
 
 /**
@@ -74,24 +159,29 @@ function sendFormViaAjax(elem, type) {
 
     formRequest.onload = () => {
         if (formRequest.status === 200) {
-            // Success
-            hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
-            stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
-            if (url.indexOf("add") != -1) {
-                resetAddForm(type);
-            }
-            //Update tooltips, because bootstrap needs to be told to do this
-            setTimeout((schedulableId) => {
-                let schedulable = document.getElementById(`${schedulableId}`);
-                let tooltip = bootstrap.Tooltip.getInstance(schedulable);
-                if (tooltip) {
-                    tooltip.update();
-                } else if (schedulable) {
-                    tooltip = new bootstrap.Tooltip(schedulable, {
-                        trigger: 'hover'
-                    });
+            if (type === 'sprint'){
+                sendSprintUpdatedMessage(formRequest.response);
+                window.location.reload();
+            } else {
+                // Success
+                hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
+                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
+                if (url.indexOf("add") !== -1) {
+                    resetAddForm(type);
                 }
-            }, 250, type + "-" + formRequest.response);
+                // Update tooltips, because bootstrap needs to be told to do this
+                setTimeout((schedulableId) => {
+                    let schedulable = document.getElementById(`${schedulableId}`);
+                    let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+                    if (tooltip) {
+                        tooltip.update();
+                    } else if (schedulable) {
+                        tooltip = new bootstrap.Tooltip(schedulable, {
+                            trigger: 'hover'
+                        });
+                    }
+                }, 250, type + "-" + formRequest.response);
+            }
         } else {
             const errors = formRequest.responseText.split('\n');
             for (let errorMsg of errors) {
@@ -118,7 +208,7 @@ function sendFormViaAjax(elem, type) {
 }
 
 /**
- * An attempt to make this function deal with schedulable objects...
+ * An attempt to make this function deal with schedulable objects... TODO JSDoc needs to be better
  * @param schedulableId the id of the schedulable object being edited
  * @param schedulableBoxId the id of the box element of the schedulable object being edited
  * @param schedulableType the type of the schedulable object (event, deadline, or milestone) as a string
@@ -168,7 +258,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
-    showRemainingChars();
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
@@ -181,22 +270,31 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 }
 
 /**
- * Populates the edit schedulable form with the current details of the schedulable.
- * @param editForm Edit schedulable form
- * @param schedulable Schedulable object
- * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ * Populates the edit sprint/schedulable form with the current details of the sprint/schedulable.
+ * @param editForm Edit sprint/schedulable form
+ * @param schedulable Sprint/Schedulable object
+ * @param type the type of the sprint/schedulable, e.g. 'sprint', 'deadline', 'milestone', or 'event'
  */
 function prefillSchedulable(editForm, schedulable, type) {
-    editForm.querySelector("#name").value = schedulable.name;
-    editForm.querySelector("#description").value =  schedulable.description;
-    editForm.querySelector("#startDate").value = schedulable.startDay;
-    if (type !== 'milestone'){
-        editForm.querySelector("#startTime").value = schedulable.startTime;
+    if (type === 'sprint') {
+        editForm.querySelector("#sprintName").value = schedulable.sprintName;
+        editForm.querySelector("#sprintDescription").value =  schedulable.sprintDescription;
+        editForm.querySelector("#sprintStartDate").value = schedulable.startDay;
+        editForm.querySelector("#sprintEndDate").value =  schedulable.endDay;
+    } else {
+        editForm.querySelector("#name").value = schedulable.name;
+        editForm.querySelector("#description").value = schedulable.description;
+        editForm.querySelector("#startDate").value = schedulable.startDay;
+
+        if (type !== 'milestone'){
+                editForm.querySelector("#startTime").value = schedulable.startTime;
+        }
+        if (type === 'event'){
+            editForm.querySelector("#endDate").value = schedulable.endDay;
+            editForm.querySelector("#endTime").value = schedulable.endTime;
+        }
     }
-    if (type === 'event'){
-        editForm.querySelector("#endDate").value = schedulable.endDay;
-        editForm.querySelector("#endTime").value = schedulable.endTime;
-    }
+
 }
 
 /**
@@ -217,7 +315,10 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    stopEditing();
+
+    if (schedulableType in EDIT_NOTIFICATIONS) {
+        stopEditing();
+    }
 }
 
 /**
@@ -248,6 +349,195 @@ function stopEditing() {
     sendStopEditingMessage(currentSchedulable.id, currentSchedulable.type);
     currentSchedulable.id = -1;
     currentSchedulable.type = "";
+}
+
+/**
+ * Decides whether the schedulable message means to show editing or hide editing.
+ * @param editMessage JSON object received from the WebSocket
+ */
+function handleSchedulableMessage(editMessage) {
+    if (editMessage.content.split(',').length === 3) {
+        if (editingLogs) {
+            console.log('GOT EDITING MESSAGE ' + editMessage.content);
+        }
+        showEditingMessage(editMessage);
+    } else {
+        if (editingLogs) {
+            console.log('GOT STOP MESSAGE ' + editMessage.content);
+        }
+        hideEditMessage(editMessage);
+    }
+}
+
+/**
+ * Handles an incoming sprint update message by prompting the user to refresh.
+ * Should also log something if the logging variable is true.
+ * @param sprintMessage the message containing information about the sprint. Name, dates etc.
+ */
+function handleSprintUpdateMessage(sprintMessage) {
+    // logging
+    if (sprintLogs) {
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
+
+/**
+ * Shows editing-schedulable notifications on the page
+ * @param editMessage JSON object received from the WebSocket
+ */
+function showEditingMessage(editMessage) {
+    const schedulableId = editMessage.content.split(',')[0]; // couldn't seem to substitute these directly into the template string
+    const username = editMessage.from;
+    const type = editMessage.content.split(',')[1]; // Type of schedulable
+    const userId = editMessage.content.split(',')[2]; // the id of the user editing the schedulable
+    const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
+
+    if (userId !== docUserId) {
+        // stops any existing timeouts so that the message is shown for the full length
+        stopSchedulableTimeout(schedulableId, type);
+
+        // locate the correct elements on the page
+        const editingSchedulableBoxClass = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableTextBoxClass = `${type}-${schedulableId}-editing-text`;
+        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
+        const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
+
+        // update the text and make it visible
+        for (const schedulableTextBox of editingSchedulableTextBoxes) {
+            if (schedulableTextBox) {
+                schedulableTextBox.innerHTML = `${username} is editing this ${type}`;
+            }
+        }
+        for (const schedulableBox of editingSchedulableBoxes) {
+            if (schedulableBox) {
+                schedulableBox.style.visibility = "visible";
+            }
+        }
+
+        // Hide it after 8s
+        schedulableTimeouts.set((schedulableId, type), setTimeout(function() {hideEditMessage(editMessage)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
+    }
+}
+
+/**
+ * Hides the editing message for the specified schedulable and clears the timer running for it.
+ * Will clear the messages from all schedulable boxes for that schedulable (such as if it spans many sprints).
+ * @param message the stop message that was received
+ */
+function hideEditMessage(message) {
+    // this check is so that if you are editing an schedulable that someone else is editing, you don't hide their message
+    // when you close your form. Their message would reappear without this anyway but it avoids confusion.
+    if (document.getElementById('user').getAttribute('data-name') !== message.from) {
+        const schedulableId = message.content.split(',')[0];
+        const type = message.content.split(',')[1];
+
+
+        const editingSchedulableBoxId = `${type}-${schedulableId}-editing-box`;
+        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxId);
+        for (const schedulableBox of editingSchedulableBoxes) {
+            if (schedulableBox) {
+                schedulableBox.style.visibility = "hidden";
+            }
+        }
+        stopSchedulableTimeout(schedulableId, type);
+    }
+}
+
+/**
+ * Stops the timeout for the specified schedulable, if it exists
+ * @param schedulableId the schedulable to stop the timeout for
+ * @param type the type of schedulable, e.g. event, deadline, or milestone
+ */
+function stopSchedulableTimeout(schedulableId, type) {
+    if (schedulableTimeouts.has((schedulableId, type))) {
+        clearTimeout(schedulableTimeouts.get((schedulableId, type)));
+    }
+}
+
+/**
+* Updates all instances of a schedulable that has been changed using information sent through websockets
+* @param schedulableMessage the message sent through websockets with schedulable information
+*/
+function updateSchedulable(schedulableMessage) {
+    if (updateLogs) {
+        console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
+        console.log(schedulableMessage);
+    }
+
+    if(currentSchedulable.id === schedulableMessage.id && currentSchedulable.type === schedulableMessage.type) {
+        stopEditing();
+    }
+// get a list of schedulable list containers
+    const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
+
+// check each schedulable list container to see if it has the schedulable in it / should have the schedulable in it
+    for (let schedulableListContainer of schedulable_lists) {
+          //check if schedulable is there, then remove schedulable if it exists
+          let schedulable = schedulableListContainer.querySelector('#' + schedulableMessage.type + '-' + schedulableMessage.id);
+          if (schedulable !== null) {
+            schedulable.parentNode.parentNode.parentNode.remove();
+          }
+          // check if schedulable list container is in the list of ids the schedulable should be displayed in
+          let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
+        if(idIndex !== -1) {
+
+            const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
+            const schedulableFragRequest = new XMLHttpRequest();
+            schedulableFragRequest.open("GET", url, true);
+            const tempIdIndex = idIndex;
+            schedulableFragRequest.onload = () => {
+                // Reload the page to get the updated list of sprints after the delete
+                createSchedulableDisplay(schedulableMessage, schedulableListContainer, tempIdIndex, schedulableFragRequest.response);
+            }
+            schedulableFragRequest.send();
+        }
+    }
+}
+
+/**
+* Creates a new schedulable display object and puts it into the correct place in the DOM
+* @param schedulableMessage the message sent by websockets containing schedulable info to be displayed
+* @param parent the parent object for the schedulable to be displayed in
+* @param idIndex the index of this schedulable used to access values in the id lists
+* @param schedulableHtml the html of this schedulable to be inserted into the page
+*/
+function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulableHtml) {
+    let newSchedulable = document.createElement("div");
+    newSchedulable.innerHTML = schedulableHtml;
+
+    // Force tooltip to update
+    setTimeout((schedulable) => {
+        let tooltip = bootstrap.Tooltip.getInstance(schedulable);
+        if (tooltip) {
+            tooltip.update();
+        } else if (schedulable) {
+            tooltip = new bootstrap.Tooltip(schedulable, {
+                trigger: 'hover'
+            });
+        }
+    }, 250, newSchedulable.querySelector('.schedulable'));
+
+    if(schedulableMessage.nextSchedulableIds[idIndex] === '-1') {
+        parent.appendChild(newSchedulable);
+    } else {
+        parent.insertBefore(newSchedulable, parent.querySelector('#' + schedulableMessage.nextSchedulableIds[idIndex]).parentNode.parentNode.parentNode);
+    }
 }
 
 /**

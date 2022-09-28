@@ -252,6 +252,10 @@ button {
     margin-top: 5px;
 }
 
+.sprintEditForm {
+    width: inherit;
+}
+
 .tooltip-inner {
     max-width: 50em;
     margin: auto;

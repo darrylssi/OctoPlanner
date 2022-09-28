@@ -28,7 +28,7 @@ public class UserAccountClientService {
     private static final Logger logger = LoggerFactory.getLogger(UserAccountClientService.class);
 
     /**
-     * Sends a UserRegisterRequest to the identity provider
+     * Sends a request to the identity provider to register a new user
      * @param username The new user's username
      * @param password The new user's password
      * @param firstName The new user's first name
@@ -154,7 +154,7 @@ public class UserAccountClientService {
         }
     }
     /**
-     * Sends an EditUserRequest to the identity provider
+     * Sends a request to the identity provider to edit a user's details
      * @param userId The id of the user to edit
      * @param firstName The edited first name of the user
      * @param middleName The edited middle name of the user
@@ -182,7 +182,7 @@ public class UserAccountClientService {
     }
 
     /**
-     * Sends a ChangePasswordRequest to the identity provider
+     * Sends a request to the identity provider to change a user's password
      * @param userId The id of the user to edit
      * @param currentPassword The user's current password
      * @param newPassword The user's new password to be changed to
@@ -200,7 +200,7 @@ public class UserAccountClientService {
 
 
     /**
-     * Sends an UploadUserProfilePhotoRequest to the identity provider.
+     * Sends a request to the identity provider to upload a profile photo for a user.
      * This returns the upload observer because it is required for the client to know that the photo
      * was successfully uploaded - without it, they cannot possibly know, and thus could load the profile page
      * before their photo is saved, wrongly showing the default picture.
@@ -246,7 +246,7 @@ public class UserAccountClientService {
     }
 
     /**
-     * Sends a DeleteUserProfilePhoto request to the identity provider
+     * Sends a request to the identity provider to delete a user's profile photo
      * @param userId The id of the user to remove the photo from
      * @return A DeleteUserProfilePhotoResponse containing the success (or failure message) of the request
      */

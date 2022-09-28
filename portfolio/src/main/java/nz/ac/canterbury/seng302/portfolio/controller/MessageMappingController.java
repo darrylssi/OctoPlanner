@@ -1,13 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
-import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
-import nz.ac.canterbury.seng302.portfolio.service.EventService;
-import nz.ac.canterbury.seng302.portfolio.service.MilestoneService;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessage;
-import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessageOutput;
-import nz.ac.canterbury.seng302.portfolio.utils.Message;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.*;
+import nz.ac.canterbury.seng302.portfolio.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,8 @@ public class MessageMappingController {
     MilestoneService milestoneService;
     @Autowired
     SprintService sprintService;
+    @Autowired
+    ProjectService projectService;
 
     /**
      * Called when a user disconnects from their websocket connection.
@@ -63,6 +62,52 @@ public class MessageMappingController {
         String from = user == null ? "SERVER" : user.getName();
         simpMessagingTemplate.convertAndSend("/ws",
                 new Message(from, "DISCONNECTED"));
+    }
+
+    /**
+     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
+     * or a SprintMessageOutput with the sprint's data if it does exist.
+     * @param sprintMessage data received from the websocket containing the sprint id and type
+     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     */
+    @MessageMapping("/sprints")
+    @SendTo("/topic/sprints")
+    public SprintMessageOutput sendSprintData(SprintMessage sprintMessage) {
+        SprintMessageOutput sprintMessageOutput;
+        try {
+            Sprint updatedSprint = sprintService.getSprintById(sprintMessage.getId());
+            sprintMessageOutput = new SprintMessageOutput(updatedSprint);
+        } catch (ResponseStatusException e) {
+            // Send back an empty message if the sprint is not found
+            logger.error(e.getMessage());
+            sprintMessageOutput = new SprintMessageOutput();
+            sprintMessageOutput.setId(sprintMessage.getId());
+        }
+
+        return sprintMessageOutput;
+    }
+
+    /**
+     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
+     * or a SprintMessageOutput with the sprint's data if it does exist.
+     * @param sprintMessage data received from the websocket containing the sprint id and type
+     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     */
+    @MessageMapping("/projects")
+    @SendTo("/topic/projects")
+    public ProjectMessageOutput sendProjectData(ProjectMessage projectMessage) {
+        ProjectMessageOutput projectMessageOutput;
+        try {
+            Project updatedProject = projectService.getProjectById(projectMessage.getId());
+            projectMessageOutput = new ProjectMessageOutput(updatedProject);
+        } catch (ResponseStatusException e) {
+            // Send back an empty message if the project is not found
+            logger.error(e.getMessage());
+            projectMessageOutput = new ProjectMessageOutput();
+            projectMessageOutput.setId(projectMessage.getId());
+        }
+
+        return projectMessageOutput;
     }
 
     /**
@@ -87,7 +132,7 @@ public class MessageMappingController {
     @MessageMapping("/schedulables")
     @SendTo("/topic/schedulables")
     public SchedulableMessageOutput sendSchedulableData(SchedulableMessage schedulableMessage) {
-        Schedulable updatedSchedulable = null;
+        Schedulable updatedSchedulable;
         SchedulableMessageOutput schedulableMessageOutput;
         List<Schedulable> schedulableList = new ArrayList<>();
 

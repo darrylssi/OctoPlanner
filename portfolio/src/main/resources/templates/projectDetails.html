@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
     <title th:text="${project.getProjectName}"></title>
@@ -10,6 +10,7 @@
     <link th:href="|../../styles/main.css|" rel="stylesheet" />
     <link th:href="|../../styles/modals.css|" rel="stylesheet" />
     <link th:href="|../../styles/reskinBootstrap.css|" rel="stylesheet" />
+    <script th:src="|../../scripts/editProject.js|"></script>
 
 </head>
 
@@ -37,21 +38,30 @@
         </div>
     </div>
 </div>
+
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
 <div id="warning-box" class="warning-container"></div>
 <div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
-        <a th:href="@{../../edit-project/{id}(id=${project.getId})}" class="edit-button" th:if="${canEdit}">
+        <a class="edit-button" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#editProjectForm-1" th:onclick="showEditProjectForm([[${project}]])">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
             </svg>
         </a>
+
     </div>
+    <div th:replace="editProject :: projectEditForm(
+                    project=${project},
+                    projectStartDate=${#dates.format(project.getProjectStartDate, dateISOFormat)},
+                    projectEndDate=${#dates.format(project.getProjectEndDate, dateISOFormat)},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen})"></div>
     <hr/>
 <!--Add Schedulable Buttons-->
     <div class="flex-row">
-        <a class="btn btn-primary btn-lg" th:if="${canEdit}" th:href="|../../add-sprint/${project.getId}|">
+        <a class="btn btn-primary btn-lg" th:if="${canEdit}" data-bs-toggle="collapse" data-bs-target="#addSprintForm">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
             </svg>
@@ -87,30 +97,35 @@
 <div th:if="${canEdit}"
      th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
          projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
+    <div th:replace="detailFragments :: sprintAddForm(
+                    projectId=${project.getId()},
+                    sprintStartError=${sprintStartError},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectStart=${projectStart},
+                    projectEnd=${projectEnd})" />
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='event',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})" ></div>
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='deadline',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})" ></div>
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='milestone',
-                    canEdit=${canEdit},
                     minNameLen=${minNameLen},
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})" ></div>
 
 </div>
     <!-- The first schedulables outside the sprint -->
@@ -125,32 +140,45 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" />
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" ></div>
         </div>
     </div>
     <!-- /* The project's sprints */ -->
     <div th:unless="${#arrays.isEmpty(sprints)}" th:each="sprint,iterStat: ${sprints}" th:object="${sprint}">
         <div class="sprint-block">
-            <div class="sprint-label" th:text="*{getSprintLabel}" th:style="'background-color:'+ *{getSprintColour} + '4c'"/>
+            <div class="sprint-label" th:text="*{getSprintLabel}" th:style="'background-color:'+ *{getSprintColour} + '4c'" ></div>
             <div class="detail-block">
                 <div>
-                    <div class="sprint-title" th:text="*{getSprintName}" />
-                    <div class="sprint-date" th:text="|*{getStartDateString} - *{getEndDateString}|" />
-                    <div class="sprint-description" th:text="*{getSprintDescription}" />
+                    <div class="sprint-title" th:text="*{getSprintName}" ></div>
+                    <div class="sprint-date" th:text="|*{getStartDateString} - *{getEndDateString}|" ></div>
+                    <div class="sprint-description" th:text="*{getSprintDescription}" ></div>
                 </div>
                 <div>
-                    <a th:href="|../../edit-sprint/${sprint.getId}|" class="edit-button" th:if="${canEdit}">
+                    <button id="|sprintEdit-${sprint.getId}|" th:if="${canEdit}" class="edit-button" th:onclick="showEditSprintForm([[${sprint}]])" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                         </svg>
-                    </a>
+                    </button>
                     <br/>
-                    <button th:if="${canEdit}" class="delete-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getSprintName()}" th:data-parameter3="sprint" th:onclick="showDeleteModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'), 'sprint')" >
+                    <button th:if="${canEdit}" class="delete-button" type="submit" th:data-parameter1="*{getId()}" th:data-parameter2="*{getSprintName()}" th:data-parameter3="sprint" th:onclick="showDeleteModal(this.getAttribute('data-parameter1'),this.getAttribute('data-parameter2'), 'sprint')" data-cy="delete-sprint">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                         </svg>
                     </button>
                 </div>
+                <div class="break"></div>
+                <!-- For edit sprint -->
+                <div th:replace="editSprint :: sprintEditForm(
+                    sprint=${sprint},
+                    sprintStartDate=${#dates.format(sprint.getSprintStartDate, dateISOFormat)},
+                    sprintEndDate=${#dates.format(sprint.getSprintEndDate, dateISOFormat)},
+                    minNameLen=${minNameLen},
+                    maxNameLen=${maxNameLen},
+                    maxDescLen=${maxDescLen},
+                    projectId=${project.getId()},
+                    projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})"></div>
+
                 <div class="break"></div>
                 <!-- The schedulables inside the sprint -->
                 <div class="schedulable-list-container" th:id="'schedulables-in-' + *{getId}">
@@ -164,7 +192,7 @@
                                 maxNameLen=${maxNameLen},
                                 maxDescLen=${maxDescLen},
                                 projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                                projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" />
+                                projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" ></div>
                     </div>
                 </div>
             </div>
@@ -181,7 +209,7 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${#lensfolioDates.toString(project.getProjectStartDate())},
-                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" />
+                    projectEnd=${#lensfolioDates.toString(project.getProjectEndDate())})" ></div>
             </div>
         </div>
     </div>
@@ -207,7 +235,7 @@
     // Bind a 'characters remaining' display to their output
     showRemainingChars();
 
-    /** Required for initialisation of bootstrap tooltip for event description */
+    /** Required for initialisation of bootstrap tooltip for schedulable descriptions */
     $(function () {
         $('[data-toggle="tooltip"]').tooltip({
             trigger : 'hover'

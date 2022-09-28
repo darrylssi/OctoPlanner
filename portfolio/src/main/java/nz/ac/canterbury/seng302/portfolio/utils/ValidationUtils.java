@@ -227,39 +227,43 @@ public class ValidationUtils {
     }
 
     /**
-     * Checks whether the name contains only valid characters
-     * @param name Project/Sprint name to be tested
-     * @return A ValidationError with a boolean error flag and a list of error messages
+     * Checks whether a text contains only valid characters.
+     * Text cannot be null. This allows letters from any languages, numbers, punctuation and spaces.
+     * For names, commas are not allowed.
+     * @param text Usually name or description
+     * @param regex Pattern that describes the text
+     * @param message Error message when the text does not match the pattern
+     * @return ValidationError object that contains the error message
      */
-    public static ValidationError validateName(String name) {
+    public static ValidationError validateText(String text, String regex, String message) {
         ValidationError error = new ValidationError();
 
-        if (name == null) {
-            error.addErrorMessage("Must enter a sprint name");
+        if (text == null) {
+            error.addErrorMessage("Cannot be null.");
             return error;
         }
 
-        /* string can only have alphanumeric and _ . - symbols */
-        String regex = "^([a-zA-Z0-9\\s\\-\\.\\_]){2,}$";
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(name);
+        Matcher matcher = pattern.matcher(text);
         if(!matcher.matches()) {
-            error.addErrorMessage("Name can only have alphanumeric and . - _ characters");
+            error.addErrorMessage(message);
         }
-
         return error;
     }
 
     /**
      * Creates a string object containing all the errors
      */
-    public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors) {
-        if (dateErrors.isError() || nameErrors.isError()) {
+    public static String joinErrors(ValidationError dateErrors, ValidationError nameErrors, ValidationError descriptionErrors) {
+        if (dateErrors.isError() || nameErrors.isError() || descriptionErrors.isError()) {
             StringJoiner errors = new StringJoiner("\n");
             for (var err: dateErrors.getErrorMessages()) {
                 errors.add(err);
             }
             for (var err: nameErrors.getErrorMessages()) {
+                errors.add(err);
+            }
+            for (var err: descriptionErrors.getErrorMessages()) {
                 errors.add(err);
             }
             return errors.toString();

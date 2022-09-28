@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.identityprovider.service;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -25,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
-import java.util.List;
 
 /**
  * This class contains server-side methods for dealing with user accounts in the IDP, such as
@@ -47,7 +45,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private Path profileImageFolder;
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
@@ -284,11 +282,11 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
                 .setNanos((int) ((millis % 1000) * 1000000)).build();
         user.setCreated(Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()));
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
 
         reply
                 .setIsSuccess(true)
-                .setNewUserId(user.getID())
+                .setNewUserId(user.getId())
                 .setMessage("User created successfully");
 
         responseObserver.onNext(reply.build());
@@ -305,7 +303,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     public void getUserAccountById(GetUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         logger.info("getUserAccountById has been called");
 
-        User user = repository.findById(request.getId());
+        User user = userRepository.findById(request.getId());
         if (user != null) {
             UserResponse reply = buildUserResponse(user);
             responseObserver.onNext(reply);
@@ -346,7 +344,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         }
 
         List<UserResponse> userResponses = paginatedUsers.stream().map(this::buildUserResponse).toList();
-        int numUsersInDatabase = (int) repository.count();
+        int numUsersInDatabase = (int) userRepository.count();
         reply
             .addAllUsers(userResponses)
             .setResultSetSize(numUsersInDatabase);
@@ -371,7 +369,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     private List<User> paginatedUsersOrderedByRole(int page, int limit, boolean isAscending) {
         ArrayList<User> users = new ArrayList<>(userService.getAllUsers());
         if (isAscending)
-            users.sort((a, b) -> a.highestRole().getNumber() - b.highestRole().getNumber());
+            users.sort(Comparator.comparingInt(a -> a.highestRole().getNumber()));
         else
             users.sort((a, b) -> b.highestRole().getNumber() - a.highestRole().getNumber());
 
@@ -388,7 +386,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
     /**
      * <p>Holds shared functionality for adding/deleting user roles.</p>
      *
-     * Sends a succesful reply if the operation was successful
+     * Sends a successful reply if the operation was successful
      * Gives a Status.NOT_FOUND error if the user ID is invalid
      */
     private void modifyUserRole(
@@ -400,7 +398,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         UserRole role = request.getRole();
 
         try {
-            boolean success = false;
+            boolean success;
             String successMessage = "Role successfully added";
             String failMessage = "Couldn't add role: User already had this role.";
 
@@ -459,7 +457,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("editUser() has been called");
         EditUserResponse.Builder reply = EditUserResponse.newBuilder();
 
-        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = userRepository.findById(request.getUserId()); // Attempts to get the user from the database
 
         List<ValidationError> errors = validator.validateEditUserRequest(request, user);
 
@@ -488,7 +486,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         user.setPersonalPronouns(request.getPersonalPronouns());
         user.setEmail(request.getEmail());
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
         reply
                 .setIsSuccess(true)
                 .setMessage("User edited successfully");
@@ -506,7 +504,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         logger.info("changeUserPassword() has been called");
         ChangePasswordResponse.Builder reply = ChangePasswordResponse.newBuilder();
 
-        User user = repository.findById(request.getUserId()); // Attempts to get the user from the database
+        User user = userRepository.findById(request.getUserId()); // Attempts to get the user from the database
 
         List<ValidationError> errors = validator.validateChangePasswordRequest(request, user);
 
@@ -531,7 +529,7 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
         String hashedPassword = encoder.encode(request.getNewPassword());
         user.setPassword(hashedPassword);
 
-        repository.save(user);  // Saves the user object to the database
+        userRepository.save(user);  // Saves the user object to the database
         reply
                 .setIsSuccess(true)
                 .setMessage("User's password changed successfully");
@@ -546,8 +544,8 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
      * @param user The user object to extract fields from
      * @return A gRPC-ready response object with the user's fields copied in.
      */
-    private UserResponse buildUserResponse(User user) {
-        int id = user.getID();
+    public UserResponse buildUserResponse(User user) {
+        int id = user.getId();
         ArrayList<UserRole> sortedRoles = new ArrayList<>(user.getRoles());
         sortedRoles.sort(Comparator.naturalOrder());
 

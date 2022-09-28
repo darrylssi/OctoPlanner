@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
@@ -22,8 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.StringJoiner;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Controller to handle requests related to events.
@@ -69,31 +69,19 @@ public class EventController extends PageController {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        ValidationError dateErrors;
-        ValidationError nameErrors;
-        // Pattern: Don't do the deeper validation if the data has no integrity (i.e. has nulls)
-        if (bindingResult.hasErrors()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: bindingResult.getAllErrors()) {
-                errors.add(err.getDefaultMessage());
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-        }
-        // Check that the dates are correct
         Project parentProject = projectService.getProjectById(projectID);
-        dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone), parentProject);
-        nameErrors = ValidationUtils.validateName(schedulableForm.getName());
-        if (dateErrors.isError() || nameErrors.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameErrors), HttpStatus.BAD_REQUEST);
+        ResponseEntity<String> validationResponse = validateEvent(schedulableForm, bindingResult, parentProject, userTimezone);
+        if (validationResponse.getStatusCode() == HttpStatus.OK) {
+            // Passed validation, create a new deadline and set details of new deadline object
+            Event event = new Event(schedulableForm.getName(), schedulableForm.getDescription(), schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone));
+            event.setParentProject(parentProject);
+
+            Event savedEvent = eventService.saveEvent(event);
+
+            return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
+        } else {
+            return validationResponse;
         }
-        // Data is valid, add it to database
-        Event event = new Event(schedulableForm.getName(), schedulableForm.getDescription(), schedulableForm.startDatetimeToDate(userTimezone), schedulableForm.endDatetimeToDate(userTimezone));
-        event.setParentProject(parentProject);
-
-        Event savedEvent = eventService.saveEvent(event);
-        logger.info("Added new Event {}", savedEvent.getId());
-
-        return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
     }
 
     /**
@@ -124,32 +112,23 @@ public class EventController extends PageController {
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        // Validation round 1: Do the Javax Validation annotations pass?
         Event event = eventService.getEventById(eventId);
-        if (bindingResult.hasErrors()) {
-            StringJoiner errors = new StringJoiner("\n");
-            for (var err: bindingResult.getAllErrors()) {
-                errors.add(err.getDefaultMessage());
-            }
-            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        Project parentProject = event.getParentProject();
+        ResponseEntity<String> validationResponse = validateEvent(editSchedulableForm, bindingResult, parentProject, userTimeZone);
+        if (validationResponse.getStatusCode() == HttpStatus.OK) {
+            // Set new event details
+            event.setName(editSchedulableForm.getName());
+            event.setDescription(editSchedulableForm.getDescription());
+            event.setStartDate(editSchedulableForm.startDatetimeToDate(userTimeZone));
+            event.setEndDate(editSchedulableForm.endDatetimeToDate(userTimeZone));
+
+            Event savedEvent = eventService.saveEvent(event);
+            logger.info("Edited event {}", eventId);
+            return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
+        } else {
+            return validationResponse;
         }
 
-        // Validation round 2: Do our custom errors pass?
-        var dateErrors = ValidationUtils.validateEventDates(editSchedulableForm.startDatetimeToDate(userTimeZone), editSchedulableForm.endDatetimeToDate(userTimeZone), event.getParentProject());
-        var nameError = ValidationUtils.validateName(editSchedulableForm.getName());
-        if (dateErrors.isError() || nameError.isError()) {
-            return new ResponseEntity<>(ValidationUtils.joinErrors(dateErrors, nameError), HttpStatus.BAD_REQUEST);
-        }
-        // Set new event details
-        event.setName(editSchedulableForm.getName());
-        event.setDescription(editSchedulableForm.getDescription());
-        event.setStartDate(editSchedulableForm.startDatetimeToDate(userTimeZone));
-        event.setEndDate(editSchedulableForm.endDatetimeToDate(userTimeZone));
-
-        Event savedEvent = eventService.saveEvent(event);
-        logger.info("Edited event {}", eventId);
-
-        return ResponseEntity.ok(String.valueOf(savedEvent.getId()));
     }
 
     /**
@@ -178,4 +157,30 @@ public class EventController extends PageController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * To validate events when they are edited or added
+     * @param schedulableForm Form containing details of the event
+     * @param bindingResult Errors that came up during validation
+     * @param parentProject Project the event belongs to
+     * @param userTimeZone Timezone of the logged in user
+     * @return ResponseEntity object that contains the errors found. Bad Request if there are errors. Ok, otherwise.
+     */
+    private ResponseEntity<String> validateEvent(SchedulableForm schedulableForm, BindingResult bindingResult, Project parentProject, TimeZone userTimeZone) {
+        if (bindingResult.hasErrors()) {
+            StringJoiner errors = new StringJoiner("\n");
+            for (var err: bindingResult.getAllErrors()) {
+                errors.add(err.getDefaultMessage());
+            }
+            return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+
+        ValidationError dateErrors = ValidationUtils.validateEventDates(schedulableForm.startDatetimeToDate(userTimeZone), schedulableForm.endDatetimeToDate(userTimeZone), parentProject);
+        ValidationError nameErrors = ValidationUtils.validateText(schedulableForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError descErrors = ValidationUtils.validateText(schedulableForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
+        HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(errorString, status);
+    }
+
 }
