@@ -3,10 +3,11 @@
 table {
     border-collapse: collapse;
     font-size: 1em;
-    width: 60%;
+    width: 95%;
     margin-left: auto;
     margin-right: auto;
     table-layout: fixed;
+    min-width: 480px;
 }
 
 thead {
@@ -50,7 +51,11 @@ th a {
     padding: 12px 15px;
 }
 
-tr:nth-child(odd) {
+thead tr {
+    background-color: var(--neutral-light);
+}
+
+tbody tr:nth-child(odd) {
     background-color: white;
 }
 
@@ -109,6 +114,19 @@ tr:nth-child(even) {
     border: none;
     background-color: #5e0202;
     justify-self: right;
+    position: relative;
+    bottom: 8px;
+}
+
+.bi-plus {
+    position: relative;
+    right: 3px;
+}
+
+.bi-x {
+    position: relative;
+    bottom: 7px;
+    right: 2px;
 }
 
 .remove-role-button {

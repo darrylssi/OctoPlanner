@@ -11,6 +11,9 @@ import java.util.Locale;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Class containing the step definitions for the add_role and delete_role Cucumber features
+ */
 public class AddAndDeleteRolesStepDefs {
     private User testUser;
 

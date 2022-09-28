@@ -34,15 +34,7 @@ public class EventStepDefinition extends RunCucumberTest {
 
     private SimpleDateFormat dateFormatter;
     private SimpleDateFormat dateTimeFormatter;
-    @ManyToOne
-    private static Project parentProject;
     private Event event;
-
-    // TODO make this code less bad - milestone and event step defs should probably be in a single file for schedulable step defs
-    // very sussy roundabout way of letting the milestone step defs access the parent project
-    public static Project getParentProject() {
-        return parentProject;
-    }
 
     /**
      * Validates event against its javax validation annotations
@@ -59,20 +51,12 @@ public class EventStepDefinition extends RunCucumberTest {
      * @return Validation errors
      */
     ValidationError checkValidator() {
-        return ValidationUtils.validateEventDates(event.getStartDate(), event.getEndDate(), parentProject);
+        return ValidationUtils.validateEventDates(event.getStartDate(), event.getEndDate(), event.getParentProject());
     }
 
     public EventStepDefinition() {
         this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         this.dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-    }
-
-    @Given("the parent project starts at {string} and ends on {string}")
-    public void the_parent_project_has_an_id_of(String startDate_s, String endDate_s) throws Exception {
-        var projStartDate = this.dateFormatter.parse(startDate_s);
-        var projEndDate = this.dateFormatter.parse(endDate_s);
-
-        parentProject = new Project("name", "desc", projStartDate, projEndDate);
     }
 
     @When("the user creates an event called {string}, starting at {string}, ending on {string}, with a description {string}")
@@ -83,6 +67,7 @@ public class EventStepDefinition extends RunCucumberTest {
         event.setDescription(description);
         event.setStartDate(dateTimeFormatter.parse(startDate));
         event.setEndDate(dateTimeFormatter.parse(endDate));
+        event.setParentProject(SchedulableStepDefinition.parentProject);
     }
 
     @Then("an event called {string} exists starting at {string}, ending at {string}, with a description {string}")

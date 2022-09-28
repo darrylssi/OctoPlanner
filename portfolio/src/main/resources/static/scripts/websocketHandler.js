@@ -1,10 +1,21 @@
-let stompClient = null;
-const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout functions in a key/value pair mapping
-const SCHEDULABLE_EDIT_MESSAGE_TIMEOUT = 4000; // hide editing schedulable messages after this many ms
+/**
+ * This file contains WebSocket methods and variables that are common to all pages that use WebSockets.
+ * That means it should deal with sending messages, but probably not receiving them, unless the action to be taken
+ * upon receiving the message is the same across all pages.
+ *
+ * The JS files for each HTML template should contain functions for handling received messages. They can also call the
+ * functions in this file for sending messages, and refer to the logging constants in this file.
+ *
+ * IMPORTANTLY, this file should be imported into HTML pages BEFORE their individual JS files.
+ * Additionally, when adding websockets to a page, you'll need import statements for Stomp and SockJS.
+ */
 
-// logging consts to hide certain things while developing
+let stompClient = null;
+
+// Show or hide console logs from various websocket functions.
 const editingLogs = false;
 const updateLogs = false;
+const sprintLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -22,6 +33,9 @@ function connect() {
         stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
             updateSchedulable(JSON.parse(schedulableMessageOutput.body));
         });
+        stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
+            handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
+        });
     });
 }
 
@@ -33,6 +47,16 @@ function disconnect() {
         stompClient.disconnect();
     }
         console.log("Disconnected");
+}
+
+/**
+ * Sends a message saying that the specified sprint was updated.
+ */
+function sendSprintUpdatedMessage(sprintId) {
+    if (editingLogs) {
+        console.log("SENDING UPDATED SPRINT MESSAGE FOR " + sprintId);
+    }
+    stompClient.send("/app/sprints", {}, JSON.stringify({'id':`${sprintId}`}));
 }
 
 /**
@@ -66,162 +90,4 @@ function sendStopEditingMessage(schedulableId, type) {
     }
 }
 
-/**
- * Decides whether the schedulable message means to show editing or hide editing.
- * @param editMessage JSON object received from the WebSocket
- */
-function handleSchedulableMessage(editMessage) {
-    if (editMessage.content.split(',').length === 3) {
-        if (editingLogs) {
-            console.log('GOT EDITING MESSAGE ' + editMessage.content);
-        }
-        showEditingMessage(editMessage);
-    } else {
-        if (editingLogs) {
-            console.log('GOT STOP MESSAGE ' + editMessage.content);
-        }
-        hideEditMessage(editMessage);
-    }
-}
 
-/**
- * Shows editing-schedulable notifications on the page
- * @param editMessage JSON object received from the WebSocket
- */
-function showEditingMessage(editMessage) {
-    const schedulableId = editMessage.content.split(',')[0]; // couldn't seem to substitute these directly into the template string
-    const username = editMessage.from;
-    const type = editMessage.content.split(',')[1]; // Type of schedulable
-    const userId = editMessage.content.split(',')[2]; // the id of the user editing the schedulable
-    const docUserId = document.getElementById("userId").getAttribute('data-name'); // the id of the user on this page
-
-    if (userId !== docUserId) {
-        // stops any existing timeouts so that the message is shown for the full length
-        stopSchedulableTimeout(schedulableId, type);
-
-        // locate the correct elements on the page
-        const editingSchedulableBoxClass = `${type}-${schedulableId}-editing-box`;
-        const editingSchedulableTextBoxClass = `${type}-${schedulableId}-editing-text`;
-        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxClass);
-        const editingSchedulableTextBoxes = document.getElementsByClassName(editingSchedulableTextBoxClass);
-
-        // update the text and make it visible
-        for (const schedulableTextBox of editingSchedulableTextBoxes) {
-            if (schedulableTextBox) {
-                schedulableTextBox.innerHTML = `${username} is editing this ${type}`;
-            }
-        }
-        for (const schedulableBox of editingSchedulableBoxes) {
-            if (schedulableBox) {
-                schedulableBox.style.visibility = "visible";
-            }
-        }
-
-        // Hide it after 8s
-        schedulableTimeouts.set((schedulableId, type), setTimeout(function() {hideEditMessage(editMessage)}, SCHEDULABLE_EDIT_MESSAGE_TIMEOUT));
-    }
-}
-
-/**
- * Hides the editing message for the specified schedulable and clears the timer running for it.
- * Will clear the messages from all schedulable boxes for that schedulable (such as if it spans many sprints).
- * @param message the stop message that was received
- */
-function hideEditMessage(message) {
-    // this check is so that if you are editing an schedulable that someone else is editing, you don't hide their message
-    // when you close your form. Their message would reappear without this anyway but it avoids confusion.
-    if (document.getElementById('user').getAttribute('data-name') !== message.from) {
-        const schedulableId = message.content.split(',')[0];
-        const type = message.content.split(',')[1];
-
-
-        const editingSchedulableBoxId = `${type}-${schedulableId}-editing-box`;
-        const editingSchedulableBoxes = document.getElementsByClassName(editingSchedulableBoxId);
-        for (const schedulableBox of editingSchedulableBoxes) {
-            if (schedulableBox) {
-                schedulableBox.style.visibility = "hidden";
-            }
-        }
-        stopSchedulableTimeout(schedulableId, type);
-    }
-}
-
-/**
- * Stops the timeout for the specified schedulable, if it exists
- * @param schedulableId the schedulable to stop the timeout for
- */
-function stopSchedulableTimeout(schedulableId, type) {
-    if (schedulableTimeouts.has((schedulableId, type))) {
-        clearTimeout(schedulableTimeouts.get((schedulableId, type)));
-    }
-}
-
-/**
-* Updates all instances of an schedulable that has been changed using information sent through websockets
-* @param schedulableMessage the message sent through websockets with schedulable information
-*/
-function updateSchedulable(schedulableMessage) {
-    if (updateLogs) {
-        console.log("Got update schedulable message for " + schedulableMessage.type + " " + schedulableMessage.id);
-        console.log(schedulableMessage);
-    }
-
-    if(currentSchedulable.id === schedulableMessage.id && currentSchedulable.type === schedulableMessage.type) {
-        stopEditing();
-    }
-// get a list of schedulable list containers
-    const schedulable_lists = document.getElementsByClassName('schedulable-list-container');
-
-// check each schedulable list container to see if it has the schedulable in it / should have the schedulable in it
-    for (let schedulableListContainer of schedulable_lists) {
-          //check if schedulable is there, then remove schedulable if it exists
-          let schedulable = schedulableListContainer.querySelector('#' + schedulableMessage.type + '-' + schedulableMessage.id);
-          if (schedulable !== null) {
-            schedulable.parentNode.parentNode.parentNode.remove();
-          }
-          // check if schedulable list container is in the list of ids the schedulable should be displayed in
-          let idIndex = schedulableMessage.schedulableListIds.indexOf(schedulableListContainer.id);
-        if(idIndex != -1) {
-
-            const url = BASE_URL + "frag/" + schedulableMessage.type + '/' + schedulableMessage.id + '/' + schedulableMessage.schedulableBoxIds[idIndex];
-            const schedulableFragRequest = new XMLHttpRequest();
-            schedulableFragRequest.open("GET", url, true);
-            const tempIdIndex = idIndex;
-            schedulableFragRequest.onload = () => {
-                // Reload the page to get the updated list of sprints after the delete
-                createSchedulableDisplay(schedulableMessage, schedulableListContainer, tempIdIndex, schedulableFragRequest.response);
-            }
-            schedulableFragRequest.send();
-        }
-    }
-}
-
-/**
-* Creates a new schedulable display object and puts it into the correct place in the DOM
-* @param schedulableMessage the message sent by websockets containing schedulable info to be displayed
-* @param parent the parent object for the schedulable to be displayed in
-* @param idIndex the index of this schedulable used to access values in the id lists
-* @param schedulableHtml the html of this schedulable to be inserted into the page
-*/
-function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulableHtml) {
-    let newSchedulable = document.createElement("div");
-    newSchedulable.innerHTML = schedulableHtml;
-
-    // Force tooltip to update
-    setTimeout((schedulable) => {
-        let tooltip = bootstrap.Tooltip.getInstance(schedulable);
-        if (tooltip) {
-            tooltip.update();
-        } else if (schedulable) {
-            tooltip = new bootstrap.Tooltip(schedulable, {
-                trigger: 'hover'
-            });
-        }
-    }, 250, newSchedulable.querySelector('.schedulable'));
-
-    if(schedulableMessage.nextSchedulableIds[idIndex] === '-1') {
-        parent.appendChild(newSchedulable);
-    } else {
-        parent.insertBefore(newSchedulable, parent.querySelector('#' + schedulableMessage.nextSchedulableIds[idIndex]).parentNode.parentNode.parentNode);
-    }
-}
