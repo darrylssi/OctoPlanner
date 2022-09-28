@@ -109,7 +109,7 @@ class SprintControllerTest {
                         .param("startDate", "2022-06-20")
                         .param("endDate", "2022-06-21"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Name can only have letters, numbers, punctuations except commas, and spaces.")));
+                .andExpect(content().string(containsString("Name can only have letters, numbers, spaces and punctuation except for commas")));
     }
 
     @Test
@@ -122,7 +122,7 @@ class SprintControllerTest {
                         .param("startDate", "2022-06-20")
                         .param("endDate", "2022-06-21"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Description can only have letters, numbers, punctuations, and spaces.")));
+                .andExpect(content().string(containsString("Description can only have letters, numbers, spaces and punctuation")));
     }
 
     @Test

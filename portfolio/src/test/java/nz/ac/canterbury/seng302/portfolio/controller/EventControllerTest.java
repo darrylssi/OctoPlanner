@@ -157,7 +157,7 @@ class EventControllerTest {
                 .param("endDate", "2022-09-14")
                 .param("endTime", "12:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
@@ -172,7 +172,7 @@ class EventControllerTest {
                         .param("endDate", "2022-09-14")
                         .param("endTime", "12:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+                .andExpect(content().string("Description can only have letters, numbers, spaces and punctuation"));
     }
 
     @Test
@@ -287,7 +287,7 @@ class EventControllerTest {
                         .param("endDate", "2022-09-14")
                         .param("endTime", "00:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
@@ -307,6 +307,6 @@ class EventControllerTest {
                         .param("endDate", "2022-09-14")
                         .param("endTime", "00:00"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+                .andExpect(content().string("Description can only have letters, numbers, spaces and punctuation"));
     }
 }

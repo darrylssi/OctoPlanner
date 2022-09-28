@@ -35,7 +35,7 @@ public class Milestone implements Schedulable {
 
     @Column (nullable = false)
     @Size(max=MAX_DESC_LENGTH, message="The milestone description must not exceed " + MAX_DESC_LENGTH + " characters.")
-    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$", message = "Description can only have letters, numbers, punctuations, and spaces.")
+    @Pattern(regexp = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$", message = "Description can only have letters, numbers, spaces and punctuation.")
     private String milestoneDescription;
 
     @DateTimeFormat(pattern=DATE_FORMAT)

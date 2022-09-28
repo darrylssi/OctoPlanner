@@ -34,7 +34,7 @@ public class GlobalVars {
 
     public static final String DESC_REGEX = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$";
     public static final String NAME_REGEX = "^[\\p{L}\\p{N}\\p{P}\\p{Z}&&[^,]]{2,}$";
-    public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, punctuations, and spaces.";
-    public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, punctuations except commas, and spaces.";
+    public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, spaces and punctuation";
+    public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, spaces and punctuation except for commas";
 
 }

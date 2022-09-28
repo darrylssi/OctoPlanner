@@ -31,6 +31,7 @@
             <div class="horizontal-group-element" id="element-description">
                 <label for="sprintDescription">Sprint Description</label> <br/>
                 <textarea class="description-input" id="sprintDescription" th:name="sprintDescription" th:field ="*{sprintDescription}"></textarea>
+                <span th:text="${invalidDescription}" th:class="error"></span>
                 <span th:if="${#fields.hasErrors('sprintDescription')}" th:errors="*{sprintDescription}" th:errorclass="error" />
             </div>
         </div>

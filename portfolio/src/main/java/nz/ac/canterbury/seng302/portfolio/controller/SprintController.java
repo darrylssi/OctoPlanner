@@ -28,6 +28,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.*;
 
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+
 /**
  * Controller for endpoints for adding and editing sprints
  */
@@ -90,8 +92,8 @@ public class SprintController extends PageController {
         ValidationError dateOutOfRange = getDateValidationError(DateUtils.localDateToDate(sprintForm.getStartDate()), DateUtils.localDateToDate(sprintForm.getEndDate()),
                 projectId, parentProject, sprintList);
 
-        ValidationError invalidName = ValidationUtils.validateText(sprintForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
-        ValidationError invalidDescription = ValidationUtils.validateText(sprintForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        ValidationError invalidName = ValidationUtils.validateText(sprintForm.getName(), NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError invalidDescription = ValidationUtils.validateText(sprintForm.getDescription(), DESC_REGEX, DESC_ERROR_MESSAGE);
         if (dateOutOfRange.isError() || invalidName.isError() || invalidDescription.isError()) {
             return new ResponseEntity<>(ValidationUtils.joinErrors(dateOutOfRange, invalidName, invalidDescription), HttpStatus.BAD_REQUEST);
         }
@@ -181,8 +183,8 @@ public class SprintController extends PageController {
         ValidationError dateOutOfRange = SprintController.getDateValidationError(DateUtils.toDate(sprintStartDate), DateUtils.toDate(sprintEndDate),
                 id, parentProject, sprintService.getSprintsInProject(projectId));
 
-        ValidationError invalidName = ValidationUtils.validateText(sprintName, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
-        ValidationError invalidDescription = ValidationUtils.validateText(sprintDescription, GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        ValidationError invalidName = ValidationUtils.validateText(sprintName, NAME_REGEX, NAME_ERROR_MESSAGE);
+        ValidationError invalidDescription = ValidationUtils.validateText(sprintDescription, DESC_REGEX, DESC_ERROR_MESSAGE);
 
         // Checking if there are errors in the input, and also doing the valid dates validation
         if (result.hasErrors() || dateOutOfRange.isError() || invalidName.isError() || invalidDescription.isError()) {
@@ -196,6 +198,7 @@ public class SprintController extends PageController {
             model.addAttribute("sprintDescription", sprintDescription);
             model.addAttribute("invalidDateRange", dateOutOfRange.getFirstError());
             model.addAttribute("invalidName", invalidName.getFirstError());
+            model.addAttribute("invalidDescription", invalidDescription.getFirstError());
             return EDIT_SPRINT_TEMPLATE;
         }
 

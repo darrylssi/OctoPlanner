@@ -219,7 +219,7 @@ class ValidationUtilsTest {
     void testInvalidName_getErrorMessage(String name) {
         ValidationError result = ValidationUtils.validateText(name, GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Name can only have letters, numbers, punctuations except commas, and spaces.", result.getFirstError());
+        assertEquals("Name can only have letters, numbers, spaces and punctuation except for commas", result.getFirstError());
     }
 
     @Test
@@ -248,6 +248,6 @@ class ValidationUtilsTest {
     void testInvalidDescription_getErrorMessage(String desc) {
         ValidationError result = ValidationUtils.validateText(desc, GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
         assertTrue(result.isError());
-        assertEquals("Description can only have letters, numbers, punctuations, and spaces.", result.getFirstError());
+        assertEquals("Description can only have letters, numbers, spaces and punctuation", result.getFirstError());
     }
 }

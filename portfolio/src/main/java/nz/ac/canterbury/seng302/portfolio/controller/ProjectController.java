@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.ProjectForm;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
@@ -10,7 +11,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +20,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import nz.ac.canterbury.seng302.portfolio.model.Project;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -116,7 +116,8 @@ public class ProjectController extends PageController {
         ValidationError dateErrors = ValidationUtils.validateProjectDates(DateUtils.localDateToDate(projectForm.getStartDate()),
                 DateUtils.localDateToDate(projectForm.getEndDate()), creationDate, sprintList, schedulableList);
         ValidationError nameErrors = ValidationUtils.validateText(projectForm.getName(), NAME_REGEX, NAME_ERROR_MESSAGE);
-        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, new ValidationError());
+        ValidationError descErrors = ValidationUtils.validateText(projectForm.getDescription(), DESC_REGEX, DESC_ERROR_MESSAGE);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }
