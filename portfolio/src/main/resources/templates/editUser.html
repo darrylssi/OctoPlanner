@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -12,7 +12,6 @@
     <link rel="stylesheet" th:href="|../../styles/editUser.css|">
     <link rel="stylesheet" th:href="|../../styles/form.css|">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.css" integrity="sha512-2eMmukTZtvwlfQoG8ztapwAH5fXaQBzaMqdljLopRSA0i6YKM8kBAOrSSykxu9NN9HrtD45lIqfONLII2AFL/Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js" integrity="sha512-Gs+PsXsGkmr+15rqObPJbenQ2wB3qYvTHuJO6YJzPe/dTLvhy0fmae2BcnaozxDo5iaF8emzmCZWbQ1XXiX2Ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script th:src="|../../scripts/editUser.js|" type="module"></script>
 
@@ -91,6 +90,7 @@
                                   th:value="${profileInfo.getBio}" maxlength="200"/><br/>
                         <span class="error" th:text="${error_Bio}"></span>
                     </div>
+                    <div class="col"></div>
                 </div><br/>
                 <div class="row centre-box">
                     <div class="col buttons-centre">
@@ -133,28 +133,36 @@
                     </div>
                 </div><br/>
                 <div class="row centre-box">
-                    <button class="btn btn-primary btn-lg" type="submit">Change Password</button>
+                    <div class="col buttons-centre">
+                        <button class="btn btn-primary btn-lg" type="submit">Change Password</button>
+                    </div>
                 </div>
             </form>
         </div><br/>
         <hr/><br/>
         <div class="row">
-            <form th:action="|./edit|" method="post" id="photoForm">
-                <div class="user-info">
-                    <div class="input-box">
+            <form th:action="|./edit|" method="post" id="photoForm" class="user-info">
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col photoInput">
                         <label> Profile Photo </label>
                         <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
                         <input id="imageString" type="hidden" th:name="imageString">
                         <span th:class="error" th:text="${error_InvalidPhoto}"></span>
                         <span th:class="error" id="invalidPhotoJS"></span>
                     </div>
-
-                    <div id="croppieWindow"></div>
+                    <div class="col"></div>
+                </div><br/>
+                <div class="row centre-box">
+                    <div class="col">
+                        <div id="croppieWindow"></div>
+                    </div>
                 </div>
-                <div class="centre-box">
-                    <div class="loader" id="croppieLoader"></div>
-                    <img src="" id="image-preview"/>
-                    <button class="btn btn-primary btn-lg" type="submit" id="photo-upload-submit-button">Save Photo</button>
+                <div class="row centre-box">
+                    <div class="col buttons-centre">
+                        <div class="loader" id="croppieLoader"></div>
+                        <img src="" id="image-preview"/>
+                        <button class="btn btn-primary btn-lg" type="submit" id="photo-upload-submit-button">Save Photo</button>
+                    </div>
                 </div>
             </form>
         </div><br/>
@@ -163,11 +171,17 @@
                 <hr/>
                 <br/>
                 <form th:action="|./edit|" method="post">
-                    <div th:if="${error_DeletePhoto}" class="centre-box">
-                        <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                    <div class="row input-row flex-column flex-md-row">
+                        <div class="col centre-box">
+                            <div th:if="${error_DeletePhoto}">
+                                <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="centre-box">
-                        <button class="btn btn-primary btn-lg" type="submit">Delete Profile Photo</button>
+                    <div class="row input-row flex-column flex-md-row">
+                        <div class="col centre-box">
+                            <button class="btn btn-primary btn-lg" type="submit">Delete Profile Photo</button>
+                        </div>
                     </div>
                 </form>
             </div>

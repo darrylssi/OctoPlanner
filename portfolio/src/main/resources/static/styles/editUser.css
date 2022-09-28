@@ -55,7 +55,7 @@ form .buttons-centre {
 }
 
 .user-info .textarea {
-    height: 15%;
+    height: 14%;
     max-width: 664px;
     resize: none;
     border-color: black;
@@ -72,6 +72,7 @@ form .buttons-centre {
 
 #inputFile {
     background-color: white;
+
 }
 
 /* Used for a loading animation when a photo is being compressed */
@@ -83,6 +84,15 @@ form .buttons-centre {
     width: 100px;
     height: 100px;
     animation: spin 1.5s linear infinite;
+}
+
+form .row .cr-slider {
+    max-width: 300px;
+}
+
+form .row .photoInput {
+    max-height: 80px;
+    max-width: 755px;
 }
 
 @keyframes spin {
