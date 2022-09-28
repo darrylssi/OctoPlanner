@@ -345,15 +345,15 @@ function handleSprintUpdateMessage(sprintMessage) {
     let newStart = getDatePlusDays(sprintMessage.startDate, 1);
     let newEnd = getDatePlusDays(sprintMessage.endDate, 2);
 
-    if (sprintMessage.name === null) { // sprint isn't real or was deleted (WORKS)
+    if (sprintMessage.name === null) { // sprint isn't real or was deleted
         if (sprint !== null) {
             sprint.remove();
         }
-    } else if (sprint !== null) { // update sprint details (WORKS... except on events that have been added. No idea why!)
+    } else if (sprint !== null) { // update sprint details
         sprint.setStart(newStart);
         sprint.setEnd(newEnd);
         sprint.setProp("title", sprintMessage.name);
-    } else { // create new sprint (UNTESTED)
+    } else { // create new sprint
         calendar.addEvent({
             id: sprintMessage.id,
             title: sprintMessage.name,
