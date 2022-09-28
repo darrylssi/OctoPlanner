@@ -18,7 +18,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),

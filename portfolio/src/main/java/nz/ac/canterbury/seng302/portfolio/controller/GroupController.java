@@ -1,8 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller to handle requests on the groups page.
@@ -28,6 +32,7 @@ public class GroupController extends PageController{
 
     @Autowired
     GroupClientService groupClientService;
+
 
     /**
      * Get request to view the groups page.
@@ -41,6 +46,12 @@ public class GroupController extends PageController{
             Model model
     ) {
         model.addAttribute("tab", 3);
+        Map<Integer, GetGroupDetailsResponse> groups = new HashMap<>();
+        groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
+        groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
+
+        model.addAttribute("groups", groups);
+
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }
 
