@@ -328,3 +328,19 @@ function resetAddForm(type) {
     }
 
 }
+
+/** Display a bootstrap message if there is a corresponding box on the page which doesn't have that message*/
+function alert(message, type) {
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('')
+
+    let box = document.getElementById(`${type}-box`);
+    if(box && box.innerHTML.indexOf(message) == -1) {
+        box.append(wrapper)
+    }
+}
