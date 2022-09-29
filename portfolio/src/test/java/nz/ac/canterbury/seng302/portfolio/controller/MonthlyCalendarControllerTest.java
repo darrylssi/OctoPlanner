@@ -51,14 +51,16 @@ class MonthlyCalendarControllerTest {
     @MockBean
     DeadlineService deadlineService;                    // initializing the DeadlineService
     @MockBean
-    EventService eventService;
+    EventService eventService;                          // initializing the EventService
     @MockBean
-    MilestoneService milestoneService;
+    MilestoneService milestoneService;                  // initializing the MilestoneService
+    @MockBean
+    DetailsController detailsController;                // initializing the DetailsController
 
     private static final int PROJECT_ID = 0;
-    private static Deadline deadline = new Deadline("deadline1", "deaddesc", DateUtils.toDate("2022-02-01"));
+    private static Deadline deadline = new Deadline("deadline1", "deaddesc", DateUtils.toDateTime("2022-02-01 17:00"));
     private static Milestone milestone = new Milestone("milestone1", "deaddesc", DateUtils.toDate("2022-02-02"));
-    private static Event event = new Event("event1", "eventdesc", DateUtils.toDate("2022-02-02"), DateUtils.toDate("2022-02-20"));
+    private static Event event = new Event("event1", "eventdesc", DateUtils.toDateTime("2022-02-02 09:00"), DateUtils.toDateTime("2022-02-20 17:00"));
     private static Sprint sprint1 = new Sprint(PROJECT_ID, "Sprint 1", "This is sprint 1", "2022-01-02", "2022-01-10", "#3ea832");
     private static Sprint sprint2 = new Sprint(PROJECT_ID, "Sprint 2", "This is sprint 2", "2022-01-11", "2022-01-22", "#123456");
     private static Project project = new Project("Project 2022", "This is the first project", "2022-01-01", "2022-12-31");
@@ -131,17 +133,17 @@ class MonthlyCalendarControllerTest {
     @Test
     @WithMockPrincipal(UserRole.TEACHER)
     void whenGetMonthlyCalendar_thenHasAllSchedulablesInProjectInCorrectFormat() throws Exception {
-        // get services to return lists
-        Mockito.when(deadlineService.getDeadlinesInProject(PROJECT_ID)).thenReturn(List.of(deadline));
-        Mockito.when(milestoneService.getMilestonesInProject(PROJECT_ID)).thenReturn(List.of(milestone));
-        Mockito.when(eventService.getEventByParentProjectId(PROJECT_ID)).thenReturn(List.of(event));
+        // get services to return list of schedulables
         Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+        Mockito.when(detailsController.getAllSchedulablesInProject(PROJECT_ID))
+                .thenReturn(List.of(deadline, milestone, event));
+
 
         // create expected lists
         String expectedNames = String.join(", ", List.of("deadline1", "milestone1", "event1"));
         String expectedTypes = String.join(", ", List.of(GlobalVars.DEADLINE_TYPE, GlobalVars.MILESTONE_TYPE, GlobalVars.EVENT_TYPE));
-        String expectedStarts = String.join(", ", List.of("2022-02-01", "2022-02-02", "2022-02-02"));
-        String expectedEnds = String.join(", ", List.of("2022-02-01", "2022-02-02", "2022-02-20"));
+        String expectedStarts = String.join(", ", List.of("2022-02-01 17:00", "2022-02-02 00:00", "2022-02-02 09:00"));
+        String expectedEnds = String.join(", ", List.of("2022-02-01 17:00", "2022-02-02 00:00", "2022-02-20 17:00"));
 
         mockMvc.perform(get("/monthlyCalendar/" + PROJECT_ID))
                 .andExpect(status().isOk())
