@@ -10,6 +10,9 @@ import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Controller to handle requests on the groups page.
@@ -90,7 +92,7 @@ public class GroupController extends PageController{
 
         if (addGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (addGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)){
+        } else if (addGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)){
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -213,6 +215,40 @@ public class GroupController extends PageController{
     }
 
     /**
+     * Deletes a group based on the given id
+     * @param principal used to check if the user is authorised to delete group
+     * @param groupId the id of the group to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/groups/{groupId}/remove-group")
+    @ResponseBody
+    public ResponseEntity<String> deleteGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name = "groupId") int groupId
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        if (groupId != TEACHER_GROUP_ID && groupId != MEMBERS_WITHOUT_GROUPS_ID) {
+            DeleteGroupResponse deleteGroupResponse = groupClientService.deleteGroup(groupId);
+
+            if (deleteGroupResponse.getIsSuccess()) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.OK);
+            } else if (deleteGroupResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
      * Mapping for an endpoint to remove users from a group
      * @param principal Authenticated user
      * @param groupId id of the group to remove members from
@@ -235,10 +271,11 @@ public class GroupController extends PageController{
 
         if (removeGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (removeGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)) {
+        } else if (removeGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
