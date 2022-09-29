@@ -27,7 +27,7 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

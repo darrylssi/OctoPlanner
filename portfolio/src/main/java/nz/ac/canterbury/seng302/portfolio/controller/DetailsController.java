@@ -18,15 +18,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
-
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 

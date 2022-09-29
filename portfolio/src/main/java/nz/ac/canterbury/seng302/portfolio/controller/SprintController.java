@@ -10,7 +10,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.validation.Valid;
 import java.util.*;
 
@@ -56,8 +54,6 @@ public class SprintController extends PageController {
      * @param projectId The id of the project to add a sprint to, taken from the URL
      * @param sprintForm The form with the information on the new sprint to be added
      * @param bindingResult The result object that allows for input validation
-     * @param userTimezone the current timezone
-     * @param model Parameters sent to thymeleaf template to be rendered into HTML
      * @return To the teacherProjectDetails page
      */
     @PostMapping("/add-sprint/{project_id}")
@@ -65,9 +61,7 @@ public class SprintController extends PageController {
             @AuthenticationPrincipal AuthState principal,
             @PathVariable("project_id") int projectId,
             @Valid SprintForm sprintForm,
-            BindingResult bindingResult,
-            TimeZone userTimezone,
-            Model model
+            BindingResult bindingResult
     ){
         requiresRoleOfAtLeast(UserRole.TEACHER, principal);
 
