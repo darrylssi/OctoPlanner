@@ -70,8 +70,9 @@ tr:nth-child(even) {
 }
 
 .pages {
-    width: 40px;
+    min-width: 40px; /* TODO check if this should be 30 px? */
     height: 40px;
+    padding: 0px 5px 0px 5px;
     background-color: white;
     display: inline-block;
     vertical-align: middle;
@@ -80,6 +81,11 @@ tr:nth-child(even) {
 
 .otherPages {
     color: #6495ED;
+}
+
+.disabled a {
+    pointer-events: none;
+    color: #666666;
 }
 
 .currentPage {
