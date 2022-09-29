@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -94,11 +95,15 @@ public class UserAccountClientService {
      * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
      */
     public PaginatedUsersResponse getPaginatedUsers(final int offset, final int limit, final String orderBy, final boolean isAscending) throws IllegalArgumentException {
-        GetPaginatedUsersRequest paginatedUsersRequest = GetPaginatedUsersRequest.newBuilder()
+        PaginationRequestOptions requestOptions = PaginationRequestOptions.newBuilder()
                 .setOffset(offset)
                 .setLimit(limit)
                 .setOrderBy(orderBy)
                 .setIsAscendingOrder(isAscending)
+                .build();
+
+        GetPaginatedUsersRequest paginatedUsersRequest = GetPaginatedUsersRequest.newBuilder()
+                .setPaginationRequestOptions(requestOptions)
                 .build();
         try {
             return userAccountStub.getPaginatedUsers(paginatedUsersRequest);
