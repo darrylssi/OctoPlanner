@@ -18,7 +18,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
@@ -27,9 +27,11 @@ public class Group {
 
     @NotBlank(message="Group short name cannot be empty")
     @Size(min = 2, max = 32, message="Group short name must be between 2 and 32 characters")
+    @Column(unique = true)
     private String shortName;
 
     @Size(max = 128, message="Group long name must not exceed 128 characters")
+    @Column(unique = true)
     private String longName;
 
     protected Group() {

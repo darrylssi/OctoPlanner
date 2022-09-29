@@ -18,6 +18,9 @@ public class GlobalVars {
 
     public static final int MAX_USERNAME_LENGTH = 20;   // Maximum number of characters a username field can have
 
+    public static final int MAX_GROUP_LONG_NAME_LENGTH = 128; // Maximum number of characters a group long name field can have
+
+
     public static final int COLOUR_LENGTH = 7;
     public static final String DEFAULT_COLOUR = "#ff3823";  // The default colour code for displaying schedulables outside sprints
 
@@ -37,4 +40,8 @@ public class GlobalVars {
     public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, spaces and punctuation";
     public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, spaces and punctuation except for commas";
 
+
+
+    public static final int TEACHER_GROUP_ID = 0;
+    public static final int MEMBERS_WITHOUT_GROUPS_ID = 1;
 }

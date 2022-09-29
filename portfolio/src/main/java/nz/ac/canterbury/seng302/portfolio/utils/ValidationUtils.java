@@ -7,10 +7,7 @@ import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,8 +103,14 @@ public class ValidationUtils {
         // Checking against all schedulable dates (Events, Deadlines, Milestones)
         for (Schedulable schedulable : schedulableList) {
             if (datesOutsideProject(schedulable.getStartDate(), schedulable.getEndDate(), start, end)) {
-                error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
-                        "\" is outside the project dates");
+                if (Objects.equals(schedulable.getType(), "event")) {
+                    error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
+                            "\": " + DateUtils.toDisplayString(schedulable.getStartDate()) + " - " +
+                            DateUtils.toDisplayString(schedulable.getEndDate()) + " is outside the project dates");
+                } else if (Objects.equals(schedulable.getType(), "deadline") || Objects.equals(schedulable.getType(), "milestone")) {
+                    error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
+                            "\": " + DateUtils.toDisplayString(schedulable.getStartDate()) + " is outside the project dates");
+                }
             }
         }
 
