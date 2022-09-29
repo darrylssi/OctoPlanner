@@ -290,7 +290,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      */
     @Override
     public void getPaginatedGroups(GetPaginatedGroupsRequest request, StreamObserver<PaginatedGroupsResponse> responseObserver) {
-        logger.info("getGroupDetails() has been called");
+        logger.info("getPaginatedGroups() has been called");
 
         PaginatedGroupsResponse.Builder reply = PaginatedGroupsResponse.newBuilder();
         PaginationRequestOptions options = request.getPaginationRequestOptions();
