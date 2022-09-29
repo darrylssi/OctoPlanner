@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
@@ -302,7 +303,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -394,7 +395,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -443,7 +444,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -500,8 +501,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -510,9 +511,10 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We get the group's details
+        assertEquals(testGroupId, response.getGroupId());
         assertEquals(testGroup.getShortName(), response.getShortName());
         assertEquals(testGroup.getLongName(), response.getLongName());
         assertTrue(testGroup.getMembers().contains(testUser1));
@@ -525,8 +527,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -535,7 +537,7 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We don't get any details
         assertEquals("", response.getShortName());
