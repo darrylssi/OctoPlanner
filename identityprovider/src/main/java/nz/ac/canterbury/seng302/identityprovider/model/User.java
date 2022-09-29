@@ -200,7 +200,7 @@ public class User {
 
     /**
      * Adds a group to the user's set of joined groups
-     * This does not add the user to the corresponding groups set of members
+     * This does not add the user to the corresponding group's set of members
      * @param group The group to add
      */
     public void joinGroup(Group group) {
@@ -209,7 +209,7 @@ public class User {
 
     /**
      * Removes a group from the user's set of joined groups
-     * This does not remove the user from the corresponding groups set of members
+     * This does not remove the user from the corresponding group's set of members
      * @param group The group to remove
      */
     public void leaveGroup(Group group) {
