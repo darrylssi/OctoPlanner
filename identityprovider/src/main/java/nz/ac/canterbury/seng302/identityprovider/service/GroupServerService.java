@@ -253,6 +253,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * Gets a group's details in the form of a GetGroupDetailsResponse
      * If the group does not exist, all the fields in the GetGroupDetailsResponse will be blank
      * @param request An object containing the id of the group to retrieve details from
+     * @param responseObserver Observable stream of messages
      */
     @Override
     public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GroupDetailsResponse> responseObserver) {

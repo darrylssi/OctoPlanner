@@ -113,7 +113,7 @@ public class GroupClientService {
 
     /**
      * Sends a request to the identity provider to get a paginated list of all groups
-     * @param offset What "page" of the groups you want. Affected by the ordering and page size
+     * @param offset What "page" of the groups you want. Affected by the ordering and page size. This starts at 0.
      * @param limit How many items you want from
      * @param orderBy How the list is ordered.
      *                Your options are:

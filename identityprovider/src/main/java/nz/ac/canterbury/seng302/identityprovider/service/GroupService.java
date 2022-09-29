@@ -60,6 +60,11 @@ public class GroupService {
      * @param limit The number of groups wanted
      * @param page Page number starting at 0
      * @param orderBy Attribute of group it is ordered by
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"shortNname"</code> - Ordered by groups short name alphabetically</li>
+     *                    <li><code>"longName"</code> - Ordered by groups long name alphabetically</li>
+     *                  </ul>
      * @param isAscending Whether the sort is ascending or descending
      * @return List of groups from that page of the given order
      */
