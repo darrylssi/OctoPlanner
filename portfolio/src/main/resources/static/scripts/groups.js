@@ -24,4 +24,13 @@ function handleGroupUpdateMessage(groupMessage) {
     if (groupLogs) {
         console.log(groupMessage);
     }
+
+    const group_list = document.getElementsByClassName('group-block');
+
+
+    if (groupMessage.shortName == null) {
+    // Delete the group
+    } else {
+
+    }
 }

@@ -111,7 +111,7 @@ public class MessageMappingController {
     public GroupMessageOutput sendGroupData(GroupMessage groupMessage) {
         GroupMessageOutput output;
         GroupDetailsResponse groupDetailsResponse = groupClientService.getGroupDetails(groupMessage.getId());
-        if (groupDetailsResponse.getLongName().isBlank()) { // not found?
+        if (groupDetailsResponse.getShortName().isBlank()) { // not found?
             output = new GroupMessageOutput(groupMessage.getId());
         } else {
             output = new GroupMessageOutput(groupMessage.getId(), groupDetailsResponse);

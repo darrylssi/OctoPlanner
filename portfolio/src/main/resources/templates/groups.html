@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <div class="card group-block container-auto" th:each="group : ${groups}" th:object="${group}">
+    <div class="card group-block container-auto" th:id="'group-' + *{group.getId}"  th:each="group : ${groups}" th:object="${group}">
 
         <div class="row">
             <div class="col-sm-auto">
