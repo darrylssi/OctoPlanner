@@ -6,6 +6,8 @@ import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -56,6 +58,7 @@ public class ProjectTests {
     private Sprint sprint1;
     private Sprint sprint2;
     private final List<Sprint> sprintList = new ArrayList<>();
+    private List<Schedulable> schedulableList;
 
     /**
      * This exists to check that dates are equivalent for the purposes of these tests. It checks
@@ -91,6 +94,7 @@ public class ProjectTests {
         sprint2.setSprintLabel("Sprint 2");
         sprintList.add(sprint1);
         sprintList.add(sprint2);
+        schedulableList = new ArrayList<>();
     }
 
     @Test
@@ -105,7 +109,7 @@ public class ProjectTests {
     }
 
     @Test
-    void searchById_getProject() throws Exception {
+    void searchById_getProject() {
         Mockito.when(projectService.getProjectById(baseProject.getId())).thenReturn(baseProject);
 
         Project foundProject = projectService.getProjectById(baseProject.getId());
@@ -165,11 +169,77 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
                 " is outside the project dates" , actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"2022-02-03 12:00",
+    "2022-08-06 12:00",
+    "2021-02-04 12:00",
+    "2023-08-05 12:00"})
+    void testEditProject_whenDeadlineOutsideDates_getErrorMessage(String deadlineDateString) {
+        Date deadlineDate = DateUtils.toDateTime(deadlineDateString);
+        Deadline deadline = new Deadline("Test Deadline 1", "This is a deadline",
+                deadlineDate);
+        schedulableList.add(deadline);
+
+        Date start = DateUtils.toDate("2022-02-04");
+        Date end = DateUtils.toDate("2022-08-05");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedDate = DateUtils.toDisplayString(deadlineDate);
+        String actual = error.getFirstError();
+        assertEquals("The deadline \"Test Deadline 1\": " + expectedDate + " is outside the project dates" , actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"2022-02-03 12:00, 2022-02-10 12:00",
+            "2022-08-06 12:00, 2022-08-13 12:00",
+            "2021-02-04 12:00, 2021-02-11 12:00",
+            "2023-08-05 12:00, 2023-08-12 12:00"})
+    void testEditProject_whenEventOutsideDates_getErrorMessage(String eventStartString, String eventEndString) {
+        Date eventStart = DateUtils.toDateTime(eventStartString);
+        Date eventEnd = DateUtils.toDateTime(eventEndString);
+        Event event = new Event("Test Event 1", "This is an event",
+                eventStart, eventEnd);
+        schedulableList.add(event);
+
+        Date start = DateUtils.toDate("2022-02-04");
+        Date end = DateUtils.toDate("2022-08-05");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedStart = DateUtils.toDisplayString(eventStart);
+        String expectedEnd = DateUtils.toDisplayString(eventEnd);
+        String actual = error.getFirstError();
+        assertEquals("The event \"Test Event 1\": " + expectedStart + " - " + expectedEnd +
+                " is outside the project dates" , actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"2022-02-03 12:00",
+            "2022-08-06 12:00",
+            "2021-02-04 12:00",
+            "2023-08-05 12:00"})
+    void testEditProject_whenMilestoneOutsideDates_getErrorMessage(String milestoneDateString) {
+        Date milestoneDate = DateUtils.toDate(milestoneDateString);
+        Milestone milestone = new Milestone("Test Milestone 1", "This is a milestone",
+                milestoneDate);
+        schedulableList.add(milestone);
+
+        Date start = DateUtils.toDate("2022-02-04");
+        Date end = DateUtils.toDate("2022-08-05");
+        assert start != null;
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedDate = DateUtils.toDisplayString(milestoneDate);
+        String actual = error.getFirstError();
+        assertEquals("The milestone \"Test Milestone 1\": " + expectedDate + " is outside the project dates" , actual);
     }
 
     @Test
@@ -181,7 +251,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-20");
         Date end = DateUtils.toDate("2022-01-20");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint1.getSprintLabel() + ": " +
                 sprint1.getStartDateString() + " - " + sprint1.getEndDateString() +
@@ -197,7 +267,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2022-01-01");
         Date end = DateUtils.toDate("2022-02-10");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(sprint2.getSprintLabel() + ": " +
                 sprint2.getStartDateString() + " - " + sprint2.getEndDateString() +
@@ -213,7 +283,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-27");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         /* Then: the validation should return a success */
         assertEquals("" , actual);
@@ -231,7 +301,7 @@ public class ProjectTests {
         Date start = DateUtils.toDate("2021-05-26");
         Date end = DateUtils.toDate("2022-10-01");
         assert start != null;
-        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList);
+        ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, sprintList, schedulableList);
         String actual = error.getFirstError();
         /* Then: the validator should catch that the start date is too early */
         assertEquals("Project cannot be set to start more than a year before it was created " +

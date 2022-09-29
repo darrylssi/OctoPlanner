@@ -35,6 +35,45 @@
     color: var(--primary-dark);
 }
 
+.btn-remove-users {
+    background-color: var(--remove-users);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+
+.btn-remove-users:disabled {
+    background-color: var(--remove-users);
+}
+.btn-remove-users:focus {
+    background-color: var(--remove-users);
+}
+.btn-remove-users:hover {
+    background-color: var(--remove-users-dark);
+    color: var(--primary-dark);
+}
+
+.btn-remove-users {
+    background-color: var(--remove-users);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+
+.btn-select {
+    background-color: var(--select);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+.btn-select:disabled {
+    background-color: var(--select);
+}
+.btn-select:focus {
+    background-color: var(--select);
+}
+.btn-select:hover {
+    background-color: var(--select-dark);
+    color: var(--primary-dark);
+}
+
 .nav-item {
     margin: 0px 2px;
 }
