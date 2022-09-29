@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
@@ -302,7 +303,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -394,7 +395,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -443,7 +444,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
