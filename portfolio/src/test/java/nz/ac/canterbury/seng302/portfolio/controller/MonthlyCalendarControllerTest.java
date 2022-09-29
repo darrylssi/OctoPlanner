@@ -22,13 +22,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Controller test class for the display project details on the monthly calendar
@@ -179,5 +179,36 @@ class MonthlyCalendarControllerTest {
                 .andExpect(model().attribute("sprintStartDates", expectedStarts))
                 .andExpect(model().attribute("sprintEndDates", expectedEnds))
                 .andExpect(model().attribute("sprintColours", expectedColours));
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
+    void whenGetAllSchedulablesOfValidType_thenOk() throws Exception {
+        Mockito.when(deadlineService.getDeadlinesInProject(PROJECT_ID)).thenReturn(List.of(deadline));
+        Mockito.when(milestoneService.getMilestonesInProject(PROJECT_ID)).thenReturn(List.of(milestone));
+        Mockito.when(eventService.getEventByParentProjectId(PROJECT_ID)).thenReturn(List.of(event));
+        Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+
+        mockMvc.perform(get("/project/" + PROJECT_ID + "/schedulables/milestone"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/project/" + PROJECT_ID + "/schedulables/deadline"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/project/" + PROJECT_ID + "/schedulables/event"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockPrincipal(UserRole.TEACHER)
+    void whenGetAllSchedulablesOfInvalidType_then400Error() throws Exception {
+        Mockito.when(deadlineService.getDeadlinesInProject(PROJECT_ID)).thenReturn(List.of(deadline));
+        Mockito.when(milestoneService.getMilestonesInProject(PROJECT_ID)).thenReturn(List.of(milestone));
+        Mockito.when(eventService.getEventByParentProjectId(PROJECT_ID)).thenReturn(List.of(event));
+        Mockito.when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+
+        mockMvc.perform(get("/project/" + PROJECT_ID + "/schedulables/invalid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason("invalid is not a type of schedulable!"));
     }
 }
