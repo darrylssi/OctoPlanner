@@ -10,12 +10,14 @@ import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
+import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -760,14 +762,17 @@ class GroupServerServiceTest {
         assertEquals("The group \"Teaching Staff\" cannot be edited", response.getMessage());
     }
 
-    /* @Test
+    @Test
     void testGetPaginatedGroup_byLongNameAscending() {
         Pageable pageable = PageRequest.of(0, 2, Sort.by("longName"));
         when(groupRepository.findAll(pageable))
                 .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
+        when(groupRepository.count())
+                .thenReturn(2L);
 
         StreamObserver<PaginatedGroupsResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<PaginatedGroupsResponse> captor = ArgumentCaptor.forClass(PaginatedGroupsResponse.class);
+
         PaginationRequestOptions options = PaginationRequestOptions.newBuilder()
                 .setOffset(0)
                 .setLimit(2)
@@ -782,16 +787,16 @@ class GroupServerServiceTest {
         PaginatedGroupsResponse response = captor.getValue();
 
         assertEquals(2, response.getGroupsCount());
-    } */
+    }
 
-    /* @Test
+    @Test
     void testGetPaginatedGroup_byInvalidKeyword_getFailure() {
         Pageable pageable = PageRequest.of(0, 2, Sort.by("longName"));
         when(groupRepository.findAll(pageable))
                 .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
 
         StreamObserver<PaginatedGroupsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<PaginatedGroupsResponse> captor = ArgumentCaptor.forClass(PaginatedGroupsResponse.class);
+        ArgumentCaptor<StatusRuntimeException> errorCaptor = ArgumentCaptor.forClass(StatusRuntimeException.class);
         PaginationRequestOptions options = PaginationRequestOptions.newBuilder()
                 .setOffset(0)
                 .setLimit(2)
@@ -802,8 +807,9 @@ class GroupServerServiceTest {
                 .setPaginationRequestOptions(options).build();
         groupServerService.getPaginatedGroups(request, observer);
 
-        verify(observer, times(1)).onError(Status.INVALID_ARGUMENT.withDescription("Can not order users by 'invalid'").asRuntimeException());
-        verify(observer, times(1)).onCompleted();
-        verify(observer, times(1)).onNext(captor.capture());
-    } */
+        verify(observer, Mockito.times(1)).onError(errorCaptor.capture());
+        StatusRuntimeException error = errorCaptor.getValue();
+        assertEquals(error.getStatus().getCode(), Status.INVALID_ARGUMENT.getCode());
+        assertEquals("INVALID_ARGUMENT: Can not order groups by 'invalid'", error.getMessage());
+    }
 }

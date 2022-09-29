@@ -66,7 +66,7 @@ public class GroupService {
         Sort sortBy = switch (orderBy) {
             case "longName"  -> Sort.by("longName");
             case "shortName" -> Sort.by("shortName");
-            default -> throw new IllegalArgumentException(String.format("Can not order users by '%s'", orderBy));
+            default -> throw new IllegalArgumentException(String.format("Can not order groups by '%s'", orderBy));
         };
 
         if (!isAscending) {

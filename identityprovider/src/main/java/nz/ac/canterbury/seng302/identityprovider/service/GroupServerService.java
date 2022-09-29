@@ -298,18 +298,19 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         String orderBy = options.getOrderBy();
         boolean isAscending = options.getIsAscendingOrder();
 
-        List<Group> groups = new ArrayList<>();
+        List<Group> groups;
         try {
-            groups = groupService.getPaginatedGroups(limit, offset, orderBy, isAscending);
+            groups = groupService.getPaginatedGroups(offset, limit, orderBy, isAscending);
         } catch (IllegalArgumentException e) {
             Throwable statusError = Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException();
             responseObserver.onError(statusError);
+            return;
         }
 
         List<GroupDetailsResponse> groupDetailsResponses = groups.stream().map(this::buildGroupDetailsResponse).toList();
-        int numUsersInDatabase = (int) groupRepository.count();
+        int numGroupsInDatabase = (int) groupRepository.count();
         PaginationResponseOptions.Builder responseOptions = PaginationResponseOptions.newBuilder();
-        responseOptions.setResultSetSize(numUsersInDatabase).build();
+        responseOptions.setResultSetSize(numGroupsInDatabase).build();
         reply
                 .addAllGroups(groupDetailsResponses)
                 .setPaginationResponseOptions(responseOptions);
