@@ -1,15 +1,13 @@
 package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,7 +81,8 @@ public class ValidationUtils {
      * @param sprintList A list of sprints in the same project to be compared to
      * @return A ValidationError with a boolean error flag and a list of error messages
      */
-    public static ValidationError validateProjectDates(Date start, Date end, Date creation, List<Sprint> sprintList) {
+    public static ValidationError validateProjectDates(Date start, Date end, Date creation,
+                                                       List<Sprint> sprintList, List<Schedulable> schedulableList) {
         // Initial error flag = false (no errors yet)
         ValidationError error = new ValidationError();
 
@@ -98,6 +97,20 @@ public class ValidationUtils {
                 error.addErrorMessage(sprint.getSprintLabel() + ": " +
                         sprint.getStartDateString() + " - " + sprint.getEndDateString() +
                         " is outside the project dates");
+            }
+        }
+
+        // Checking against all schedulable dates (Events, Deadlines, Milestones)
+        for (Schedulable schedulable : schedulableList) {
+            if (datesOutsideProject(schedulable.getStartDate(), schedulable.getEndDate(), start, end)) {
+                if (Objects.equals(schedulable.getType(), "event")) {
+                    error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
+                            "\": " + DateUtils.toDisplayString(schedulable.getStartDate()) + " - " +
+                            DateUtils.toDisplayString(schedulable.getEndDate()) + " is outside the project dates");
+                } else if (Objects.equals(schedulable.getType(), "deadline") || Objects.equals(schedulable.getType(), "milestone")) {
+                    error.addErrorMessage("The " + schedulable.getType() + " \"" + schedulable.getName() +
+                            "\": " + DateUtils.toDisplayString(schedulable.getStartDate()) + " is outside the project dates");
+                }
             }
         }
 

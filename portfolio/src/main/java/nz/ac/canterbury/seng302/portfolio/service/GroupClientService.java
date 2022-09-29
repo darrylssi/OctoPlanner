@@ -100,7 +100,7 @@ public class GroupClientService {
      * @param groupId The id of the group to fetch details of
      * @return A GetGroupDetailsResponse containing the groups short name, long name and a list of members
      */
-    public GetGroupDetailsResponse getGroupDetails(final int groupId) {
+    public GroupDetailsResponse getGroupDetails(final int groupId) {
         logger.info("Sending request to retrieve details from the group with id {}", groupId);
         GetGroupDetailsRequest getGroupDetailsRequest = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(groupId)

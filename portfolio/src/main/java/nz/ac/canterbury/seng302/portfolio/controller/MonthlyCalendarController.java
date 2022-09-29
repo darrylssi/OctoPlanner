@@ -1,26 +1,25 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
-import nz.ac.canterbury.seng302.portfolio.model.Deadline;
-import nz.ac.canterbury.seng302.portfolio.model.Event;
-import nz.ac.canterbury.seng302.portfolio.model.Milestone;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +41,8 @@ public class MonthlyCalendarController extends PageController {
     private EventService eventService;
     @Autowired
     private MilestoneService milestoneService;
+    @Autowired
+    private DetailsController detailsController;
 
     /**
      *
@@ -80,7 +81,7 @@ public class MonthlyCalendarController extends PageController {
             model.addAttribute("sprintColours", getSprintsArrayList.get(4));
         }
 
-        List<Schedulable> schedulableList = getAllSchedulablesInProject(id);
+        List<Schedulable> schedulableList = detailsController.getAllSchedulablesInProject(id);
         List<String> schedulableDetailsList = getStringListFromSchedulables(schedulableList);
         model.addAttribute("schedulableNames", schedulableDetailsList.get(0));
         model.addAttribute("schedulableTypes", schedulableDetailsList.get(1));
@@ -90,23 +91,6 @@ public class MonthlyCalendarController extends PageController {
         model.addAttribute("tab", 2);
 
         return "monthlyCalendar";
-    }
-
-    /**
-     * Returns a list of every schedulable object in the specified project.
-     * @param projectId as an int, e.g. 5
-     * @return list of schedulable objects in that project
-     */
-    private List<Schedulable> getAllSchedulablesInProject(int projectId) {
-        List<Deadline> deadlineList = deadlineService.getDeadlinesInProject(projectId);
-        List<Milestone> milestoneList = milestoneService.getMilestonesInProject(projectId);
-        List<Event> eventList = eventService.getEventByParentProjectId(projectId);
-        List<Schedulable> schedulableList = new ArrayList<>();
-        schedulableList.addAll(deadlineList);
-        schedulableList.addAll(milestoneList);
-        schedulableList.addAll(eventList);
-
-        return schedulableList;
     }
 
     /**

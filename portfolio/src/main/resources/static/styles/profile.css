@@ -1,6 +1,6 @@
 .edit-image {
-    height: 150px;
-    width: 150px;
+    max-height: 150px;
+    max-width: 50%;
 }
 
 .profile-image {
@@ -12,6 +12,7 @@
     border-radius: 150px;
     background-position: center;
     background-size: cover;
+    padding-top: 5px;
 }
 
 .profile-detail {

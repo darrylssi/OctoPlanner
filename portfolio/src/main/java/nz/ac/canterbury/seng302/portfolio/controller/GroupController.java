@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
@@ -28,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
@@ -45,7 +47,6 @@ public class GroupController extends PageController{
     @Autowired
     private GroupClientService groupClientService;
 
-    //TODO update this when the template is actually created or just get rid of the TODO
     public static final String GROUPS_TEMPLATE_NAME = "groups";
 
     /**
@@ -63,11 +64,11 @@ public class GroupController extends PageController{
         model.addAttribute("canEdit", hasEditPermissions);
 
         model.addAttribute("tab", 3);
-        Map<Integer, GetGroupDetailsResponse> groups = new HashMap<>();
+        Map<Integer, GroupDetailsResponse> groups = new HashMap<>();
         groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
         groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
 
-        model.addAttribute("groups", groups);
+        model.addAttribute(GROUPS_TEMPLATE_NAME, groups);
         model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
 
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
@@ -172,7 +173,7 @@ public class GroupController extends PageController{
             whether the user is part of the group, so checking Teacher role happens first
             */
             PrincipalData thisUser = PrincipalData.from(principal);
-            GetGroupDetailsResponse thisGroup = groupClientService.getGroupDetails(groupId);
+            GroupDetailsResponse thisGroup = groupClientService.getGroupDetails(groupId);
 
             // Checks that the user is in the group
             if (thisGroup.getMembersList().stream().noneMatch(o -> thisUser.getID() ==  o.getId())) {
