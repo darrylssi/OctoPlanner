@@ -18,6 +18,7 @@ function toggleById(group_id) {
 
 /**
 * Shows the checkboxes so that a user can select users in the group with the given id
+* Shows buttons so that user can add and remove users from groups
 * @param group_id the id of the group users are being selected from
 * @param button the button that was clicked to start selecting
 */
@@ -26,6 +27,7 @@ function startSelecting(group_id, button) {
     button.onclick = () => stopSelecting(group_id, button);
     button.innerHTML = 'Stop Selecting Users';
     checkboxes = document.getElementsByClassName('checkbox');
+    // show checkboxes in group being edited. hide other checkboxes
     for (let checkbox of checkboxes) {
         if (checkbox.classList.contains("user-" + group_id)){
             checkbox.removeAttribute("hidden");
@@ -34,6 +36,7 @@ function startSelecting(group_id, button) {
             checkbox.firstChild.firstChild.nextElementSibling.checked = false;
         }
     }
+    // show an 'add selected users' button for all groups other than the one being selected
     addUsersButtons = document.getElementsByClassName('btn-add-users');
     for (let addUsersButton of addUsersButtons) {
         if(addUsersButton.parentNode.id === 'add-users-' + group_id) {
@@ -42,6 +45,7 @@ function startSelecting(group_id, button) {
             addUsersButton.parentNode.removeAttribute("hidden");
         }
     }
+    // show a 'remove selected users' button on the group being selected. hide other remove users buttons
     removeUsersButtons = document.getElementsByClassName('btn-remove-users');
     for (let removeUsersButton of removeUsersButtons) {
         if(removeUsersButton.parentNode.id === 'remove-users-' + group_id) {
@@ -53,7 +57,7 @@ function startSelecting(group_id, button) {
 }
 
 /**
-* Deselects all users and hides checkboxes
+* Deselects all users and hides checkboxes. Hides all 'add selected users' and 'remove selected users' buttons
 * @param group_id the id of the group being deselected
 * @param button the button that was clicked
 */
