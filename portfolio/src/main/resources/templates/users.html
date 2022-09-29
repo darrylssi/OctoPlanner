@@ -128,51 +128,70 @@
     </table>
     <br>
     <div class="pagination" th:if="${totalPages > 1}">
-<!--        if not on first page, add link to first page -->
+<!--        add link to PREVIOUS page -->
         <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{''(page=1)}"> First </a>
+            <a th:href="@{''(page=${page - 1})}"> Previous </a>
         </span>
-<!--        add link to PREV page -->
-        <span class="pages otherPages" th:if="${page > 1}">
-            <a th:href="@{''(page=${page - 1})}"> Prev </a>
+        <span class="pages otherPages disabled" th:if="${page <= 1}">
+             <a href="#"> Previous </a>
         </span>
-<!--        add link to all pages -->
-<!--        check the total pages is less than or equal to two, then show pages based on it-->
-        <th:block th:if="${totalPages <= 2}">
+
+<!--        show all page numbers if there are 3 or less-->
+        <th:block th:if="${totalPages <= 3}">
             <span class="pages" th:each="i: ${#numbers.sequence(1, totalPages)}">
                 <a th:href="@{''(page=${i})}" th:if="${i != page}"
                    class="otherPages">[[${i}]]</a>
                 <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
             </span>
         </th:block>
-<!--        check the total pages is more than two, then show pages based on it-->
-        <th:block th:if="${totalPages > 2}">
-            <th:block th:if="${page <= 2 || page >= totalPages - 1}">
-                <span class="pages" th:each="i: ${#numbers.sequence(1, 2)}">
+
+<!--        If there are > 3 pages, use one of the two blocks depending on the user's current page-->
+        <th:block th:if="${totalPages > 3}">
+<!--        Block 1 - shown if the user is in the first 3 or last 2 pages -->
+            <th:block th:if="${page <= 3 || page >= totalPages - 1}">
+<!--                show the first 3 pages-->
+                <span class="pages" th:each="i: ${#numbers.sequence(1, 3)}">
                     <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
 
-                <a th:href="@{''(page=3)}" class="otherPages" th:if="${totalPages != 4}">...</a>
+<!--                if there are more than 5 pages, put a ... in to show this-->
+                <a th:href="@{''(page=4)}" class="otherPages" th:if="${totalPages > 5}">...</a>
 
-                <span class="pages" th:each="i: ${#numbers.sequence(totalPages - 1, totalPages)}">
+<!--                show the last two pages, if they are not already shown-->
+                <span class="pages" th:each="i: ${#numbers.sequence(totalPages - 1, totalPages)}" th:if="${i > 3}">
                     <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
             </th:block>
 
-            <th:block th:if="${page > 2 && page < totalPages - 1}">
+<!--        Block 2 - shown if the user has 3+ pages before and 2+ pages after their current page -->
+            <th:block th:if="${page > 3 && page < totalPages - 1}">
+
+<!--            if not on first page, add link to first page -->
+                <span class="pages otherPages" th:if="${page > 1}">
+                    <a th:href="@{''(page=1)}"> 1 </a>
+                </span>
+
+<!--            show a ... -->
                 <a th:href="@{''(page=${page - 2})}" class="otherPages">...</a>
 
+<!--            show the user's current page and one either side   -->
                 <span class="pages" th:each="i: ${#numbers.sequence(page - 1, page + 1)}">
                     <a th:href="@{''(page=${i})}" th:if="${i != page}"
                        class="otherPages">[[${i}]]</a>
                     <span th:unless="${i != page}" class="currentPage">[[${i}]]</span>
                 </span>
 
-                <a th:href="@{''(page=${page + 2})}" class="otherPages">...</a>
+<!--            another ..., shown only if there are 3 or more pages to the right    -->
+                <a th:href="@{''(page=${page + 2})}" th:if="${(totalPages - page) >= 3}" class="otherPages">...</a>
+
+<!--            if not on last page, add link to LAST page-->
+                <span class="pages otherPages" th:if="${page < totalPages}">
+                    <a th:href="@{''(page=${totalPages})}"> [[${totalPages}]] </a>
+                </span>
             </th:block>
         </th:block>
 
@@ -180,9 +199,8 @@
         <span class="pages otherPages" th:if="${page < totalPages}">
             <a th:href="@{''(page=${page + 1})}"> Next </a>
         </span>
-<!--        add link to LAST page-->
-        <span class="pages otherPages" th:if="${page < totalPages}">
-            <a th:href="@{''(page=${totalPages})}"> Last </a>
+        <span class="pages otherPages disabled" th:if="${page >= totalPages}">
+            <a href="#"> Next </a>
         </span>
     </div>
 
