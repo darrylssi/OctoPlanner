@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -50,7 +51,7 @@ public class GroupService {
         if (group != null) {
             return group;
         } else {
-            throw new NoSuchElementException("There is no group with id " + id);
+            throw new NoSuchElementException(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + id);
         }
     }
 
