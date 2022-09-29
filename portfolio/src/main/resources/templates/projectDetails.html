@@ -94,7 +94,7 @@
     Add Schedulable Forms
     */-->
 <!--/* Clipping off the offset (The +1200 at the end) because HTML forms don't accept them */-->
-<div th:if="${canEdit}"
+<div th:if="${canEdit}" class="add-forms"
      th:with="projectStart=${#dates.format(project.getProjectStartDate, dateISOFormat)},
          projectEnd=${#dates.format(project.getProjectEndDate, dateISOFormat)}">
     <div th:replace="detailFragments :: sprintAddForm(

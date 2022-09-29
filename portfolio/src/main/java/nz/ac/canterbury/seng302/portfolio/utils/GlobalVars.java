@@ -40,4 +40,8 @@ public class GlobalVars {
     public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, punctuations, and spaces.";
     public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, punctuations except commas, and spaces.";
 
+
+
+    public static final int TEACHER_GROUP_ID = 0;
+    public static final int MEMBERS_WITHOUT_GROUPS_ID = 1;
 }
