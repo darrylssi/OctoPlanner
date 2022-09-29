@@ -54,6 +54,8 @@ function startSelecting(group_id, button) {
 
 /**
 * Deselects all users and hides checkboxes
+* @param group_id the id of the group being deselected
+* @param button the button that was clicked
 */
 function stopSelecting(group_id, button) {
     console.log('stop selecting ' + group_id);
@@ -80,8 +82,8 @@ function stopSelecting(group_id, button) {
 /**
  * Submits the given form's request in Javascript, allowing for in-place
  * updating of the page.
- * @param {HTMLFormElement} elem
- * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ * @param group_id the id of the group being modified
+ * @param action the action being done. 'remove-members' or 'add-members'
  */
 function sendFormViaAjax(group_id, action) {
     let url = BASE_URL + 'groups/' + group_id + '/' + action;
