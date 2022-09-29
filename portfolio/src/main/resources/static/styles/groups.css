@@ -66,19 +66,19 @@ tr {
 }
 
 .btn-add-users {
-    background-color: var(--select);
+    background-color: var(--select-light);
     color: var(--primary-dark);
     margin: 5px 0px;
 }
 
 .btn-add-users:disabled {
-    background-color: var(--select);
+    background-color: var(--select-light);
 }
 .btn-add-users:focus {
-    background-color: var(--select);
+    background-color: var(--select-light);
 }
 .btn-add-users:hover {
-    background-color: var(--select-dark);
+    background-color: var(--select-mid);
     color: var(--primary-dark);
 }
 
@@ -89,17 +89,20 @@ tr {
 }
 
 .btn-select {
-    background-color: var(--select);
-    color: var(--primary-dark);
+    background-color: var(--select-light);
+    color: var(--neutral-darker);
     margin: 5px 0px;
 }
 .btn-select:disabled {
-    background-color: var(--select);
+    background-color: var(--select-light);
 }
 .btn-select:focus {
-    background-color: var(--select);
+    background-color: var(--select-dark);
 }
 .btn-select:hover {
+    background-color: var(--select-mid);
+}
+
+.selecting {
     background-color: var(--select-dark);
-    color: var(--primary-dark);
 }

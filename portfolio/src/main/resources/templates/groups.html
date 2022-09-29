@@ -61,13 +61,13 @@
         </div>
         <div class="col"></div>
         <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|remove-users-*{key}|">
-            <button type="submit" class="btn btn-remove-users btn-sm">Remove Selected Users</button>
+            <button type="button" class="btn btn-remove-users btn-sm">Remove Selected Users</button>
         </div>
         <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|add-users-*{key}|">
-            <button type="submit" class="btn btn-add-users btn-sm">Add Selected Users</button>
+            <button type="button" class="btn btn-add-users btn-sm">Add Selected Users</button>
         </div>
         <div class="col-auto" >
-            <button type="submit" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key})|">Select Users</button>
+            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key}, this)|">Select Users</button>
         </div>
         <div class="col-auto" th:if="${group.key != membersWithoutGroupsId && canEdit}">
             <button class="delete-button" >
@@ -97,8 +97,8 @@
                 <form>
                 <table class="table container-auto">
                     <tr th:each="user:*{value.getMembersList()}" class="row">
-                        <td th:class="|col-auto checkbox user-*{key}|" hidden th:if="${canEdit}" ><div th:class="|form-check |" name="user_id" value="${user.getId()}" style="margin-left:10px">
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <td th:class="|col-auto checkbox user-*{key}|" hidden th:if="${canEdit}" ><div th:class="|form-check |" style="margin-left:10px">
+                            <input class="form-check-input" type="checkbox"  name="user_id" value="${user.getId()}" id="flexCheckDefault">
                         </div></td>
                         <td class="col-auto"><img class="profile-icon" th:src="${user.getProfileImagePath()}" alt="User profile photo"></td>
                         <td class="col" th:text="|${user.getFirstName()} ${user.getMiddleName()} ${user.getLastName()}|"></td>

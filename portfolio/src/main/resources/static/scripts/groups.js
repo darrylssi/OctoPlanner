@@ -19,15 +19,19 @@ function toggleById(group_id) {
 /**
 * Shows the checkboxes so that a user can select users in the group with the given id
 * @param group_id the id of the group users are being selected from
+* @param button the button that was clicked to start selecting
 */
-function startSelecting(group_id) {
+function startSelecting(group_id, button) {
+    button.classList.add('selecting');
+    button.onclick = () => stopSelecting(group_id, button);
+    button.innerHTML = 'Stop Selecting Users';
     checkboxes = document.getElementsByClassName('checkbox');
     for (let checkbox of checkboxes) {
         if (checkbox.classList.contains("user-" + group_id)){
             checkbox.removeAttribute("hidden");
-            checkbox.checked = false;
         } else {
-                 checkbox.hidden = true;
+            checkbox.hidden = true;
+            checkbox.firstChild.firstChild.nextElementSibling.checked = false;
         }
     }
     addUsersButtons = document.getElementsByClassName('btn-add-users');
@@ -51,6 +55,23 @@ function startSelecting(group_id) {
 /**
 * Deselects all users and hides checkboxes
 */
-function stopSelecting() {
-
+function stopSelecting(group_id, button) {
+    console.log('stop selecting ' + group_id);
+    button.classList.remove('selecting');
+    button.focus = false;
+    button.innerHTML = 'Select Users';
+    button.onclick = () => startSelecting(group_id, button);
+    removeButtons = document.getElementsByClassName('btn-remove-users');
+    addButtons = document.getElementsByClassName('btn-add-users');
+    for(let removeButton of removeButtons){
+        removeButton.parentNode.hidden = true
+    }
+    for(let addButton of addButtons){
+        addButton.parentNode.hidden = true
+    }
+    checkboxes = document.getElementsByClassName('checkbox');
+    for (let checkbox of checkboxes) {
+        checkbox.hidden = true;
+        checkbox.firstChild.firstChild.nextElementSibling.checked = false;
+    }
 }
