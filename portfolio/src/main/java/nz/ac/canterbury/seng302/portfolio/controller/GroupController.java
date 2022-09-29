@@ -12,7 +12,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Controller to handle requests on the groups page.
@@ -94,7 +92,7 @@ public class GroupController extends PageController{
 
         if (addGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (addGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)){
+        } else if (addGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)){
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -235,14 +233,12 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        GetGroupDetailsResponse groupDetailsResponse = groupClientService.getGroupDetails(groupId);
-
-        if (groupDetailsResponse.getShortName() != "Teaching staff" && groupDetailsResponse.getShortName() != "Members without groups") {
+        if (groupId != TEACHER_GROUP_ID && groupId != MEMBERS_WITHOUT_GROUPS_ID) {
             DeleteGroupResponse deleteGroupResponse = groupClientService.deleteGroup(groupId);
 
             if (deleteGroupResponse.getIsSuccess()) {
                 return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.OK);
-            } else if (deleteGroupResponse.getMessage().equals("There is no group with id " + groupId)) {
+            } else if (deleteGroupResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
                 return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.NOT_FOUND);
             } else {
                 return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -275,7 +271,7 @@ public class GroupController extends PageController{
 
         if (removeGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (removeGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)) {
+        } else if (removeGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
