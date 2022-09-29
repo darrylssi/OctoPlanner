@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
@@ -270,6 +267,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         for (User user : group.getMembers()) {
             userResponses.add(userAccountServerService.buildUserResponse(user));
         }
+        userResponses.sort(Comparator.comparing((UserResponse user) -> user.getFirstName() + user.getMiddleName() + user.getLastName()));
 
         reply
                 .setGroupId(group.getId())

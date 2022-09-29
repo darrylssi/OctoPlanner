@@ -75,3 +75,30 @@ function stopSelecting(group_id, button) {
         checkbox.firstChild.firstChild.nextElementSibling.checked = false;
     }
 }
+
+
+/**
+ * Submits the given form's request in Javascript, allowing for in-place
+ * updating of the page.
+ * @param {HTMLFormElement} elem
+ * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ */
+function sendFormViaAjax(group_id, action) {
+    let url = BASE_URL + 'groups/' + group_id + '/' + action;
+    const formData = new FormData(document.getElementById('form'));
+    const formRequest = new XMLHttpRequest();
+    if(action === 'remove-members'){
+        formRequest.open("DELETE", url);
+    } else {
+        formRequest.open("POST", url);
+    }
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            window.location.reload();
+        } else {
+            //handle errors
+        }
+    }
+    formRequest.send(formData);
+}
