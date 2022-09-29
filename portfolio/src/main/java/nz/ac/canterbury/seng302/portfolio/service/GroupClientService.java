@@ -1,7 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -106,6 +109,43 @@ public class GroupClientService {
                 .setGroupId(groupId)
                 .build();
         return groupStub.getGroupDetails(getGroupDetailsRequest);
+    }
+
+    /**
+     * Sends a request to the identity provider to get a paginated list of all groups
+     * @param offset What "page" of the groups you want. Affected by the ordering and page size
+     * @param limit How many items you want from
+     * @param orderBy How the list is ordered.
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"shortNname"</code> - Ordered by groups short name alphabetically</li>
+     *                    <li><code>"longName"</code> - Ordered by groups long name alphabetically</li>
+     *                  </ul>
+     * @param isAscending Is the list in ascending or descending order
+     * @return A PaginatedGroupsResponse containing a list of groups
+     * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
+     */
+    public PaginatedGroupsResponse getPaginatedGroups(final int offset, final int limit, final String orderBy, final boolean isAscending) throws IllegalArgumentException {
+        PaginationRequestOptions requestOptions = PaginationRequestOptions.newBuilder()
+                .setOffset(offset)
+                .setLimit(limit)
+                .setOrderBy(orderBy)
+                .setIsAscendingOrder(isAscending)
+                .build();
+
+        GetPaginatedGroupsRequest paginatedGroupsRequest = GetPaginatedGroupsRequest.newBuilder()
+                .setPaginationRequestOptions(requestOptions)
+                .build();
+        try {
+            return groupStub.getPaginatedGroups(paginatedGroupsRequest);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.INVALID_ARGUMENT.getCode()) {
+                // Didn't order by a valid column
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
     }
 
 }
