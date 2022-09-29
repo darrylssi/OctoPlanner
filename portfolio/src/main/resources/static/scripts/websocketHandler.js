@@ -103,5 +103,3 @@ function sendStopEditingMessage(schedulableId, type) {
         JSON.stringify({'from':user, 'content':content}));
     }
 }
-
-

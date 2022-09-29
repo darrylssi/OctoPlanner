@@ -380,8 +380,8 @@ function handleSprintUpdateMessage(sprintMessage) {
         console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -393,8 +393,8 @@ function handleProjectUpdateMessage(projectMessage) {
         console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -619,18 +619,19 @@ function resetAddForm(type) {
 
 }
 
-/** Display a bootstrap message if there is a corresponding box on the page which doesn't have that message*/
-function alert(message, type) {
-    const wrapper = document.createElement('div')
+/** Warn the user of changes to sprint/project dates */
+function sprintProjectAlert() {
+    const message = 'Sprint or Project dates have been changed. Please refresh to update the page.';
+    const wrapper = document.createElement('div');
     wrapper.innerHTML = [
-        `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
+        '<div class="alert alert-warning alert-dismissible fade show" role="alert">',
         `   <div>${message}</div>`,
         '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
         '</div>'
-    ].join('')
+    ].join('');
 
-    let box = document.getElementById(`${type}-box`);
+    let box = document.getElementById(`warning-box`);
     if(box && box.innerHTML.indexOf(message) == -1) {
-        box.append(wrapper)
+        box.append(wrapper);
     }
 }
