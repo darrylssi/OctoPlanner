@@ -29,10 +29,13 @@
                 <a class="nav-link" th:classappend="${tab} == 0 ? active : ''" data-cy="navProjectDetails" th:href="@{|${@environment.getProperty('base-url')}project/0/|}">Project Details</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" th:classappend="${tab} == 2 ? active : ''" data-cy="navMonthlyCalendar" th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" th:classappend="${tab} == 1 ? active : ''" data-cy="navUsers" th:href="@{|${@environment.getProperty('base-url')}users|}">Users</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${tab} == 2 ? active : ''" data-cy="navMonthlyCalendar" th:href="@{|${@environment.getProperty('base-url')}monthlyCalendar/0|}">Calendar</a>
+                <a class="nav-link" th:classappend="${tab} == 3 ? active : ''" data-cy="navGroups" th:href="@{|${@environment.getProperty('base-url')}groups|}">Groups</a>
             </li>
         </ul>
     </div>

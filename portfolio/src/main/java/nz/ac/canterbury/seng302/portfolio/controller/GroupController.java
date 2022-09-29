@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
@@ -51,9 +54,17 @@ public class GroupController extends PageController{
             @AuthenticationPrincipal AuthState principal,
             Model model
     ) {
-        /*
-        Insert code that does things with the page here
-         */
+        boolean hasEditPermissions = PrincipalData.from(principal).hasRoleOfAtLeast(UserRole.TEACHER);
+        model.addAttribute("canEdit", hasEditPermissions);
+
+        model.addAttribute("tab", 3);
+        Map<Integer, GetGroupDetailsResponse> groups = new HashMap<>();
+        groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
+        groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
+
+        model.addAttribute("groups", groups);
+        model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
+
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }
 
