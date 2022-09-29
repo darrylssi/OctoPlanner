@@ -354,7 +354,7 @@ function createTooltipString(icon, sNames, sStarts, sEnds, i) {
 
 /**
  * Update the calendar using the information sent through the websocket
- * @param schedulableMessage Message sent through the websocket
+ * @param message Message sent through the websocket
  */
 function updateCalendar(message) {
     const url = BASE_URL + "project/" + projectId + "/schedulables/" + message.type;

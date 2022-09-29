@@ -67,7 +67,7 @@ public class MonthlyCalendarController extends PageController {
         PrincipalData thisUser = PrincipalData.from(principal);
         boolean hasEditPermissions = thisUser.hasRoleOfAtLeast(UserRole.TEACHER);
         model.addAttribute("sprintsEditable", hasEditPermissions);
-        model.addAttribute("user", thisUser.getFullName());
+        model.addAttribute("userName", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
 
         model.addAttribute("project", project);
