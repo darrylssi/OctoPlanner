@@ -73,7 +73,7 @@ describe('I can register a student', () => {
 
 describe('I can register a teacher', () => {
   // If this test is failing, make sure that the user doesn't already exist in the database
-  // Note that this doesn'tt make the user a teacher, you'll have to go and do that manually
+  // Note that this doesn't make the user a teacher, you'll have to go and do that manually
   it('adds teacher to database and redirects to profile page on successful register', () => {
     cy.fixture('users/teacher.json').then((user) => {
       cy.visit('/register')

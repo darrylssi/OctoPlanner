@@ -15,7 +15,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" id="sprintName" th:value="${name != null} ? ${name} : ${sprint.getSprintName}" th:name="name" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
+                                <input type="text" class="form-control" data-cy="editSprintName" id="sprintName" th:value="${name != null} ? ${name} : ${sprint.getSprintName}" th:name="name" th:minlength="${minNameLen}" th:maxlength="${maxNameLen}" required>
                                 <label for="sprintName" class="form-label">Name</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -23,7 +23,7 @@
                         </div>
                         <div class="col-10">
                             <div class="form-floating input-group mb-3 limited-text-input">
-                                <input type="text" class="form-control" id="sprintDescription" th:value="${description != null} ? ${description} : ${sprint.getSprintDescription}" th:name="description" th:maxlength="${maxDescLen}">
+                                <input type="text" class="form-control" data-cy="editSprintDescription" id="sprintDescription" th:value="${description != null} ? ${description} : ${sprint.getSprintDescription}" th:name="description" th:maxlength="${maxDescLen}">
                                 <label for="sprintDescription" class="form-label">Description</label>
                                 <span class="input-group-text remaining-chars-field">...</span>
                             </div>
@@ -33,14 +33,14 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-floating mb-3">
-                                <input type="date" class="form-control" id="sprintStartDate" th:value="${startDate != null} ? ${startDate} : ${sprintStartDate}" th:name="startDate" required th:min="${projectStart}" th:max="${projectEnd}">
+                                <input type="date" class="form-control" data-cy="editSprintStartDate" id="sprintStartDate" th:value="${startDate != null} ? ${startDate} : ${sprintStartDate}" th:name="startDate" required th:min="${projectStart}" th:max="${projectEnd}">
                                 <label for="sprintStartDate" class="form-label">Start Date</label>
                             </div>
                             <small id="startDateFeedback" class="text-danger"></small>
                         </div>
                         <div class="col">
                             <div class="form-floating mb-3 has-validation">
-                                <input type="date" class="form-control" id="sprintEndDate" th:value="${endDate != null} ? ${endDate} : ${sprintEndDate}" th:name="endDate" required th:min="${projectStart}" th:max="${projectEnd}">
+                                <input type="date" class="form-control" data-cy="editSprintEndDate" id="sprintEndDate" th:value="${endDate != null} ? ${endDate} : ${sprintEndDate}" th:name="endDate" required th:min="${projectStart}" th:max="${projectEnd}">
                                 <label for="sprintEndDate" class="form-label">End Date</label>
                             </div>
                             <small id="endDateFeedback" class="text-danger"></small>
