@@ -8,6 +8,8 @@ import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.identityprovider.DeleteGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,9 @@ import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -52,6 +57,8 @@ class GroupControllerTest {
     static final int GROUP_ID = 2;
     private GroupForm groupForm;                                // Initialises the group form object
     private Group group;                                        // Initialises the group object
+    private GetGroupDetailsResponse groupDetails;
+    private DeleteGroupResponse deleteGroupResponse;
 
     @BeforeEach
     void setup() {
@@ -67,6 +74,15 @@ class GroupControllerTest {
         group = new Group();
         group.setId(GROUP_ID);
         group.setParentProject(parentProject);
+        group.setGroupShortName("Test Group");
+        group.setGroupLongName("Test Project Group 2022");
+        groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
+
+        // Gets the group details at group id 1
+        groupDetails = groupClientService.getGroupDetails(1);
+
+        // Gets the group delete response at group id 1
+        deleteGroupResponse = groupClientService.deleteGroup(1);
 
         // Define the user for the tests; this is done to provide access to the edit page
         UserResponse testUser = UserResponse.newBuilder()
@@ -89,6 +105,33 @@ class GroupControllerTest {
         when(projectService.getProjectById(0)).
                 thenReturn(group.getParentProject());
     }
+
+//    @Test
+//    @WithMockPrincipal(TEACHER)
+//    void deleteGroupAsTeacher_get200Response() throws Exception {
+//        Mockito.when(groupClientService.deleteGroup(anyInt())).
+//                thenReturn(deleteGroupResponse);
+//        mockMvc.perform(delete("/delete-group/1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(String.valueOf(deleteGroupResponse)));
+//    }
+
+//    @Test
+//    @WithMockPrincipal(TEACHER)
+//    void deleteGroupAsTeacher1_get200Response() throws Exception {
+////        System.out.println(groupDetails.getShortName());
+////        System.out.println(groupDetails.getLongName());
+//
+//        Mockito.when(projectService.getProjectById(anyInt())).
+//                thenReturn(group.getParentProject());
+//        Mockito.when(groupClientService.getGroupDetails(anyInt())).
+//                thenReturn(groupDetails);
+//        Mockito.when(groupClientService.deleteGroup(anyInt())).
+//                thenReturn(deleteGroupResponse);
+//        mockMvc.perform(delete("/delete-group/1"))
+//                .andExpect(status().isOk())
+//                .andExpect(status().reason(containsString("Group deleted.")));
+//    }
 
     @Test
     @WithMockPrincipal(TEACHER)

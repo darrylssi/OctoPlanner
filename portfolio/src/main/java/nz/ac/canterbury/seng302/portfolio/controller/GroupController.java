@@ -10,6 +10,10 @@ import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
+import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
+import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -242,4 +246,37 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    /**
+     * Deletes a group based on the given id
+     * @param principal used to check if the user is authorised to delete group
+     * @param groupId the id of the group to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/delete-group/{groupId}")
+    @ResponseBody
+    public ResponseEntity<String> deleteGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name = "groupId") int groupId
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        GetGroupDetailsResponse groupDetails = groupClientService.getGroupDetails(groupId);
+        System.out.println("Group details-> " + groupDetails);
+        try {
+            if (groupDetails.getShortName() != "Teaching staff" && groupDetails.getShortName() != "Members without groups") {
+                groupClientService.deleteGroup(groupId);
+                return new ResponseEntity<>("Group deleted.", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
