@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
-import nz.ac.canterbury.seng302.portfolio.model.ErrorType;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -43,9 +42,6 @@ public class SprintController extends PageController {
     private SprintService sprintService;                // Initializes the SprintService object
     @Autowired
     private SprintLabelService labelUtils;
-
-    private static final String EDIT_SPRINT_TEMPLATE = "editSprint";
-    private static final String REDIRECT_TO_PROJECT = "redirect:../project/";
 
     // Provide a list of colours that are noticeably different for the system to cycle through
     private static final List<String> SPRINT_COLOURS = Arrays.asList(
@@ -137,7 +133,6 @@ public class SprintController extends PageController {
             @Valid @ModelAttribute SprintForm sprintForm,
             BindingResult bindingResult
     ) {
-        System.out.println("here");
         try {
             requiresRoleOfAtLeast(UserRole.TEACHER, principal);
         } catch (ResponseStatusException ex) {
