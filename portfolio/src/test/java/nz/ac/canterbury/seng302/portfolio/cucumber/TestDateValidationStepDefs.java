@@ -8,6 +8,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
@@ -26,10 +27,12 @@ public class TestDateValidationStepDefs extends RunCucumberTest {
     private Project project;
     private Sprint sprint;
     private List<Sprint> sprintList;
+    private List<Schedulable> schedulableList;
 
     @Before
     public void setUp(){
         sprintList = new ArrayList<>();
+        schedulableList = new ArrayList<>();
         project = new Project("testProject", "test description",
                 "2022-01-01", "2022-10-01" );
         sprint = new Sprint(1, "testSprint", "test description",
@@ -68,7 +71,7 @@ public class TestDateValidationStepDefs extends RunCucumberTest {
     @Then("Project {string} message should be displayed")
     public void project_message_should_be_displayed(String expected) {
         ValidationError error = ValidationUtils.validateProjectDates(project.getProjectStartDate(),
-                project.getProjectEndDate(), project.getProjectCreationDate(), sprintList);
+                project.getProjectEndDate(), project.getProjectCreationDate(), sprintList, schedulableList);
         String actual = error.getFirstError();
         assertEquals(expected, actual);
     }

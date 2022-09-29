@@ -1,0 +1,49 @@
+@import "themeColors.css";
+
+.group-block {
+    padding: 5px;
+    background-color: white;
+    border-radius: 8px;
+    flex-grow: 1;
+}
+
+.show-users {
+    color: var(--primary-dark);
+    font-weight: bold;
+    background-color: white;
+    border: none;
+}
+
+.content > * {
+    margin: 10px;
+}
+
+td {
+    display: flex;
+    align-items: center;
+}
+
+tr {
+    margin: 0px 10px;
+}
+
+.form-check-input {
+    height: 20px;
+    width: 20px;
+}
+
+.remove-button {
+    height: 30px;
+    width: 30px;
+    border-radius: 30px;
+    border: none;
+    background-color: #e61610;
+    color: white;
+    margin: 10px;
+}
+.remove-button > * {
+    margin: auto;
+}
+.remove-button:hover {
+    background-color: var(--primary);
+}
