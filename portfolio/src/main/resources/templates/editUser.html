@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit Profile</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -24,134 +25,167 @@
         <th th:text="${errMsg}"></th>
         <br/>
     <div class="content" th:if="${userExists}" th:object="${profileInfo}">
-        <div th:text="${dateCreated}"></div>
-        <div class="centre-box">
-            <img class="edit-image photo" th:src="${G_ProfilePic}" alt="User profile photo"><br/>
+        <div class="row">
+            <div th:text="${dateCreated}"></div>
         </div>
-        <form th:action="@{./edit}"
-            method="post">
-            <div class="user-info">
-                <div class="input-box">
-                    <label> Username </label>
-                    <input type="text" th:field="*{username}" th:value="${profileInfo.getUsername}" th:disabled="disabled"/><br>
-                </div>
-                <div class="input-box">
-                    <p th:text="${editMessage}" id="error"/>
-                    <p th:text="${editErrorMessage}" id="error"/>
-                </div>
-                <div class="input-box">
-                    <label class="required"> First Name </label>
-                    <input type="text" th:field="*{firstName}" th:value="${profileInfo.getFirstName}" th:required="required" maxlength="20"/><br/>
-                    <span class="error" th:text="${error_FirstName}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Middle Name </label>
-                    <input type="text" placeholder="Enter your middle name" th:field="*{middleName}" th:value="${profileInfo.getMiddleName}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_MiddleName}"></span>
-                </div>
-                <div class="input-box">
-                    <label class="required"> Last Name </label>
-                    <input type="text" th:field="*{lastName}" th:value="${profileInfo.getLastName}" th:required="required" maxlength="20"/><br/>
-                    <span class="error" th:text="${error_LastName}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Nickname </label>
-                    <input type="text" placeholder="Enter your nickname" th:field="*{nickname}" th:value="${profileInfo.getNickname}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_Nickname}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Personal Pronouns </label>
-                    <input type="text" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" th:value="${profileInfo.getPersonalPronouns}" maxlength="20" /><br/>
-                    <span class="error" th:text="${error_PersonalPronouns}"></span>
-                </div>
-                <div class="input-box">
-                    <label class="required"> Email </label>
-                    <input th:type="email" th:field="*{email}" th:value="${profileInfo.getEmail}" th:required="required" /><br/>
-                    <span class="error" th:text="${error_Email}"></span>
-                </div>
-                <div class="input-box">
-                    <label> Bio </label>
-                    <textarea class="textarea" placeholder="Enter your bio" th:field="*{bio}" th:value="${profileInfo.getBio}" maxlength="200"/><br/>
-                    <span class="error" th:text="${error_Bio}"></span>
-                </div>
-                <br/>
-            </div>
-            <br/>
+        <div class="row">
             <div class="centre-box">
-                    <a th:href="|../${id}|" class="btn btn-neutral btn-lg">Cancel</a>
-                <button class="btn btn-primary btn-lg" type="submit">Change Details</button>
+                <img class="edit-image photo" th:src="${G_ProfilePic}" alt="User profile photo"><br/>
             </div>
-        </form><br/>
-        <hr/>
-        <form th:action="|./edit|"
-            method="post" th:object="${user}">
-            <div class="user-info">
-            <div class="input-box">
-                <label class="required"> Current Password </label>
-                <input type="password" placeholder="Enter your password" th:name="oldPassword" th:required="required" /><br>
-                <span class="error" th:text="${error_CurrentPassword}"></span>
-            </div>
-            <div class="input-box"><!--Included to send to newline, space used to display messages-->
-                <p th:text="${pwMessage}" id="error"/>
-                <p th:text="${pwErrorMessage}" id="error"/>
-            </div>
-            <div class="input-box">
-                <label class="required"> New Password </label>
-                <input type="password" placeholder="Enter your new password" th:field="*{password}" th:required="required" /><br>
-                <span th:class="error" th:text="${error_NewPassword}"></span>
-            </div>
-            <div class="input-box">
-                <label class="required"> Confirm New Password </label>
-                <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
-                       placeholder="Password" th:field="*{confirmPassword}">
-                <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
-                       placeholder="Password" th:field="*{confirmPassword}">
-                <br/>
-                <span th:class="error" th:text="${error_PasswordsEqual}"></span>
-            </div>
-            <br/>
-            </div>
-            <div class="centre-box">
-                <button class="btn btn-primary btn-lg" type="submit">Change Password</button>
-            </div>
-        </form>
-        <br/>
-        <hr/>
-        <br/>
-            <form th:action="|./edit|" method="post" id="photoForm">
-            <div class="user-info">
-                <div class="input-box">
-                    <label> Profile Photo </label>
-                    <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
-                    <input id="imageString" type="hidden" th:name="imageString">
-                    <span th:class="error" th:text="${error_InvalidPhoto}"></span>
-                    <span th:class="error" id="invalidPhotoJS"></span>
+        </div><br/>
+        <div class="row">
+            <form th:action="@{./edit}" method="post" class="user-info">
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label> Username </label>
+                        <input type="text" class="form-control username" th:field="*{username}" th:value="${profileInfo.getUsername}" th:disabled="disabled" />
+                    </div>
+                    <div class="col">
+                        <div class="input-box">
+                            <p th:text="${editMessage}" id="error"/>
+                            <p th:text="${editErrorMessage}" id="error"/>
+                        </div>
+                    </div>
                 </div>
-
-                <div id="croppieWindow"></div>
-            </div>
-            <div class="centre-box">
-                <div class="loader" id="croppieLoader"></div>
-                <img src="" id="image-preview"/>
-                <button class="btn btn-primary btn-lg" type="submit" id="photo-upload-submit-button">Save Photo</button>
-            </div>
-        </form>
-        <br/>
-        <div th:if="${userHasProfilePhoto}">
-            <hr/>
-            <br/>
-            <form th:action="|./edit|" method="post">
-                <div th:if="${error_DeletePhoto}" class="centre-box">
-                    <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label class="required"> First Name </label>
+                        <input type="text" class="form-control" th:field="*{firstName}" th:value="${profileInfo.getFirstName}" th:required="required" maxlength="20"/><br/>
+                        <span class="error" th:text="${error_FirstName}"></span>
+                    </div>
+                    <div class="col">
+                        <label> Middle Name </label>
+                        <input type="text" class="form-control" placeholder="Enter your middle name" th:field="*{middleName}" th:value="${profileInfo.getMiddleName}" maxlength="20" /><br/>
+                        <span class="error" th:text="${error_MiddleName}"></span>
+                    </div>
                 </div>
-                <div class="centre-box">
-                    <button class="btn btn-primary btn-lg" type="submit">Delete Profile Photo</button>
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label class="required"> Last Name </label>
+                        <input type="text" class="form-control" th:field="*{lastName}" th:value="${profileInfo.getLastName}" th:required="required" maxlength="20"/><br/>
+                        <span class="error" th:text="${error_LastName}"></span>
+                    </div>
+                    <div class="col">
+                        <label> Nickname </label>
+                        <input type="text" class="form-control" placeholder="Enter your nickname" th:field="*{nickname}" th:value="${profileInfo.getNickname}" maxlength="20" /><br/>
+                        <span class="error" th:text="${error_Nickname}"></span>
+                    </div>
+                </div>
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label> Personal Pronouns </label>
+                        <input type="text" class="form-control" placeholder="Enter your personal pronouns" th:field="*{personalPronouns}" th:value="${profileInfo.getPersonalPronouns}" maxlength="20" /><br/>
+                        <span class="error" th:text="${error_PersonalPronouns}"></span>
+                    </div>
+                    <div class="col">
+                        <label class="required"> Email </label>
+                        <input th:type="email" class="form-control" th:field="*{email}" th:value="${profileInfo.getEmail}" th:required="required" /><br/>
+                        <span class="error" th:text="${error_Email}"></span>
+                    </div>
+                </div>
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label> Bio </label>
+                        <textarea class="textarea form-control" placeholder="Enter your bio" th:field="*{bio}"
+                                  th:value="${profileInfo.getBio}" maxlength="200"/><br/>
+                        <span class="error" th:text="${error_Bio}"></span>
+                    </div>
+                    <div class="col"></div>
+                </div><br/>
+                <div class="row centre-box">
+                    <div class="col buttons-centre">
+                        <a th:href="|../${id}|" class="btn btn-neutral btn-lg">Cancel</a>
+                        <button class="btn btn-primary btn-lg" type="submit">Change Details</button>
+                    </div>
                 </div>
             </form>
+        </div><br/>
+        <hr/>
+        <div class="row">
+            <form th:action="|./edit|" method="post" th:object="${user}" class="user-info">
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label class="required"> Current Password </label>
+                        <input type="password" class="form-control" placeholder="Enter your password" th:name="oldPassword" th:required="required" /><br>
+                        <span class="error" th:text="${error_CurrentPassword}"></span>
+                    </div>
+                    <div class="col">
+                        <div class="input-box"><!--Included to send to newline, space used to display messages-->
+                            <p th:text="${pwMessage}" id="error"/>
+                            <p th:text="${pwErrorMessage}" id="error"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col">
+                        <label class="required"> New Password </label>
+                        <input type="password" class="form-control" placeholder="Enter your new password" th:field="*{password}" th:required="required" /><br>
+                        <span th:class="error" th:text="${error_NewPassword}"></span>
+                    </div>
+                    <div class="col">
+                        <label class="required"> Confirm New Password </label>
+                        <input type="password" th:unless="${#fields.hasErrors('passwordsEqual')}" class="form-control"
+                               placeholder="Password" th:field="*{confirmPassword}">
+                        <input type="password" th:if="${#fields.hasErrors('passwordsEqual')}" class="form-control alert-danger"
+                               placeholder="Password" th:field="*{confirmPassword}">
+                        <br/>
+                        <span th:class="error" th:text="${error_PasswordsEqual}"></span>
+                    </div>
+                </div><br/>
+                <div class="row centre-box">
+                    <div class="col buttons-centre">
+                        <button class="btn btn-primary btn-lg" type="submit">Change Password</button>
+                    </div>
+                </div>
+            </form>
+        </div><br/>
+        <hr/><br/>
+        <div class="row">
+            <form th:action="|./edit|" method="post" id="photoForm" class="user-info">
+                <div class="row input-row flex-column flex-md-row">
+                    <div class="col photoInput">
+                        <label> Profile Photo </label>
+                        <input id="inputFile" type="file" th:name="file" accept=".png,.jpg,.jpeg"> <br>
+                        <input id="imageString" type="hidden" th:name="imageString">
+                        <span th:class="error" th:text="${error_InvalidPhoto}"></span>
+                        <span th:class="error" id="invalidPhotoJS"></span>
+                    </div>
+                    <div class="col"></div>
+                </div><br/>
+                <div class="row centre-box">
+                    <div class="col">
+                        <div id="croppieWindow"></div>
+                    </div>
+                </div>
+                <div class="row centre-box">
+                    <div class="col buttons-centre">
+                        <div class="loader" id="croppieLoader"></div>
+                        <img src="" id="image-preview"/>
+                        <button class="btn btn-primary btn-lg" type="submit" id="photo-upload-submit-button">Save Photo</button>
+                    </div>
+                </div>
+            </form>
+        </div><br/>
+        <div class="row">
+            <div th:if="${userHasProfilePhoto}">
+                <hr/>
+                <br/>
+                <form th:action="|./edit|" method="post">
+                    <div class="row input-row flex-column flex-md-row">
+                        <div class="col centre-box">
+                            <div th:if="${error_DeletePhoto}">
+                                <span th:class="error" th:text="${error_DeletePhoto}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row input-row flex-column flex-md-row">
+                        <div class="col centre-box">
+                            <button class="btn btn-primary btn-lg" type="submit">Delete Profile Photo</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    </div>
-
 </body>
-
 </html>
