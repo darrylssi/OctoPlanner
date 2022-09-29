@@ -174,12 +174,13 @@
                             <small id="editSchedulableEndTimeFeedback" class="text-danger"></small>
                         </div>
                     </div>
-                    <div class="row justify-content-md-center">
-                        <ul id="errors" class="col"></ul>
-                        <div class="col col-md-2">
+                    <ul id="errors" class="col"></ul>
+                    <div class="row justify-content-end">
+
+                        <div class="col col-md-4 col-lg-2">
                             <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${schedulable.getId}]], [[${boxId}]], [[${schedulable.getType}]])">Cancel</button>
                         </div>
-                        <div class="col col-md-2">
+                        <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
