@@ -5,8 +5,11 @@ import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
+import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
+import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.FileUploadStatus;
 import nz.ac.canterbury.seng302.shared.util.FileUploadStatusResponse;
@@ -56,6 +59,12 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     @Autowired
     private ValidationService validator;
+
+    @Autowired
+    private GroupService groupService;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     /**
      * Creates a request to upload a profile photo for a user, following this tutorial:
@@ -285,6 +294,15 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
         userRepository.save(user);  // Saves the user object to the database
 
+        // Add new user to group for people without a group
+        try {
+            Group usersWithoutAGroup = groupService.getGroup(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
+            usersWithoutAGroup.addMember(user);
+            groupRepository.save(usersWithoutAGroup);
+        } catch (NoSuchElementException ex) { // shouldn't happen
+            logger.error("ERROR adding new user {} to members without a group: {}", user.getId(), ex.getMessage());
+        }
+
         reply
                 .setIsSuccess(true)
                 .setNewUserId(user.getId())
@@ -296,7 +314,6 @@ public class UserAccountServerService extends UserAccountServiceGrpc.UserAccount
 
     /**
      * Gets a user from the database by its id and returns it as a UserResponse to the portfolio.
-     * 
      * Gives a Status.NOT_FOUND error if the user ID is invalid.
      * @param request An object containing the id of the user to retrieve
      */
