@@ -8,7 +8,7 @@ describe('Navigation', () => {
   })
 })
 
-describe('I can register a user', () => {
+describe('I can register a student', () => {
   it('shows typed data', () => {
     cy.fixture('users/student.json').then((user) => {
       cy.visit('/register')
@@ -47,8 +47,35 @@ describe('I can register a user', () => {
   })
 
   // If this test is failing, make sure that the user doesn't already exist in the database
-  it('adds user to database and redirects to profile page on successful register', () => {
+  it('adds student to database and redirects to profile page on successful register', () => {
     cy.fixture('users/student.json').then((user) => {
+      cy.visit('/register')
+
+      cy.get('[data-cy="firstName"]').type(user.fname)
+      cy.get('[data-cy="middleName"]').type(user.mname)
+      cy.get('[data-cy="lastName"]').type(user.lname)
+      cy.get('[data-cy="nickname"]').type(user.nickname)
+      cy.get('[data-cy="username"]').type(user.username)
+      cy.get('[data-cy="email"]').type(user.email)
+      cy.get('[data-cy="pronouns"]').type(user.pronouns)
+      cy.get('[data-cy="bio"]').type(user.bio)
+      cy.get('[data-cy="password"]').type(user.password)
+      cy.get('[data-cy="passwordConfirm"]').type(user.password)
+
+      cy.get('[data-cy="register-button"]').click()
+
+      // Ideally we would check here that the user is now in the database
+      // Should be redirected to profile page
+      cy.url().should('match', /users\/\d*/)
+    })
+  })
+})
+
+describe('I can register a teacher', () => {
+  // If this test is failing, make sure that the user doesn't already exist in the database
+  // Note that this doesn'tt make the user a teacher, you'll have to go and do that manually
+  it('adds teacher to database and redirects to profile page on successful register', () => {
+    cy.fixture('users/teacher.json').then((user) => {
       cy.visit('/register')
 
       cy.get('[data-cy="firstName"]').type(user.fname)
