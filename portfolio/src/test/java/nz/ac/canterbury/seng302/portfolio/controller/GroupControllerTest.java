@@ -7,9 +7,9 @@ import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
+import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.DeleteGroupResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,17 +20,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,8 +53,6 @@ class GroupControllerTest {
     static final int GROUP_ID = 2;
     private GroupForm groupForm;                                // Initialises the group form object
     private Group group;                                        // Initialises the group object
-    private GetGroupDetailsResponse groupDetails;
-    private DeleteGroupResponse deleteGroupResponse;
 
     @BeforeEach
     void setup() {
@@ -78,12 +72,6 @@ class GroupControllerTest {
         group.setGroupLongName("Test Project Group 2022");
         groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
 
-        // Gets the group details at group id 1
-        groupDetails = groupClientService.getGroupDetails(1);
-
-        // Gets the group delete response at group id 1
-        deleteGroupResponse = groupClientService.deleteGroup(1);
-
         // Define the user for the tests; this is done to provide access to the edit page
         UserResponse testUser = UserResponse.newBuilder()
                 .setUsername("test_user")
@@ -97,7 +85,7 @@ class GroupControllerTest {
                 .setProfileImagePath("")
                 .setId(USER_ID)
                 .build();
-        GetGroupDetailsResponse testGroup = GetGroupDetailsResponse.newBuilder()
+        GroupDetailsResponse testGroup = GroupDetailsResponse.newBuilder()
                 .addMembers(testUser)
                 .build();
         when(groupClientService.getGroupDetails(GROUP_ID)).thenReturn(testGroup);
@@ -106,32 +94,57 @@ class GroupControllerTest {
                 thenReturn(group.getParentProject());
     }
 
-//    @Test
-//    @WithMockPrincipal(TEACHER)
-//    void deleteGroupAsTeacher_get200Response() throws Exception {
-//        Mockito.when(groupClientService.deleteGroup(anyInt())).
-//                thenReturn(deleteGroupResponse);
-//        mockMvc.perform(delete("/delete-group/1"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(String.valueOf(deleteGroupResponse)));
-//    }
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void deleteGroupAsTeacher_get200Response() throws Exception {
+        DeleteGroupResponse deleteGroupResponse = DeleteGroupResponse.newBuilder().setIsSuccess(true).setMessage("Group deleted.").build();
+        when(groupClientService.deleteGroup(5)).thenReturn(deleteGroupResponse);
 
-//    @Test
-//    @WithMockPrincipal(TEACHER)
-//    void deleteGroupAsTeacher1_get200Response() throws Exception {
-////        System.out.println(groupDetails.getShortName());
-////        System.out.println(groupDetails.getLongName());
-//
-//        Mockito.when(projectService.getProjectById(anyInt())).
-//                thenReturn(group.getParentProject());
-//        Mockito.when(groupClientService.getGroupDetails(anyInt())).
-//                thenReturn(groupDetails);
-//        Mockito.when(groupClientService.deleteGroup(anyInt())).
-//                thenReturn(deleteGroupResponse);
-//        mockMvc.perform(delete("/delete-group/1"))
-//                .andExpect(status().isOk())
-//                .andExpect(status().reason(containsString("Group deleted.")));
-//    }
+        mockMvc.perform(delete("/groups/5/remove-group"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Group deleted."));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void deleteTeachingStaffGroupAsTeacher_get400Response() throws Exception {
+        DeleteGroupResponse deleteGroupResponse = DeleteGroupResponse.newBuilder().setIsSuccess(false).setMessage("Default group cannot be deleted").build();
+        when(groupClientService.deleteGroup(0)).thenReturn(deleteGroupResponse);
+
+        mockMvc.perform(delete("/groups/0/remove-group"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Default group cannot be deleted"));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void deleteMembersWithoutGroupAsTeacher_get400Response() throws Exception {
+        DeleteGroupResponse deleteGroupResponse = DeleteGroupResponse.newBuilder().setIsSuccess(false).setMessage("Default group cannot be deleted").build();
+        when(groupClientService.deleteGroup(1)).thenReturn(deleteGroupResponse);
+
+        mockMvc.perform(delete("/groups/1/remove-group"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Default group cannot be deleted"));
+    }
+
+    @Test
+    @WithMockPrincipal(TEACHER)
+    void deleteNonexistentGroupAsTeacher_get404Response() throws Exception {
+        DeleteGroupResponse deleteGroupResponse = DeleteGroupResponse.newBuilder().setIsSuccess(false).setMessage(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "5").build();
+        when(groupClientService.deleteGroup(5)).thenReturn(deleteGroupResponse);
+
+        mockMvc.perform(delete("/groups/5/remove-group"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "5"));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void deleteGroupAsStudent_get403Response() throws Exception {
+        mockMvc.perform(delete("/groups/5/remove-group"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
+    }
 
     @Test
     @WithMockPrincipal(TEACHER)
@@ -202,14 +215,14 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addUsersToNonexistentGroupAsTeacher_get404Response() throws Exception{
-        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 5").build();
+        AddGroupMembersResponse addGroupMembersResponse = AddGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "5").build();
         when(groupClientService.addGroupMembers(5, List.of(1, 2))).thenReturn(addGroupMembersResponse);
 
         mockMvc.perform(post("/groups/5/add-members")
                         .param("user_id", "1")
                         .param("user_id", "2"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("There is no group with id 5"));
+                .andExpect(content().string(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "5"));
     }
 
     @Test
@@ -332,6 +345,7 @@ class GroupControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You are not a part of this group"));
     }
+
     @Test
     @WithMockPrincipal(TEACHER)
     void removeUsersFromGroupAsTeacher_get200Response() throws Exception {
@@ -348,14 +362,14 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void removeUsersFromNonexistentGroupAsTeacher_get404Response() throws Exception {
-        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage("There is no group with id 6").build();
+        RemoveGroupMembersResponse removeGroupMembersResponse = RemoveGroupMembersResponse.newBuilder().setIsSuccess(false).setMessage(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "6").build();
         when(groupClientService.removeGroupMembers(6, List.of(3, 8))).thenReturn(removeGroupMembersResponse);
 
         mockMvc.perform(delete("/groups/6/remove-members")
                         .param("user_id", "3")
                         .param("user_id", "8"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("There is no group with id 6"));
+                .andExpect(content().string(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + "6"));
     }
 
     @Test

@@ -12,7 +12,6 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
-import nz.ac.canterbury.seng302.shared.identityprovider.GetGroupDetailsResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Controller to handle requests on the groups page.
@@ -44,7 +42,6 @@ public class GroupController extends PageController{
     @Autowired
     private GroupClientService groupClientService;
 
-    //TODO update this when the template is actually created or just get rid of the TODO
     public static final String GROUPS_TEMPLATE_NAME = "groups";
 
     /**
@@ -62,11 +59,11 @@ public class GroupController extends PageController{
         model.addAttribute("canEdit", hasEditPermissions);
 
         model.addAttribute("tab", 3);
-        Map<Integer, GetGroupDetailsResponse> groups = new HashMap<>();
+        Map<Integer, GroupDetailsResponse> groups = new HashMap<>();
         groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
         groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
 
-        model.addAttribute("groups", groups);
+        model.addAttribute(GROUPS_TEMPLATE_NAME, groups);
         model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
 
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
@@ -95,7 +92,7 @@ public class GroupController extends PageController{
 
         if (addGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (addGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)){
+        } else if (addGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)){
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(addGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -171,7 +168,7 @@ public class GroupController extends PageController{
             whether the user is part of the group, so checking Teacher role happens first
             */
             PrincipalData thisUser = PrincipalData.from(principal);
-            GetGroupDetailsResponse thisGroup = groupClientService.getGroupDetails(groupId);
+            GroupDetailsResponse thisGroup = groupClientService.getGroupDetails(groupId);
 
             // Checks that the user is in the group
             if (thisGroup.getMembersList().stream().noneMatch(o -> thisUser.getID() ==  o.getId())) {
@@ -218,6 +215,40 @@ public class GroupController extends PageController{
     }
 
     /**
+     * Deletes a group based on the given id
+     * @param principal used to check if the user is authorised to delete group
+     * @param groupId the id of the group to be deleted
+     * @return a redirect to the project view
+     */
+    @DeleteMapping("/groups/{groupId}/remove-group")
+    @ResponseBody
+    public ResponseEntity<String> deleteGroup(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name = "groupId") int groupId
+    ) {
+        // Check if the user is authorised for this
+        try {
+            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
+        }
+
+        if (groupId != TEACHER_GROUP_ID && groupId != MEMBERS_WITHOUT_GROUPS_ID) {
+            DeleteGroupResponse deleteGroupResponse = groupClientService.deleteGroup(groupId);
+
+            if (deleteGroupResponse.getIsSuccess()) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.OK);
+            } else if (deleteGroupResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(deleteGroupResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
      * Mapping for an endpoint to remove users from a group
      * @param principal Authenticated user
      * @param groupId id of the group to remove members from
@@ -240,42 +271,10 @@ public class GroupController extends PageController{
 
         if (removeGroupMembersResponse.getIsSuccess()) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.OK);
-        } else if (removeGroupMembersResponse.getMessage().equals("There is no group with id " + groupId)) {
+        } else if (removeGroupMembersResponse.getMessage().equals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + groupId)) {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(removeGroupMembersResponse.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    /**
-     * Deletes a group based on the given id
-     * @param principal used to check if the user is authorised to delete group
-     * @param groupId the id of the group to be deleted
-     * @return a redirect to the project view
-     */
-    @DeleteMapping("/delete-group/{groupId}")
-    @ResponseBody
-    public ResponseEntity<String> deleteGroup(
-            @AuthenticationPrincipal AuthState principal,
-            @PathVariable(name = "groupId") int groupId
-    ) {
-        // Check if the user is authorised for this
-        try {
-            requiresRoleOfAtLeast(UserRole.TEACHER, principal);
-        } catch (ResponseStatusException ex) {
-            return new ResponseEntity<>(ex.getReason(), ex.getStatus());
-        }
-
-        GetGroupDetailsResponse groupDetails = groupClientService.getGroupDetails(groupId);
-        System.out.println("Group details-> " + groupDetails);
-        try {
-            if (groupDetails.getShortName() != "Teaching staff" && groupDetails.getShortName() != "Members without groups") {
-                groupClientService.deleteGroup(groupId);
-                return new ResponseEntity<>("Group deleted.", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Default group cannot be deleted", HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
