@@ -30,6 +30,22 @@ function startSelecting(group_id) {
                  checkbox.hidden = true;
         }
     }
+    addUsersButtons = document.getElementsByClassName('btn-add-users');
+    for (let addUsersButton of addUsersButtons) {
+        if(addUsersButton.parentNode.id === 'add-users-' + group_id) {
+            addUsersButton.parentNode.hidden = true;
+        } else {
+            addUsersButton.parentNode.removeAttribute("hidden");
+        }
+    }
+    removeUsersButtons = document.getElementsByClassName('btn-remove-users');
+    for (let removeUsersButton of removeUsersButtons) {
+        if(removeUsersButton.parentNode.id === 'remove-users-' + group_id) {
+            removeUsersButton.parentNode.removeAttribute("hidden");
+        } else {
+            removeUsersButton.parentNode.hidden = true;
+        }
+    }
 }
 
 /**

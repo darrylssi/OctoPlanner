@@ -60,8 +60,11 @@
             <div class="sprint-description" th:text="*{value.getLongName()}" />
         </div>
         <div class="col"></div>
-        <div class="col-auto" th:if="${group.key != membersWithoutGroupsId && canEdit}">
+        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|remove-users-*{key}|">
             <button type="submit" class="btn btn-remove-users btn-sm">Remove Selected Users</button>
+        </div>
+        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|add-users-*{key}|">
+            <button type="submit" class="btn btn-add-users btn-sm">Add Selected Users</button>
         </div>
         <div class="col-auto" >
             <button type="submit" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key})|">Select Users</button>
