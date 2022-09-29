@@ -181,35 +181,44 @@ public class ProjectTests {
     "2022-08-06 12:00",
     "2021-02-04 12:00",
     "2023-08-05 12:00"})
-    void testEditProject_whenDeadlineOutsideDates_getErrorMessage(String deadlineDate) {
+    void testEditProject_whenDeadlineOutsideDates_getErrorMessage(String deadlineDateString) {
+        Date deadlineDate = DateUtils.toDateTime(deadlineDateString);
         Deadline deadline = new Deadline("Test Deadline 1", "This is a deadline",
-                DateUtils.toDateTime(deadlineDate));
+                deadlineDate);
         schedulableList.add(deadline);
 
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
         ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedDate = DateUtils.toDisplayString(deadlineDate);
         String actual = error.getFirstError();
-        assertEquals("The deadline \"Test Deadline 1\" is outside the project dates" , actual);
+        assertEquals("The deadline \"Test Deadline 1\": " + expectedDate + " is outside the project dates" , actual);
     }
 
     @ParameterizedTest
-    @CsvSource({"2022-02-03, 2022-02-10",
-            "2022-08-06, 2022-08-13",
-            "2021-02-04, 2021-02-11",
-            "2023-08-05, 2023-08-12"})
-    void testEditProject_whenEventOutsideDates_getErrorMessage(String eventStart, String eventEnd) {
+    @CsvSource({"2022-02-03 12:00, 2022-02-10 12:00",
+            "2022-08-06 12:00, 2022-08-13 12:00",
+            "2021-02-04 12:00, 2021-02-11 12:00",
+            "2023-08-05 12:00, 2023-08-12 12:00"})
+    void testEditProject_whenEventOutsideDates_getErrorMessage(String eventStartString, String eventEndString) {
+        Date eventStart = DateUtils.toDateTime(eventStartString);
+        Date eventEnd = DateUtils.toDateTime(eventEndString);
         Event event = new Event("Test Event 1", "This is an event",
-                DateUtils.toDate(eventStart), DateUtils.toDate(eventEnd));
+                eventStart, eventEnd);
         schedulableList.add(event);
 
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
         ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedStart = DateUtils.toDisplayString(eventStart);
+        String expectedEnd = DateUtils.toDisplayString(eventEnd);
         String actual = error.getFirstError();
-        assertEquals("The event \"Test Event 1\" is outside the project dates" , actual);
+        assertEquals("The event \"Test Event 1\": " + expectedStart + " - " + expectedEnd +
+                " is outside the project dates" , actual);
     }
 
     @ParameterizedTest
@@ -217,18 +226,20 @@ public class ProjectTests {
             "2022-08-06 12:00",
             "2021-02-04 12:00",
             "2023-08-05 12:00"})
-    void testEditProject_whenMilestoneOutsideDates_getErrorMessage(String milestoneDate) {
+    void testEditProject_whenMilestoneOutsideDates_getErrorMessage(String milestoneDateString) {
+        Date milestoneDate = DateUtils.toDate(milestoneDateString);
         Milestone milestone = new Milestone("Test Milestone 1", "This is a milestone",
-                DateUtils.toDate(milestoneDate));
-
+                milestoneDate);
         schedulableList.add(milestone);
 
         Date start = DateUtils.toDate("2022-02-04");
         Date end = DateUtils.toDate("2022-08-05");
         assert start != null;
         ValidationError error = ValidationUtils.validateProjectDates(start, end, creationDate, Collections.emptyList(), schedulableList);
+
+        String expectedDate = DateUtils.toDisplayString(milestoneDate);
         String actual = error.getFirstError();
-        assertEquals("The milestone \"Test Milestone 1\" is outside the project dates" , actual);
+        assertEquals("The milestone \"Test Milestone 1\": " + expectedDate + " is outside the project dates" , actual);
     }
 
     @Test
