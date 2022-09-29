@@ -15,3 +15,13 @@ function toggleUsersButton(button) {
 function toggleById(group_id) {
     toggleUsersButton(document.getElementById("user-button-" + group_id));
 }
+
+/**
+ * Updates the page in-place based on the group update message received
+ * @param groupMessage
+ */
+function handleGroupUpdateMessage(groupMessage) {
+    if (groupLogs) {
+        console.log(groupMessage);
+    }
+}

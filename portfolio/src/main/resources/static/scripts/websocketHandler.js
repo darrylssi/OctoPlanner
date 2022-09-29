@@ -16,6 +16,7 @@ let stompClient = null;
 const editingLogs = false;
 const updateLogs = false;
 const sprintLogs = false;
+const groupLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -36,6 +37,9 @@ function connect() {
         stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
             handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
         });
+        stompClient.subscribe('/topic/groups', function(groupMessageOutput) {
+            handleGroupUpdateMessage(JSON.parse(groupMessageOutput.body));
+        });
     });
 }
 
@@ -50,7 +54,19 @@ function disconnect() {
 }
 
 /**
+ * Sends a message saying that a group was updated
+ * @param groupId the id of the updated group
+ */
+function sendGroupUpdatedMessage(groupId) {
+    if (groupLogs) {
+        console.log("SENDING UPDATED GROUP MESSAGE FOR " + groupId);
+    }
+    stompClient.send("/app/groups", {}, JSON.stringify({'id':`${groupId}`}));
+}
+
+/**
  * Sends a message saying that the specified sprint was updated.
+ * @param sprintId the id of the sprint to request an update for
  */
 function sendSprintUpdatedMessage(sprintId) {
     if (editingLogs) {
