@@ -15,3 +15,26 @@ function toggleUsersButton(button) {
 function toggleById(group_id) {
     toggleUsersButton(document.getElementById("user-button-" + group_id));
 }
+
+/**
+* Shows the checkboxes so that a user can select users in the group with the given id
+* @param group_id the id of the group users are being selected from
+*/
+function startSelecting(group_id) {
+    checkboxes = document.getElementsByClassName('checkbox');
+    for (let checkbox of checkboxes) {
+        if (checkbox.classList.contains("user-" + group_id)){
+            checkbox.removeAttribute("hidden");
+            checkbox.checked = false;
+        } else {
+                 checkbox.hidden = true;
+        }
+    }
+}
+
+/**
+* Deselects all users and hides checkboxes
+*/
+function stopSelecting() {
+
+}

@@ -62,7 +62,7 @@
             <button type="submit" class="btn btn-remove-users btn-sm">Remove Selected Users</button>
         </div>
         <div class="col-sm-auto" >
-            <button type="submit" th:if="${canEdit}" class="btn btn-select btn-sm">Select Users</button>
+            <button type="submit" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key})|">Select Users</button>
         </div>
         <div class="col-sm-auto" th:if="${group.key != membersWithoutGroupsId && canEdit}">
             <button class="delete-button" >
@@ -89,9 +89,10 @@
                 <div class="col"><button class="show-users" th:text="|Hide users (*{value.getMembersList().size()})|" th:onclick="|toggleById(*{key})|"></button></div>
             </div>
             <div class="col">
+                <form>
                 <table class="table container-auto">
                     <tr th:each="user:*{value.getMembersList()}" class="row">
-                        <td class="col-sm-auto" th:if="${canEdit}" ><div class="form-check" style="margin-left:10px">
+                        <td th:class="|col-sm-auto checkbox user-*{key}|" hidden th:if="${canEdit}" ><div th:class="|form-check |" name="user_id" value="${user.getId()}" style="margin-left:10px">
                             <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                         </div></td>
                         <td class="col-sm-auto"><img class="profile-icon" th:src="${user.getProfileImagePath()}" alt="User profile photo"></td>
@@ -105,6 +106,7 @@
                         </td>
                     </tr>
                 </table>
+                </form>
             </div>
         </div>
         <div class="row text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{key}|">
