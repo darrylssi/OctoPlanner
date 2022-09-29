@@ -8,6 +8,9 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -49,6 +52,29 @@ public class GroupService {
         } else {
             throw new NoSuchElementException("There is no group with id " + id);
         }
+    }
+
+    /**
+     * Get a number of groups based on the parameters
+     * @param limit The number of groups wanted
+     * @param page Page number starting at 0
+     * @param orderBy Attribute of group it is ordered by
+     * @param isAscending Whether the sort is ascending or descending
+     * @return List of groups from that page of the given order
+     */
+    public List<Group> getPaginatedGroups(int page, int limit, String orderBy, boolean isAscending) {
+        Sort sortBy = switch (orderBy) {
+            case "longName"  -> Sort.by("longName");
+            case "shortName" -> Sort.by("shortName");
+            default -> throw new IllegalArgumentException(String.format("Can not order users by '%s'", orderBy));
+        };
+
+        if (!isAscending) {
+            sortBy = sortBy.descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, limit, sortBy);
+        return groupRepository.findAll(pageable);
     }
 
     /**
