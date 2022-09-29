@@ -309,10 +309,11 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
+            let schedulableTooltip = createTooltipString(icon, sNames, sStarts, sEnds, i);
             if (icon.extendedProps.description === '') {
-                icon.setExtendedProp("description", sNames[i]);
+                icon.setExtendedProp("description", schedulableTooltip);
             } else{
-                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + sNames[i])
+                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + schedulableTooltip)
             }
 
             let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
@@ -322,6 +323,34 @@ function updateIconObjectsWithSchedulables(calendar) {
     }
 }
 
+/**
+ * Creates schedulable tooltip contents for an icon on the monthly calendar.
+ * Helper function for updateIconObjectsWithSchedulables
+ * @returns {String} the contents for the tooltip, as determined by type
+ */
+function createTooltipString(icon, sNames, sStarts, sEnds, i) {
+    let tooltip = `<strong>${sNames[i]}</strong>`;
+    // Work out what to add to tooltip based on
+    switch(icon.extendedProps.type) {
+        case 'event':
+            // Needs start and end dates and times
+            tooltip += ` <small><i>${sStarts[i]} - ${sEnds[i]}</i></small>`;
+            break;
+        case 'deadline':
+            // Needs date and time
+            tooltip += ` <small><i>${sStarts[i]}</i></small>`;
+            break;
+        case 'milestone':
+            // Needs date
+            tooltip += ` <small><i>${sStarts[i].substring(0,10)}</i></small>`;
+            break;
+        default:
+            // This shouldn't ever be reached
+            break;
+    }
+
+    return tooltip;
+}
 
 /**
  * Handles an incoming sprint update message by adding/updating/removing the relevant sprint event in the calendar.
