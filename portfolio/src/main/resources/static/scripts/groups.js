@@ -31,16 +31,21 @@ function sendGroupFormViaAjax(elem) {
     let url = elem.getAttribute('data-url');
     formRequest.open("POST", url);
 
+    console.log("url -> " + url);
+
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             window.location.reload();
         } else {
             const errors = formRequest.responseText.split('\n');
+            console.log(errors);
+
             for (let errorMsg of errors) {
                 // Determine correct error field. Defaults to NameFeedback
                 let field = "shortName";
-                // Need to write error test for long name
-
+                if (errorMsg.indexOf('exceed') !== -1) {
+                    field = 'longName'
+                }
                 field += 'Feedback';
                 const errorBox = elem.querySelector(`[id*="` + field + `"]`);
                 errorBox.textContent = errorMsg;

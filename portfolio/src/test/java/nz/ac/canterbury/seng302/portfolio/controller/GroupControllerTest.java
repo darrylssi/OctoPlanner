@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
-import nz.ac.canterbury.seng302.portfolio.model.Group;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -23,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +50,6 @@ class GroupControllerTest {
     static final int USER_ID = 1;
     static final int GROUP_ID = 2;
     private GroupForm groupForm;                                // Initialises the group form object
-    private Group group;                                        // Initialises the group object
 
     @BeforeEach
     void setup() {
@@ -63,14 +60,6 @@ class GroupControllerTest {
 
         // Creates and sets the details to the new project
         Project parentProject = new Project("Project 2022", "Test Parent Project", "2022-01-01", "2022-12-31");
-
-        // Creates and sets the details to the group object
-        group = new Group();
-        group.setId(GROUP_ID);
-        group.setParentProject(parentProject);
-        group.setGroupShortName("Test Group");
-        group.setGroupLongName("Test Project Group 2022");
-        groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
 
         // Define the user for the tests; this is done to provide access to the edit page
         UserResponse testUser = UserResponse.newBuilder()
@@ -89,9 +78,6 @@ class GroupControllerTest {
                 .addMembers(testUser)
                 .build();
         when(groupClientService.getGroupDetails(GROUP_ID)).thenReturn(testGroup);
-
-        when(projectService.getProjectById(0)).
-                thenReturn(group.getParentProject());
     }
 
     @Test

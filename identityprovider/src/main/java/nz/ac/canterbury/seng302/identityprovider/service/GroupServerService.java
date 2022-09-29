@@ -1,11 +1,13 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,44 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
 
     @Autowired
     private UserAccountServerService userAccountServerService;
+
+    @Override
+    public void getPaginatedGroups(GetPaginatedGroupsRequest request, StreamObserver<PaginatedGroupsResponse> responseObserver) {
+        logger.info("getPaginatedGroups has been called");
+        PaginatedGroupsResponse.Builder reply = PaginatedGroupsResponse.newBuilder();
+        int limit = request.getPaginationRequestOptions().getLimit();
+        int offset = request.getPaginationRequestOptions().getOffset();
+        String orderBy = request.getPaginationRequestOptions().getOrderBy();
+        boolean isAscending = request.getPaginationRequestOptions().getIsAscendingOrder();
+
+        List<Group> paginatedGroups;
+        try {
+            paginatedGroups = groupService.getGroupsPaginated(offset, limit, orderBy, isAscending);
+        } catch (IllegalArgumentException e) { // `orderBy` wasn't a valid value.
+            Throwable statusError = Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException();
+            responseObserver.onError(statusError);
+            return;
+        }
+        for(int i = 0; i< paginatedGroups.size(); i++){
+            GroupDetailsResponse groupDetailsResponse = GroupDetailsResponse.newBuilder().setGroupId(paginatedGroups.get(i).getId())
+            reply.addGroups(i, groupDetailsResponse);
+        }
+
+
+        #loop througp paginatedGroups and then add to reply
+
+
+//        List<GroupDetailsResponse> groupResponses = paginatedGroups.stream().map(this::buildGroupResponse).toList();
+//        int numGroupsInDatabase = (int) groupRepository.count();
+//        PaginationResponseOptions.Builder responseOptions = PaginationResponseOptions.newBuilder();
+//        responseOptions.setResultSetSize(numGroupsInDatabase).build();
+//        reply
+//                .addAllGroups(groupResponses)
+//                .setPaginationResponseOptions(responseOptions);
+//
+//        responseObserver.onNext(reply.build());
+//        responseObserver.onCompleted();
+    }
 
     /**
      * Creates a new group, adds it to the database and returns a CreateGroupResponse

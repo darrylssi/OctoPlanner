@@ -25,24 +25,26 @@
 <div class="card collapse" th:id="|addGroupForm|" >
     <div class="card-header" th:text="|New Group|"></div>
     <div class="card-body">
-        <form action="javascript:;" th:data-url="@{/project/{id}(id = ${projectId})/add-group}" th:formBoxId="|addGroupForm|"
+        <form action="javascript:;" th:data-url="@{/groups/add-group}" th:formBoxId="|addGroupForm|"
               method="post" th:onsubmit="return sendGroupFormViaAjax(this)" th:object="${groupForm}" class="container-fluid js-form" >
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="shortNameInput" required class="form-control" aria-describedby="shortNameFeedback">
-                        <label class="form-label" for="shortNameInput">Short Name</label>
+                        <input type="text" th:value="${shortName == null} ? '' : ${shortName}" th:name="shortName" id="shortName" required class="form-control"
+                               aria-describedby="shortNameFeedback" th:minlength="${minShortNameLen}" th:maxlength="${maxShortNameLen}">
+                        <label class="form-label" for="shortName">Short Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small id="shortNameFeedback" class="text-danger"></small>
+                    <small id="addShortNameFeedback" class="text-danger"></small>
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="longNameInput" class="form-control" placeholder="Long name" aria-describedby="longNameFeedback">
-                        <label for="longNameInput">Long Name</label>
+                        <input type="text" th:value="${longName == null} ? '' : ${longName}" th:name="longName" id="longName" class="form-control" placeholder="Long name"
+                               aria-describedby="longNameFeedback" th:maxlength="${maxLongNameLen}">
+                        <label for="longName">Long Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
-                    <small id="longNameFeedback" class="text-danger"></small>
+                    <small id="addLongNameFeedback" class="text-danger"></small>
                 </div>
             </div>
             <div class="col">

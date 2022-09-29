@@ -11,14 +11,13 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  */
 public class GroupForm {
 
-    @NotBlank(message = "Short name cannot be blank")
+    @NotBlank(message = "Group short name cannot be empty")
     @Size(min = MIN_NAME_LENGTH, max = MAX_NAME_LENGTH,
-            message = "Short name must be between " + MIN_NAME_LENGTH + "-" + MAX_NAME_LENGTH + " characters")
+            message = "Group short name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters")
     private String shortName;
 
-    @NotBlank(message = "Long name cannot be blank")
-    @Size(min = MIN_NAME_LENGTH, max = MAX_GROUP_LONG_NAME_LENGTH,
-            message = "Long name must be between " + MIN_NAME_LENGTH + "-" + MAX_GROUP_LONG_NAME_LENGTH + " characters")
+    @Size(max = MAX_GROUP_LONG_NAME_LENGTH,
+            message = "Group long name must not exceed " + MAX_GROUP_LONG_NAME_LENGTH + " characters")
     private String longName;
 
     public String getShortName() {

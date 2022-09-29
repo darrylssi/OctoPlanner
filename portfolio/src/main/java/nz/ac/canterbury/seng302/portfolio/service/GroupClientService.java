@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.portfolio.service;
 
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
+import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,27 @@ public class GroupClientService {
     private GroupsServiceGrpc.GroupsServiceStub groupServiceStub;
 
     private static final Logger logger = LoggerFactory.getLogger(GroupClientService.class);
+
+    /**
+     * Gets the paginated groups
+     * @param offSet How many results to skip (offset of 0 means start at beginning, i.e page 1)
+     * @param limit Max results to get - "results per page"
+     * @param orderBy When paginating, we must sort on the server, not the frontend (why is this?)
+     * @param isAscendingOrder gets the boolean whether it is order by ascending or descending
+     * @return
+     */
+    public PaginatedGroupsResponse getPaginatedGroups(int offSet, int limit, String orderBy, boolean isAscendingOrder){
+        logger.info("Sending request to retrieve all the groups");
+
+        PaginationRequestOptions paginationRequestOptions = PaginationRequestOptions.newBuilder().setOffset(1)
+                .setOffset(offSet)
+                .setLimit(limit)
+                .setOrderBy(orderBy)
+                .setIsAscendingOrder(isAscendingOrder)
+                .build();
+        GetPaginatedGroupsRequest getPaginatedGroupsRequest = GetPaginatedGroupsRequest.newBuilder().setPaginationRequestOptions(paginationRequestOptions).build();
+        return groupStub.getPaginatedGroups(getPaginatedGroupsRequest);
+    }
 
     /**
      * Sends a request to the identity provider to create a new group
@@ -107,5 +130,6 @@ public class GroupClientService {
                 .build();
         return groupStub.getGroupDetails(getGroupDetailsRequest);
     }
+
 
 }
