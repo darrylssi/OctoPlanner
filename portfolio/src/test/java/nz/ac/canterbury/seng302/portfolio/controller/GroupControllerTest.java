@@ -81,7 +81,7 @@ class GroupControllerTest {
                 .setProfileImagePath("")
                 .setId(USER_ID)
                 .build();
-        GetGroupDetailsResponse testGroup = GetGroupDetailsResponse.newBuilder()
+        GroupDetailsResponse testGroup = GroupDetailsResponse.newBuilder()
                 .addMembers(testUser)
                 .build();
         when(groupClientService.getGroupDetails(GROUP_ID)).thenReturn(testGroup);

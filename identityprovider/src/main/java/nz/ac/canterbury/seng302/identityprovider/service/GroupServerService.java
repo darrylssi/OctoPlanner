@@ -252,9 +252,9 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * @param request An object containing the id of the group to retrieve details from
      */
     @Override
-    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GetGroupDetailsResponse> responseObserver) {
+    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GroupDetailsResponse> responseObserver) {
         logger.info("getGroupDetails() has been called");
-        GetGroupDetailsResponse.Builder reply = GetGroupDetailsResponse.newBuilder();
+        GroupDetailsResponse.Builder reply = GroupDetailsResponse.newBuilder();
 
         Group group;
         try {
@@ -272,6 +272,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         }
 
         reply
+                .setGroupId(group.getId())
                 .setShortName(group.getShortName())
                 .setLongName(group.getLongName())
                 .addAllMembers(userResponses);
