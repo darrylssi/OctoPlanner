@@ -65,14 +65,27 @@ public class MessageMappingController {
     }
 
     /**
-     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
-     * or a SprintMessageOutput with the sprint's data if it does exist.
+     * <p>Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
+     * or a SprintMessageOutput with the sprint's data if it does exist.</p>
+     * <p>Waits for 100ms before sending the message, so that entities in the database can be updated
+     * before an update is sent out for them. This is because these updates are triggered by the user
+     * updating the object in the first place, so we need to wait for the object to update before we send
+     * the update out to everyone.</p>
      * @param sprintMessage data received from the websocket containing the sprint id and type
      * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     * @throws InterruptedException if the thread is interrupted while it is waiting
      */
     @MessageMapping("/sprints")
     @SendTo("/topic/sprints")
-    public SprintMessageOutput sendSprintData(SprintMessage sprintMessage) {
+    public synchronized SprintMessageOutput sendSprintData(SprintMessage sprintMessage) throws InterruptedException {
+        // wait statements must be in a while loop, so it is in a while loop
+        // the loop should end if the sprint changes, but that breaks live updates (at least on localhost)
+        // so it ends after 250 ms every time instead
+        int count = 0;
+        while (count < 250) {
+            count++;
+            wait(1);
+        }
         SprintMessageOutput sprintMessageOutput;
         try {
             Sprint updatedSprint = sprintService.getSprintById(sprintMessage.getId());
