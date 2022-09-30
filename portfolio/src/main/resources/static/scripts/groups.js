@@ -33,68 +33,91 @@ function handleGroupUpdateMessage(groupMessageOutput) {
         console.log(groupMessageOutput);
     }
 
-    // groupMessageOutput.id = 10;
-
-    if (groupMessageOutput.shortName === null) { // Delete the group
-        if (groupLogs) {
-            console.log("Deleting group with id " + groupMessageOutput.id);
-        }
-        const groupBox = document.getElementById("group-" + groupMessageOutput.id);
-        groupBox.parentElement.removeChild(groupBox);
+    if (groupMessageOutput.shortName === null) { // Delete the group if it does not exist in the database
+        deleteGroup(groupMessageOutput.id);
     } else {
         // see if group exists, if it does, update; else make new box
         const groupBox = document.getElementById("group-" + groupMessageOutput.id);
         if (groupBox === null) {
-            if (groupLogs) {
-                console.log("Creating group with id " + groupMessageOutput.id);
-            }
-            createNewGroupDiv(groupMessageOutput);
+            createNewGroup(groupMessageOutput);
         } else {
-            if (groupLogs) {
-                console.log("Updating group with id " + groupMessageOutput.id);
-            }
-            // update
-            document.getElementById("group-" + groupMessageOutput.id + "-sname").innerHTML = groupMessageOutput.shortName;
-            document.getElementById("group-" + groupMessageOutput.id + "-lname").innerHTML = groupMessageOutput.longName;
-            // clear all users
-            document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
-            // add all users
-            for (let user of groupMessageOutput.members) {
-                createNewGroupMember(groupMessageOutput.id, user);
-            }
+            updateGroup(groupMessageOutput);
         }
     }
 }
 
 /**
- * Create a div for a new group on the page
+ * Updates the long and short names and user list for the specified group on the page
+ * @param groupMessageOutput
+ */
+function updateGroup(groupMessageOutput) {
+    if (groupLogs) {
+        console.log("Updating group with id " + groupMessageOutput.id);
+    }
+    // update names
+    document.getElementById("group-" + groupMessageOutput.id + "-sname").innerHTML = groupMessageOutput.shortName;
+    document.getElementById("group-" + groupMessageOutput.id + "-lname").innerHTML = groupMessageOutput.longName;
+    // clear all users
+    document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
+    // add all users
+    for (let user of groupMessageOutput.members) {
+        createNewGroupMember(groupMessageOutput.id, user);
+    }
+}
+
+/**
+ * Removes a group from the page
+ * @param groupId
+ */
+function deleteGroup(groupId) {
+    if (groupLogs) {
+        console.log("Deleting group with id " + groupId);
+    }
+    const groupBox = document.getElementById("group-" + groupId);
+    groupBox.parentElement.removeChild(groupBox);
+}
+
+/**
+ * Creates a new group on the page
  * @param groupMessageOutput the group update message with the group's details
  */
-function createNewGroupDiv(groupMessageOutput) {
+function createNewGroup(groupMessageOutput) {
+    if (groupLogs) {
+        console.log("Creating group with id " + groupMessageOutput.id);
+    }
     const url = BASE_URL + "frag/" + groupMessageOutput.id;
     const groupFragRequest = new XMLHttpRequest();
     groupFragRequest.open("GET", url, true);
 
     groupFragRequest.onload = () => {
-        let newGroup = document.createElement("div");
-        newGroup.classList.add("card");
-        newGroup.classList.add("group-block");
-        newGroup.classList.add("container-auto");
-
-        newGroup.id = "group-" + groupMessageOutput.id;
-
-        newGroup.innerHTML = groupFragRequest.response;
-
-        const form = document.getElementById("form");
-        form.appendChild(newGroup);
-
-        // add all users
-        document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
-        for (let user of groupMessageOutput.members) {
-            createNewGroupMember(groupMessageOutput.id, user);
-        }
+        createGroupDisplay(groupMessageOutput, groupFragRequest.response)
     }
     groupFragRequest.send();
+}
+
+/**
+ * Creates the HTML element for a new group
+ * @param groupMessageOutput the message with the group's information
+ * @param groupHTML the HTML for the group
+ */
+function createGroupDisplay(groupMessageOutput, groupHTML) {
+    let newGroup = document.createElement("div");
+    newGroup.classList.add("card");
+    newGroup.classList.add("group-block");
+    newGroup.classList.add("container-auto");
+
+    newGroup.id = "group-" + groupMessageOutput.id;
+
+    newGroup.innerHTML = groupHTML;
+
+    const form = document.getElementById("form");
+    form.appendChild(newGroup);
+
+    // add all users
+    document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
+    for (let user of groupMessageOutput.members) {
+        createNewGroupMember(groupMessageOutput.id, user);
+    }
 }
 
 /**
