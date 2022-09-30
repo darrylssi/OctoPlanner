@@ -517,6 +517,19 @@ function handleProjectUpdateMessage(projectMessage) {
         console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    const message = 'Project information has changed. Please <a class="refresh-link" ' +
+            'onclick=location.reload()>refresh</a> to update the page.';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        '<div class="alert alert-warning alert-dismissible fade show" role="alert">',
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('');
+
+    let box = document.getElementById(`warning-box`);
+    if(box && box.innerHTML.indexOf(message.substring(0,30)) == -1) {
+        box.append(wrapper);
+    }
 }

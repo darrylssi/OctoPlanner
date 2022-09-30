@@ -40,6 +40,7 @@
 </div>
 
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
+<div id="warning-box" class="warning-container"></div>
 <div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
