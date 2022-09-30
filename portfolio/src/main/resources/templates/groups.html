@@ -56,9 +56,7 @@
         </div>
     </div>
 
-    <div class="card group-block container-auto" th:each="group : ${groups}" th:object="${group}">
-
-        <div th:id ="|group-*{key}|">
+    <div class="card group-block container-auto" th:each="group : ${groups}" th:object="${group}" th:id ="|group-*{key}|">
             <div class="row">
                 <div class="col-sm-auto">
                     <div class="sprint-title" th:text="*{value.getShortName()}" />
@@ -119,7 +117,6 @@
                                          th:id="|user-button-*{key}|" onclick="toggleUsersButton(this)" th:showText="|Hide users (*{value.getMembersList().size()})|"></button></div>
             </div>
             </div>
-        </div>
     </div>
 </div>
 <!-- This needs to be down here for it to work -->

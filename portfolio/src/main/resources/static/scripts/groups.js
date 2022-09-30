@@ -14,22 +14,27 @@ function toggleUsersButton(button) {
 */
 function toggleById(group_id) {
     toggleUsersButton(document.getElementById("user-button-" + group_id));
+    sendGroupUpdatedMessage(group_id); // TODO remove
 }
 
 /**
  * Updates the page in-place based on the group update message received
- * @param groupMessage
+ * @param groupMessageOutput
  */
-function handleGroupUpdateMessage(groupMessage) {
+function handleGroupUpdateMessage(groupMessageOutput) {
     if (groupLogs) {
-        console.log(groupMessage);
+        console.log(groupMessageOutput);
     }
 
     const group_list = document.getElementsByClassName('group-block');
 
 
-    if (groupMessage.shortName == null) {
-    // Delete the group
+    if (groupMessageOutput.shortName === null) { // Delete the group
+        if (groupLogs) {
+            console.log("Deleting group with id " + groupMessageOutput.id);
+        }
+        const groupBox = document.getElementById("group-" + groupMessageOutput.id);
+        groupBox.parentElement.removeChild(groupBox);
     } else {
 
     }

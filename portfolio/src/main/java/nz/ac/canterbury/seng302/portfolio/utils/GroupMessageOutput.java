@@ -51,6 +51,9 @@ public class GroupMessageOutput {
      */
     public GroupMessageOutput(int id) {
         this.id = id;
+        this.shortName = null;
+        this.longName = null;
+        this.members = new ArrayList<>();
     }
 
     /**

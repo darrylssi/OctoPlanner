@@ -16,7 +16,7 @@ let stompClient = null;
 const editingLogs = false;
 const updateLogs = false;
 const sprintLogs = false;
-const groupLogs = false;
+const groupLogs = true;
 
 /**
  * Sets up a connection to a WebSocket
