@@ -278,7 +278,7 @@ class SprintControllerTest {
                         .param("description", "TEST")
                         .param("endDate", "2022-03-10"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
