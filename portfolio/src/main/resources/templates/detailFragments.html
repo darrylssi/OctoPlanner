@@ -58,8 +58,8 @@
             </div>
             <div class="schedulable-right" th:if="${canEdit}">
                 <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'deadline-' + *{getId} + '-editing-box'">
-                    <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'deadline-' + *{getId} + '-editing-text'"></span>
+                    <span class="dots-cont"> <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span>
                 </span>
                 <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${deadline}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -96,8 +96,8 @@
             </div>
             <div class="schedulable-right" th:if="${canEdit}">
                 <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'milestone-' + *{getId} + '-editing-box'">
-                    <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'milestone-' + *{getId} + '-editing-text'"></span>
+                    <span class="dots-cont"> <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span>
                 </span>
                 <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${milestone}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
