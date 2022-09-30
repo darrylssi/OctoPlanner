@@ -63,6 +63,7 @@ function hideErrorBoxes(elem) {
 
 /**
  * This submits the form and shows error messages if there are any.
+ * @param sprintId the id of the relevant sprint
  * @param elem HTML Form element
  */
 function saveSprint(sprintId, elem) {
