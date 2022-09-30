@@ -19,13 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
-
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -88,7 +86,6 @@ public class DetailsController extends PageController {
         return "redirect:" + id + '/';
     }
 
-
     /**
      * <p>Pre-populates all the data needed in the model</p>
      *
@@ -103,12 +100,14 @@ public class DetailsController extends PageController {
         model.addAttribute("maxNameLen", GlobalVars.MAX_NAME_LENGTH);
         model.addAttribute("maxDescLen", GlobalVars.MAX_DESC_LENGTH);
         model.addAttribute("dateISOFormat", GlobalVars.DATE_FORMAT);
+
         /* Add project details to the model */
         Project project = projectService.getProjectById(parentProjectId);
         model.addAttribute("project", project);
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
         model.addAttribute("projectForm", new ProjectForm());
+        model.addAttribute("sprintForm", new SprintForm());
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 

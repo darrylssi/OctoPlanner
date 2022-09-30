@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.*;
@@ -357,5 +360,32 @@ class GroupServiceTests {
         groupService.populateMembersWithoutAGroup();
         assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser1));
         assertFalse(testMembersWithoutAGroup.getMembers().contains(testUser2));
+    }
+
+    @Test
+    void test_getPaginatedGroupsAscendingByLongName() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("longName"));
+        when(groupRepository.findAll(pageable))
+                .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
+        List<Group> groups = groupService.getPaginatedGroups(0,2, "longName", true);
+        assertEquals(2, groups.size());
+        assertEquals("test long name", groups.get(0).getLongName());
+    }
+
+    @Test
+    void test_getPaginatedGroupsDescendingByShortName() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("shortName").descending());
+        when(groupRepository.findAll(pageable))
+                .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
+        List<Group> groups = groupService.getPaginatedGroups(0,2, "shortName", false);
+        assertEquals(2, groups.size());
+        assertEquals("test short name", groups.get(0).getShortName());
+    }
+
+    @Test
+    void test_getPaginatedGroupsByInvalid_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            groupService.getPaginatedGroups(0,2, "invalid", true);
+        });
     }
 }
