@@ -36,6 +36,52 @@ function handleGroupUpdateMessage(groupMessageOutput) {
         const groupBox = document.getElementById("group-" + groupMessageOutput.id);
         groupBox.parentElement.removeChild(groupBox);
     } else {
-
+        // see if group exists, if does, update, else make new box
+        const groupBox = document.getElementById("group-" + groupMessageOutput.id);
+        if (groupBox === null) {
+            createNewGroupDiv(groupMessageOutput);
+        } else {
+            // update
+            document.getElementById("group-" + groupMessageOutput.id + "-sname").innerHTML = groupMessageOutput.shortName;
+            document.getElementById("group-" + groupMessageOutput.id + "-lname").innerHTML = groupMessageOutput.longName;
+            // clear all users
+            document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
+            // add all users
+            for (let user of groupMessageOutput.members) {
+                createNewGroupMember(groupMessageOutput.id, user);
+            }
+        }
     }
+}
+
+function createNewGroupDiv(groupMessageOutput) {
+
+}
+
+/**
+ * Creates a new table row with the user's info for the specified group
+ * @param groupId
+ * @param user
+ */
+function createNewGroupMember(groupId, user) {
+    console.log(groupId + user.fullName + user.id);
+
+    const url = BASE_URL + "frag/" + groupId + '/' + user.id;
+    const groupMemberFragRequest = new XMLHttpRequest();
+    groupMemberFragRequest.open("GET", url, true);
+
+    groupMemberFragRequest.onload = () => {
+        createGroupMemberDisplay(groupId, user, groupMemberFragRequest.response);
+    }
+    groupMemberFragRequest.send();
+}
+
+function createGroupMemberDisplay(groupId, user, memberHTML) {
+    let newMember = document.createElement("tr");
+    newMember.classList.add("row");
+    newMember.innerHTML = memberHTML;
+
+    // find table element and insert html response
+    const table = document.getElementById("group-" + groupId + "-table");
+    table.firstChild.appendChild(newMember);
 }

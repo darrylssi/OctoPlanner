@@ -1,11 +1,10 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
-import nz.ac.canterbury.seng302.portfolio.model.Group;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
+import nz.ac.canterbury.seng302.portfolio.model.*;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
@@ -39,6 +38,9 @@ public class GroupController extends PageController{
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private UserAccountClientService userAccountClientService;
     @Autowired
     private GroupClientService groupClientService;
     
@@ -279,4 +281,28 @@ public class GroupController extends PageController{
         }
     }
 
+
+    /**
+     * A method to get the html of a group member that can be added to the details
+     * page using javascript
+     * TODO
+     */
+    @GetMapping("/frag/{groupId}/{userId}")
+    public String groupMemberFragment(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="groupId") int groupId,
+            @PathVariable(name="userId") int userId,
+            Model model
+    ){
+        PrincipalData thisUser = PrincipalData.from(principal);
+        UserResponse user = userAccountClientService.getUserAccountById(userId);
+
+        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
+        model.addAttribute("groupId", groupId);
+        model.addAttribute("userId", userId);
+        model.addAttribute("name", user.getFirstName()); // todo get whole name
+        model.addAttribute("userProfileImagePath", user.getProfileImagePath());
+
+        return "fragments :: groupMember";
+    }
 }
