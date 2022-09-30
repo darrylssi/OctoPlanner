@@ -34,7 +34,7 @@ function handleGroupUpdateMessage(groupMessageOutput) {
     }
 
     if (groupMessageOutput.shortName === null) { // Delete the group if it does not exist in the database
-        deleteGroup(groupMessageOutput.id);
+        deleteGroupElem(groupMessageOutput.id);
     } else {
         // see if group exists, if it does, update; else make new box
         const groupBox = document.getElementById("group-" + groupMessageOutput.id);
@@ -69,7 +69,7 @@ function updateGroup(groupMessageOutput) {
  * Removes a group from the page
  * @param groupId
  */
-function deleteGroup(groupId) {
+function deleteGroupElem(groupId) {
     if (groupLogs) {
         console.log("Deleting group with id " + groupId);
     }
@@ -114,9 +114,11 @@ function createGroupDisplay(groupMessageOutput, groupHTML) {
     form.appendChild(newGroup);
 
     // add all users
-    document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
-    for (let user of groupMessageOutput.members) {
-        createNewGroupMember(groupMessageOutput.id, user);
+    if (groupMessageOutput.members.length > 0) {
+        document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
+        for (let user of groupMessageOutput.members) {
+            createNewGroupMember(groupMessageOutput.id, user);
+        }
     }
 }
 
@@ -156,7 +158,6 @@ function createGroupMemberDisplay(groupId, user, memberHTML) {
  * Submits the given group form's request in Javascript, allowing for in-place
  * updating of the page.
  * @param {HTMLFormElement} elem
- * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
  */
 function sendGroupFormViaAjax(elem) {
     // Delete any pre-existing errors on the form
@@ -169,6 +170,13 @@ function sendGroupFormViaAjax(elem) {
 
     formRequest.onload = () => {
         if (formRequest.status === 200) {
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[0]);
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[1]);
+            sendGroupUpdatedMessage(formRequest.responseText.split(" ")[2].split("\n")[0]);
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[3]);
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[4]);
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[5]);
+            // sendGroupUpdatedMessage(formRequest.responseText.split(" ")[6]);
             window.location.reload();
         } else {
             const errors = formRequest.responseText.split('\n');
@@ -222,7 +230,7 @@ function deleteGroup(id) {
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
         hideModal();
-        //TODO: change this to send a message to websockets for live updating
+        sendGroupUpdatedMessage(id);
         window.location.reload();
     }
     deleteRequest.send();
@@ -304,6 +312,7 @@ function stopSelecting(group_id, button) {
  * @param action the action being done. 'remove-members' or 'add-members'
  */
 function sendFormViaAjax(group_id, action) {
+    sendGroupUpdatedMessage(group_id);
     let url = BASE_URL + 'groups/' + group_id + '/' + action;
     const formData = new FormData(document.getElementById('form'));
     const formRequest = new XMLHttpRequest();

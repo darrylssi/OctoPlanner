@@ -290,10 +290,12 @@ public class GroupController extends PageController{
     ){
         PrincipalData thisUser = PrincipalData.from(principal);
         UserResponse user = userAccountClientService.getUserAccountById(userId);
+        GroupDetailsResponse group = groupClientService.getGroupDetails(groupId);
 
         model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
         model.addAttribute("groupId", groupId);
         model.addAttribute("userId", userId);
+        model.addAttribute("groupName", group.getShortName());
 
         String fullname;
         if ("".equals(user.getMiddleName())) {
