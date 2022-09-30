@@ -101,10 +101,10 @@ public class MessageMappingController {
     }
 
     /**
-     * Receives a websocket message for a sprint id, then replies with an empty output if it doesn't exist,
-     * or a SprintMessageOutput with the sprint's data if it does exist.
-     * @param sprintMessage data received from the websocket containing the sprint id and type
-     * @return a SprintMessageOutput that gets sent to the endpoint in @Sendto
+     * Receives a websocket message for a project id, then replies with an empty output if it doesn't exist,
+     * or a ProjecttMessageOutput with the project's data if it does exist.
+     * @param projectMessage data received from the websocket containing the project id and type
+     * @return a ProjectMessageOutput that gets sent to the endpoint in @Sendto
      */
     @MessageMapping("/projects")
     @SendTo("/topic/projects")

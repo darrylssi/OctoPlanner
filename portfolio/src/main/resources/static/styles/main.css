@@ -348,3 +348,7 @@ button:hover {
     transform: translate(-50%, 0);
     z-index: 1;
 }
+
+.add-forms {
+    margin: 10px;
+}

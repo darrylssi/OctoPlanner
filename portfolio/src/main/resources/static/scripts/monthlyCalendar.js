@@ -399,6 +399,7 @@ function handleSprintUpdateMessage(sprintMessage) {
 
 /**
  * Responds to discovering a project has been updated (via websockets)
+ * @param projectMessage the message containing project information. Currently only id is used.
  */
 function handleProjectUpdateMessage(projectMessage) {
     // logging
