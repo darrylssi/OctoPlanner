@@ -71,6 +71,7 @@ public class DetailsController extends PageController {
         PrincipalData thisUser = PrincipalData.from(principal);
         prePopulateSchedulableForm(schedulableForm, userTimezone.toZoneId());
         prePopulateSprintForm(sprintForm, userTimezone.toZoneId(), id, model);
+        model.addAttribute("sprintForm", sprintForm);
         populateProjectDetailsModel(model, id, thisUser);
 
         return PROJECT_DETAILS_TEMPLATE_NAME;   // Return the name of the Thymeleaf template
@@ -107,7 +108,6 @@ public class DetailsController extends PageController {
         model.addAttribute("projectStart", DateUtils.toString(project.getProjectStartDate()));
         model.addAttribute("projectEnd", DateUtils.toString(project.getProjectEndDate()));
         model.addAttribute("projectForm", new ProjectForm());
-        model.addAttribute("sprintForm", new SprintForm());
 
         labelUtils.refreshProjectSprintLabels(parentProjectId);
 
@@ -127,7 +127,6 @@ public class DetailsController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
         model.addAttribute("user", thisUser.getFullName());
         model.addAttribute("userId", thisUser.getID());
-        model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         model.addAttribute("tab", 0);
     }
