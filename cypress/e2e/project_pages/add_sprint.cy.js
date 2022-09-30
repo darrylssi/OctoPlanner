@@ -109,7 +109,7 @@ describe("I can't add an invalid sprint", () => {
        .clear()
       .type('<New Sprint>')
     cy.get('[data-cy="add-sprint-save"]').click()
-    cy.contains(' Name can only have letters, numbers, punctuations except commas, and spaces.').should('be.visible')
+    cy.contains(' Name can only have letters, numbers, spaces and punctuation except for commas').should('be.visible')
   })
 
   it("doesn't add a sprint with an invalid description", () => {
@@ -120,7 +120,7 @@ describe("I can't add an invalid sprint", () => {
         .clear()
         .type('😃')
     cy.get('[data-cy="add-sprint-save"]').click()
-    cy.contains('Description can only have letters, numbers, punctuations, and spaces.').should('be.visible')
+    cy.contains('Description can only have letters, numbers, spaces and punctuation.').should('be.visible')
   })
 
   it("doesn't add a sprint overlapping another sprint", () => {
