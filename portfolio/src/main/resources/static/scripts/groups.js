@@ -14,6 +14,13 @@ function toggleUsersButton(button) {
 */
 function toggleById(group_id) {
     toggleUsersButton(document.getElementById("user-button-" + group_id));
+
+    if (groupLogs) {
+        console.log("Deleting group with id " + group_id);
+    }
+    const groupBox = document.getElementById("group-" + group_id);
+    groupBox.parentElement.removeChild(groupBox);
+
     sendGroupUpdatedMessage(group_id); // TODO remove
 }
 
@@ -26,7 +33,7 @@ function handleGroupUpdateMessage(groupMessageOutput) {
         console.log(groupMessageOutput);
     }
 
-    groupMessageOutput.id = 10;
+    // groupMessageOutput.id = 10;
 
     if (groupMessageOutput.shortName === null) { // Delete the group
         if (groupLogs) {
@@ -35,11 +42,17 @@ function handleGroupUpdateMessage(groupMessageOutput) {
         const groupBox = document.getElementById("group-" + groupMessageOutput.id);
         groupBox.parentElement.removeChild(groupBox);
     } else {
-        // see if group exists, if does, update, else make new box
+        // see if group exists, if it does, update; else make new box
         const groupBox = document.getElementById("group-" + groupMessageOutput.id);
         if (groupBox === null) {
+            if (groupLogs) {
+                console.log("Creating group with id " + groupMessageOutput.id);
+            }
             createNewGroupDiv(groupMessageOutput);
         } else {
+            if (groupLogs) {
+                console.log("Updating group with id " + groupMessageOutput.id);
+            }
             // update
             document.getElementById("group-" + groupMessageOutput.id + "-sname").innerHTML = groupMessageOutput.shortName;
             document.getElementById("group-" + groupMessageOutput.id + "-lname").innerHTML = groupMessageOutput.longName;
@@ -53,8 +66,11 @@ function handleGroupUpdateMessage(groupMessageOutput) {
     }
 }
 
+/**
+ * Create a div for a new group on the page
+ * @param groupMessageOutput the group update message with the group's details
+ */
 function createNewGroupDiv(groupMessageOutput) {
-    console.log("This method was called");
     const url = BASE_URL + "frag/" + groupMessageOutput.id;
     const groupFragRequest = new XMLHttpRequest();
     groupFragRequest.open("GET", url, true);
@@ -64,6 +80,8 @@ function createNewGroupDiv(groupMessageOutput) {
         newGroup.classList.add("card");
         newGroup.classList.add("group-block");
         newGroup.classList.add("container-auto");
+
+        newGroup.id = "group-" + groupMessageOutput.id;
 
         newGroup.innerHTML = groupFragRequest.response;
 
