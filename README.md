@@ -162,7 +162,7 @@ username: `sa`\
 password: leave blank
 
 ## User Manual
-The user manual of the application can be found at <https://docs.google.com/document/d/18i0VFJ5rMoCj69X1UW01uZUI77weBlpzSfD1sygBQ_M/edit>.  
+The user manual of the application can be found at <https://docs.google.com/document/d/18i0VFJ5rMoCj69X1UW01uZUI77weBlpzSfD1sygBQ_M/edit?usp=sharing>.  
 
 ## 1 Accessing the application
 
