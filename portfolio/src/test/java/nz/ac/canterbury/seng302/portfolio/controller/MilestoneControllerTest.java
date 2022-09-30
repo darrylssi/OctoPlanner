@@ -108,7 +108,7 @@ class MilestoneControllerTest {
                         .param("description", "This is a milestone")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
@@ -120,7 +120,7 @@ class MilestoneControllerTest {
                         .param("description", "This is invalid 😠")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+                .andExpect(content().string("Description can only have letters, numbers, spaces and punctuation"));
     }
 
     @Test
@@ -199,7 +199,7 @@ class MilestoneControllerTest {
                         .param("description", "This is a milestone")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
@@ -215,7 +215,7 @@ class MilestoneControllerTest {
                         .param("description", "This is a milestone 🥰")
                         .param("startDate", "2022-09-09"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Description can only have letters, numbers, punctuations, and spaces."));
+                .andExpect(content().string("Description can only have letters, numbers, spaces and punctuation"));
     }
 
     @Test

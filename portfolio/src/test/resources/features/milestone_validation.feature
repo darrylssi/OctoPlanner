@@ -24,6 +24,6 @@ Feature: Milestone validation
       | "2022-01-01" | "2022-12-31" | "2022-02-20" | "      "                               | "Name is blank"              | "Milestone name cannot be blank."|
       | "2022-01-01" | "2022-12-31" | "2022-02-20" | "S3"                                   | "This is a really really long milestone description that is hopefully longer than the maximum limit of two hundred characters which is a lot longer than I thought it would be so here are few more characters"  | "The milestone description must not exceed 200 characters."|
       | "2022-01-01" | "2022-12-31" | "2022-02-20" | "Emoji"                                | "Fire emoji 🔥"              | "Description can only have letters, numbers, punctuations and spaces."|
-      | "2022-01-01" | "2022-12-31" | "2022-02-20" | "Invalid punctuation"                  | "This $ is not accepted for some reason ^" | "Description can only have letters, numbers, punctuations, and spaces."|
+      | "2022-01-01" | "2022-12-31" | "2022-02-20" | "Invalid punctuation"                  | "This $ is not accepted for some reason ^" | "Description can only have letters, numbers, spaces and punctuation."|
       | "2022-01-01" | "2022-12-31" | "2021-02-20" | "M4"                                   | "Date before project start date" | "Milestone date must be within project date range: %s - %s" |
       | "2022-01-01" | "2022-12-31" | "2023-02-20" | "M5"                                   | "Date after project end date"    | "Milestone date must be within project date range: %s - %s" |

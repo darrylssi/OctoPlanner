@@ -15,6 +15,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  * Sprint objects are stored in a table called Sprint, as it is an @Entity.
  */
 @Entity
+@Table (name = "Sprint")
 public class Sprint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -156,6 +157,10 @@ public class Sprint {
         this.sprintStartDate = DateUtils.toDate(date);
     }
 
+    public String getStartDay() {
+        return DateUtils.toString(sprintStartDate);
+    }
+
     public Date getSprintEndDate() {
         return sprintEndDate;
     }
@@ -166,6 +171,10 @@ public class Sprint {
      */
     public String getEndDateString() {
         return DateUtils.toDisplayString(this.sprintEndDate);
+    }
+
+    public String getEndDay() {
+        return DateUtils.toString(sprintEndDate);
     }
 
     public void setEndDate(Date newEndDate) {
