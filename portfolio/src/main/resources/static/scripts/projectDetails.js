@@ -5,6 +5,7 @@ const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout f
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EDIT_NOTIFICATIONS = ['event', 'deadline', 'milestone'];
 
 /** Hides the deletion confirmation modal without deleting a sprint/event/deadline */
 function hideModal() {
@@ -36,11 +37,12 @@ function deleteObject(id, type) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        hideModal();
-        if (type !== 'sprint') {
-            // Send a schedulable websocket message to update the page after the deletion, for non-sprints
+        // Send a websocket message to update the page after the deletion
+        if (type in EDIT_NOTIFICATIONS) {
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
+            hideModal();
         } else {
+            sendSprintUpdatedMessage(id);
             window.location.reload();
         }
     }
@@ -61,6 +63,7 @@ function hideErrorBoxes(elem) {
 
 /**
  * This submits the form and shows error messages if there are any.
+ * @param sprintId the id of the relevant sprint
  * @param elem HTML Form element
  */
 function saveSprint(sprintId, elem) {
@@ -76,6 +79,7 @@ function saveSprint(sprintId, elem) {
         if (formRequest.status === 200) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', sprintId, 'sprint');
+            sendSprintUpdatedMessage(sprintId);
             window.location.reload();
         } else {
             // Otherwise, show the error messages
@@ -157,11 +161,12 @@ function sendFormViaAjax(elem, type) {
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             if (type === 'sprint'){
+                sendSprintUpdatedMessage(formRequest.response);
                 window.location.reload();
             } else {
                 // Success
                 hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
-                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
+                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
                 if (url.indexOf("add") !== -1) {
                     resetAddForm(type);
                 }
@@ -311,7 +316,10 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    stopEditing();
+
+    if (schedulableType in EDIT_NOTIFICATIONS) {
+        stopEditing();
+    }
 }
 
 /**
@@ -362,6 +370,33 @@ function handleSchedulableMessage(editMessage) {
     }
 }
 
+/**
+ * Handles an incoming sprint update message by prompting the user to refresh.
+ * Should also log something if the logging variable is true.
+ * @param sprintMessage the message containing information about the sprint. Name, dates etc.
+ */
+function handleSprintUpdateMessage(sprintMessage) {
+    // logging
+    if (sprintLogs) {
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
 
 /**
  * Shows editing-schedulable notifications on the page
@@ -528,17 +563,12 @@ function displayRemainingCharacters(input, display) {
     }
     const event = () => {
         const maxLength = input.getAttribute('maxlength');
-        const minLength = input.getAttribute('minlength');
         const inputLength = input.value.length;
         const remainingChars = maxLength - inputLength;
         if (remainingChars <= 0) {
             // Too many characters
             display.classList.add('text-danger');
             display.textContent = remainingChars;
-        } else if (minLength !== null && inputLength < minLength) {
-            // (Optional) Not enough characters
-            display.classList.add('text-danger');
-            display.textContent = '< ' + (minLength - inputLength);
         } else {
             display.classList.remove('text-danger');
             display.textContent = remainingChars;

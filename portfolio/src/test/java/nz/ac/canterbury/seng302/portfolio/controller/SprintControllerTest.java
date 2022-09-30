@@ -92,7 +92,9 @@ class SprintControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addValidSprint_get200Response() throws Exception {
-        Mockito.doNothing().when(sprintService).saveSprint(any());
+        Sprint thisSprint = new Sprint(PROJECT_ID, "Sprint 1", "", DateUtils.toDate("2022-09-09"),
+                        DateUtils.toDate("2022-10-09"), "#abcdef");
+        when(sprintService.saveSprint(any())).thenReturn(thisSprint);
         this.mockMvc.perform(post("/add-sprint/0")
                         .param("name", "Sprint 1")
                         .param("description", "")
@@ -124,7 +126,7 @@ class SprintControllerTest {
                         .param("startDate", "2022-06-20")
                         .param("endDate", "2022-06-21"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Name can only have letters, numbers, punctuations except commas, and spaces.")));
+                .andExpect(content().string(containsString("Name can only have letters, numbers, spaces and punctuation except for commas")));
     }
 
     @Test
@@ -137,7 +139,7 @@ class SprintControllerTest {
                         .param("startDate", "2022-06-20")
                         .param("endDate", "2022-06-21"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Description can only have letters, numbers, punctuations, and spaces.")));
+                .andExpect(content().string(containsString("Description can only have letters, numbers, spaces and punctuation")));
     }
 
     @Test
@@ -278,7 +280,7 @@ class SprintControllerTest {
                         .param("description", "TEST")
                         .param("endDate", "2022-03-10"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test

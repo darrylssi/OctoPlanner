@@ -353,6 +353,69 @@ function createTooltipString(icon, sNames, sStarts, sEnds, i) {
 }
 
 /**
+ * Update the calendar using the information sent through the websocket
+ * @param message Message sent through the websocket
+ */
+function updateCalendar(message) {
+    const url = BASE_URL + "project/" + projectId + "/schedulables/" + message.type;
+    const schedulableFragRequest = new XMLHttpRequest();
+    schedulableFragRequest.open("GET", url, true);
+    schedulableFragRequest.onload = () => {
+        // Reload the page to get the updated list of sprints after the delete
+        rerenderCalendar(schedulableFragRequest.response, message);
+    }
+    schedulableFragRequest.send();
+}
+
+
+/**
+ * Rerender the calendar with the new schedulable details
+ * @param response Response from the GET request containing the list of all schedulables
+ * @param message Message sent through the websocket
+ */
+function rerenderCalendar(response, message) {
+    removeSchedulables(message.type);
+    let schedulables = JSON.parse(response);
+    for (let i = 0; i < schedulables.length; i ++) {
+        let schedulable = schedulables[i];
+        let start = getDateFromProjectDateString(schedulable.startDay);
+        const end = getDateFromProjectDateString(schedulable.endDay);
+        while (start <= end) {
+            const id = `${message.type}-${getStringFromDate(start)}`;
+            const icon = calendar.getEventById(id);
+            icon.setExtendedProp("num", icon.extendedProps.num + 1);
+            icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat(schedulable.name));
+            if (icon.extendedProps.description === '') {
+                icon.setExtendedProp("description", schedulable.name);
+            } else{
+                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + schedulable.name);
+            }
+
+            let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
+            newStart.setDate(newStart.getDate() + 1);
+            start = newStart;
+        }
+    }
+    calendar.render();
+}
+
+
+/**
+ * Remove from the calendar all schedulables of a given type.
+ * @param type Type of the schedulable to be removed
+ */
+function removeSchedulables(type) {
+    let events = calendar.getEvents();
+    for (let i = 0; i < events.length; i++) {
+        if (events[i].id.includes(type) && events[i].extendedProps.num !== 0) {
+            const icon = calendar.getEventById(events[i].id);
+            icon.setExtendedProp("num", 0);
+        }
+    }
+}
+
+
+/**
  * Handles an incoming sprint update message by adding/updating/removing the relevant sprint event in the calendar.
  * Logs the incoming message if the logging variable is true.
  *
@@ -395,4 +458,18 @@ function handleSprintUpdateMessage(sprintMessage) {
             extendedProps: { type: 'sprint' }
         });
     }
+}
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ * @param projectMessage the message containing project information. Currently only id is used.
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
 }

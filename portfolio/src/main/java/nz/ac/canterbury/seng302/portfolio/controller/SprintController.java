@@ -1,32 +1,31 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
-import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintLabelService;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.portfolio.utils.GlobalVars;
 import nz.ac.canterbury.seng302.portfolio.utils.PrincipalData;
 import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
-import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import nz.ac.canterbury.seng302.portfolio.model.Project;
-import nz.ac.canterbury.seng302.portfolio.model.Sprint;
-import nz.ac.canterbury.seng302.portfolio.service.SprintService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
 import javax.validation.Valid;
 import java.util.*;
 
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * Controller for endpoints for adding and editing sprints
@@ -83,8 +82,8 @@ public class SprintController extends PageController {
         ValidationError dateOutOfRange = getDateValidationError(DateUtils.localDateToDate(sprintForm.getStartDate()), DateUtils.localDateToDate(sprintForm.getEndDate()),
                 projectId, parentProject, sprintList);
 
-        ValidationError invalidName = ValidationUtils.validateText(sprintForm.getName(), GlobalVars.NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
-        ValidationError invalidDescription = ValidationUtils.validateText(sprintForm.getDescription(), GlobalVars.DESC_REGEX, GlobalVars.DESC_ERROR_MESSAGE);
+        ValidationError invalidName = ValidationUtils.validateText(sprintForm.getName(), NAME_REGEX, GlobalVars.NAME_ERROR_MESSAGE);
+        ValidationError invalidDescription = ValidationUtils.validateText(sprintForm.getDescription(), DESC_REGEX, DESC_ERROR_MESSAGE);
         if (dateOutOfRange.isError() || invalidName.isError() || invalidDescription.isError()) {
             return new ResponseEntity<>(ValidationUtils.joinErrors(dateOutOfRange, invalidName, invalidDescription), HttpStatus.BAD_REQUEST);
         }
@@ -106,8 +105,8 @@ public class SprintController extends PageController {
         sprint.setSprintLabel(labelUtils.nextLabel(projectId));
         sprint.setSprintColour(sprintColour);
 
-        sprintService.saveSprint(sprint);
-        return new ResponseEntity<>("Sprint Updated", HttpStatus.OK);
+        Sprint savedSprint = sprintService.saveSprint(sprint);
+        return ResponseEntity.ok(String.valueOf(savedSprint.getId()));
     }
 
     /**
@@ -219,7 +218,8 @@ public class SprintController extends PageController {
         ValidationError dateErrors = ValidationUtils.validateSprintDates(sprintId, DateUtils.localDateToDate(sprintForm.getStartDate()),
                 DateUtils.localDateToDate(sprintForm.getEndDate()), parentProject, sprintList);
         ValidationError nameErrors = ValidationUtils.validateText(sprintForm.getName(), NAME_REGEX, NAME_ERROR_MESSAGE);
-        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, new ValidationError());
+        ValidationError descErrors = ValidationUtils.validateText(sprintForm.getDescription(), DESC_REGEX, DESC_ERROR_MESSAGE);
+        String errorString = ValidationUtils.joinErrors(dateErrors, nameErrors, descErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);
     }

@@ -5,8 +5,11 @@ import nz.ac.canterbury.seng302.portfolio.model.Event;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.DeadlineService;
 import nz.ac.canterbury.seng302.portfolio.service.EventService;
+import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.SprintService;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
+import nz.ac.canterbury.seng302.portfolio.utils.ProjectMessage;
+import nz.ac.canterbury.seng302.portfolio.utils.ProjectMessageOutput;
 import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessage;
 import nz.ac.canterbury.seng302.portfolio.utils.SchedulableMessageOutput;
 import org.junit.jupiter.api.Test;
@@ -39,6 +42,8 @@ class MessageMappingControllerTest {
     private DeadlineService deadlineService;
     @MockBean
     private SprintService sprintService;
+    @MockBean
+    private ProjectService projectService;
 
     @Autowired
     MessageMappingController messageMappingController = new MessageMappingController(new SimpMessagingTemplate((message1, timeout) -> false));
@@ -102,5 +107,30 @@ class MessageMappingControllerTest {
         SchedulableMessageOutput SchedulableMessageOutput = messageMappingController.sendSchedulableData(message);
         assertEquals(1, SchedulableMessageOutput.getId());
         assertEquals(1, SchedulableMessageOutput.getSchedulableListIds().size());
+    }
+
+    @Test
+    void whenProjectDoesNotExist_thenReturnEmptyResponse() {
+        when(projectService.getProjectById(1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found."));
+        ProjectMessage message = new ProjectMessage();
+        message.setId(1);
+        ProjectMessageOutput projectMessageOutput = messageMappingController.sendProjectData(message);
+        assertEquals(1, projectMessageOutput.getId());
+    }
+
+    @Test
+    void whenProjectDoesExist_thenReturnFullResponse() {
+        Project project = new Project("ProjName", "desc", DateUtils.toDate("2022-01-01"), DateUtils.toDate("2022-04-01"));
+        project.setId(1);
+        when(projectService.getProjectById(1)).thenReturn(project);
+
+        ProjectMessage message = new ProjectMessage();
+        message.setId(1);
+        ProjectMessageOutput projectMessageOutput = messageMappingController.sendProjectData(message);
+        assertEquals(1, projectMessageOutput.getId());
+        // With correct information
+        assertEquals(project.getProjectName(), projectMessageOutput.getName());
+        assertEquals(project.getProjectStartDate(), projectMessageOutput.getStartDate());
+        assertEquals(project.getProjectEndDate(), projectMessageOutput.getEndDate());
     }
 }
