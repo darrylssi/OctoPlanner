@@ -120,7 +120,7 @@
                         <td class="col-auto"><img class="profile-icon" th:src="${user.getProfileImagePath()}" alt="User profile photo"></td>
                         <td class="col" th:text="|${user.getFirstName()} ${user.getMiddleName()} ${user.getLastName()}|"></td>
                         <td class="col-auto">
-                            <button type="button" th:if="${group.key != membersWithoutGroupsId && canEdit}" class="remove-button" >
+                            <button th:if="${group.key != membersWithoutGroupsId && canEdit}" class="delete-button" style="margin-right:10px" type="button" th:onclick="|removeUserFromGroup(*{key}, ${user.getId()})|">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
                                     <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
                                 </svg>
