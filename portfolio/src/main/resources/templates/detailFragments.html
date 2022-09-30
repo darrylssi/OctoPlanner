@@ -208,7 +208,7 @@
                     </div>
                     <div class="col-10">
                         <div class="form-floating input-group mb-3 limited-text-input">
-                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, punctuations, and spaces.|">
+                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, spaces and punctuation.|">
                             <label for="addSchedulableDescriptionInput">Description</label>
                             <span class="input-group-text remaining-chars-field">...</span>
                         </div>

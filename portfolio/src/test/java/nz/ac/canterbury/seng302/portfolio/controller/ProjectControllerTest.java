@@ -98,7 +98,7 @@ class ProjectControllerTest {
                         .param("startDate", "2021-06-20")
                         .param("endDate", "2022-03-05"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Name can only have letters, numbers, punctuations except commas, and spaces.")));
+                .andExpect(content().string(containsString("Name can only have letters, numbers, spaces and punctuation except for commas")));
     }
 
     @Test
