@@ -135,7 +135,7 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addValidGroupAsTeacher_get200Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group 1")
                         .param("longName", "Test Project Group"))
                 .andExpect(status().isOk());
@@ -144,45 +144,52 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addBlankShortNameGroupAsTeacher_get400Response() throws Exception {
-        String resultString = mockMvc.perform(post("/project/0/add-group")
+        String resultString = mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "")
                         .param("longName", "Test Project Group 2022"))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
-        Assertions.assertTrue(resultString.contains("Short name cannot be blank"));
-        Assertions.assertTrue(resultString.contains("Short name must be between 2-32 characters"));
+        Assertions.assertTrue(resultString.contains("Group short name cannot be empty"));
+        Assertions.assertTrue(resultString.contains("Group short name must be between 2 and 32 characters"));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addBlankLongNameGroupAsTeacher_get400Response() throws Exception {
-        String resultString = mockMvc.perform(post("/project/0/add-group")
+        String resultString = mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group")
                         .param("longName", ""))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
-        Assertions.assertTrue(resultString.contains("Long name cannot be blank"));
-        Assertions.assertTrue(resultString.contains("Long name must be between 2-128 characters"));
+        Assertions.assertTrue(resultString.contains("Group long name cannot be empty"));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addInvalidShortNameGroupAsTeacher_get400Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group 🏋")
                         .param("longName", "Test Project Group 2022"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
+                .andExpect(content().string("Group short name can only have letters, numbers, punctuations except commas, and spaces."));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addInvalidLongNameGroupAsTeacher_get400Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group")
                         .param("longName", "Test Project Group 2022 🏋"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
+                .andExpect(content().string("Group long name can only have letters, numbers, punctuations, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void addGroupAsStudent_forbidden() throws Exception {
+        this.mockMvc.perform(post("/groups/add-group"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
     @Test
@@ -217,14 +224,6 @@ class GroupControllerTest {
         mockMvc.perform(post("/groups/1/add-members")
                         .param("user_id", "1")
                         .param("user_id", "2"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string("You do not have permission to access this endpoint"));
-    }
-
-    @Test
-    @WithMockPrincipal(STUDENT)
-    void addGroupAsStudent_forbidden() throws Exception {
-        this.mockMvc.perform(post("/project/0/add-group"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }
