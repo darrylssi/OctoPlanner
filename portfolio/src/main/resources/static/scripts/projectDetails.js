@@ -5,6 +5,7 @@ const schedulableTimeouts = new Map(); // holds schedulable ids and setTimeout f
 let sendEditMessageInterval;
 const EDIT_FORM_CLOSE_DELAY = 300;
 const DATES_IN_WRONG_ORDER_MESSAGE = "Start date must always be before end date";
+const EDIT_NOTIFICATIONS = ['event', 'deadline', 'milestone'];
 
 /** Hides the deletion confirmation modal without deleting a sprint/event/deadline */
 function hideModal() {
@@ -36,11 +37,12 @@ function deleteObject(id, type) {
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
-        hideModal();
-        if (type !== 'sprint') {
-            // Send a schedulable websocket message to update the page after the deletion, for non-sprints
+        // Send a websocket message to update the page after the deletion
+        if (type in EDIT_NOTIFICATIONS) {
             stompClient.send("/app/schedulables", {}, JSON.stringify({id: id, type: type}));
+            hideModal();
         } else {
+            sendSprintUpdatedMessage(id);
             window.location.reload();
         }
     }
@@ -57,6 +59,87 @@ function hideErrorBoxes(elem) {
         feedbackBox.innerHTML = '';
         feedbackBox.style.display = 'none';
     }
+}
+
+/**
+ * This submits the form and shows error messages if there are any.
+ * @param sprintId the id of the relevant sprint
+ * @param elem HTML Form element
+ */
+function saveSprint(sprintId, elem) {
+    // Remove existing error messages
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            // Upon success, hide the edit project form and reload the page
+            hideEditSchedulable('1', sprintId, 'sprint');
+            sendSprintUpdatedMessage(sprintId);
+            window.location.reload();
+        } else {
+            // Otherwise, show the error messages
+            const errors = formRequest.responseText.split('\n');
+            for (let errorMsg of errors) {
+                let field = "name";
+                if (errorMsg === DATES_IN_WRONG_ORDER_MESSAGE || errorMsg.indexOf('end date') !== -1) {
+                    field = 'endDate';
+                } else if (errorMsg.indexOf('date') !== -1 || errorMsg.indexOf('sprint') !== -1) {
+                    field = 'startDate'
+                } else if (errorMsg.indexOf('exceed') !== -1) {
+                    field = 'description'
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+/**
+ * The function shows the selected sprint edit form. All of the other sprint edit forms are closed.
+ * @param sprint Gets the selected edit sprint object
+ */
+function showEditSprintForm(sprint) {
+    /* Search for the edit form */
+    let editForm = document.getElementById("editSprintForm-" + sprint.id);
+    hideErrorBoxes(editForm);
+    prefillSchedulable(editForm, sprint, 'sprint');
+
+    /* Collapse element, send stop message, and take no further action if the selected form is open */
+    if (editForm != null && editForm.classList.contains("show")) {
+        hideEditSchedulable('1', sprint.id, 'sprint');
+        return;
+    }
+
+    /* Collapse any edit forms already on the page. If we find any, delay
+       opening the new form by EDIT_FORM_CLOSE_DELAY. */
+    let collapseElementList = document.getElementsByClassName("collapse show");
+    let delay = collapseElementList.length > 0 ? EDIT_FORM_CLOSE_DELAY : 0;
+    let different = false;
+    for (let element of collapseElementList) {
+        new bootstrap.Collapse(element).hide();
+        /* Check whether any form is for a different form, to see whether
+           we need to send a stop editing message */
+        if (element.id.indexOf("editSprintForm-" + sprint.id) === -1) {
+            different = true;  // Extracted to a variable to avoid sending extra messages (worst case)
+        }
+    }
+    showRemainingChars();   // Used to update the remaining number of chars for name and description
+
+    /* Get this form to show after a delay that allows any other open forms to collapse */
+    setTimeout((formId) => {
+        let shownForm = document.getElementById(formId)
+        new bootstrap.Collapse(shownForm).show();
+        shownForm.scroll({ top: shownForm.scrollHeight, behavior: "smooth"})
+    }, delay, "editSprintForm-" + sprint.id);
 }
 
 /**
@@ -78,11 +161,12 @@ function sendFormViaAjax(elem, type) {
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             if (type === 'sprint'){
+                sendSprintUpdatedMessage(formRequest.response);
                 window.location.reload();
             } else {
                 // Success
                 hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
-                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}))
+                stompClient.send("/app/schedulables", {}, JSON.stringify({id: formRequest.response, type: type}));
                 if (url.indexOf("add") !== -1) {
                     resetAddForm(type);
                 }
@@ -175,7 +259,6 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
         clearInterval(sendEditMessageInterval);
     }
     sendEditMessageInterval = setInterval(function() {sendEditingSchedulableMessage(schedulableId, schedulableType)}, SCHEDULABLE_EDIT_MESSAGE_FREQUENCY)
-    showRemainingChars();
 
     showRemainingChars();   // Used to update the remaining number of chars for name and description
 
@@ -188,22 +271,31 @@ function showEditSchedulable(schedulableId, schedulableBoxId, schedulableType, s
 }
 
 /**
- * Populates the edit schedulable form with the current details of the schedulable.
- * @param editForm Edit schedulable form
- * @param schedulable Schedulable object
- * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ * Populates the edit sprint/schedulable form with the current details of the sprint/schedulable.
+ * @param editForm Edit sprint/schedulable form
+ * @param schedulable Sprint/Schedulable object
+ * @param type the type of the sprint/schedulable, e.g. 'sprint', 'deadline', 'milestone', or 'event'
  */
 function prefillSchedulable(editForm, schedulable, type) {
-    editForm.querySelector("#name").value = schedulable.name;
-    editForm.querySelector("#description").value =  schedulable.description;
-    editForm.querySelector("#startDate").value = schedulable.startDay;
-    if (type !== 'milestone'){
-        editForm.querySelector("#startTime").value = schedulable.startTime;
+    if (type === 'sprint') {
+        editForm.querySelector("#sprintName").value = schedulable.sprintName;
+        editForm.querySelector("#sprintDescription").value =  schedulable.sprintDescription;
+        editForm.querySelector("#sprintStartDate").value = schedulable.startDay;
+        editForm.querySelector("#sprintEndDate").value =  schedulable.endDay;
+    } else {
+        editForm.querySelector("#name").value = schedulable.name;
+        editForm.querySelector("#description").value = schedulable.description;
+        editForm.querySelector("#startDate").value = schedulable.startDay;
+
+        if (type !== 'milestone'){
+                editForm.querySelector("#startTime").value = schedulable.startTime;
+        }
+        if (type === 'event'){
+            editForm.querySelector("#endDate").value = schedulable.endDay;
+            editForm.querySelector("#endTime").value = schedulable.endTime;
+        }
     }
-    if (type === 'event'){
-        editForm.querySelector("#endDate").value = schedulable.endDay;
-        editForm.querySelector("#endTime").value = schedulable.endTime;
-    }
+
 }
 
 /**
@@ -224,7 +316,10 @@ function hideEditSchedulable(schedulableId, schedulableBoxId, schedulableType) {
     if (editForm) { // Just in case
         new bootstrap.Collapse(editForm).hide();
     }
-    stopEditing();
+
+    if (schedulableType in EDIT_NOTIFICATIONS) {
+        stopEditing();
+    }
 }
 
 /**
@@ -275,6 +370,33 @@ function handleSchedulableMessage(editMessage) {
     }
 }
 
+/**
+ * Handles an incoming sprint update message by prompting the user to refresh.
+ * Should also log something if the logging variable is true.
+ * @param sprintMessage the message containing information about the sprint. Name, dates etc.
+ */
+function handleSprintUpdateMessage(sprintMessage) {
+    // logging
+    if (sprintLogs) {
+        console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
 
 /**
  * Shows editing-schedulable notifications on the page
@@ -441,17 +563,12 @@ function displayRemainingCharacters(input, display) {
     }
     const event = () => {
         const maxLength = input.getAttribute('maxlength');
-        const minLength = input.getAttribute('minlength');
         const inputLength = input.value.length;
         const remainingChars = maxLength - inputLength;
         if (remainingChars <= 0) {
             // Too many characters
             display.classList.add('text-danger');
             display.textContent = remainingChars;
-        } else if (minLength !== null && inputLength < minLength) {
-            // (Optional) Not enough characters
-            display.classList.add('text-danger');
-            display.textContent = '< ' + (minLength - inputLength);
         } else {
             display.classList.remove('text-danger');
             display.textContent = remainingChars;

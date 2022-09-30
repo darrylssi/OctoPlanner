@@ -20,8 +20,8 @@
             </div>
             <div class="schedulable-right" th:if="${canEdit}">
                 <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'event-' + *{getId} + '-editing-box'">
-                    <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'event-' + *{getId} + '-editing-text'"></span>
+                    <span class="dots-cont"> <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span>
                 </span>
                 <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${event}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -58,8 +58,8 @@
             </div>
             <div class="schedulable-right" th:if="${canEdit}">
                 <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'deadline-' + *{getId} + '-editing-box'">
-                    <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'deadline-' + *{getId} + '-editing-text'"></span>
+                    <span class="dots-cont"> <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span>
                 </span>
                 <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${deadline}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -96,8 +96,8 @@
             </div>
             <div class="schedulable-right" th:if="${canEdit}">
                 <span th:if="${canEdit}" class="me-2" th:style="'visibility: hidden'" th:class="'milestone-' + *{getId} + '-editing-box'">
-                    <span class="spinner-border spinner-border-sm"></span>
                     <span class="fst-italic" th:class="'milestone-' + *{getId} + '-editing-text'"></span>
+                    <span class="dots-cont"> <span class="dot dot-1"></span> <span class="dot dot-2"></span> <span class="dot dot-3"></span> </span>
                 </span>
                 <button class="edit-button edit-schedulable-button" th:onclick="return showEditSchedulable([[*{getId}]], [[${boxId}]], [[*{getType}]], [[${milestone}]])">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -174,12 +174,13 @@
                             <small id="editSchedulableEndTimeFeedback" class="text-danger"></small>
                         </div>
                     </div>
-                    <div class="row justify-content-md-center">
-                        <ul id="errors" class="col"></ul>
-                        <div class="col col-md-2">
+                    <ul id="errors" class="col"></ul>
+                    <div class="row justify-content-end">
+
+                        <div class="col col-md-4 col-lg-2">
                             <button type="button" id="cancel" class="btn btn-secondary btn-lg buttons" th:onclick="return hideEditSchedulable([[${schedulable.getId}]], [[${boxId}]], [[${schedulable.getType}]])">Cancel</button>
                         </div>
-                        <div class="col col-md-2">
+                        <div class="col col-md-3 col-lg-2">
                             <button type="submit" class="btn btn-primary btn-lg buttons pull-right">Save Changes</button>
                         </div>
                     </div>
@@ -207,7 +208,7 @@
                     </div>
                     <div class="col-10">
                         <div class="form-floating input-group mb-3 limited-text-input">
-                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, punctuations, and spaces.|">
+                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, spaces and punctuation.|">
                             <label for="addSchedulableDescriptionInput">Description</label>
                             <span class="input-group-text remaining-chars-field">...</span>
                         </div>
@@ -279,14 +280,14 @@
                 <div class="row">
                     <div class="col">
                         <div class="form-floating mb-3">
-                            <input type="date" th:field="*{startDate}" class="form-control" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <input type="date" th:field="*{startDate}" class="form-control" data-cy="addSprintStartDate" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="sprintStartDate">Start Date</label>
                         </div>
                         <small id="addSprintStartDateFeedback" class="text-danger" th:text="${sprintStartError}"></small>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3 has-validation">
-                            <input type="date" th:field="*{endDate}" class="form-control" id="sprintEndDate" aria-describedby="sprintEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <input type="date" th:field="*{endDate}" class="form-control" data-cy="addSprintEndDate" id="sprintEndDate" aria-describedby="sprintEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="sprintEndDate">End Date</label>
                         </div>
                         <small id="addSsprintEndDateFeedback" class="text-danger"></small>

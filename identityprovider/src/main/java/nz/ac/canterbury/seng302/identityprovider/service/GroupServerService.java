@@ -1,21 +1,21 @@
 package nz.ac.canterbury.seng302.identityprovider.service;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
+import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
@@ -250,11 +250,12 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * Gets a group's details in the form of a GetGroupDetailsResponse
      * If the group does not exist, all the fields in the GetGroupDetailsResponse will be blank
      * @param request An object containing the id of the group to retrieve details from
+     * @param responseObserver Observable stream of messages
      */
     @Override
-    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GetGroupDetailsResponse> responseObserver) {
+    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GroupDetailsResponse> responseObserver) {
         logger.info("getGroupDetails() has been called");
-        GetGroupDetailsResponse.Builder reply = GetGroupDetailsResponse.newBuilder();
+        GroupDetailsResponse.Builder reply = GroupDetailsResponse.newBuilder();
 
         Group group;
         try {
@@ -270,11 +271,49 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         for (User user : group.getMembers()) {
             userResponses.add(userAccountServerService.buildUserResponse(user));
         }
+        userResponses.sort(Comparator.comparing((UserResponse user) -> user.getFirstName() + user.getMiddleName() + user.getLastName()));
 
         reply
+                .setGroupId(group.getId())
                 .setShortName(group.getShortName())
                 .setLongName(group.getLongName())
                 .addAllMembers(userResponses);
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Get the list of groups in the form of PaginatedGroupsResponse
+     * @param request An object containing the number of groups, the offset, how they are ordered and if they are ascending
+     */
+    @Override
+    public void getPaginatedGroups(GetPaginatedGroupsRequest request, StreamObserver<PaginatedGroupsResponse> responseObserver) {
+        logger.info("getPaginatedGroups() has been called");
+
+        PaginatedGroupsResponse.Builder reply = PaginatedGroupsResponse.newBuilder();
+        PaginationRequestOptions options = request.getPaginationRequestOptions();
+        int limit = options.getLimit();
+        int offset = options.getOffset();
+        String orderBy = options.getOrderBy();
+        boolean isAscending = options.getIsAscendingOrder();
+
+        List<Group> groups;
+        try {
+            groups = groupService.getPaginatedGroups(offset, limit, orderBy, isAscending);
+        } catch (IllegalArgumentException e) {
+            Throwable statusError = Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException();
+            responseObserver.onError(statusError);
+            return;
+        }
+
+        List<GroupDetailsResponse> groupDetailsResponses = groups.stream().map(this::buildGroupDetailsResponse).toList();
+        int numGroupsInDatabase = (int) groupRepository.count();
+        PaginationResponseOptions.Builder responseOptions = PaginationResponseOptions.newBuilder();
+        responseOptions.setResultSetSize(numGroupsInDatabase).build();
+        reply
+                .addAllGroups(groupDetailsResponses)
+                .setPaginationResponseOptions(responseOptions);
+
         responseObserver.onNext(reply.build());
         responseObserver.onCompleted();
     }
@@ -328,4 +367,25 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
 
         return errors;
     }
+
+    /**
+     * Returns a GroupDetailsResponse builder object from a Group model.
+     *
+     * @param group The group object to extract the fields from
+     * @return A gRPC-ready response object with the group's fields copied in
+     */
+    public GroupDetailsResponse buildGroupDetailsResponse(Group group) {
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : group.getMembers()) {
+            userResponses.add(userAccountServerService.buildUserResponse(user));
+        }
+
+        GroupDetailsResponse.Builder groupDetailsResponse = GroupDetailsResponse.newBuilder()
+                .setGroupId(group.getId())
+                .setLongName(group.getLongName())
+                .setShortName(group.getShortName())
+                .addAllMembers(userResponses);
+        return groupDetailsResponse.build();
+    }
+
 }
