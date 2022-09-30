@@ -67,10 +67,11 @@ function hideModal() {
  * @param id the id of the object, e.g. 12
  * @param name the name of the object as a string
  */
-function showDeleteModal(id, name) {
+function showDeleteModal(id, name, members) {
     const modal = document.getElementById("deleteModal");
     const deleteButton = document.getElementById("deleteButton");
     document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + name + "?";
+    document.getElementsByClassName("modal-description")[0].textContent = members+" users will be removed from this group and the group will be deleted. This cannot be undone.";
     deleteButton.onclick = () => {deleteGroup(id)}
     modal.style.display = "block";
 }
