@@ -16,6 +16,12 @@ import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Sprint;
+import nz.ac.canterbury.seng302.portfolio.service.SprintService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -105,8 +111,8 @@ public class SprintController extends PageController {
         sprint.setSprintLabel(labelUtils.nextLabel(projectId));
         sprint.setSprintColour(sprintColour);
 
-        sprintService.saveSprint(sprint);
-        return new ResponseEntity<>("Sprint Updated", HttpStatus.OK);
+        Sprint savedSprint = sprintService.saveSprint(sprint);
+        return ResponseEntity.ok(String.valueOf(savedSprint.getId()));
     }
 
     /**
