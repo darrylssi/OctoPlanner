@@ -80,7 +80,7 @@ function showDeleteModal(id, name) {
 * @param id the id of the group to be deleted
 */
 function deleteGroup(id) {
-    const url = BASE_URL + "delete-group/" + id;
+    const url = BASE_URL + "groups/" + id +"/remove-group";
     const deleteRequest = new XMLHttpRequest();
     deleteRequest.open("DELETE", url, true);
     deleteRequest.onload = () => {
