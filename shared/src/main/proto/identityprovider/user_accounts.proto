@@ -5,6 +5,8 @@ package nz.ac.canterbury.seng302;
 import "google/protobuf/timestamp.proto";
 import "util/validation_error.proto";
 import "util/file_upload.proto";
+import "util/pagination.proto";
+import "util/filtering.proto";
 
 option java_multiple_files = true;
 option java_package = "nz.ac.canterbury.seng302.shared.identityprovider";
@@ -101,14 +103,15 @@ message DeleteUserProfilePhotoResponse {
 }
 
 message GetPaginatedUsersRequest {
-   int32 Offset = 1; // How many results to skip (offset of 0 means start at beginning, i.e page 1)
-   int32 Limit = 2; // Max results to get - "results per page"
-   string OrderBy = 3; // When paginating, we must sort on the server, not the frontend (why is this?)
-   bool IsAscendingOrder = 4;
+   PaginationRequestOptions PaginationRequestOptions = 1;
+}
+message GetPaginatedUsersFilteredRequest {
+   PaginationRequestOptions PaginationRequestOptions = 1;
+   BasicStringFilteringOptions FilteringOptions = 2;
 }
 message PaginatedUsersResponse {
    repeated UserResponse Users = 1;
-   int32 ResultSetSize = 2; // How many possible results there are (so we can say how many 'pages' are needed)
+   PaginationResponseOptions PaginationResponseOptions = 2;
 }
 
 message ModifyRoleOfUserRequest {
@@ -129,6 +132,7 @@ service UserAccountService {
    rpc UploadUserProfilePhoto (stream UploadUserProfilePhotoRequest) returns (stream FileUploadStatusResponse);
    rpc DeleteUserProfilePhoto (DeleteUserProfilePhotoRequest) returns (DeleteUserProfilePhotoResponse);
    rpc GetPaginatedUsers(GetPaginatedUsersRequest) returns (PaginatedUsersResponse);
+   rpc GetPaginatedUsersFilteredByName(GetPaginatedUsersFilteredRequest) returns (PaginatedUsersResponse);
    rpc AddRoleToUser(ModifyRoleOfUserRequest) returns (UserRoleChangeResponse);
    rpc RemoveRoleFromUser(ModifyRoleOfUserRequest) returns (UserRoleChangeResponse);
 }

@@ -18,15 +18,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import nz.ac.canterbury.seng302.portfolio.controller.forms.SprintForm;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
-
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
@@ -119,15 +116,7 @@ public class DetailsController extends PageController {
         sprintList.sort(Comparator.comparing(Sprint::getSprintStartDate));
         model.addAttribute("sprints", sprintList);
 
-        // Gets the event, deadline and milestone lists and sorts them based on their start dates
-        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
-        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
-        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
-
-        List<Schedulable> schedulableList = new ArrayList<>();
-        schedulableList.addAll(eventList);
-        schedulableList.addAll(deadlineList);
-        schedulableList.addAll(milestoneList);
+        List<Schedulable> schedulableList = getAllSchedulablesInProject(parentProjectId);
 
         // Sorts schedulable list by start dates.
         schedulableList.sort(Comparator.comparing(Schedulable::getStartDate));
@@ -254,5 +243,22 @@ public class DetailsController extends PageController {
         model.addAttribute("editSchedulableForm", new SchedulableForm());
 
         return "detailFragments :: " + schedulableType;
+    }
+
+    /**
+     * Gets a list of all schedulables in the project
+     * @param parentProjectId The id of the project to get schedulables from
+     * @return A list of all schedulables in the project
+     */
+    public List<Schedulable> getAllSchedulablesInProject(int parentProjectId) {
+        // Gets the event, deadline and milestone lists and sorts them based on their start dates
+        List<Event> eventList = eventService.getEventByParentProjectId(parentProjectId);
+        List<Deadline> deadlineList = deadlineService.getDeadlineByParentProjectId(parentProjectId);
+        List<Milestone> milestoneList = milestoneService.getMilestoneByParentProjectId(parentProjectId);
+        List<Schedulable> schedulableList = new ArrayList<>();
+        schedulableList.addAll(eventList);
+        schedulableList.addAll(deadlineList);
+        schedulableList.addAll(milestoneList);
+        return schedulableList;
     }
 }

@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -47,7 +48,7 @@ public class GroupService {
         if (group != null) {
             return group;
         } else {
-            throw new NoSuchElementException("There is no group with id " + id);
+            throw new NoSuchElementException(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + id);
         }
     }
 
@@ -59,7 +60,6 @@ public class GroupService {
      */
     @Transactional
     public int addUsersToGroup(int groupId, List<Integer> userIds) {
-        // TODO if users were in members without groups, then they need to be removed from it
         if (groupId == MEMBERS_WITHOUT_GROUPS_ID) { // If trying to add to members without groups, do nothing
             return 0;
         }
@@ -72,6 +72,7 @@ public class GroupService {
                 user.addRole(UserRole.TEACHER);
                 userRepository.save(user);
             }
+            removeUserFromMembersWithoutAGroup(user);
             count++;
         }
         groupRepository.save(group);
@@ -86,7 +87,6 @@ public class GroupService {
      */
     @Transactional
     public int removeUsersFromGroup(int groupId, List<Integer> userIds) {
-        // TODO check that the group being removed from isn't a special group - needs to be special cases for that
         if (groupId == MEMBERS_WITHOUT_GROUPS_ID) { // If trying to remove from members without groups, do nothing
             return 0;
         }
@@ -102,10 +102,38 @@ public class GroupService {
                 user.removeRole(UserRole.TEACHER);
                 userRepository.save(user);
             }
+            if (user.getGroups().isEmpty()) {
+                addUserToMembersWithoutAGroup(user);
+            }
             count++;
         }
         groupRepository.save(group);
         return count;
+    }
+
+    /**
+     * Adds a user to the group "Members Without A Group"
+     * @param user The user to add to the group
+     */
+    @Transactional
+    public void addUserToMembersWithoutAGroup(User user) {
+        Group membersWithoutAGroup = getGroup(MEMBERS_WITHOUT_GROUPS_ID);
+        membersWithoutAGroup.addMember(user);
+        groupRepository.save(membersWithoutAGroup);
+        userRepository.save(user);
+    }
+
+    /**
+     * Removes a user from the group "Members Without A Group"
+     * @param user The user to remove from the group
+     */
+    public void removeUserFromMembersWithoutAGroup(User user) {
+        Group membersWithoutAGroup = getGroup(MEMBERS_WITHOUT_GROUPS_ID);
+        if (user.getGroups().contains(membersWithoutAGroup)) {
+            membersWithoutAGroup.removeMember(user);
+            groupRepository.save(membersWithoutAGroup);
+            userRepository.save(user);
+        }
     }
 
     /**

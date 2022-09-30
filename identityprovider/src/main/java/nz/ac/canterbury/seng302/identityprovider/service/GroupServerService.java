@@ -15,6 +15,7 @@ import javax.validation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
@@ -127,10 +128,73 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         responseObserver.onCompleted();
     }
 
+    /**
+     * Modifies the details of an existing group and returns a ModifyGroupDetailsResponse
+     * @param request An object containing the id of the group to modify and the details to change
+     */
     @Override
     public void modifyGroupDetails(ModifyGroupDetailsRequest request, StreamObserver<ModifyGroupDetailsResponse> responseObserver) {
         logger.info("modifyGroupDetails() has been called");
-        // TODO implement this
+        ModifyGroupDetailsResponse.Builder reply = ModifyGroupDetailsResponse.newBuilder();
+
+        // Check that the group is not one of the default groups
+        if (request.getGroupId() == TEACHER_GROUP_ID) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("The group \"Teaching Staff\" cannot be edited");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        } else if (request.getGroupId() == MEMBERS_WITHOUT_GROUPS_ID) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("The group \"Members Without A Group\" cannot be edited");
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        Group group;
+
+        // Check that the group exists
+        try {
+            group = groupService.getGroup(request.getGroupId());
+        } catch (NoSuchElementException e) {
+            reply
+                    .setIsSuccess(false)
+                    .setMessage(e.getMessage());
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        // Validate the fields in the group
+        group.setShortName(request.getShortName());
+        group.setLongName(request.getLongName());
+        List<ValidationError> errors = getValidationErrors(group);
+
+        if(!errors.isEmpty()) { // If there are errors in the request
+            for (ValidationError error : errors) {
+                logger.error("Modify group {} : {} - {}",
+                        request.getGroupId(), error.getFieldName(), error.getErrorText());
+            }
+            reply
+                    .setIsSuccess(false)
+                    .setMessage("Group could not be edited")
+                    .addAllValidationErrors(errors);
+            responseObserver.onNext(reply.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        // Once all validation passes, save the group and return success
+        groupRepository.save(group);
+        reply
+                .setIsSuccess(true)
+                .setMessage("Group edited successfully");
+
+        responseObserver.onNext(reply.build());
+        responseObserver.onCompleted();
     }
 
     /**
@@ -188,9 +252,9 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * @param request An object containing the id of the group to retrieve details from
      */
     @Override
-    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GetGroupDetailsResponse> responseObserver) {
+    public void getGroupDetails(GetGroupDetailsRequest request, StreamObserver<GroupDetailsResponse> responseObserver) {
         logger.info("getGroupDetails() has been called");
-        GetGroupDetailsResponse.Builder reply = GetGroupDetailsResponse.newBuilder();
+        GroupDetailsResponse.Builder reply = GroupDetailsResponse.newBuilder();
 
         Group group;
         try {
@@ -208,6 +272,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
         }
 
         reply
+                .setGroupId(group.getId())
                 .setShortName(group.getShortName())
                 .setLongName(group.getLongName())
                 .addAllMembers(userResponses);
@@ -221,7 +286,7 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
      * @param group The group to validate
      * @return A list of ValidationErrors
      */
-    List<ValidationError> getValidationErrors(Group group) {
+    private List<ValidationError> getValidationErrors(Group group) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         List<ValidationError> errors = new ArrayList<>();
@@ -240,6 +305,26 @@ public class GroupServerService extends GroupsServiceGrpc.GroupsServiceImplBase 
                     .setErrorText(violation.getMessage())
                     .build();
             errors.add(error);
+        }
+
+        // Check that the short and long names are unique
+        for (Group other : groupRepository.findAll()) {
+            if (group.getId() != other.getId()) {
+                if (Objects.equals(group.getShortName(), other.getShortName())) {
+                    ValidationError error = ValidationError.newBuilder()
+                            .setFieldName("shortName")
+                            .setErrorText("Group short name is already in use")
+                            .build();
+                    errors.add(error);
+                }
+                if (Objects.equals(group.getLongName(), other.getLongName())) {
+                    ValidationError error = ValidationError.newBuilder()
+                            .setFieldName("longName")
+                            .setErrorText("Group long name is already in use")
+                            .build();
+                    errors.add(error);
+                }
+            }
         }
 
         return errors;

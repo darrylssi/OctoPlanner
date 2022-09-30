@@ -1,7 +1,22 @@
+.edit-image {
+    max-height: 150px;
+    max-width: 50%;
+}
+
 .profile-image {
-    height: 150px;
-    width: 150px;
+    max-width: 80%;
+    max-height: 200px;
+}
+
+.photo {
     border-radius: 150px;
     background-position: center;
     background-size: cover;
+    padding-top: 5px;
+}
+
+.profile-detail {
+    padding: 5px;
+    background-color: white;
+    border-radius: 8px;
 }

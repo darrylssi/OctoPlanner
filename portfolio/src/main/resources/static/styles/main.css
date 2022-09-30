@@ -338,3 +338,7 @@ button:hover {
 .bi-calendar-event,.bi-calendar-deadline, .bi-calendar-milestone, .bi-hourglass-bottom{
     margin: 5px;
 }
+
+.add-forms {
+    margin: 10px;
+}

@@ -6,7 +6,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
-import nz.ac.canterbury.seng302.identityprovider.service.GroupService;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -45,13 +43,11 @@ class GroupServerServiceTest {
     @MockBean
     private GroupRepository groupRepository;
 
-    @InjectMocks
-    private GroupService groupService = spy(GroupService.class);
-
     @MockBean
     private UserRepository userRepository;
 
     private Group testGroup;
+    private Group testMembersWithoutAGroup;
     private User testUser1;
     private User testUser2;
     private static final int testGroupId = 999;
@@ -60,8 +56,9 @@ class GroupServerServiceTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
         testGroup = new Group("test short name", "test long name");
+        testMembersWithoutAGroup = new Group("Members Without A Group",
+                "test long name for members without a group");
         testGroup.setId(testGroupId);
         testUser1 = new User("testUsername1", "testPassword1", "testFirstName1",
                 "testMiddleName1", "testLastName1", "testNickname1",
@@ -154,6 +151,70 @@ class GroupServerServiceTest {
     }
 
     @Test
+    void testCreateGroup_whenShortNameNotUnique_getFailure() {
+        // * Given: There is another group with the same short name
+        Group other = new Group("duplicate shortname", "valid long name");
+        other.setId(testGroupId);   // Give other group an ID so the two groups do not have the same ID
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to modify the group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("duplicate shortname")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText("Group short name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testCreateGroup_whenLongNameNotUnique_getFailure() {
+        // * Given: There is another group with the same long name
+        Group other = new Group("valid short name", "duplicate long name");
+        other.setId(testGroupId);   // Give other group an ID so the two groups do not have the same ID
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<CreateGroupResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<CreateGroupResponse> captor = ArgumentCaptor.forClass(CreateGroupResponse.class);
+        // * When: We try to modify the group
+        CreateGroupRequest request = CreateGroupRequest.newBuilder()
+                .setShortName("edit valid short name")
+                .setLongName("duplicate long name")
+                .build();
+        groupServerService.createGroup(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        CreateGroupResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
     void testAddUsersToGroup_getSuccess() {
         // Prepare collections of user ids/users to use as mock data
         List<Integer> userIds = List.of(testUserId1, testUserId2);
@@ -164,6 +225,8 @@ class GroupServerServiceTest {
         // * Given: There is a group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * When: We try to add members to this group
         StreamObserver<AddGroupMembersResponse> observer = mock(StreamObserver.class);
@@ -240,7 +303,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -254,6 +317,8 @@ class GroupServerServiceTest {
         // * Given: There is a group with this id
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * When: We try to remove members from this group
         StreamObserver<RemoveGroupMembersResponse> observer = mock(StreamObserver.class);
@@ -330,7 +395,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -379,7 +444,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -436,8 +501,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -446,9 +511,10 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We get the group's details
+        assertEquals(testGroupId, response.getGroupId());
         assertEquals(testGroup.getShortName(), response.getShortName());
         assertEquals(testGroup.getLongName(), response.getLongName());
         assertTrue(testGroup.getMembers().contains(testUser1));
@@ -461,8 +527,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -471,11 +537,221 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We don't get any details
         assertEquals("", response.getShortName());
         assertEquals("", response.getLongName());
         assertEquals(0, response.getMembersCount());
+    }
+
+    @Test
+    void modifyGroupDetails_whenValid_getSuccess() {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify the group
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .setShortName("edit valid short name")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // * Then: The request succeeds
+        assertTrue(response.getIsSuccess());
+    }
+
+    @Test
+    void modifyGroupDetails_whenShortNameNotUnique_getFailure() {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+        // * And: There is another group with the same short name
+        Group other = new Group("duplicate shortname", "valid long name");
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify the group
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .setShortName("duplicate shortname")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText("Group short name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void modifyGroupDetails_whenLongNameNotUnique_getFailure() {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+        // * And: There is another group with the same long name
+        Group other = new Group("valid short name", "duplicate long name");
+        when(groupRepository.findAll())
+                .thenReturn(List.of(other));
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify the group
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .setShortName("edit valid short name")
+                .setLongName("duplicate long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name is already in use")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"'',Group short name cannot be empty",
+            "a,Group short name must be between 2 and 32 characters",
+            "Thirty-Three Character Long Name3,Group short name must be between 2 and 32 characters"})
+    void testModifyGroupDetails_whenShortNameInvalid_getFailure(String shortName, String errorMessage) {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify a groups details
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .setShortName(shortName)
+                .setLongName("test valid long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("shortName")
+                .setErrorText(errorMessage)
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testModifyGroupDetails_whenLongNameTooLong_getFailure() {
+        // * Given: There is a group with this id
+        when(groupRepository.findById(testGroupId))
+                .thenReturn(testGroup);
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify a groups details
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(testGroupId)
+                .setShortName("test valid short name")
+                .setLongName("One hundred and twenty-nine character long long name Lorem ipsum dolor sit amet, " +
+                        "consectetur adipiscing elit, sed do eiusmod temp")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // Expected error message
+        ValidationError error = ValidationError.newBuilder()
+                .setFieldName("longName")
+                .setErrorText("Group long name must not exceed 128 characters")
+                .build();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertTrue(response.getValidationErrorsList().contains(error));
+    }
+
+    @Test
+    void testModifyGroupDetails_whenModifyingMembersWithoutAGroup_getFailure() {
+        // * Given: This group is the group for members without groups
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testGroup);
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify the group for members without groups
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(MEMBERS_WITHOUT_GROUPS_ID)
+                .setShortName("edit valid short name")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("The group \"Members Without A Group\" cannot be edited", response.getMessage());
+    }
+
+    @Test
+    void testModifyGroupDetails_whenModifyingTeachingStaff_getFailure() {
+        // * Given: This group is the group for members without groups
+        when(groupRepository.findById(TEACHER_GROUP_ID))
+                .thenReturn(testGroup);
+
+        StreamObserver<ModifyGroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<ModifyGroupDetailsResponse> captor = ArgumentCaptor.forClass(ModifyGroupDetailsResponse.class);
+        // * When: We try to modify the group for members without groups
+        ModifyGroupDetailsRequest request = ModifyGroupDetailsRequest.newBuilder()
+                .setGroupId(TEACHER_GROUP_ID)
+                .setShortName("edit valid short name")
+                .setLongName("edit valid long name")
+                .build();
+        groupServerService.modifyGroupDetails(request, observer);
+
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        ModifyGroupDetailsResponse response = captor.getValue();
+
+        // * Then: The request fails
+        assertFalse(response.getIsSuccess());
+        assertEquals("The group \"Teaching Staff\" cannot be edited", response.getMessage());
     }
 }

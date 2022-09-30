@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.identityprovider.grpcservice;
 
-import io.cucumber.java.bs.A;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -8,9 +7,7 @@ import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
-import nz.ac.canterbury.seng302.identityprovider.service.GroupService;
 import nz.ac.canterbury.seng302.identityprovider.service.UserAccountServerService;
-import nz.ac.canterbury.seng302.identityprovider.service.UserService;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,6 +46,7 @@ class UserAccountServiceTest {
 
     private User testUser;
     private Group testTeacherGroup;
+    private Group testMembersWithoutAGroup;
 
     private static final int testUserID = 999;
     private final BCryptPasswordEncoder encoder =  new BCryptPasswordEncoder();
@@ -55,6 +54,9 @@ class UserAccountServiceTest {
     @BeforeEach
     public void setup() {
         testTeacherGroup = new Group("test short name", "test long name");
+        testMembersWithoutAGroup = new Group("Members Without A Group",
+                "test long name for members without a group");
+        testMembersWithoutAGroup.setId(MEMBERS_WITHOUT_GROUPS_ID);
         testUser = new User("testUser", encoder.encode("testPassword"), "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
@@ -86,6 +88,34 @@ class UserAccountServiceTest {
     }
 
     @Test
+    void testRegister_userAddedToDefaultGroup() {
+        assertEquals(0, testMembersWithoutAGroup.getMembers().size());
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID)).thenReturn(testMembersWithoutAGroup);
+        StreamObserver<UserRegisterResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<UserRegisterResponse> captor = ArgumentCaptor.forClass(UserRegisterResponse.class);
+        UserRegisterRequest request = UserRegisterRequest.newBuilder()
+                .setUsername("testValid")
+                .setPassword("testPassword")
+                .setFirstName("Frank")
+                .setMiddleName("Michael")
+                .setLastName("Lucas")
+                .setNickname("Nick")
+                .setBio("This is a test bio")
+                .setPersonalPronouns("test/pronouns")
+                .setEmail("test@example.com")
+                .build();
+        userAccountServerService.register(request, observer);
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+
+        assertEquals(1, testMembersWithoutAGroup.getMembers().size());
+
+        UserRegisterResponse response = captor.getValue();
+
+        assertTrue(response.getIsSuccess());
+    }
+
+    @Test
     void test_CanAddRoleToUser() {
         StreamObserver<UserRoleChangeResponse> observer = mock(StreamObserver.class);
         ArgumentCaptor<UserRoleChangeResponse> captor = ArgumentCaptor.forClass(UserRoleChangeResponse.class);
@@ -95,7 +125,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
-
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * Given: A user doesn't have a role
         assertFalse(testUser.getRoles().contains(UserRole.TEACHER));
@@ -125,6 +156,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         // * Given: A user has a role
         testUser.addRole(UserRole.TEACHER);
@@ -155,6 +188,8 @@ class UserAccountServiceTest {
                 .thenReturn(testTeacherGroup);
         when(userRepository.findAllById(List.of(testUserID)))
                 .thenReturn(List.of(testUser));
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
 
         ModifyRoleOfUserRequest request = ModifyRoleOfUserRequest.newBuilder()
                 .setUserId(testUserID)

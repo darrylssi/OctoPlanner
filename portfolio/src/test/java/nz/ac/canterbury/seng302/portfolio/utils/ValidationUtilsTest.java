@@ -1,6 +1,7 @@
-package nz.ac.canterbury.seng302.portfolio;
+package nz.ac.canterbury.seng302.portfolio.utils;
 
 import nz.ac.canterbury.seng302.portfolio.model.Project;
+import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.utils.DateUtils;
@@ -12,10 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,6 +30,7 @@ class ValidationUtilsTest {
     private Sprint sprint3;
     private Sprint testSprint;
     private List<Sprint> sprintList;
+    private final List<Schedulable> schedulableList = new ArrayList<>();
 
     @BeforeEach
     void setUp(){
@@ -70,7 +69,7 @@ class ValidationUtilsTest {
     @Test
     void validProjectDates_noErrorFlag() {
         ValidationError result = ValidationUtils.validateProjectDates(baseProject.getProjectStartDate(), baseProject.getProjectEndDate(),
-                baseProject.getProjectCreationDate(), sprintList);
+                baseProject.getProjectCreationDate(), sprintList, schedulableList);
         assertFalse(result.isError());
     }
 
@@ -86,7 +85,7 @@ class ValidationUtilsTest {
     @Test
     void projectDatesInWrongOrder_getErrorMessage() {
         ValidationError result = ValidationUtils.validateProjectDates(baseProject.getProjectEndDate(), baseProject.getProjectStartDate(),
-                baseProject.getProjectCreationDate(), sprintList);
+                baseProject.getProjectCreationDate(), sprintList, schedulableList);
         String actual = result.getFirstError();
         assertTrue(result.isError());
         assertEquals(ValidationUtils.DATES_IN_WRONG_ORDER_MESSAGE, actual);
@@ -187,7 +186,7 @@ class ValidationUtilsTest {
         Date newStart = DateUtils.toDate("2020-01-01");
         assert newStart != null;
         ValidationError result = ValidationUtils.validateProjectDates(newStart, baseProject.getProjectEndDate(),
-                baseProject.getProjectCreationDate(), sprintList);
+                baseProject.getProjectCreationDate(), sprintList, schedulableList);
         String actual = result.getFirstError();
         assertTrue(result.isError());
         assertEquals("Project cannot be set to start more than a year before it was created " +

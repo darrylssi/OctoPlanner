@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.MEMBERS_WITHOUT_GROUPS_ID;
 import static nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars.TEACHER_GROUP_ID;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,9 +30,6 @@ class UserServiceTests {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private GroupService groupService;
-
     @MockBean
     private UserRepository userRepository;
 
@@ -42,10 +40,13 @@ class UserServiceTests {
     private static final int userID = 999;
     private User testUser;
     private Group testGroup;
+    private Group testMembersWithoutAGroup;
 
     @BeforeEach
     public void setup() {
         testGroup = new Group("Teaching Staff", "teaching staff test long name");
+        testMembersWithoutAGroup = new Group("Members Without A Group",
+                "test long name for members without a group");
         testUser = new User(testUsername, "testPassword", "testFirstName",
                 "testMiddleName", "testLastName", "testNickname",
                 "testBio", "testPronouns", "testEmail@example.com");
@@ -99,6 +100,8 @@ class UserServiceTests {
                 .thenReturn(testGroup);
         when(userRepository.findAllById(List.of(userID)))
                 .thenReturn(List.of(testUser));
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
         // When: We add the Teacher role to a user
         userService.addRoleToUser(userID, UserRole.TEACHER);
         // Then: The user is added to the Teaching Staff group
@@ -114,6 +117,8 @@ class UserServiceTests {
                 .thenReturn(testUser);
         when(groupRepository.findById(TEACHER_GROUP_ID))
                 .thenReturn(testGroup);
+        when(groupRepository.findById(MEMBERS_WITHOUT_GROUPS_ID))
+                .thenReturn(testMembersWithoutAGroup);
         when(userRepository.findAllById(List.of(userID)))
                 .thenReturn(List.of(testUser));
         // When: We remove the Teacher role from a user
