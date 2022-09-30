@@ -15,3 +15,12 @@ function toggleUsersButton(button) {
 function toggleById(group_id) {
     toggleUsersButton(document.getElementById("user-button-" + group_id));
 }
+
+/**
+ * Show a pop up that says 'Changes have been saved' when adding, deleting or editing groups.
+ */
+function showUpdateMessage() {
+    let toastLiveExample = document.getElementById('success-box');
+    let toast = new bootstrap.Toast(toastLiveExample);
+    toast.show();
+}
