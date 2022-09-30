@@ -59,7 +59,7 @@ function saveProject(elem) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', '1', 'project');
             sendProjectUpdatedMessage(formRequest.response);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 50);
         } else {
             // Otherwise, show the error messages
             const errors = formRequest.responseText.split('\n');

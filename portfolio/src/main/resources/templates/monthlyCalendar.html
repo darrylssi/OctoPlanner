@@ -46,6 +46,7 @@
 </head>
 <body onload="connect()"> <!-- immediately connect to websockets -->
     <div th:replace="fragments :: header(title=|${project.getProjectName} - Calendar|, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
+    <div id="warning-box" class="warning-container"></div>
 
     <div class="content">
         <br>
@@ -72,6 +73,8 @@
     <!-- This needs to be down here for it to work -->
     <script th:inline="javascript">
         var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
+        document.addEventListener("mousedown", updateMouseState);
+        document.addEventListener("mouseup", updateMouseState);
     </script>
 </body>
 </html>
