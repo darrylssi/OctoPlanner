@@ -87,6 +87,12 @@ function createNewGroupDiv(groupMessageOutput) {
 
         const form = document.getElementById("form");
         form.appendChild(newGroup);
+
+        // add all users
+        document.getElementById("group-" + groupMessageOutput.id + "-table").innerHTML = `<tbody id='group-${groupMessageOutput.id}-tbody'></tbody>`;
+        for (let user of groupMessageOutput.members) {
+            createNewGroupMember(groupMessageOutput.id, user);
+        }
     }
     groupFragRequest.send();
 }
@@ -107,6 +113,12 @@ function createNewGroupMember(groupId, user) {
     groupMemberFragRequest.send();
 }
 
+/**
+ * Creates the actual HTML element for a user in a group
+ * @param groupId the id of the group to add the user to
+ * @param user the user object (with id and name) to add to the group
+ * @param memberHTML the HTML for the user
+ */
 function createGroupMemberDisplay(groupId, user, memberHTML) {
     let newMember = document.createElement("tr");
     newMember.classList.add("row");
