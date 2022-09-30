@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.portfolio.controller;
 
+import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
@@ -48,6 +49,8 @@ public class MessageMappingController {
     SprintService sprintService;
     @Autowired
     GroupClientService groupClientService;
+    @Autowired
+    ProjectService projectService;
 
     /**
      * Called when a user disconnects from their websocket connection.
@@ -117,6 +120,29 @@ public class MessageMappingController {
             output = new GroupMessageOutput(groupMessage.getId(), groupDetailsResponse);
         }
         return output;
+    }
+
+    /**
+     * Receives a websocket message for a project id, then replies with an empty output if it doesn't exist,
+     * or a ProjecttMessageOutput with the project's data if it does exist.
+     * @param projectMessage data received from the websocket containing the project id and type
+     * @return a ProjectMessageOutput that gets sent to the endpoint in @Sendto
+     */
+    @MessageMapping("/projects")
+    @SendTo("/topic/projects")
+    public ProjectMessageOutput sendProjectData(ProjectMessage projectMessage) {
+        ProjectMessageOutput projectMessageOutput;
+        try {
+            Project updatedProject = projectService.getProjectById(projectMessage.getId());
+            projectMessageOutput = new ProjectMessageOutput(updatedProject);
+        } catch (ResponseStatusException e) {
+            // Send back an empty message if the project is not found
+            logger.error(e.getMessage());
+            projectMessageOutput = new ProjectMessageOutput();
+            projectMessageOutput.setId(projectMessage.getId());
+        }
+
+        return projectMessageOutput;
     }
 
     /**

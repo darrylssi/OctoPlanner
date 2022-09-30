@@ -208,7 +208,7 @@
                     </div>
                     <div class="col-10">
                         <div class="form-floating input-group mb-3 limited-text-input">
-                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, punctuations, and spaces.|">
+                            <input type="text" id="addSchedulableDescriptionInput" th:field="*{description}" th:maxlength="${maxDescLen}" class="form-control" placeholder="description" th:pattern="|^[\p{L}\p{N}\p{P}\p{Z}]*$|" th:title="|Description can only have letters, numbers, spaces and punctuation.|">
                             <label for="addSchedulableDescriptionInput">Description</label>
                             <span class="input-group-text remaining-chars-field">...</span>
                         </div>
@@ -280,14 +280,14 @@
                 <div class="row">
                     <div class="col">
                         <div class="form-floating mb-3">
-                            <input type="date" th:field="*{startDate}" class="form-control" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <input type="date" th:field="*{startDate}" class="form-control" data-cy="addSprintStartDate" id="sprintStartDate" aria-describedby="sprintStartDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="sprintStartDate">Start Date</label>
                         </div>
                         <small id="addSprintStartDateFeedback" class="text-danger" th:text="${sprintStartError}"></small>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3 has-validation">
-                            <input type="date" th:field="*{endDate}" class="form-control" id="sprintEndDate" aria-describedby="sprintEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
+                            <input type="date" th:field="*{endDate}" class="form-control" data-cy="addSprintEndDate" id="sprintEndDate" aria-describedby="sprintEndDateFeedback" required th:min="${projectStart}" th:max="${projectEnd}">
                             <label for="sprintEndDate">End Date</label>
                         </div>
                         <small id="addSsprintEndDateFeedback" class="text-danger"></small>
