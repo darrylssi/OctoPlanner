@@ -408,7 +408,7 @@ function handleProjectUpdateMessage(projectMessage) {
     }
 
     // Show the user an alert warning them that the page needs to be refreshed
-    const message = 'Project dates have been changed. Please refresh to update the page.';
+    const message = 'Project information has changed. Please refresh to update the page.';
     const wrapper = document.createElement('div');
     wrapper.innerHTML = [
         '<div class="alert alert-warning alert-dismissible fade show" role="alert">',

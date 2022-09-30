@@ -622,7 +622,7 @@ function resetAddForm(type) {
 
 /** Warn the user of changes to sprint/project dates */
 function sprintProjectAlert() {
-    const message = 'Sprint or Project dates have been changed. Please refresh to update the page.';
+    const message = 'Sprint or Project information has been changed. Please refresh to update the page.';
     const wrapper = document.createElement('div');
     wrapper.innerHTML = [
         '<div class="alert alert-warning alert-dismissible fade show" role="alert">',
