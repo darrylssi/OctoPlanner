@@ -459,3 +459,17 @@ function handleSprintUpdateMessage(sprintMessage) {
         });
     }
 }
+
+/**
+ * Responds to discovering a project has been updated (via websockets)
+ * @param projectMessage the message containing project information. Currently only id is used.
+ */
+function handleProjectUpdateMessage(projectMessage) {
+    // logging
+    if (projectLogs) {
+        console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
+    }
+
+    // TODO way to handle this:
+    // Show the user an alert warning them that the page needs to be refreshed
+}
