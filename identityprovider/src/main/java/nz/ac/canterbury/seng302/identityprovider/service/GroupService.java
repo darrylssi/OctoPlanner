@@ -84,6 +84,34 @@ public class GroupService {
     }
 
     /**
+     * Get a number of groups based on the parameters
+     * @param limit The number of groups wanted
+     * @param page Page number starting at 0
+     * @param orderBy Attribute of group it is ordered by
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"shortNname"</code> - Ordered by groups short name alphabetically</li>
+     *                    <li><code>"longName"</code> - Ordered by groups long name alphabetically</li>
+     *                  </ul>
+     * @param isAscending Whether the sort is ascending or descending
+     * @return List of groups from that page of the given order
+     */
+    public List<Group> getPaginatedGroups(int page, int limit, String orderBy, boolean isAscending) {
+        Sort sortBy = switch (orderBy) {
+            case "longName"  -> Sort.by("longName");
+            case "shortName" -> Sort.by("shortName");
+            default -> throw new IllegalArgumentException(String.format("Can not order groups by '%s'", orderBy));
+        };
+
+        if (!isAscending) {
+            sortBy = sortBy.descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, limit, sortBy);
+        return groupRepository.findAll(pageable);
+    }
+
+    /**
      * Adds a set of users to a group
      * @param groupId The id of the group to add users to
      * @param userIds The ids of the users to add to the group
