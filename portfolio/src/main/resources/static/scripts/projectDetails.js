@@ -43,7 +43,7 @@ function deleteObject(id, type) {
             hideModal();
         } else {
             sendSprintUpdatedMessage(id);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         }
     }
     deleteRequest.send();
@@ -80,7 +80,7 @@ function saveSprint(sprintId, elem) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', sprintId, 'sprint');
             sendSprintUpdatedMessage(sprintId);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         } else {
             // Otherwise, show the error messages
             const errors = formRequest.responseText.split('\n');
@@ -162,7 +162,7 @@ function sendFormViaAjax(elem, type) {
         if (formRequest.status === 200) {
             if (type === 'sprint'){
                 sendSprintUpdatedMessage(formRequest.response);
-                window.location.reload();
+                setTimeout(() => {window.location.reload();}, 300);
             } else {
                 // Success
                 hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
@@ -381,8 +381,8 @@ function handleSprintUpdateMessage(sprintMessage) {
         console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -394,8 +394,8 @@ function handleProjectUpdateMessage(projectMessage) {
         console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -613,4 +613,22 @@ function resetAddForm(type) {
         addForm.querySelector("#schedulableEndTime").value = today.getHours() + ":" + (today.getMinutes()+1);
     }
 
+}
+
+/** Warn the user of changes to sprint/project dates */
+function sprintProjectAlert() {
+    const message = 'Sprint or Project information has been changed. Please <a class="refresh-link" ' +
+            'onclick=location.reload()>refresh</a> to update the page.';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        '<div class="alert alert-warning alert-dismissible fade show" role="alert">',
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('');
+
+    let box = document.getElementById(`warning-box`);
+    if(box && box.innerHTML.indexOf(message.substring(0,30)) == -1) {
+        box.append(wrapper);
+    }
 }
