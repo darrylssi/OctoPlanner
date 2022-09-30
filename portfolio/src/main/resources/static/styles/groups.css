@@ -5,6 +5,7 @@
     background-color: white;
     border-radius: 8px;
     flex-grow: 1;
+    margin: 10px 0px;
 }
 
 .show-users {
@@ -32,6 +33,10 @@ tr {
     width: 20px;
 }
 
+.checkbox {
+    margin-left:10px;
+}
+
 .remove-button {
     height: 30px;
     width: 30px;
@@ -46,4 +51,67 @@ tr {
 }
 .remove-button:hover {
     background-color: var(--primary);
+}
+
+.btn-remove-users {
+    background-color: var(--remove-users);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+
+.btn-remove-users:disabled {
+    background-color: var(--remove-users);
+}
+.btn-remove-users:focus {
+    background-color: var(--remove-users);
+}
+.btn-remove-users:hover {
+    background-color: var(--remove-users-dark);
+    color: var(--primary-dark);
+}
+
+.btn-add-users {
+    background-color: var(--select-light);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+
+.btn-add-users:disabled {
+    background-color: var(--select-light);
+}
+.btn-add-users:focus {
+    background-color: var(--select-light);
+}
+.btn-add-users:hover {
+    background-color: var(--select-mid);
+    color: var(--primary-dark);
+}
+
+.btn-remove-users {
+    background-color: var(--remove-users);
+    color: var(--primary-dark);
+    margin: 5px 0px;
+}
+
+.btn-select {
+    background-color: var(--select-light);
+    color: var(--neutral-darker);
+    margin: 5px 0px;
+}
+.btn-select:disabled {
+    background-color: var(--select-light);
+}
+.btn-select:focus {
+    background-color: var(--select-dark);
+}
+.btn-select:hover {
+    background-color: var(--select-mid);
+}
+
+.selecting {
+    background-color: var(--select-dark);
+}
+
+.modal-title {
+    font-weight: bold;
 }

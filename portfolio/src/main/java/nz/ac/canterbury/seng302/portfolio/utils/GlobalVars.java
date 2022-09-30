@@ -37,12 +37,15 @@ public class GlobalVars {
 
     public static final String DESC_REGEX = "^[\\p{L}\\p{N}\\p{P}\\p{Z}]*$";
     public static final String NAME_REGEX = "^[\\p{L}\\p{N}\\p{P}\\p{Z}&&[^,]]{2,}$";
-    public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, punctuations, and spaces.";
-    public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, punctuations except commas, and spaces.";
+    public static final String DESC_ERROR_MESSAGE = "Description can only have letters, numbers, spaces and punctuation";
+    public static final String NAME_ERROR_MESSAGE = "Name can only have letters, numbers, spaces and punctuation except for commas";
 
 
     public static final int TEACHER_GROUP_ID = 0;
     public static final int MEMBERS_WITHOUT_GROUPS_ID = 1;
+    public static final String SHORT_NAME_ERROR_MESSAGE = "Group short name can only have letters, numbers, punctuations " +
+            "except commas, and spaces.";
+    public static final String LONG_NAME_ERROR_MESSAGE = "Group long name can only have letters, numbers, punctuations, and spaces.";
     public static final String GROUP_NOT_FOUND_ERROR_MESSAGE = "There is no group with id ";
 
 

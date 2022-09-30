@@ -11,14 +11,15 @@
     <link th:href="|../../styles/modals.css|" rel="stylesheet" />
     <link th:href="|../../styles/reskinBootstrap.css|" rel="stylesheet" />
     <script th:src="|../../scripts/editProject.js|"></script>
+    <script th:src="|../../scripts/main.js|"></script>
 
 </head>
 
 <body onload="connect()"> <!-- Immediately connect to WebSocket -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
     <script th:src="|../../scripts/projectDetails.js|"></script>
-    <script th:src="|../../scripts/monthlyCalendar.js|"></script>
 
     <!-- WebSockets -->
     <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js|" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -41,6 +42,7 @@
 </div>
 
 <div th:replace="fragments :: header(title=${project.getProjectName}, subtitle=|${project.getStartDateString} - ${project.getEndDateString}|)"></div>
+<div id="warning-box" class="warning-container"></div>
 <div class="container-fluid content">
     <div class="detail-block">
         <div th:text="${project.getProjectDescription}"/>
@@ -104,7 +106,7 @@
                     maxNameLen=${maxNameLen},
                     maxDescLen=${maxDescLen},
                     projectStart=${projectStart},
-                    projectEnd=${projectEnd})" />
+                    projectEnd=${projectEnd})" ></div>
     <div th:replace="detailFragments :: schedulableAddForm(
                     type='event',
                     minNameLen=${minNameLen},

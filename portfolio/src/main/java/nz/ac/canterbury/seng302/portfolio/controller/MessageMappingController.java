@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.portfolio.model.Schedulable;
 import nz.ac.canterbury.seng302.portfolio.model.Sprint;
 import nz.ac.canterbury.seng302.portfolio.service.*;
 import nz.ac.canterbury.seng302.portfolio.utils.*;
+import nz.ac.canterbury.seng302.shared.identityprovider.GroupDetailsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class MessageMappingController {
     MilestoneService milestoneService;
     @Autowired
     SprintService sprintService;
+    @Autowired
+    GroupClientService groupClientService;
     @Autowired
     ProjectService projectService;
 
@@ -98,6 +101,25 @@ public class MessageMappingController {
         }
 
         return sprintMessageOutput;
+    }
+
+    /**
+     * Receives a message calling for an update about a group, gets the group's info from the IDP, and
+     * returns a message with the group's full information.
+     * @param groupMessage a message with the id of the group to send an update for
+     * @return a GroupMessageOutput with the info of the updated group, or just the id if it doesn't exist
+     */
+    @MessageMapping("/groups")
+    @SendTo("/topic/groups")
+    public GroupMessageOutput sendGroupData(GroupMessage groupMessage) {
+        GroupMessageOutput output;
+        GroupDetailsResponse groupDetailsResponse = groupClientService.getGroupDetails(groupMessage.getId());
+        if (groupDetailsResponse.getShortName().isBlank()) { // not found?
+            output = new GroupMessageOutput(groupMessage.getId());
+        } else {
+            output = new GroupMessageOutput(groupMessage.getId(), groupDetailsResponse);
+        }
+        return output;
     }
 
     /**

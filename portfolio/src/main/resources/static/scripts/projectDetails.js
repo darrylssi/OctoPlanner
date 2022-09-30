@@ -43,23 +43,12 @@ function deleteObject(id, type) {
             hideModal();
         } else {
             sendSprintUpdatedMessage(id);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         }
     }
     deleteRequest.send();
 }
 
-/**
- * Hides and clears any input feedback boxes in the given element
- * @param {HTMLFormElement} elem
- */
-function hideErrorBoxes(elem) {
-    const errorBoxes = elem.querySelectorAll(`[id*="Feedback"]`);
-    for (let feedbackBox of errorBoxes) {
-        feedbackBox.innerHTML = '';
-        feedbackBox.style.display = 'none';
-    }
-}
 
 /**
  * This submits the form and shows error messages if there are any.
@@ -80,7 +69,7 @@ function saveSprint(sprintId, elem) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', sprintId, 'sprint');
             sendSprintUpdatedMessage(sprintId);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         } else {
             // Otherwise, show the error messages
             const errors = formRequest.responseText.split('\n');
@@ -162,7 +151,7 @@ function sendFormViaAjax(elem, type) {
         if (formRequest.status === 200) {
             if (type === 'sprint'){
                 sendSprintUpdatedMessage(formRequest.response);
-                window.location.reload();
+                setTimeout(() => {window.location.reload();}, 300);
             } else {
                 // Success
                 hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
@@ -381,8 +370,8 @@ function handleSprintUpdateMessage(sprintMessage) {
         console.log('GOT UPDATE SPRINT MESSAGE FOR ' + sprintMessage.name + " ID " + sprintMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -394,8 +383,8 @@ function handleProjectUpdateMessage(projectMessage) {
         console.log('GOT UPDATE PROJECT MESSAGE FOR ' + projectMessage.name + " ID " + projectMessage.id);
     }
 
-    // TODO way to handle this:
     // Show the user an alert warning them that the page needs to be refreshed
+    sprintProjectAlert();
 }
 
 /**
@@ -542,62 +531,6 @@ function createSchedulableDisplay(schedulableMessage, parent, idIndex, schedulab
 }
 
 /**
- * Binds an event to the input, such that the remaining length is displayed.
- *
- * @param {HTMLInputElement} input An `<input type="text" maxlength=...>` element,
- *                                  with an optional `minlength` element
- * @param {Element} display The element that'll display the output (Note: Will overwrite
- *                                  any inner HTML)
- * @throws {EvalError} If any of the above requirements are broken
- */
-function displayRemainingCharacters(input, display) {
-    if (
-        input.tagName.toLowerCase() !== 'input'
-        || input.getAttribute('type') !== 'text'
-        || !input.hasAttribute('maxlength')
-    ) {
-        console.error(input);
-        throw new EvalError(
-            '`input` doesn\'t look like `<input type="text" maxlength=...>'
-        );
-    }
-    const event = () => {
-        const maxLength = input.getAttribute('maxlength');
-        const minLength = input.getAttribute('minlength');
-        const inputLength = input.value.length;
-        const remainingChars = maxLength - inputLength;
-        if (remainingChars <= 0) {
-            // Too many characters
-            display.classList.add('text-danger');
-            display.textContent = remainingChars;
-        } else if (minLength !== null && inputLength < minLength) {
-            // (Optional) Not enough characters
-            display.classList.add('text-danger');
-            display.textContent = '< ' + (minLength - inputLength);
-        } else {
-            display.classList.remove('text-danger');
-            display.textContent = remainingChars;
-        }
-    }
-    // Bind the event, then give it a kick to initialise the display
-    input.addEventListener("input", event);
-    event();
-}
-
-/**
- * Shows the number of remaining characters on an input field with class 'limited-text-input'
- * in a span tag with class 'remaining-chars-field'.
- * This is called when the page is loaded and when the edit button is clicked.
- */
-function showRemainingChars() {
-    for (const parent of document.getElementsByClassName('limited-text-input')) {
-        const input = parent.getElementsByTagName('input')[0];
-        const display = parent.getElementsByClassName('remaining-chars-field')[0];
-        displayRemainingCharacters(input, display);
-    }
-}
-
-/**
  * Resets the add schedulable form after submission.
  * @param type Type of schedulable to be added.
  */
@@ -618,4 +551,22 @@ function resetAddForm(type) {
         addForm.querySelector("#schedulableEndTime").value = today.getHours() + ":" + (today.getMinutes()+1);
     }
 
+}
+
+/** Warn the user of changes to sprint/project dates */
+function sprintProjectAlert() {
+    const message = 'Sprint or Project information has been changed. Please <a class="refresh-link" ' +
+            'onclick=location.reload()>refresh</a> to update the page.';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+        '<div class="alert alert-warning alert-dismissible fade show" role="alert">',
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('');
+
+    let box = document.getElementById(`warning-box`);
+    if(box && box.innerHTML.indexOf(message.substring(0,30)) == -1) {
+        box.append(wrapper);
+    }
 }
