@@ -563,17 +563,12 @@ function displayRemainingCharacters(input, display) {
     }
     const event = () => {
         const maxLength = input.getAttribute('maxlength');
-        const minLength = input.getAttribute('minlength');
         const inputLength = input.value.length;
         const remainingChars = maxLength - inputLength;
         if (remainingChars <= 0) {
             // Too many characters
             display.classList.add('text-danger');
             display.textContent = remainingChars;
-        } else if (minLength !== null && inputLength < minLength) {
-            // (Optional) Not enough characters
-            display.classList.add('text-danger');
-            display.textContent = '< ' + (minLength - inputLength);
         } else {
             display.classList.remove('text-danger');
             display.textContent = remainingChars;
