@@ -32,7 +32,11 @@ function connect() {
             handleSchedulableMessage(JSON.parse(message.body));
         });
         stompClient.subscribe('/topic/schedulables', function(schedulableMessageOutput) {
-            updateSchedulable(JSON.parse(schedulableMessageOutput.body));
+            if (document.URL.includes('monthlyCalendar')) {
+                updateCalendar(JSON.parse(schedulableMessageOutput.body));
+            } else {
+                updateSchedulable(JSON.parse(schedulableMessageOutput.body));
+            }
         });
         stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
             handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
