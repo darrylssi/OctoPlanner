@@ -43,7 +43,7 @@ function deleteObject(id, type) {
             hideModal();
         } else {
             sendSprintUpdatedMessage(id);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         }
     }
     deleteRequest.send();
@@ -80,7 +80,7 @@ function saveSprint(sprintId, elem) {
             // Upon success, hide the edit project form and reload the page
             hideEditSchedulable('1', sprintId, 'sprint');
             sendSprintUpdatedMessage(sprintId);
-            window.location.reload();
+            setTimeout(() => {window.location.reload();}, 300);
         } else {
             // Otherwise, show the error messages
             const errors = formRequest.responseText.split('\n');
@@ -162,7 +162,7 @@ function sendFormViaAjax(elem, type) {
         if (formRequest.status === 200) {
             if (type === 'sprint'){
                 sendSprintUpdatedMessage(formRequest.response);
-                window.location.reload();
+                setTimeout(() => {window.location.reload();}, 300);
             } else {
                 // Success
                 hideForm(formRequest.response, elem.getAttribute('formBoxId'), type);
@@ -628,7 +628,7 @@ function sprintProjectAlert() {
     ].join('');
 
     let box = document.getElementById(`warning-box`);
-    if(box && box.innerHTML.indexOf(message) == -1) {
+    if(box && box.innerHTML.indexOf(message.substring(0,30)) == -1) {
         box.append(wrapper);
     }
 }

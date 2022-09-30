@@ -482,7 +482,7 @@ function handleProjectUpdateMessage(projectMessage) {
     ].join('');
 
     let box = document.getElementById(`warning-box`);
-    if(box && box.innerHTML.indexOf(message) == -1) {
+    if(box && box.innerHTML.indexOf(message.substring(0,30)) == -1) {
         box.append(wrapper);
     }
 }
