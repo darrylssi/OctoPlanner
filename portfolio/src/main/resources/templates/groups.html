@@ -31,7 +31,7 @@
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:value="${shortName == null} ? '' : ${shortName}" th:name="shortName" id="shortName" required class="form-control"
+                        <input type="text" data-cy="addShortName" th:value="${shortName == null} ? '' : ${shortName}" th:name="shortName" id="shortName" required class="form-control"
                                aria-describedby="ShortNameFeedback" th:minlength="${minShortNameLen}" th:maxlength="${maxShortNameLen}">
                         <label class="form-label" for="shortName">Short Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
@@ -40,7 +40,7 @@
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" th:value="${longName == null} ? '' : ${longName}" th:name="longName" id="longName" class="form-control" placeholder="Long name"
+                        <input type="text" data-cy="addLongName" th:value="${longName == null} ? '' : ${longName}" th:name="longName" id="longName" class="form-control" placeholder="Long name"
                                aria-describedby="LongNameFeedback" th:maxlength="${maxLongNameLen}">
                         <label for="longName">Long Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
@@ -107,7 +107,7 @@
                         <td class="col-auto"><img class="profile-icon" th:src="${user.getProfileImagePath()}" alt="User profile photo"></td>
                         <td class="col" th:text="|${user.getFirstName()} ${user.getMiddleName()} ${user.getLastName()}|"></td>
                         <td class="col-auto">
-                            <button th:if="${group.key != membersWithoutGroupsId && canEdit}" class="delete-button" style="margin-right:10px" type="button" th:onclick="|removeUserFromGroup(*{key}, ${user.getId()})|">
+                            <button th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" class="delete-button" style="margin-right:10px" type="button" th:onclick="|removeUserFromGroup(${group.getGroupId()}, ${user.getId()})|">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
                                     <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
                                 </svg>
