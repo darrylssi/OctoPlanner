@@ -3,6 +3,7 @@ const deadlineIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height=
 const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"> <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>';
 
 let calendar;
+let mouseButtonDown = false;
 
 /**
  * Returns a new date that is the original date plus the specified number of days.
@@ -185,13 +186,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         eventDidMount: function(info) {
             if(info.event.extendedProps.type !== 'sprint'){
-                var tooltip = new bootstrap.Tooltip(info.el, {
-                    title: info.event.extendedProps.description,
-                    placement: "top",
-                    trigger: "hover",
-                    container: "body",
-                    html: true
-                });
+                let tooltip = bootstrap.Tooltip.getInstance(info.el);
+                if (tooltip) {
+                    tooltip.update();
+                } else {
+                    tooltip = new bootstrap.Tooltip(info.el, {
+                        title: info.event.extendedProps.description,
+                        placement: "top",
+                        trigger: "hover",
+                        container: "body",
+                        html: true
+                    });
+                }
             }
         },
 
@@ -309,7 +315,7 @@ function updateIconObjectsWithSchedulables(calendar) {
             const icon = calendar.getEventById(id);
             icon.setExtendedProp("num", icon.extendedProps.num + 1);
             icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat([sNames[i]]));
-            let schedulableTooltip = createTooltipString(icon, sNames, sStarts, sEnds, i);
+            let schedulableTooltip = createTooltipString(icon, sNames[i], sStarts[i], sEnds[i]);
             if (icon.extendedProps.description === '') {
                 icon.setExtendedProp("description", schedulableTooltip);
             } else{
@@ -328,21 +334,21 @@ function updateIconObjectsWithSchedulables(calendar) {
  * Helper function for updateIconObjectsWithSchedulables
  * @returns {String} the contents for the tooltip, as determined by type
  */
-function createTooltipString(icon, sNames, sStarts, sEnds, i) {
-    let tooltip = `<strong>${sNames[i]}</strong>`;
+function createTooltipString(icon, sName, sStart, sEnd) {
+    let tooltip = `<strong>${sName}</strong>`;
     // Work out what to add to tooltip based on
     switch(icon.extendedProps.type) {
         case 'event':
             // Needs start and end dates and times
-            tooltip += ` <small><i>${sStarts[i]} - ${sEnds[i]}</i></small>`;
+            tooltip += ` <small><i>${sStart.substring(0,16)} - ${sEnd.substring(0,16)}</i></small>`;
             break;
         case 'deadline':
             // Needs date and time
-            tooltip += ` <small><i>${sStarts[i]}</i></small>`;
+            tooltip += ` <small><i>${sStart.substring(0,16)}</i></small>`;
             break;
         case 'milestone':
             // Needs date
-            tooltip += ` <small><i>${sStarts[i].substring(0,10)}</i></small>`;
+            tooltip += ` <small><i>${sStart.substring(0,10)}</i></small>`;
             break;
         default:
             // This shouldn't ever be reached
@@ -376,29 +382,69 @@ function updateCalendar(message) {
 function rerenderCalendar(response, message) {
     removeSchedulables(message.type);
     let schedulables = JSON.parse(response);
-    for (let i = 0; i < schedulables.length; i ++) {
-        let schedulable = schedulables[i];
-        let start = getDateFromProjectDateString(schedulable.startDay);
-        const end = getDateFromProjectDateString(schedulable.endDay);
-        while (start <= end) {
-            const id = `${message.type}-${getStringFromDate(start)}`;
-            const icon = calendar.getEventById(id);
-            icon.setExtendedProp("num", icon.extendedProps.num + 1);
-            icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat(schedulable.name));
-            if (icon.extendedProps.description === '') {
-                icon.setExtendedProp("description", schedulable.name);
-            } else{
-                icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + schedulable.name);
-            }
+    for (let schedulable of schedulables) {
+        if (schedulable.type === message.type) {
+            let start = getDateFromProjectDateString(schedulable.startDay);
+            const end = getDateFromProjectDateString(schedulable.endDay);
+            while (start <= end) {
+                const id = `${message.type}-${getStringFromDate(start)}`;
+                const icon = calendar.getEventById(id);
+                icon.setExtendedProp("num", icon.extendedProps.num + 1);
+                icon.setExtendedProp("schedulableNames", icon.extendedProps.schedulableNames.concat(schedulable.name));
+                let schedulableTooltip = createTooltipString(icon, schedulable.name, schedulable.startDay, schedulable.endDay);
+                if (icon.extendedProps.description === '') {
+                    icon.setExtendedProp("description", schedulableTooltip);
+                } else{
+                    icon.setExtendedProp("description", icon.extendedProps.description + '<br>' + schedulableTooltip);
+                }
 
-            let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
-            newStart.setDate(newStart.getDate() + 1);
-            start = newStart;
+                let newStart = new Date(start); // on the advice of https://stackoverflow.com/a/19691491
+                newStart.setDate(newStart.getDate() + 1);
+                start = newStart;
+            }
         }
     }
     calendar.render();
+    refreshView();
 }
 
+
+/**
+ * Force the calendar tooltips to update by switching the view format to something else, then switching back.
+ * Bootstrap and fullcalendar don't seem to work together very well in that regard.
+ */
+async function refreshView() {
+    await userNotPressingMouse();
+    calendar.changeView('timeGridDay');
+    calendar.changeView('dayGridMonth');
+}
+
+/**
+ * Checks that the user doesn't have a mouse button pressed. If they do, waits
+ * up to 10 seconds before updating the page. If not, returns instantly.
+ */
+function userNotPressingMouse() {
+    const date = new Date();
+    const startPoint = date.getTime();
+    let currentDate = null;
+    do {
+        currentDate = date.getTime();
+        if (!mouseButtonDown) {
+            return;
+        }
+    } while (currentDate - startPoint < 10000);
+}
+
+/**
+ * Updates whether the mouse is down or not (triggered by document events)
+ * From https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
+ * @param {*} e the triggering event
+ */
+function updateMouseState(e) {
+    // This is ternary in case of old browsers which don't support MouseEvent.buttons
+    let flags = e.buttons !== undefined ? e.buttons : e.which;
+    mouseButtonDown = (flags & 1) === 1;
+}
 
 /**
  * Remove from the calendar all schedulables of a given type.
@@ -406,10 +452,11 @@ function rerenderCalendar(response, message) {
  */
 function removeSchedulables(type) {
     let events = calendar.getEvents();
-    for (let i = 0; i < events.length; i++) {
-        if (events[i].id.includes(type) && events[i].extendedProps.num !== 0) {
-            const icon = calendar.getEventById(events[i].id);
+    for (let event of events) {
+        if (event.id.includes(type) && event.extendedProps.num !== 0) {
+            const icon = calendar.getEventById(event.id);
             icon.setExtendedProp("num", 0);
+            icon.setExtendedProp("description", '');
         }
     }
 }
