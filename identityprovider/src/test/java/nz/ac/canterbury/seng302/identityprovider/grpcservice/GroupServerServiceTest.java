@@ -1,21 +1,30 @@
 package nz.ac.canterbury.seng302.identityprovider.grpcservice;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import nz.ac.canterbury.seng302.identityprovider.model.Group;
 import nz.ac.canterbury.seng302.identityprovider.model.User;
 import nz.ac.canterbury.seng302.identityprovider.repository.GroupRepository;
 import nz.ac.canterbury.seng302.identityprovider.repository.UserRepository;
 import nz.ac.canterbury.seng302.identityprovider.service.GroupServerService;
+import nz.ac.canterbury.seng302.identityprovider.utils.GlobalVars;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
+import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
+import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import nz.ac.canterbury.seng302.shared.util.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Instant;
@@ -302,7 +311,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -394,7 +403,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -443,7 +452,7 @@ class GroupServerServiceTest {
 
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
-        assertEquals("There is no group with id " + testGroupId, response.getMessage());
+        assertEquals(GlobalVars.GROUP_NOT_FOUND_ERROR_MESSAGE + testGroupId, response.getMessage());
     }
 
     @Test
@@ -500,8 +509,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(testGroup);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -510,9 +519,10 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We get the group's details
+        assertEquals(testGroupId, response.getGroupId());
         assertEquals(testGroup.getShortName(), response.getShortName());
         assertEquals(testGroup.getLongName(), response.getLongName());
         assertTrue(testGroup.getMembers().contains(testUser1));
@@ -525,8 +535,8 @@ class GroupServerServiceTest {
         when(groupRepository.findById(testGroupId))
                 .thenReturn(null);
 
-        StreamObserver<GetGroupDetailsResponse> observer = mock(StreamObserver.class);
-        ArgumentCaptor<GetGroupDetailsResponse> captor = ArgumentCaptor.forClass(GetGroupDetailsResponse.class);
+        StreamObserver<GroupDetailsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<GroupDetailsResponse> captor = ArgumentCaptor.forClass(GroupDetailsResponse.class);
         // * When: We try to get a group's details
         GetGroupDetailsRequest request = GetGroupDetailsRequest.newBuilder()
                 .setGroupId(testGroupId)
@@ -535,7 +545,7 @@ class GroupServerServiceTest {
 
         verify(observer, times(1)).onCompleted();
         verify(observer, times(1)).onNext(captor.capture());
-        GetGroupDetailsResponse response = captor.getValue();
+        GroupDetailsResponse response = captor.getValue();
 
         // * Then: We don't get any details
         assertEquals("", response.getShortName());
@@ -751,5 +761,56 @@ class GroupServerServiceTest {
         // * Then: The request fails
         assertFalse(response.getIsSuccess());
         assertEquals("The group \"Teaching Staff\" cannot be edited", response.getMessage());
+    }
+
+    @Test
+    void testGetPaginatedGroup_byLongNameAscending() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("longName"));
+        when(groupRepository.findAll(pageable))
+                .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
+        when(groupRepository.count())
+                .thenReturn(2L);
+
+        StreamObserver<PaginatedGroupsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<PaginatedGroupsResponse> captor = ArgumentCaptor.forClass(PaginatedGroupsResponse.class);
+
+        PaginationRequestOptions options = PaginationRequestOptions.newBuilder()
+                .setOffset(0)
+                .setLimit(2)
+                .setOrderBy("longName")
+                .setIsAscendingOrder(true)
+                .build();
+        GetPaginatedGroupsRequest request = GetPaginatedGroupsRequest.newBuilder()
+                .setPaginationRequestOptions(options).build();
+        groupServerService.getPaginatedGroups(request, observer);
+        verify(observer, times(1)).onCompleted();
+        verify(observer, times(1)).onNext(captor.capture());
+        PaginatedGroupsResponse response = captor.getValue();
+
+        assertEquals(2, response.getGroupsCount());
+    }
+
+    @Test
+    void testGetPaginatedGroup_byInvalidKeyword_getFailure() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("longName"));
+        when(groupRepository.findAll(pageable))
+                .thenReturn(List.of(testGroup, testMembersWithoutAGroup));
+
+        StreamObserver<PaginatedGroupsResponse> observer = mock(StreamObserver.class);
+        ArgumentCaptor<StatusRuntimeException> errorCaptor = ArgumentCaptor.forClass(StatusRuntimeException.class);
+        PaginationRequestOptions options = PaginationRequestOptions.newBuilder()
+                .setOffset(0)
+                .setLimit(2)
+                .setOrderBy("invalid")
+                .setIsAscendingOrder(true)
+                .build();
+        GetPaginatedGroupsRequest request = GetPaginatedGroupsRequest.newBuilder()
+                .setPaginationRequestOptions(options).build();
+        groupServerService.getPaginatedGroups(request, observer);
+
+        verify(observer, Mockito.times(1)).onError(errorCaptor.capture());
+        StatusRuntimeException error = errorCaptor.getValue();
+        assertEquals(error.getStatus().getCode(), Status.INVALID_ARGUMENT.getCode());
+        assertEquals("INVALID_ARGUMENT: Can not order groups by 'invalid'", error.getMessage());
     }
 }

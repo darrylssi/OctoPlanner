@@ -102,7 +102,7 @@ public class ListUsersController extends PageController {
         model.addAttribute("canEdit", hasEditPermissions);
 
         /* Total number of pages */
-        int totalPages = (users.getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
+        int totalPages = (users.getPaginationResponseOptions().getResultSetSize() + PAGE_SIZE - 1) / PAGE_SIZE;
         model.addAttribute("totalPages", totalPages);
 
         model.addAttribute("tab", 1);
