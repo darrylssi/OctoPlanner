@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Groups</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <link th:href="|./styles/main.css|" rel="stylesheet" />
-  <link th:href="|./styles/reskinBootstrap.css|" rel="stylesheet" />
+    <link th:href="|./styles/main.css|" rel="stylesheet" />
+    <link th:href="|./styles/reskinBootstrap.css|" rel="stylesheet" />
     <link th:href="|./styles/groups.css|" rel="stylesheet" />
+    <script th:src="|./scripts/projectDetails.js|"></script>
     <script th:src="|./scripts/groups.js|"></script>
 </head>
 <body>
@@ -25,51 +26,54 @@
 <div class="card collapse" th:id="|addGroupForm|" >
     <div class="card-header" th:text="|New Group|"></div>
     <div class="card-body">
-        <form action="javascript:;" th:data-url="@{../../add-group/{id}(id = ${projectId})}" th:formBoxId="|addGroupForm|"
-              method="post" class="container-fluid js-form" >
+        <form action="javascript:;" th:data-url="@{/groups/add-group}" th:formBoxId="|addGroupForm|"
+              method="post" th:onsubmit="return sendGroupFormViaAjax(this)" th:object="${groupForm}" class="container-fluid js-form" >
             <div class="row">
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="addGroupShortNameInput" required class="form-control" aria-describedby="addShortNameFeedback">
-                        <label class="form-label" for="addGroupShortNameInput">Short Name</label>
+                        <input type="text" th:value="${shortName == null} ? '' : ${shortName}" th:name="shortName" id="shortName" required class="form-control"
+                               aria-describedby="ShortNameFeedback" th:minlength="${minShortNameLen}" th:maxlength="${maxShortNameLen}">
+                        <label class="form-label" for="shortName">Short Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
                     <small id="addShortNameFeedback" class="text-danger"></small>
                 </div>
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
-                        <input type="text" id="addGroupLongNameInput" class="form-control" aria-describedby="addLongNameFeedback">
-                        <label class="form-label" for="addGroupLongNameInput">Long Name</label>
+                        <input type="text" th:value="${longName == null} ? '' : ${longName}" th:name="longName" id="longName" class="form-control" placeholder="Long name"
+                               aria-describedby="LongNameFeedback" th:maxlength="${maxLongNameLen}">
+                        <label for="longName">Long Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
                     <small id="addLongNameFeedback" class="text-danger"></small>
                 </div>
             </div>
             <div class="col">
-                <button type="submit" onclick="showUpdateMessage()" data-cy="add-sprint-save" class="btn btn-primary btn-lg">Save</button>
+                <button type="submit" data-cy="add-group-save" class="btn btn-primary btn-lg">Save</button>
             </div>
         </form>
     </div>
 </div>
 
 <form id="form" method="post" action="javascript:;">
-<div class="card group-block container-auto" th:each="group : ${groups}" th:object="${group}">
+<div class="card group-block container-auto" th:each="group : ${groupList}" th:object="${group}">
+
     <div class="row">
         <div class="col-auto">
-            <div class="sprint-title" th:text="*{value.getShortName()}" />
-            <div class="sprint-description" th:text="*{value.getLongName()}" />
+            <div class="sprint-title" th:text="*{getShortName()}" />
+            <div class="sprint-description" th:text="*{getLongName()}" />
         </div>
         <div class="col"></div>
-        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|remove-users-*{key}|">
-            <button type="button" th:onclick="|sendFormViaAjax(*{key}, 'remove-members')|" class="btn btn-remove-users btn-sm" >Remove Selected Users</button>
+        <div class="col-auto" hidden th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" th:id="|remove-users-${group.getGroupId()}|">
+            <button type="button" th:onclick="|sendFormViaAjax(${group.getGroupId(), 'remove-members')|" class="btn btn-remove-users btn-sm" >Remove Selected Users</button>
         </div>
-        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|add-users-*{key}|">
-            <button type="button" th:onclick="|sendFormViaAjax(*{key}, 'add-members')|" class="btn btn-add-users btn-sm" >Add Selected Users</button>
+        <div class="col-auto" hidden th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" th:id="|add-users-${group.getGroupId()}|">
+            <button type="button" th:onclick="|sendFormViaAjax(${group.getGroupId(), 'add-members')|" class="btn btn-add-users btn-sm" >Add Selected Users</button>
         </div>
         <div class="col-auto" >
-            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key}, this)|" th:groupid="*{key}">Select Users</button>
+            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(${group.getGroupId()}, this)|" th:groupid="${group.getGroupId()}">Select Users</button>
         </div>
-        <div class="col-auto" th:if="${group.key != membersWithoutGroupsId && canEdit}">
+        <div class="col-auto" th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}">
             <button class="delete-button" >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
@@ -85,24 +89,25 @@
         </div>
     </div>
     <hr/>
-    <div th:if="${#arrays.isEmpty(group.value.getMembersList())}" style="text-align:center">
+    <div th:if="${#arrays.isEmpty(group.getMembersList())}" style="text-align:center">
         <strong>[ This group has no members. ]</strong>
     </div>
-    <div th:if="${!#arrays.isEmpty(group.value.getMembersList())}">
-        <div class="row collapse" th:id="|group-*{key}|">
-            <div class="text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{key}|">
-                <div class="col"><button type="button" class="show-users" th:text="|Hide users (*{value.getMembersList().size()})|" th:onclick="|toggleById(*{key})|"></button></div>
+    <div th:if="${!#arrays.isEmpty(group.getMembersList())}">
+        <div class="row collapse" th:id="|group-*{getGroupId()}|">
+            <div class="text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{getGroupId()}|">
+                <div class="col"><button class="show-users" th:text="|Hide users (*{getMembersList().size()})|"
+                                         th:onclick="|toggleById(*{getGroupId()})|"></button></div>
             </div>
             <div class="col">
                 <table class="table container-auto">
-                    <tr th:each="user:*{value.getMembersList()}" class="row">
-                        <td th:class="|col-auto checkbox user-*{key}|" hidden th:if="${canEdit}" ><div th:class="|form-check |" style="margin-left:10px">
-                            <input class="form-check-input" type="checkbox"  name="user_id" th:value="${user.getId()}" id="flexCheckDefault">
+                    <tr th:each="user:*{getMembersList()}" class="row">
+                        <td class="col-auto" th:if="${canEdit}" ><div class="form-check" style="margin-left:10px">
+                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                         </div></td>
                         <td class="col-auto"><img class="profile-icon" th:src="${user.getProfileImagePath()}" alt="User profile photo"></td>
                         <td class="col" th:text="|${user.getFirstName()} ${user.getMiddleName()} ${user.getLastName()}|"></td>
                         <td class="col-auto">
-                            <button type="button" th:if="${group.key != membersWithoutGroupsId && canEdit}" class="remove-button" >
+                            <button th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" class="remove-button" >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
                                     <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
                                 </svg>
@@ -112,9 +117,9 @@
                 </table>
             </div>
         </div>
-        <div class="row text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{key}|">
-            <div class="col"><button type="button" class="show-users" th:text="|Show users (*{value.getMembersList().size()})|"
-            th:id="|user-button-*{key}|" onclick="toggleUsersButton(this)" th:showText="|Hide users (*{value.getMembersList().size()})|"></button></div>
+        <div class="row text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{getGroupId()}|">
+            <div class="col"><button class="show-users" th:text="|Show users (*{getMembersList().size()})|"
+            th:id="|user-button-*{getGroupId()}|" onclick="toggleUsersButton(this)" th:showText="|Hide users (*{getMembersList().size()})|"></button></div>
         </div>
     </div>
 </div>
@@ -134,6 +139,8 @@
 
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
+
+    showRemainingChars();        // Used to update the remaining number of chars for short and long name
 </script>
 </body>
 </html>
