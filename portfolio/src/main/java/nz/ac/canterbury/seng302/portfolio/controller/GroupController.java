@@ -281,11 +281,14 @@ public class GroupController extends PageController{
         }
     }
 
-
     /**
      * A method to get the html of a group member that can be added to the details
      * page using javascript
-     * TODO
+     * @param principal The current user
+     * @param groupId The id of the group to add group members to
+     * @param userId The id of the user to add to the group
+     * @param model The model that stores the attributes for the fragment
+     * @return An html fragment of the given user
      */
     @GetMapping("/frag/{groupId}/{userId}")
     public String groupMemberFragment(
@@ -300,7 +303,15 @@ public class GroupController extends PageController{
         model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
         model.addAttribute("groupId", groupId);
         model.addAttribute("userId", userId);
-        model.addAttribute("name", user.getFirstName()); // todo get whole name
+
+        String fullname;
+        if ("".equals(user.getMiddleName())) {
+            fullname =  user.getFirstName() + " " + user.getLastName();
+        } else {
+            fullname =  user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName();
+        }
+
+        model.addAttribute("name", fullname);
         model.addAttribute("userProfileImagePath", user.getProfileImagePath());
 
         return "fragments :: groupMember";
