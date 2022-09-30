@@ -316,4 +316,31 @@ public class GroupController extends PageController{
 
         return "fragments :: groupMember";
     }
+
+    /**
+     * A method to get the html of a group member that can be added to the details
+     * page using javascript
+     * @param principal The current user
+     * @param groupId The id of the group to add group members to
+     * @param model The model that stores the attributes for the fragment
+     * @return An html fragment of the given user
+     */
+    @GetMapping("/frag/{groupId}")
+    public String groupFragment(
+            @AuthenticationPrincipal AuthState principal,
+            @PathVariable(name="groupId") int groupId,
+            Model model
+    ){
+        PrincipalData thisUser = PrincipalData.from(principal);
+
+        GroupDetailsResponse group = groupClientService.getGroupDetails(groupId);
+
+        model.addAttribute("canEdit", thisUser.hasRoleOfAtLeast(UserRole.TEACHER));
+        model.addAttribute("groupId", groupId);
+        model.addAttribute("shortName", group.getShortName());
+        model.addAttribute("longName", group.getLongName());
+        model.addAttribute("numMembers", group.getMembersList().size());
+
+        return "fragments :: group";
+    }
 }

@@ -26,8 +26,7 @@ function handleGroupUpdateMessage(groupMessageOutput) {
         console.log(groupMessageOutput);
     }
 
-    const group_list = document.getElementsByClassName('group-block');
-
+    groupMessageOutput.id = 10;
 
     if (groupMessageOutput.shortName === null) { // Delete the group
         if (groupLogs) {
@@ -55,7 +54,23 @@ function handleGroupUpdateMessage(groupMessageOutput) {
 }
 
 function createNewGroupDiv(groupMessageOutput) {
+    console.log("This method was called");
+    const url = BASE_URL + "frag/" + groupMessageOutput.id;
+    const groupFragRequest = new XMLHttpRequest();
+    groupFragRequest.open("GET", url, true);
 
+    groupFragRequest.onload = () => {
+        let newGroup = document.createElement("div");
+        newGroup.classList.add("card");
+        newGroup.classList.add("group-block");
+        newGroup.classList.add("container-auto");
+
+        newGroup.innerHTML = groupFragRequest.response;
+
+        const form = document.getElementById("form");
+        form.appendChild(newGroup);
+    }
+    groupFragRequest.send();
 }
 
 /**
@@ -64,8 +79,6 @@ function createNewGroupDiv(groupMessageOutput) {
  * @param user
  */
 function createNewGroupMember(groupId, user) {
-    console.log(groupId + user.fullName + user.id);
-
     const url = BASE_URL + "frag/" + groupId + '/' + user.id;
     const groupMemberFragRequest = new XMLHttpRequest();
     groupMemberFragRequest.open("GET", url, true);
