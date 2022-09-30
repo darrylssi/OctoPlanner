@@ -73,7 +73,7 @@ public class SprintService {
      * Otherwise, updates the sprint with the given ID.
      * @param sprint sprint to be added to the database
      */
-    public void saveSprint(Sprint sprint) {
-        repository.save(sprint);
+    public Sprint saveSprint(Sprint sprint) {
+        return repository.save(sprint);
     }
 }

@@ -16,6 +16,7 @@ let stompClient = null;
 const editingLogs = false;
 const updateLogs = false;
 const sprintLogs = false;
+const projectLogs = false;
 
 /**
  * Sets up a connection to a WebSocket
@@ -36,6 +37,9 @@ function connect() {
         stompClient.subscribe('/topic/sprints', function(sprintMessageOutput) {
             handleSprintUpdateMessage(JSON.parse(sprintMessageOutput.body));
         });
+        stompClient.subscribe('/topic/projects', function(projectMessageOutput) {
+            handleProjectUpdateMessage(JSON.parse(projectMessageOutput.body));
+        });
     });
 }
 
@@ -51,6 +55,7 @@ function disconnect() {
 
 /**
  * Sends a message saying that the specified sprint was updated.
+ * @param sprintId the id of the project which has updated
  */
 function sendSprintUpdatedMessage(sprintId) {
     if (editingLogs) {
@@ -60,8 +65,21 @@ function sendSprintUpdatedMessage(sprintId) {
 }
 
 /**
+ * Sends a message saying that the specified project was updated.
+ * @param projectId the id of the project which has updated
+ */
+function sendProjectUpdatedMessage(projectId) {
+    if (editingLogs) {
+        console.log("SENDING UPDATED PROJECT MESSAGE FOR " + projectId);
+    }
+    stompClient.send("/app/projects", {}, JSON.stringify({'id':`${projectId}`}));
+}
+
+/**
  * Sends a message saying that a user is editing the specified schedulable.
  * Format: `schedulableType,schedulableId,userId'.
+ * @param schedulableId the id of the schedulable which has updated
+ * @param type the type of the schedulable which has updated
  */
 function sendEditingSchedulableMessage(schedulableId, type) {
     if (editingLogs) {

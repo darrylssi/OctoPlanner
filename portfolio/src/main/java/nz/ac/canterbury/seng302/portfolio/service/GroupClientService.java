@@ -1,9 +1,9 @@
 package nz.ac.canterbury.seng302.portfolio.service;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import nz.ac.canterbury.seng302.shared.identityprovider.*;
-import nz.ac.canterbury.seng302.shared.util.PaginationRequestOptions;
-import nz.ac.canterbury.seng302.shared.util.PaginationResponseOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,27 +20,6 @@ public class GroupClientService {
     private GroupsServiceGrpc.GroupsServiceStub groupServiceStub;
 
     private static final Logger logger = LoggerFactory.getLogger(GroupClientService.class);
-
-    /**
-     * Gets the paginated groups
-     * @param offSet How many results to skip (offset of 0 means start at beginning, i.e page 1)
-     * @param limit Max results to get - "results per page"
-     * @param orderBy When paginating, we must sort on the server, not the frontend (why is this?)
-     * @param isAscendingOrder gets the boolean whether it is order by ascending or descending
-     * @return
-     */
-    public PaginatedGroupsResponse getPaginatedGroups(int offSet, int limit, String orderBy, boolean isAscendingOrder){
-        logger.info("Sending request to retrieve all the groups");
-
-        PaginationRequestOptions paginationRequestOptions = PaginationRequestOptions.newBuilder().setOffset(1)
-                .setOffset(offSet)
-                .setLimit(limit)
-                .setOrderBy(orderBy)
-                .setIsAscendingOrder(isAscendingOrder)
-                .build();
-        GetPaginatedGroupsRequest getPaginatedGroupsRequest = GetPaginatedGroupsRequest.newBuilder().setPaginationRequestOptions(paginationRequestOptions).build();
-        return groupStub.getPaginatedGroups(getPaginatedGroupsRequest);
-    }
 
     /**
      * Sends a request to the identity provider to create a new group
@@ -131,5 +110,40 @@ public class GroupClientService {
         return groupStub.getGroupDetails(getGroupDetailsRequest);
     }
 
+    /**
+     * Sends a request to the identity provider to get a paginated list of all groups
+     * @param offset What "page" of the groups you want. Affected by the ordering and page size. This starts at 0.
+     * @param limit How many items you want from
+     * @param orderBy How the list is ordered.
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"shortNname"</code> - Ordered by groups short name alphabetically</li>
+     *                    <li><code>"longName"</code> - Ordered by groups long name alphabetically</li>
+     *                  </ul>
+     * @param isAscending Is the list in ascending or descending order
+     * @return A PaginatedGroupsResponse containing a list of groups
+     * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
+     */
+    public PaginatedGroupsResponse getPaginatedGroups(final int offset, final int limit, final String orderBy, final boolean isAscending) throws IllegalArgumentException {
+        PaginationRequestOptions requestOptions = PaginationRequestOptions.newBuilder()
+                .setOffset(offset)
+                .setLimit(limit)
+                .setOrderBy(orderBy)
+                .setIsAscendingOrder(isAscending)
+                .build();
 
+        GetPaginatedGroupsRequest paginatedGroupsRequest = GetPaginatedGroupsRequest.newBuilder()
+                .setPaginationRequestOptions(requestOptions)
+                .build();
+        try {
+            return groupStub.getPaginatedGroups(paginatedGroupsRequest);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.INVALID_ARGUMENT.getCode()) {
+                // Didn't order by a valid column
+                throw new IllegalArgumentException(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
+    }
 }

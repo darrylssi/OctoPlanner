@@ -11,6 +11,8 @@ import nz.ac.canterbury.seng302.portfolio.utils.ValidationUtils;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,8 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
  */
 @Controller
 public class ProjectController extends PageController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @Autowired
     private ProjectService projectService;
@@ -84,8 +88,9 @@ public class ProjectController extends PageController {
             newProject.setProjectDescription(projectForm.getDescription());
             projectService.saveProject(newProject);
 
-            /* Redirect to the details' page when done */
-            return new ResponseEntity<>("", HttpStatus.OK);
+            /* Send an "OK" response when done */
+            logger.info("Edited project {}", id);
+            return ResponseEntity.ok(String.valueOf(id));
         } else {
             return validationResponse;
         }

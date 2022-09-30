@@ -11,7 +11,7 @@ import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
 
 /**
  * <p>SprintForm class that's given to the user inside templates.</p>
- * 
+ *
  * This proxy exists for security reasons, as directly giving Sprint objects from the
  * database flags Sonarqube errors.
  */
@@ -33,7 +33,7 @@ public class SprintForm {
     @NotNull(message="End date cannot be blank")
     @DateTimeFormat(pattern=DATE_FORMAT)
     private LocalDate endDate;
-    
+
     public String getName() {
         return name;
     }
@@ -44,6 +44,10 @@ public class SprintForm {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description.trim();
     }
 
     public LocalDate getStartDate() {
@@ -61,11 +65,4 @@ public class SprintForm {
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
-
 }
