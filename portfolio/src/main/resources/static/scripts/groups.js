@@ -191,6 +191,44 @@ function sendGroupFormViaAjax(elem) {
 }
 
 /**
+* Hides the delete group modal
+*/
+function hideModal() {
+    const modal = document.getElementById("deleteModal");
+    modal.style.display = "none";
+}
+
+/**
+ * Show a modal asking the user to confirm their deletion of the object with the given id and name.
+ * @param id the id of the object, e.g. 12
+ * @param name the name of the object as a string
+ */
+function showDeleteModal(id, name, members) {
+    const modal = document.getElementById("deleteModal");
+    const deleteButton = document.getElementById("deleteButton");
+    document.getElementsByClassName("modal-title")[0].textContent = "Are you sure you want to delete " + name + "?";
+    document.getElementsByClassName("modal-description")[0].textContent = members+" users will be removed from this group and the group will be deleted. This cannot be undone.";
+    deleteButton.onclick = () => {deleteGroup(id)}
+    modal.style.display = "block";
+}
+
+/**
+* Sends a delete request to delete the group with the given id
+* @param id the id of the group to be deleted
+*/
+function deleteGroup(id) {
+    const url = BASE_URL + "groups/" + id +"/remove-group";
+    const deleteRequest = new XMLHttpRequest();
+    deleteRequest.open("DELETE", url, true);
+    deleteRequest.onload = () => {
+        hideModal();
+        //TODO: change this to send a message to websockets for live updating
+        window.location.reload();
+    }
+    deleteRequest.send();
+}
+
+/**
 * Shows the checkboxes so that a user can select users in the group with the given id
 * Shows buttons so that user can add and remove users from groups
 * @param group_id the id of the group users are being selected from

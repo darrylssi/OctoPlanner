@@ -37,7 +37,7 @@ public class User {
     @Enumerated
     private Set<UserRole> roles;
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER)
     private Set<Group> groups = new HashSet<>();
 
     protected User() {

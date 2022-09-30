@@ -111,3 +111,7 @@ tr {
 .selecting {
     background-color: var(--select-dark);
 }
+
+.modal-title {
+    font-weight: bold;
+}
