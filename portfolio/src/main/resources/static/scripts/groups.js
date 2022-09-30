@@ -23,9 +23,7 @@ function toggleById(group_id) {
 * @param button the button that was clicked to start selecting
 */
 function startSelecting(group_id, button) {
-    button.classList.add('selecting');
-    button.onclick = () => stopSelecting(group_id, button);
-    button.innerHTML = 'Stop Selecting Users';
+    console.log('start selecting ' + group_id);
     checkboxes = document.getElementsByClassName('checkbox');
     // show checkboxes in group being edited. hide other checkboxes
     for (let checkbox of checkboxes) {
@@ -54,6 +52,10 @@ function startSelecting(group_id, button) {
             removeUsersButton.parentNode.hidden = true;
         }
     }
+    resetSelectingButton();
+    button.classList.add('selecting');
+    button.onclick = () => stopSelecting(group_id, button);
+    button.innerHTML = 'Stop Selecting Users';
 }
 
 /**
@@ -63,18 +65,18 @@ function startSelecting(group_id, button) {
 */
 function stopSelecting(group_id, button) {
     console.log('stop selecting ' + group_id);
-    button.classList.remove('selecting');
-    button.focus = false;
-    button.innerHTML = 'Select Users';
-    button.onclick = () => startSelecting(group_id, button);
+    resetSelectingButton();
     removeButtons = document.getElementsByClassName('btn-remove-users');
     addButtons = document.getElementsByClassName('btn-add-users');
+    // hide all remove buttons
     for(let removeButton of removeButtons){
         removeButton.parentNode.hidden = true
     }
+    // hide all add buttons
     for(let addButton of addButtons){
         addButton.parentNode.hidden = true
     }
+    // hide all checkboxes
     checkboxes = document.getElementsByClassName('checkbox');
     for (let checkbox of checkboxes) {
         checkbox.hidden = true;
@@ -107,4 +109,17 @@ function sendFormViaAjax(group_id, action) {
         }
     }
     formRequest.send(formData);
+}
+
+/**
+* Resets the button of a group that was in selecting mode to the default mode
+*/
+function resetSelectingButton() {
+    currentSelectingButtons = document.getElementsByClassName('selecting');
+    for (let currentSelectingButton of currentSelectingButtons){
+        currentSelectingButton.classList.remove('selecting');
+        currentSelectingButton.focus = false;
+        currentSelectingButton.innerHTML = 'Select Users';
+        currentSelectingButton.onclick = () => startSelecting(currentSelectingButton.getAttribute("groupid"), currentSelectingButton);
+    }
 }

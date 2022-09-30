@@ -67,7 +67,7 @@
             <button type="button" th:onclick="|sendFormViaAjax(*{key}, 'add-members')|" class="btn btn-add-users btn-sm" >Add Selected Users</button>
         </div>
         <div class="col-auto" >
-            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key}, this)|">Select Users</button>
+            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key}, this)|" th:groupid="*{key}">Select Users</button>
         </div>
         <div class="col-auto" th:if="${group.key != membersWithoutGroupsId && canEdit}">
             <button class="delete-button" >
