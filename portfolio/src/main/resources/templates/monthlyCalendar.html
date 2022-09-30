@@ -15,6 +15,8 @@
     <script th:src="|../webjars/fullcalendar/5.10.2/main.js|"></script>
     <script>
 
+        let projectId = "[[${project.getId}]]";
+
         // Getting the project start and end date
         let projectStartDate =  "[[${projectStartDate}]]";
         let projectEndDate = "[[${projectEndDate}]]";
@@ -38,8 +40,8 @@
     <!-- WebSockets -->
     <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js|" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js|" integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script th:src="|../../scripts/websocketHandler.js|"></script>
-
+    <script th:src="|../scripts/websocketHandler.js|"></script>
+    <script th:src="|../scripts/projectDetails.js|"></script>
     <script th:src="|../scripts/monthlyCalendar.js|"></script>
 </head>
 <body onload="connect()"> <!-- immediately connect to websockets -->
@@ -59,6 +61,12 @@
             </form>
         </div>
         <div id='calendar'></div>
+    </div>
+
+    <!-- Used for event editing popups -->
+    <div hidden>
+        <div id="user" th:data-name="${user}" value="${user}"></div>
+        <div id="userId" th:data-name="${userId}" value="${userId}"></div> <!-- there must be a better way of doing this -->
     </div>
 
     <!-- This needs to be down here for it to work -->

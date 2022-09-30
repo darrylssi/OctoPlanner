@@ -172,7 +172,7 @@ class GroupControllerTest {
                         .param("shortName", "Test Group 🏋")
                         .param("longName", "Test Project Group 2022"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
@@ -182,7 +182,7 @@ class GroupControllerTest {
                         .param("shortName", "Test Group")
                         .param("longName", "Test Project Group 2022 🏋"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, punctuations except commas, and spaces."));
+                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
     }
 
     @Test
