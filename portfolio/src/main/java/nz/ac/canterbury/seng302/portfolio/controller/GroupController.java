@@ -56,13 +56,10 @@ public class GroupController extends PageController{
         model.addAttribute("canEdit", hasEditPermissions);
 
         model.addAttribute("tab", 3);
-//        Map<Integer, GroupDetailsResponse> groups = new HashMap<>();
-//        groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
-//        groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
 
-        GetPaginatedGroupsRequest groups = groupClientService.getPaginatedGroups(1, 1, );
+        PaginatedGroupsResponse groups = groupClientService.getPaginatedGroups(0, Integer.MAX_VALUE, "shortName", true );
 
-        model.addAttribute(GROUPS_TEMPLATE_NAME, groups);
+        model.addAttribute("groupList", groups.getGroupsList());
         model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
 
         // Sending the min and max length of group short and long name
