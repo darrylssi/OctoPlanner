@@ -140,6 +140,10 @@ By default, the Portfolio will run on local port 9000 (`http://localhost:9000`)
   - Click on "+ Add Sprint" to add a sprint to the project
   - On each sprint, there is pencil shaped button to edit the sprint details
   - On each sprint, there is bin shaped button to delete the sprint.
+  - Click "Groups" to show all the groups (There are two default groups)
+  - Click on "+ Add Group" to add a group to the groups
+  - On each group, there is bin shaped button to delete the group, except for one default group.
+
 
 #### Accessing the database
 In the event that you need to access one of the in-memory databases, make sure you have the correct module running, navigate to `url` for the appropriate module, and make sure the `JDBC_URL`, `username`, and `password` match the values here.
@@ -158,6 +162,7 @@ username: `sa`\
 password: leave blank
 
 ## User Manual
+The user manual of the application can be found at <https://docs.google.com/document/d/18i0VFJ5rMoCj69X1UW01uZUI77weBlpzSfD1sygBQ_M/edit>.  
 
 ## 1 Accessing the application
 
