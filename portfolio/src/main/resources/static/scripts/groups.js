@@ -153,6 +153,44 @@ function createGroupMemberDisplay(groupId, user, memberHTML) {
 }
 
 /**
+ * Submits the given group form's request in Javascript, allowing for in-place
+ * updating of the page.
+ * @param {HTMLFormElement} elem
+ * @param type the type of the schedulable, e.g. 'deadline', 'milestone', or 'event'
+ */
+function sendGroupFormViaAjax(elem) {
+    // Delete any pre-existing errors on the form
+    hideErrorBoxes(elem);
+
+    const formData = new FormData(elem);
+    const formRequest = new XMLHttpRequest();
+    let url = elem.getAttribute('data-url');
+    formRequest.open("POST", url);
+
+    formRequest.onload = () => {
+        if (formRequest.status === 200) {
+            window.location.reload();
+        } else {
+            const errors = formRequest.responseText.split('\n');
+            console.log(errors);
+
+            for (let errorMsg of errors) {
+                // Determine correct error field. Defaults to NameFeedback
+                let field = "ShortName";
+                if (errorMsg.indexOf('long name') !== -1) {
+                        field = 'LongName'
+                }
+                field += 'Feedback';
+                const errorBox = elem.querySelector(`[id*="` + field + `"]`);
+                errorBox.textContent = errorMsg;
+                errorBox.style.display = 'block';
+            }
+        }
+    }
+    formRequest.send(formData);
+}
+
+/**
 * Shows the checkboxes so that a user can select users in the group with the given id
 * Shows buttons so that user can add and remove users from groups
 * @param group_id the id of the group users are being selected from
@@ -258,4 +296,26 @@ function resetSelectingButton() {
         currentSelectingButton.innerHTML = 'Select Users';
         currentSelectingButton.onclick = () => startSelecting(currentSelectingButton.getAttribute("groupid"), currentSelectingButton);
     }
+}
+
+/**
+* Removes a single user from a group
+* @param group_id the id of the group the user is being removed from
+* @param user_id the id of the user being removed
+*/
+function removeUserFromGroup(group_id, user_id){
+    let url = BASE_URL + 'groups/' + group_id + '/remove-members';
+    const params = 'user_id=' + user_id;
+    const removeUserRequest = new XMLHttpRequest();
+    removeUserRequest.open("DELETE", url);
+    removeUserRequest.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    removeUserRequest.onload = () => {
+        if (removeUserRequest.status === 200) {
+            window.location.reload();
+        } else {
+            //handle errors
+        }
+    }
+    removeUserRequest.send(params);
 }

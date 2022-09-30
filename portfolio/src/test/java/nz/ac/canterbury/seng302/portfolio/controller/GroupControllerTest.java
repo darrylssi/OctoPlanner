@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.annotation.WithMockPrincipal;
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
-import nz.ac.canterbury.seng302.portfolio.model.Group;
 import nz.ac.canterbury.seng302.portfolio.model.Project;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
@@ -23,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.STUDENT;
 import static nz.ac.canterbury.seng302.shared.identityprovider.UserRole.TEACHER;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +50,6 @@ class GroupControllerTest {
     static final int USER_ID = 1;
     static final int GROUP_ID = 2;
     private GroupForm groupForm;                                // Initialises the group form object
-    private Group group;                                        // Initialises the group object
 
     @BeforeEach
     void setup() {
@@ -63,14 +60,6 @@ class GroupControllerTest {
 
         // Creates and sets the details to the new project
         Project parentProject = new Project("Project 2022", "Test Parent Project", "2022-01-01", "2022-12-31");
-
-        // Creates and sets the details to the group object
-        group = new Group();
-        group.setId(GROUP_ID);
-        group.setParentProject(parentProject);
-        group.setGroupShortName("Test Group");
-        group.setGroupLongName("Test Project Group 2022");
-        groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
 
         // Define the user for the tests; this is done to provide access to the edit page
         UserResponse testUser = UserResponse.newBuilder()
@@ -89,9 +78,6 @@ class GroupControllerTest {
                 .addMembers(testUser)
                 .build();
         when(groupClientService.getGroupDetails(GROUP_ID)).thenReturn(testGroup);
-
-        when(projectService.getProjectById(0)).
-                thenReturn(group.getParentProject());
     }
 
     @Test
@@ -149,7 +135,7 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addValidGroupAsTeacher_get200Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group 1")
                         .param("longName", "Test Project Group"))
                 .andExpect(status().isOk());
@@ -158,45 +144,52 @@ class GroupControllerTest {
     @Test
     @WithMockPrincipal(TEACHER)
     void addBlankShortNameGroupAsTeacher_get400Response() throws Exception {
-        String resultString = mockMvc.perform(post("/project/0/add-group")
+        String resultString = mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "")
                         .param("longName", "Test Project Group 2022"))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
-        Assertions.assertTrue(resultString.contains("Short name cannot be blank"));
-        Assertions.assertTrue(resultString.contains("Short name must be between 2-32 characters"));
+        Assertions.assertTrue(resultString.contains("Group short name cannot be empty"));
+        Assertions.assertTrue(resultString.contains("Group short name must be between 2 and 32 characters"));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addBlankLongNameGroupAsTeacher_get400Response() throws Exception {
-        String resultString = mockMvc.perform(post("/project/0/add-group")
+        String resultString = mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group")
                         .param("longName", ""))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
-        Assertions.assertTrue(resultString.contains("Long name cannot be blank"));
-        Assertions.assertTrue(resultString.contains("Long name must be between 2-128 characters"));
+        Assertions.assertTrue(resultString.contains("Group long name cannot be empty"));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addInvalidShortNameGroupAsTeacher_get400Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group 🏋")
                         .param("longName", "Test Project Group 2022"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
+                .andExpect(content().string("Group short name can only have letters, numbers, punctuations except commas, and spaces."));
     }
 
     @Test
     @WithMockPrincipal(TEACHER)
     void addInvalidLongNameGroupAsTeacher_get400Response() throws Exception {
-        mockMvc.perform(post("/project/0/add-group")
+        mockMvc.perform(post("/groups/add-group")
                         .param("shortName", "Test Group")
                         .param("longName", "Test Project Group 2022 🏋"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Name can only have letters, numbers, spaces and punctuation except for commas"));
+                .andExpect(content().string("Group long name can only have letters, numbers, punctuations, and spaces."));
+    }
+
+    @Test
+    @WithMockPrincipal(STUDENT)
+    void addGroupAsStudent_forbidden() throws Exception {
+        this.mockMvc.perform(post("/groups/add-group"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("You do not have permission to access this endpoint"));
     }
 
     @Test
@@ -231,14 +224,6 @@ class GroupControllerTest {
         mockMvc.perform(post("/groups/1/add-members")
                         .param("user_id", "1")
                         .param("user_id", "2"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string("You do not have permission to access this endpoint"));
-    }
-
-    @Test
-    @WithMockPrincipal(STUDENT)
-    void addGroupAsStudent_forbidden() throws Exception {
-        this.mockMvc.perform(post("/project/0/add-group"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("You do not have permission to access this endpoint"));
     }

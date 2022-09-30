@@ -30,6 +30,7 @@ public class Group {
     @Column(unique = true)
     private String shortName;
 
+    @NotBlank(message="Group long name cannot be empty")
     @Size(max = 128, message="Group long name must not exceed 128 characters")
     @Column(unique = true)
     private String longName;

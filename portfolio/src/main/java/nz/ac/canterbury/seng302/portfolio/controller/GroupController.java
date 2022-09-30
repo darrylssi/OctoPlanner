@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.portfolio.controller;
 
 import nz.ac.canterbury.seng302.portfolio.controller.forms.GroupForm;
 import nz.ac.canterbury.seng302.portfolio.model.*;
+import nz.ac.canterbury.seng302.portfolio.model.ValidationError;
 import nz.ac.canterbury.seng302.portfolio.service.GroupClientService;
 import nz.ac.canterbury.seng302.portfolio.service.ProjectService;
 import nz.ac.canterbury.seng302.portfolio.service.UserAccountClientService;
@@ -12,6 +13,7 @@ import nz.ac.canterbury.seng302.shared.identityprovider.*;
 import nz.ac.canterbury.seng302.shared.identityprovider.AuthState;
 import nz.ac.canterbury.seng302.shared.identityprovider.CreateGroupResponse;
 import nz.ac.canterbury.seng302.shared.identityprovider.UserRole;
+import nz.ac.canterbury.seng302.shared.identityprovider.AddGroupMembersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
-
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
+import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
 
 /**
  * Controller to handle requests on the groups page.
@@ -43,7 +42,7 @@ public class GroupController extends PageController{
     private UserAccountClientService userAccountClientService;
     @Autowired
     private GroupClientService groupClientService;
-    
+
     public static final String GROUPS_TEMPLATE_NAME = "groups";
 
     /**
@@ -61,13 +60,17 @@ public class GroupController extends PageController{
         model.addAttribute("canEdit", hasEditPermissions);
 
         model.addAttribute("tab", 3);
-        Map<Integer, GroupDetailsResponse> groups = new HashMap<>();
-        groups.put(GlobalVars.TEACHER_GROUP_ID, groupClientService.getGroupDetails(GlobalVars.TEACHER_GROUP_ID));
-        groups.put(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID, groupClientService.getGroupDetails(GlobalVars.MEMBERS_WITHOUT_GROUPS_ID));
 
-        model.addAttribute(GROUPS_TEMPLATE_NAME, groups);
+        PaginatedGroupsResponse groups = groupClientService.getPaginatedGroups(0, Integer.MAX_VALUE, "shortName", true );
+
+        model.addAttribute("groupList", groups.getGroupsList());
         model.addAttribute("membersWithoutGroupsId", GlobalVars.MEMBERS_WITHOUT_GROUPS_ID);
         model.addAttribute("teacherGroupId", TEACHER_GROUP_ID);
+
+        // Sending the min and max length of group short and long name
+        model.addAttribute("minShortNameLen", GlobalVars.MIN_NAME_LENGTH);
+        model.addAttribute("maxShortNameLen", GlobalVars.MAX_NAME_LENGTH);
+        model.addAttribute("maxLongNameLen", GlobalVars.MAX_GROUP_LONG_NAME_LENGTH);
 
         return GROUPS_TEMPLATE_NAME;    // Return the name of the Thymeleaf template
     }
@@ -103,18 +106,16 @@ public class GroupController extends PageController{
     }
 
     /**
-     * Post request to add groups.
-     * @param principal The authenticated or currently logged in user
-     * @param projectId ID of the group's parent project
+     * Post requests to add groups.
+     * @param principal The authenticated or currently logged-in user
      * @param groupForm The form submitted by the user
      * @param bindingResult Any errors that occurred while constraint checking the form
      * @return A response entity that contains any errors that were found. Bad Request if there were errors, Ok if there are none
      */
-    @PostMapping("/project/{projectId}/add-group")
+    @PostMapping("/groups/add-group")
     public ResponseEntity<String> postAddGroup(
             @AuthenticationPrincipal AuthState principal,
-            @PathVariable("projectId") int projectId,
-            @Valid GroupForm groupForm,
+            @Valid @ModelAttribute GroupForm groupForm,
             BindingResult bindingResult
     ) {
         try {
@@ -123,20 +124,10 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        // Getting parent project object by path id
-        Project parentProject = projectService.getProjectById(projectId);
-
         // validate group
         ResponseEntity<String> validationResponse = validateGroup(groupForm, bindingResult);
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
-            Group group = new Group();
-
-            // Set details of new group object
-            group.setParentProject(parentProject);
-            group.setGroupShortName(groupForm.getShortName());
-            group.setGroupLongName(groupForm.getLongName());
-
-            CreateGroupResponse savedGroup = groupClientService.createGroup(group.getGroupShortName(), group.getGroupLongName());
+            CreateGroupResponse savedGroup = groupClientService.createGroup(groupForm.getShortName(), groupForm.getLongName());
 
             return ResponseEntity.ok(String.valueOf(savedGroup));
         } else {
@@ -210,8 +201,8 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
 
-        ValidationError shortNameErrors = ValidationUtils.validateText(groupForm.getShortName(), NAME_REGEX, NAME_ERROR_MESSAGE);
-        ValidationError longNameErrors = ValidationUtils.validateText(groupForm.getLongName(), NAME_REGEX, NAME_ERROR_MESSAGE);
+        ValidationError shortNameErrors = ValidationUtils.validateText(groupForm.getShortName(), NAME_REGEX, SHORT_NAME_ERROR_MESSAGE);
+        ValidationError longNameErrors = ValidationUtils.validateText(groupForm.getLongName(), DESC_REGEX, LONG_NAME_ERROR_MESSAGE);
         String errorString = ValidationUtils.joinErrors(new ValidationError(), shortNameErrors, longNameErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);

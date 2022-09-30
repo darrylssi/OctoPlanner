@@ -42,6 +42,34 @@ public class GroupService {
     }
 
     /**
+     * @param page What "page" of the groups you want. Affected by the ordering and page size
+     * @param limit How many items are in a page
+     * @param orderBy How the list is ordered.
+     *                Your options are:
+     *                  <ul>
+     *                    <li><code>"shortname"</code> - Ordered by their short  name alphabetically</li>
+     *                    <li><code>"longname"</code> - Ordered by their long name alphabetically</li>
+     *                  </ul>
+     * @param isAscending Is the list in ascending or descending order
+     * @return A list of groups from that "page"
+     * @throws IllegalArgumentException Thrown if the provided orderBy string isn't one of the valid options
+     */
+    public List<Group> getGroupsPaginated(int page, int limit, String orderBy, boolean isAscending) throws IllegalArgumentException {
+        Sort sortBy = switch (orderBy) {
+            case "shortname"     -> Sort.by("shortName");
+            case "longname" -> Sort.by("longName");
+            default -> throw new IllegalArgumentException(String.format("Can not order users by '%s'", orderBy));
+        };
+
+        if (!isAscending) {
+            sortBy = sortBy.descending();
+        }
+        Pageable pageable = PageRequest.of(page, limit, sortBy);
+
+        return (List<Group>) groupRepository.findAll();
+    }
+
+    /**
      * Gets a specific group from the repository
      * @param id The id of the group to retrieve
      * @return The group with the specified id, or <code>null</code>
