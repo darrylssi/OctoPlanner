@@ -3,6 +3,7 @@ const deadlineIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height=
 const eventIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"> <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>';
 
 let calendar;
+let mouseButtonDown = false;
 
 /**
  * Returns a new date that is the original date plus the specified number of days.
@@ -404,8 +405,46 @@ function rerenderCalendar(response, message) {
         }
     }
     calendar.render();
+    refreshView();
 }
 
+
+/**
+ * Force the calendar tooltips to update by switching the view format to something else, then switching back.
+ * Bootstrap and fullcalendar don't seem to work together very well in that regard.
+ */
+async function refreshView() {
+    await userNotPressingMouse();
+    calendar.changeView('timeGridDay');
+    calendar.changeView('dayGridMonth');
+}
+
+/**
+ * Checks that the user doesn't have a mouse button pressed. If they do, waits
+ * up to 10 seconds before updating the page. If not, returns instantly.
+ */
+function userNotPressingMouse() {
+    const date = new Date();
+    const startPoint = date.getTime();
+    let currentDate = null;
+    do {
+        currentDate = date.getTime();
+        if (!mouseButtonDown) {
+            return;
+        }
+    } while (currentDate - startPoint < 10000);
+}
+
+/**
+ * Updates whether the mouse is down or not (triggered by document events)
+ * From https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
+ * @param {*} e the triggering event
+ */
+function updateMouseState(e) {
+    // This is ternary in case of old browsers which don't support MouseEvent.buttons
+    let flags = e.buttons !== undefined ? e.buttons : e.which;
+    mouseButtonDown = (flags & 1) === 1;
+}
 
 /**
  * Remove from the calendar all schedulables of a given type.
