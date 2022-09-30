@@ -16,6 +16,7 @@ public class GroupForm {
             message = "Group short name must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters")
     private String shortName;
 
+    @NotBlank(message = "Group long name cannot be empty")
     @Size(max = MAX_GROUP_LONG_NAME_LENGTH,
             message = "Group long name must not exceed " + MAX_GROUP_LONG_NAME_LENGTH + " characters")
     private String longName;

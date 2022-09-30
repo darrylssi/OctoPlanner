@@ -25,7 +25,6 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.StringJoiner;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.*;
-import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_ERROR_MESSAGE;
 import static nz.ac.canterbury.seng302.portfolio.utils.GlobalVars.NAME_REGEX;
 
 /**
@@ -119,9 +118,6 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(ex.getReason(), ex.getStatus());
         }
 
-        System.out.println("short name -> " + groupForm.getShortName());
-        System.out.println("long name -> " + groupForm.getLongName());
-
         // validate group
         ResponseEntity<String> validationResponse = validateGroup(groupForm, bindingResult);
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
@@ -199,8 +195,8 @@ public class GroupController extends PageController{
             return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
         }
 
-        ValidationError shortNameErrors = ValidationUtils.validateText(groupForm.getShortName(), NAME_REGEX, NAME_ERROR_MESSAGE);
-        ValidationError longNameErrors = ValidationUtils.validateText(groupForm.getLongName(), NAME_REGEX, NAME_ERROR_MESSAGE);
+        ValidationError shortNameErrors = ValidationUtils.validateText(groupForm.getShortName(), NAME_REGEX, SHORT_NAME_ERROR_MESSAGE);
+        ValidationError longNameErrors = ValidationUtils.validateText(groupForm.getLongName(), DESC_REGEX, LONG_NAME_ERROR_MESSAGE);
         String errorString = ValidationUtils.joinErrors(new ValidationError(), shortNameErrors, longNameErrors);
         HttpStatus status = errorString.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(errorString, status);

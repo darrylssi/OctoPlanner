@@ -31,8 +31,6 @@ function sendGroupFormViaAjax(elem) {
     let url = elem.getAttribute('data-url');
     formRequest.open("POST", url);
 
-    console.log("url -> " + url);
-
     formRequest.onload = () => {
         if (formRequest.status === 200) {
             window.location.reload();
@@ -42,9 +40,9 @@ function sendGroupFormViaAjax(elem) {
 
             for (let errorMsg of errors) {
                 // Determine correct error field. Defaults to NameFeedback
-                let field = "shortName";
-                if (errorMsg.indexOf('exceed') !== -1) {
-                    field = 'longName'
+                let field = "ShortName";
+                if (errorMsg.indexOf('long name') !== -1) {
+                        field = 'LongName'
                 }
                 field += 'Feedback';
                 const errorBox = elem.querySelector(`[id*="` + field + `"]`);

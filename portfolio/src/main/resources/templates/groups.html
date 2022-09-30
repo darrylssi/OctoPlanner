@@ -32,7 +32,7 @@
                 <div class="col">
                     <div class="form-floating input-group mb-3 limited-text-input">
                         <input type="text" th:value="${shortName == null} ? '' : ${shortName}" th:name="shortName" id="shortName" required class="form-control"
-                               aria-describedby="shortNameFeedback" th:minlength="${minShortNameLen}" th:maxlength="${maxShortNameLen}">
+                               aria-describedby="ShortNameFeedback" th:minlength="${minShortNameLen}" th:maxlength="${maxShortNameLen}">
                         <label class="form-label" for="shortName">Short Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
@@ -41,7 +41,7 @@
                 <div class="col-10">
                     <div class="form-floating input-group mb-3 limited-text-input">
                         <input type="text" th:value="${longName == null} ? '' : ${longName}" th:name="longName" id="longName" class="form-control" placeholder="Long name"
-                               aria-describedby="longNameFeedback" th:maxlength="${maxLongNameLen}">
+                               aria-describedby="LongNameFeedback" th:maxlength="${maxLongNameLen}">
                         <label for="longName">Long Name</label>
                         <span class="input-group-text remaining-chars-field">...</span>
                     </div>
@@ -60,18 +60,18 @@
 
     <div class="row">
         <div class="col-auto">
-            <div class="sprint-title" th:text="*{value.getShortName()}" />
-            <div class="sprint-description" th:text="*{value.getLongName()}" />
+            <div class="sprint-title" th:text="*{getShortName()}" />
+            <div class="sprint-description" th:text="*{getLongName()}" />
         </div>
         <div class="col"></div>
-        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|remove-users-*{key}|">
-            <button type="button" th:onclick="|sendFormViaAjax(*{key}, 'remove-members')|" class="btn btn-remove-users btn-sm" >Remove Selected Users</button>
+        <div class="col-auto" hidden th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" th:id="|remove-users-${group.getGroupId()}|">
+            <button type="button" th:onclick="|sendFormViaAjax(${group.getGroupId(), 'remove-members')|" class="btn btn-remove-users btn-sm" >Remove Selected Users</button>
         </div>
-        <div class="col-auto" hidden th:if="${group.key != membersWithoutGroupsId && canEdit}" th:id="|add-users-*{key}|">
-            <button type="button" th:onclick="|sendFormViaAjax(*{key}, 'add-members')|" class="btn btn-add-users btn-sm" >Add Selected Users</button>
+        <div class="col-auto" hidden th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}" th:id="|add-users-${group.getGroupId()}|">
+            <button type="button" th:onclick="|sendFormViaAjax(${group.getGroupId(), 'add-members')|" class="btn btn-add-users btn-sm" >Add Selected Users</button>
         </div>
         <div class="col-auto" >
-            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(*{key}, this)|" th:groupid="*{key}">Select Users</button>
+            <button type="button" th:if="${canEdit}" class="btn btn-select btn-sm" th:onclick="|startSelecting(${group.getGroupId()}, this)|" th:groupid="${group.getGroupId()}">Select Users</button>
         </div>
         <div class="col-auto" th:if="${group.getGroupId() != membersWithoutGroupsId && canEdit}">
             <button class="delete-button" >
@@ -95,7 +95,8 @@
     <div th:if="${!#arrays.isEmpty(group.getMembersList())}">
         <div class="row collapse" th:id="|group-*{getGroupId()}|">
             <div class="text-center" data-bs-toggle="collapse" th:data-bs-target="|#group-*{getGroupId()}|">
-                <div class="col"><button class="show-users" th:text="|Hide users (*{getMembersList().size()})|" th:onclick="|toggleById(*{getGroupId()})|"></button></div>
+                <div class="col"><button class="show-users" th:text="|Hide users (*{getMembersList().size()})|"
+                                         th:onclick="|toggleById(*{getGroupId()})|"></button></div>
             </div>
             <div class="col">
                 <table class="table container-auto">
@@ -126,6 +127,8 @@
 </div>
 <script th:inline="javascript">
     var BASE_URL = /*[[ ${@environment.getProperty('base-url')} ?: '/' ]]*/ "";
+
+    showRemainingChars();        // Used to update the remaining number of chars for short and long name
 </script>
 </body>
 </html>
